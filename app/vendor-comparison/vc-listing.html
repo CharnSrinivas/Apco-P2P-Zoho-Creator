@@ -274,7 +274,7 @@
                   class="font-semibold text-[#1B5CA8] font-mono text-[11px]" x-text="rec.VC_No || '–'"></span></td>
               <td
                 class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900 max-w-[160px]"
-                x-text="rec.Vendor_Comparison_Subject || '–'"></td>
+                x-text="rec.Quote_Comparison_Subject || '–'"></td>
               <td class="px-3 py-[9px] align-middle whitespace-nowrap">
                 <template x-if="rec.PR_Ref && rec.PR_Ref.ID">
                   <a href="#" @click.prevent="openRecord('PR_Detailed', rec.PR_Ref.ID)"
@@ -390,7 +390,7 @@
               <div>
                 <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Subject
                   <span class="text-red-500">*</span></label>
-                <input x-model="form.Vendor_Comparison_Subject" type="text" required
+                <input x-model="form.Quote_Comparison_Subject" type="text" required
                   class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all shadow-sm"
                   placeholder="e.g. Server Rack Equipment Comparison">
               </div>
@@ -458,6 +458,8 @@
                         Name</th>
                       <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[10%]">Basic
                         Rate</th>
+                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[10%]">Negotiated
+                        Rate</th>
                       <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[9%]">Disc %
                       </th>
                       <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[10%]">
@@ -468,7 +470,7 @@
                         Rate</th>
                       <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[16%]">
                         Payment Terms</th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500  text-center w-[10%]">Rank
+                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500  text-center w-[10%]">Lowest
                       </th>
                       <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500  text-center w-8"></th>
                     </tr>
@@ -487,11 +489,16 @@
                             class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
                         </td>
                         <td class="px-2 py-2">
+                          <input x-model.number="vendor.Negotiated_Rate" @input="calculateVendor(vendor)" type="number"
+                            step="any"
+                            class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
+                        </td>
+                        <td class="px-2 py-2">
                           <input x-model.number="vendor.Disc" @input="calculateVendor(vendor)" type="number" step="any"
                             class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
                         </td>
                         <td class="px-2 py-2">
-                          <input x-model.number="vendor.Fright" @input="calculateVendor(vendor)" type="number"
+                          <input x-model.number="vendor.Freight" @input="calculateVendor(vendor)" type="number"
                             step="any"
                             class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
                         </td>
@@ -584,8 +591,8 @@
     document.addEventListener('alpine:init', () => {
       Alpine.data('vcApp', () => ({
         // Constants
-        REPORT_NAME: 'Vendor_Comparison_Report',
-        FORM_NAME: 'Vendor_Comparison1',
+        REPORT_NAME: 'Quote_Comparison_Report',
+        FORM_NAME: 'Quote_Comparison',
         PR_REPORT_NAME: 'Purchase_Requisition_Report',
         FETCH_BATCH_SIZE: 200,
 
@@ -608,7 +615,7 @@
         rfqTsInstance: null,
         itemTsInstance: null,
         form: {
-          Vendor_Comparison_Subject: '', PR_Ref: '', RFQ_Ref: '', Items_Master: '', Unit: '', Required_Quantity: '', Deliver_to_Plant: '',
+          Quote_Comparison_Subject: '', PR_Ref: '', RFQ_Ref: '', Items_Master: '', Unit: '', Required_Quantity: '', Deliver_to_Plant: '',
           Finalized_Vendor: '', Total_Landed_Rate: '', Justification: '',
           Quotation_Comparison_Statement: []
         },
@@ -665,7 +672,7 @@
 
         computeStats() {
           let q = this.searchQuery.replace(/'/g, "\\'");
-          let searchCrit = this.searchQuery ? `(VC_No.contains("${q}") || Vendor_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))` : '';
+          let searchCrit = this.searchQuery ? `(VC_No.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))` : '';
 
           let combine = (statusCrit) => [searchCrit, statusCrit].filter(Boolean).join(' && ');
 
@@ -679,7 +686,7 @@
           map.forEach(item => {
             let config = { report_name: this.REPORT_NAME };
             if (item.crit) config.criteria = item.crit;
-            ZOHO.CREATOR.DATA.getRecordCount(config)
+            ZOHO.ATOR.DATA.getRecordCount(config)
               .then(res => this.stats[item.key] = res.result ? res.result.records_count : 0)
               .catch(() => this.stats[item.key] = 0);
           });
@@ -688,7 +695,7 @@
         fetchRecords() {
           this.isLoading = true;
           let q = this.searchQuery.replace(/'/g, "\\'");
-          let searchCrit = this.searchQuery ? `(VC_No.contains("${q}") || Vendor_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))` : '';
+          let searchCrit = this.searchQuery ? `(VC_No.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))` : '';
 
           let statusCrit = '';
           if (this.filter === 'submitted') statusCrit = '(Status == "Submitted" || (Status == "" && Finalized_Vendor == ""))';
@@ -727,7 +734,7 @@
           let getVal = (rec, col) => {
             switch (col) {
               case 'vc_no': return (rec.VC_No || '').toString().toLowerCase();
-              case 'subject': return (rec.Vendor_Comparison_Subject || '').toString().toLowerCase();
+              case 'subject': return (rec.Quote_Comparison_Subject || '').toString().toLowerCase();
               case 'pr_ref': return (rec.PR_Ref && rec.PR_Ref.zc_display_value) ? rec.PR_Ref.zc_display_value.toLowerCase() : '';
               case 'qty': return parseFloat(rec.Required_Quantity) || 0;
               case 'date': return rec.Added_Time ? dayjs(rec.Added_Time).valueOf() : 0;
@@ -749,7 +756,7 @@
         // --- Creation Modal Logic --- //
         openModal() {
           this.form = {
-            Vendor_Comparison_Subject: '', PR_Ref: '', RFQ_Ref: '', Items_Master: '', Item_Name: '', Unit: '', Required_Quantity: '', Deliver_to_Plant: '',
+            Quote_Comparison_Subject: '', PR_Ref: '', RFQ_Ref: '', Items_Master: '', Item_Name: '', Unit: '', Required_Quantity: '', Deliver_to_Plant: '',
             Finalized_Vendor: '', Total_Landed_Rate: '', Justification: '', Quotation_Comparison_Statement: []
           };
           this.addVendorRow();
@@ -773,7 +780,7 @@
 
         addVendorRow() {
           // Initialize Rank to 'No' by default
-          this.form.Quotation_Comparison_Statement.push({ Vendor_Name: '', Basic_Rate: '', Disc: '', Fright: '', GST: '', Landed_Rate: '', Payment_Terms: '', Rank: 'No' });
+          this.form.Quotation_Comparison_Statement.push({ Vendor_Name: '', Basic_Rate: '', Negotiated_Rate: 0, Disc: '', Freight: '', GST: '', Landed_Rate: '', Payment_Terms: '', Rank: 'No' });
         },
 
         removeVendorRow(index) {
@@ -783,9 +790,9 @@
 
         // Calculation Logic for Auto-Populating Landed Rate
         calculateVendor(vendor) {
-          let basic = parseFloat(vendor.Basic_Rate) || 0;
+          let basic = parseFloat(vendor.Negotiated_Rate) || parseFloat(vendor.Basic_Rate) || 0;
           let discPct = parseFloat(vendor.Disc) || 0;
-          let freight = parseFloat(vendor.Fright) || 0;
+          let freight = parseFloat(vendor.Freight) || 0;
           let gstPct = parseFloat(vendor.GST) || 0;
 
           // Landed Rate = Basic rate - discount % + fright + gst %
@@ -869,7 +876,7 @@
             load: function (query, callback) {
               if (!query.length) return callback();
               var q = query.replace(/'/g, "\\'");
-              ZOHO.CREATOR.DATA.getRecords({ report_name: self.PR_REPORT_NAME, criteria: `(PR_Number.contains("${q}") || Requisition_Number.contains("${q}"))` })
+              ZOHO.CREATOR.DATA.getRecords({ report_name: self.PR_REPORT_NAME, criteria: `(Current_Stage == "Request For Quotation") && (PR_Number.contains("${q}")))` })
                 .then(res => { callback((res.code === 3000 && res.data) ? res.data : []); })
                 .catch(() => callback());
             },
@@ -1013,8 +1020,9 @@
           let itemsCollection = this.form.Quotation_Comparison_Statement.map(v => ({
             "Vendor_Name": v.Vendor_Name,
             "Basic_Rate": parseFloat(v.Basic_Rate) || 0,
+            "Negotiated_Rate": parseFloat(v.Negotiated_Rate) || 0,
             "Disc": parseFloat(v.Disc) || 0,
-            "Fright": parseFloat(v.Fright) || 0,
+            "Freight": parseFloat(v.Freight) || 0,
             "GST": parseFloat(v.GST) || 0,
             "Landed_Rate": parseFloat(v.Landed_Rate) || 0,
             "Payment_Terms": v.Payment_Terms || "",
@@ -1023,7 +1031,7 @@
 
           const payload = {
             "data": {
-              "Vendor_Comparison_Subject": this.form.Vendor_Comparison_Subject,
+              "Quote_Comparison_Subject": this.form.Quote_Comparison_Subject,
               "PR_Ref": this.form.PR_Ref,
               "RFQ_Ref": this.form.RFQ_Ref,
               "Items_Master": this.form.Items_Master,

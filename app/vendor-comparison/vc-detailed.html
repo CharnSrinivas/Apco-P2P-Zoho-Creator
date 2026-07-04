@@ -218,7 +218,7 @@
                                 <label
                                     class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Subject
                                     <span class="text-red-500">*</span></label>
-                                <input x-model="form.Vendor_Comparison_Subject" type="text" required
+                                <input x-model="form.Quote_Comparison_Subject" type="text" required
                                     class="cursor-not-allowed w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all shadow-sm">
                             </div>
                             <div>
@@ -327,7 +327,7 @@
                                                         class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
                                                 </td>
                                                 <td class="px-2 py-2">
-                                                    <input x-model.number="vendor.Fright"
+                                                    <input x-model.number="vendor.Freight"
                                                         @input="calculateVendor(vendor)" type="number" step="any"
                                                         class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
                                                 </td>
@@ -433,7 +433,7 @@
                 <div>
                     <nav class="flex items-center gap-1.5 text-xs mb-2.5">
                         <button
-                            onclick="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',window:'same',url:'#Page:Vendor_Comparison'})"
+                            onclick="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',window:'same',url:'#Page:Quote_Comparison'})"
                             class="text-[#1B5CA8] hover:text-[#14457e] font-medium transition-colors no-underline cursor-pointer">
                             Vendor Comparisons
                         </button>
@@ -446,7 +446,7 @@
                     </div>
                     <div class="text-xs text-gray-400 mt-1">
                         <span
-                            x-text="rec.Vendor_Comparison_Subject ? `Subject: ${rec.Vendor_Comparison_Subject} · ` : ''"></span>
+                            x-text="rec.Quote_Comparison_Subject ? `Subject: ${rec.Quote_Comparison_Subject} · ` : ''"></span>
                         Created <span x-text="formatDate(rec.Added_Time)"></span>
                     </div>
                 </div>
@@ -586,7 +586,7 @@
                                             <td class="px-4 py-2.5 text-gray-700 text-right tabular-nums"
                                                 x-text="vendor.GST ? vendor.GST + '%' : '–'"></td>
                                             <td class="px-4 py-2.5 text-gray-700 text-right tabular-nums"
-                                                x-text="formatINR(vendor.Fright)"></td>
+                                                x-text="formatINR(vendor.Freight)"></td>
                                             <td class="px-4 py-2.5 text-gray-900 font-bold text-right tabular-nums"
                                                 x-text="formatINR(vendor.Landed_Rate)"></td>
                                             <td class="px-4 py-2.5 text-gray-500 text-right text-[11px] whitespace-nowrap"
@@ -705,7 +705,7 @@
                 isEditModalOpen: false,
                 isEditSubmitting: false,
                 form: {
-                    Vendor_Comparison_Subject: '', PR_Ref: '', RFQ_Ref: '', Item_Name: '', Unit: '', Required_Quantity: '', Deliver_to_Plant: '',
+                    Quote_Comparison_Subject: '', PR_Ref: '', RFQ_Ref: '', Item_Name: '', Unit: '', Required_Quantity: '', Deliver_to_Plant: '',
                     Finalized_Vendor: '', Total_Landed_Rate: '', Justification: '',
                     Quotation_Comparison_Statement: []
                 },
@@ -835,7 +835,7 @@
 
                         // 1. Update the record status natively first (per requirements)
                         const response = await ZOHO.CREATOR.DATA.updateRecordById({
-                            report_name: "Vendor_Comparison_Report",
+                            report_name: "Quote_Comparison_Report",
                             id: this.recordId,
                             payload: {
 
@@ -881,7 +881,7 @@
                     ZOHO.CREATOR.UTIL.navigateParentURL({
                         action: 'open',
                         window: 'same',
-                        url: '#Page:Vendor_Comparison'
+                        url: '#Page:Quote_Comparison'
                     });
                 },
 
@@ -890,7 +890,7 @@
                 openEditModal() {
                     // Populate initial form state from rec
                     this.form = {
-                        Vendor_Comparison_Subject: this.rec.Vendor_Comparison_Subject || '',
+                        Quote_Comparison_Subject: this.rec.Quote_Comparison_Subject || '',
                         PR_Ref: this.rec.PR_Ref ? this.rec.PR_Ref.ID : '',
                         RFQ_Ref: (this.rec.RFQ_Ref && this.rec.RFQ_Ref.length > 0) ? this.rec.RFQ_Ref[0] : '',
                         Item_Name: this.rec.Item_Name || '',
@@ -910,7 +910,7 @@
                             Vendor_Name: v.Vendor_Name || '',
                             Basic_Rate: v.Basic_Rate || '',
                             Disc: v.Disc || '',
-                            Fright: v.Fright || '',
+                            Freight: v.Freight || '',
                             GST: v.GST || '',
                             Landed_Rate: v.Landed_Rate || '',
                             Payment_Terms: v.Payment_Terms || '',
@@ -954,7 +954,7 @@
                             "Vendor_Name": v.Vendor_Name,
                             "Basic_Rate": parseFloat(v.Basic_Rate) || 0,
                             "Disc": parseFloat(v.Disc) || 0,
-                            "Fright": parseFloat(v.Fright) || 0,
+                            "Freight": parseFloat(v.Freight) || 0,
                             "GST": parseFloat(v.GST) || 0,
                             "Landed_Rate": parseFloat(v.Landed_Rate) || 0,
                             "Payment_Terms": v.Payment_Terms || "",
@@ -966,7 +966,7 @@
 
                     const payload = {
                         "data": {
-                            "Vendor_Comparison_Subject": this.form.Vendor_Comparison_Subject,
+                            "Quote_Comparison_Subject": this.form.Quote_Comparison_Subject,
                             // "PR_Ref": this.form.PR_Ref,
                             // "RFQ_Ref": this.form.RFQ_Ref,
                             "Item_Name": this.form.Item_Name,
@@ -982,7 +982,7 @@
 
                     try {
                         const res = await ZOHO.CREATOR.DATA.updateRecordById({
-                            report_name: "Vendor_Comparison_Report",
+                            report_name: "Quote_Comparison_Report",
                             id: this.recordId,
                             payload: payload
                         });
@@ -1003,7 +1003,7 @@
 
                 // ── Edit Subform Mechanics ── //
                 addVendorRow() {
-                    this.form.Quotation_Comparison_Statement.push({ Vendor_Name: '', Basic_Rate: '', Disc: '', Fright: '', GST: '', Landed_Rate: '', Payment_Terms: '', Rank: 'No' });
+                    this.form.Quotation_Comparison_Statement.push({ Vendor_Name: '', Basic_Rate: '', Disc: '', Freight: '', GST: '', Landed_Rate: '', Payment_Terms: '', Rank: 'No' });
                 },
 
                 removeVendorRow(index) {
@@ -1014,7 +1014,7 @@
                 calculateVendor(vendor) {
                     let basic = parseFloat(vendor.Basic_Rate) || 0;
                     let discPct = parseFloat(vendor.Disc) || 0;
-                    let freight = parseFloat(vendor.Fright) || 0;
+                    let freight = parseFloat(vendor.Freight) || 0;
                     let gstPct = parseFloat(vendor.GST) || 0;
 
                     let discountAmount = basic * (discPct / 100);

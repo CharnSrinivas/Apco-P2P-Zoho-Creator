@@ -840,7 +840,7 @@
           Toast.fire({ icon: 'info', title: 'Fetching PR details...' });
           try {
             let res = await ZOHO.CREATOR.DATA.invokeCustomApi({
-              api_name: "Fetch_PR_Details", http_method: "GET", query_params: 'recId=' + prId
+              api_name: "Fetch_PR_Details", http_method: "GET", query_params: 'recId=' + prId,
             });
 
             if (res && res.result && res.result.length > 0) {

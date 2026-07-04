@@ -111,9 +111,9 @@
         <!-- ── Action Modal ── -->
         <div x-show="showModal" style="display: none;"
             class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm transition-opacity">
-            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden fade-in mx-4 border border-gray-200"
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden fade-in mx-4 border border-gray-200 flex flex-col max-h-[90vh]"
                 @click.away="closeModal()">
-                <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
+                <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-white shrink-0">
                     <h3 class="text-[14px] font-bold text-gray-800" x-text="modalTitle"></h3>
                     <button @click="closeModal()"
                         class="text-gray-400 hover:text-gray-700 cursor-pointer transition-colors">
@@ -128,12 +128,12 @@
                         class="w-full border border-gray-300 rounded-lg p-3 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1B5CA8]/20 focus:border-[#1B5CA8] transition-all shadow-sm"
                         placeholder="Enter your remarks here..."></textarea>
                 </div>
-                <div class="px-5 py-3.5 bg-white flex justify-end gap-2.5 border-t border-gray-100">
+                <div class="px-5 py-3.5 bg-white flex justify-end gap-2.5 border-t border-gray-100 shrink-0">
                     <button @click="closeModal()" :disabled="isSubmitting"
                         class="px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors cursor-pointer shadow-sm disabled:opacity-50">
                         Cancel
                     </button>
-                    <button @click="submitAction()" :disabled="isSubmitting"
+                    <button @click="submitAction()" :disabled="isSubmitting || hasQtyError"
                         :class="modalBtnClass + ' ' + modalBtnHoverClass"
                         class="px-4 py-2 rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer shadow-sm flex items-center gap-1.5 disabled:opacity-70">
                         <template x-if="isSubmitting">
@@ -288,7 +288,8 @@
                         x-cloak>
                         <button @click="approveRFQ()"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors no-underline cursor-pointer shadow-sm">
-                            <i class="bi bi-check-lg"></i> <span class="btn-text">Approve & Submit For Vendor Comparison</span>
+                            <i class="bi bi-check-lg"></i> <span class="btn-text">Approve & Submit For Vendor
+                                Comparison</span>
                         </button>
                         <button @click="rejectRFQ()"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors no-underline cursor-pointer shadow-sm">
@@ -418,7 +419,7 @@
                         api_name: "Get_RFQ_Details",
                         http_method: "GET",
                         content_type: "application/json",
-                        query_params: 'recId=' + this.recordId
+                        query_params: 'recId=' + this.recordId,
                     }).then((response) => {
                         if (!response || !response.result || response.result.length === 0) {
                             throw new Error("No data returned");
@@ -510,24 +511,24 @@
                         let prId = Array.isArray(this.rec.PR_Ref) ? (this.rec.PR_Ref[0]) : undefined;
                         const config = {
                             form_name: "PR_Action", // Note: Change this to 'RFQ_Action' if your system uses specific action forms per module.
-                            payload: {
-                                "data": {
-                                    "PR_Number": prId,
-                                    "Request_For_Quotation": this.recordId,
-                                    "Status": this.pendingStatus,
-                                    "Moved_To": this.pendingStage,
+                                payload: {
+                                    "data": {
+                                        "PR_Number": prId,
+                                        "Request_For_Quotation": this.recordId,
+                                        "Status": this.pendingStatus,
+                                        "Moved_To": this.pendingStage,
                                     "Comment": this.modalComment.trim()
                                 }
                             }
                         };
                         const response = await ZOHO.CREATOR.DATA.addRecords(config);
-                        this.isSubmitting = false;
+                            this.isSubmitting = false;
                         this.closeModal()
                         if (response.code === 3000) {
                             this.fetchData(); // Refresh the details & UI
                         } else {
-                            throw new Error(response.message || 'Action processing failed');
-                        }
+                                throw new Error(response.message || 'Action processing failed');
+                            }
                     } catch (err) {
                         console.error("API Error: ", err);
                         alert("An error occurred while submitting. Please try again.");

@@ -278,6 +278,7 @@
           <col style="width:90px">
           <col style="width:90px">
           <col style="width:108px">
+          <col style="width:130px">
           <col style="width:90px">
           <col style="width:auto">
         </colgroup>
@@ -304,6 +305,9 @@
             <th data-sort="status"
               class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
               Status<span class="sort-indicator"></span></th>
+            <th data-sort="item_approval"
+              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
+              Item Approval<span class="sort-indicator"></span></th>
             <th
               class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap bg-gray-50 sticky-action-cell">
               Actions</th>
@@ -311,7 +315,7 @@
         </thead>
         <tbody id="prTableBody">
           <tr id="loadingRow">
-            <td colspan="8" class="px-3 py-12 text-center">
+            <td colspan="9" class="px-3 py-12 text-center">
               <div class="flex flex-col items-center gap-3">
                 <div class="pr-spinner"></div>
                 <div class="text-sm text-gray-400 font-medium">Loading purchase requests…</div>
@@ -420,6 +424,7 @@
             return rec.PR_Date ? dayjs(rec.PR_Date).valueOf() : 0;
           case 'stage': return (rec.Current_Stage || '').toString().toLowerCase();
           case 'status': return normalizeStatus(rec);
+          case 'item_approval': return (rec.Items_Approval_Status || '').toString().toLowerCase();
           default: return '';
         }
       }
@@ -612,7 +617,7 @@
 
         const checks = itemsToCheck.map(item => {
           return ZOHO.CREATOR.DATA.invokeCustomApi({
-            api_name: "Check_Items_In_GRN",
+            api_name: "Check_Vendor_Requirement_For_Item",
             http_method: "POST",
             payload: {
               itemIds: item.id
@@ -736,10 +741,11 @@
             "PR_Date": formatZohoDateSubmission(new Date().toISOString().split('T')[0]),
             "Due_Date": formatZohoDateSubmission(document.getElementById('prDueDate').value),
             "Status": "Submitted",
+            "Items_Approval_Status": "Pending",
             "Current_Stage": "Purchase Requisition",
             "description": document.getElementById('prDescription').value,
             "Request_For_Quotation": document.querySelector('input[name="Request_For_Quotation"]:checked') ? document.querySelector('input[name="Request_For_Quotation"]:checked').value : "No",
-            "Items": itemsCollection
+            "Requested_Items": itemsCollection
           }
         };
 
@@ -843,7 +849,7 @@
 
       function fetchRecords() {
         isLoading = true;
-        $tableBody.innerHTML = `<tr><td colspan="8" class="px-3 py-12 text-center"><div class="flex flex-col items-center gap-3"><div class="pr-spinner"></div><div class="text-sm text-gray-400 font-medium">Loading purchase requests…</div></div></td></tr>`;
+        $tableBody.innerHTML = `<tr><td colspan="9" class="px-3 py-12 text-center"><div class="flex flex-col items-center gap-3"><div class="pr-spinner"></div><div class="text-sm text-gray-400 font-medium">Loading purchase requests…</div></div></td></tr>`;
 
         var q = searchQuery.replace(/'/g, "\\'");
         var searchCrit = searchQuery ? `Unit=("${q}") || PR_Number=("${q}") || Current_Stage=("${q}")` : '';
@@ -858,14 +864,14 @@
           // showToast('Failed to load purchase requests.', 'error');
           isLoading = false; allRecords = []; filteredRecords = [];
           $tableBody.innerHTML = `<tr>
-            <td colspan="8" class="px-3 py-12 text-center">
+            <td colspan="9" class="px-3 py-12 text-center">
               <div class="text-gray-400">
                 <i class="bi bi-clipboard-x text-3xl mb-2 block"></i>
                 <div class="text-sm font-medium text-gray-500">No records found</div>
               </div>
             </td>
           </tr>`
-          //`<tr><td colspan="8" class="px-3 py-12 text-center"><div class="text-gray-400"><i class="bi bi-alert-circle text-3xl mb-2 block text-red-400"></i><div class="text-sm font-medium text-gray-500">Not records found</div></div></td></tr>`;
+          //`<tr><td colspan="9" class="px-3 py-12 text-center"><div class="text-gray-400"><i class="bi bi-alert-circle text-3xl mb-2 block text-red-400"></i><div class="text-sm font-medium text-gray-500">Not records found</div></div></td></tr>`;
         });
       }
 
@@ -910,7 +916,7 @@
 
       function renderTable() {
         if (filteredRecords.length === 0) {
-          $tableBody.innerHTML = `<tr><td colspan="8" class="px-3 py-12 text-center"><div class="text-gray-400"><i class="bi bi-clipboard-x text-3xl mb-2 block"></i><div class="text-sm font-medium text-gray-500">No records found</div></div></td></tr>`;
+          $tableBody.innerHTML = `<tr><td colspan="9" class="px-3 py-12 text-center"><div class="text-gray-400"><i class="bi bi-clipboard-x text-3xl mb-2 block"></i><div class="text-sm font-medium text-gray-500">No records found</div></div></td></tr>`;
           return;
         }
 
@@ -930,6 +936,16 @@
           const prNum = esc(rec.PR_Number || 'PR-' + rec.Requisition_Number);
           const requesterName = esc(rec.Added_User && rec.Added_User.display_value ? rec.Added_User.display_value : rec.Added_User);
 
+          let itemApproval = rec.Items_Approval_Status || '-';
+          let itemAppBorder = 'border-gray-200', itemAppBg = 'bg-gray-50', itemAppText = 'text-gray-600', itemAppDot = 'bg-gray-400';
+          if (itemApproval === 'Approved') {
+            itemAppBorder = 'border-emerald-200'; itemAppBg = 'bg-emerald-50'; itemAppText = 'text-emerald-800'; itemAppDot = 'bg-emerald-600';
+          } else if (itemApproval === 'Rejected') {
+            itemAppBorder = 'border-red-200'; itemAppBg = 'bg-red-50'; itemAppText = 'text-red-800'; itemAppDot = 'bg-red-600';
+          } else if (itemApproval === 'Partially Approved') {
+            itemAppBorder = 'border-amber-200'; itemAppBg = 'bg-amber-50'; itemAppText = 'text-amber-800'; itemAppDot = 'bg-amber-500';
+          }
+
           html += `
           <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors duration-150 group">
             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap"><span class="font-semibold text-[#1B5CA8] font-mono text-[11px]">${prNum}</span></td>
@@ -947,6 +963,11 @@
             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap">
               <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap border ${sb.border} ${sb.bg} ${sb.text}">
                 <span class="w-[5px] h-[5px] rounded-full ${sb.dot} shrink-0"></span>${statusLabel}
+              </span>
+            </td>
+            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap">
+              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap border ${itemAppBorder} ${itemAppBg} ${itemAppText}">
+                <span class="w-[5px] h-[5px] rounded-full ${itemAppDot} shrink-0"></span>${esc(itemApproval)}
               </span>
             </td>
             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap bg-white group-hover:bg-[#EBF3FC] sticky-action-cell">

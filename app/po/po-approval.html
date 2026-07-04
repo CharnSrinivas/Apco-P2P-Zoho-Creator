@@ -395,7 +395,9 @@
                         <select x-init="initItemSelect($el, item, 'po')" class="w-full text-xs" required></select>
                       </td>
                       <td class="px-3 py-2">
-                        <input type="number" x-model.number="item.quantity" @input="if(item.unitPrice) item.amount = Number((item.quantity * item.unitPrice).toFixed(2))" required min="1"
+                        <input type="number" x-model.number="item.quantity"
+                          @input="if(item.unitPrice) item.amount = Number((item.quantity * item.unitPrice).toFixed(2))"
+                          required min="1"
                           class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
                       </td>
                       <td class="px-3 py-2">
@@ -780,8 +782,8 @@
         initItemSelect(el, itemRef, type) {
           let ts = new TomSelect(el, {
             valueField: 'ID', labelField: 'item_name', searchField: 'item_name', options: this.itemMasters, maxItems: 1, placeholder: 'Search item...',
-            onChange: (val) => { 
-              itemRef.id = val; 
+            onChange: (val) => {
+              itemRef.id = val;
               let selectedItem = this.itemMasters.find(m => m.ID === val);
               if (selectedItem) {
                 itemRef.unitPrice = parseFloat(selectedItem.unit_price) || 0;
@@ -844,7 +846,9 @@
         async fetchPRDetailsForPO(prId) {
           Toast.fire({ icon: 'info', title: 'Fetching PR items...' });
           try {
-            let res = await ZOHO.CREATOR.DATA.invokeCustomApi({ api_name: "Fetch_PR_Details", http_method: "GET", query_params: 'recId=' + prId });
+            let res = await ZOHO.CREATOR.DATA.invokeCustomApi({
+              api_name: "Fetch_PR_Details", http_method: "GET", query_params: 'recId=' + prId,
+            });
             if (res && res.result && res.result.length > 0) {
               const prData = res.result[0];
               const items = prData.Items || [];
@@ -920,7 +924,7 @@
             let poRes = await ZOHO.CREATOR.DATA.invokeCustomApi({
               api_name: "Fetch_Po_Details",
               http_method: "GET",
-              query_params: 'recId=' + rec.ID
+              query_params: 'recId=' + rec.ID,
             });
 
             if (poRes && poRes.result && poRes.result.length > 0) {
@@ -945,7 +949,7 @@
                   ZOHO.CREATOR.DATA.invokeCustomApi({
                     api_name: "Fetch_GRN_Details",
                     http_method: "GET",
-                    query_params: 'recId=' + grn.ID
+                    query_params: 'recId=' + grn.ID,
                   }).catch(() => null) // Prevent one failed GRN fetch from breaking the whole process
                 );
 
