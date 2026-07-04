@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Comparison Detail</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
+
+    <!-- Tom Select (for Edit Modal) -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.default.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+    <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+        rel="stylesheet">
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        /* ── Loading spinner ── */
+        .vc-spinner {
+            border: 2.5px solid #e5e7eb;
+            border-top-color: #1B5CA8;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            animation: spin 0.7s linear infinite;
+        }
+
+        /* ── Button Spinner ── */
+        .btn-spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── Progress stepper connector ── */
+        .step-connector {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            right: 14px;
+            height: 3px;
+            background: #e5e7eb;
+            z-index: 0;
+        }
+
+        .step-connector-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            transition: width 0.6s ease;
+        }
+
+        /* ── Timeline connector ── */
+        .timeline-line {
+            position: absolute;
+            left: 15px;
+            top: 32px;
+            bottom: 0;
+            width: 2px;
+            background: #e5e7eb;
+        }
+
+        .timeline-item:last-child .timeline-line {
+            display: none;
+        }
+
+        /* ── Fade in ── */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.35s ease-out both;
+        }
+
+        /* ── Tom Select overrides (For Edit Modal) ── */
+        .ts-control {
+            border: 1px solid #e5e7eb !important;
+            border-radius: 0.5rem !important;
+            font-size: 0.8125rem !important;
+            padding: 0.5rem 0.75rem !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+            font-family: inherit;
+            background-color: #f9fafb !important;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .ts-control.focus {
+            border-color: #1B5CA8 !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(27, 92, 168, 0.15) !important;
+        }
+
+        .ts-dropdown {
+            border-radius: 0.5rem !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+            border: 1px solid #f3f4f6 !important;
+            padding: 0.35rem !important;
+            margin-top: 4px !important;
+            font-size: 0.8125rem !important;
+            z-index: 9999 !important;
+            /* Keep above modal */
+        }
+
+        .ts-dropdown .option {
+            border-radius: 0.375rem !important;
+            padding: 0.5rem 0.75rem !important;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .ts-dropdown .active {
+            background-color: #f3f4f6 !important;
+            color: #111827 !important;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 p-6">
+
+    <div id="app" x-data="vcWidget()" x-init="initWidget()" x-cloak
+        class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-5xl mx-auto">
+
+        <!-- ── Action Modal (Approve/Reject) ── -->
+        <div x-show="showModal" style="display: none;"
+            class="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm transition-opacity">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden fade-in mx-4 border border-gray-200"
+                @click.away="closeModal()">
+                <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
+                    <h3 class="text-[14px] font-bold text-gray-800" x-text="modalTitle"></h3>
+                    <button @click="closeModal()"
+                        class="text-gray-400 hover:text-gray-700 cursor-pointer transition-colors">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="p-5 bg-gray-50/50">
+                    <label class="block text-xs font-semibold text-gray-700 mb-2">
+                        Comment <span class="text-gray-400 font-normal text-[11px]">(Optional)</span>
+                    </label>
+                    <textarea x-model="modalComment" rows="3"
+                        class="w-full border border-gray-300 rounded-lg p-3 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1B5CA8]/20 focus:border-[#1B5CA8] transition-all shadow-sm"
+                        placeholder="Enter your remarks here..."></textarea>
+                </div>
+                <div class="px-5 py-3.5 bg-white flex justify-end gap-2.5 border-t border-gray-100">
+                    <button @click="closeModal()" :disabled="isSubmitting"
+                        class="px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors cursor-pointer shadow-sm disabled:opacity-50">
+                        Cancel
+                    </button>
+                    <button @click="submitAction()" :disabled="isSubmitting"
+                        :class="modalBtnClass + ' ' + modalBtnHoverClass"
+                        class="px-4 py-2 rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer shadow-sm flex items-center gap-1.5 disabled:opacity-70">
+                        <template x-if="isSubmitting">
+                            <div class="btn-spinner mr-1"></div>
+                        </template>
+                        <span x-text="isSubmitting ? 'Submitting...' : modalBtnText"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Edit VC Modal ── -->
+        <div x-show="isEditModalOpen" style="display: none;"
+            class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div x-show="isEditModalOpen" @click="closeEditModal()" x-transition.opacity
+                class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"></div>
+
+            <div x-show="isEditModalOpen" x-transition.duration.200ms
+                class="relative z-10 bg-white rounded-[11px] w-full max-w-5xl shadow-2xl flex flex-col"
+                style="max-height: 90vh;">
+
+                <div
+                    class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50 shrink-0 rounded-t-[11px]">
+                    <h3 class="text-[15px] font-bold text-gray-800">Edit Vendor Comparison</h3>
+                    <button @click="closeEditModal()" type="button"
+                        class="text-gray-400 hover:text-gray-700 transition-colors"><i
+                            class="bi bi-x-lg text-lg"></i></button>
+                </div>
+
+                <div class="overflow-y-auto p-5">
+                    <form @submit.prevent="submitEditForm">
+
+                        <h4 class="text-xs font-bold text-[#1B5CA8] tracking-wide mb-3 border-b border-gray-100 pb-1">
+                            Purchase Requirement</h4>
+
+                        <div class="grid grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Subject
+                                    <span class="text-red-500">*</span></label>
+                                <input x-model="form.Vendor_Comparison_Subject" type="text" required
+                                    class="cursor-not-allowed w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all shadow-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PR
+                                    Reference</label>
+                                <select x-ref="prSelect" disabled class="w-full text-xs"
+                                    placeholder="Search PR Number..."></select>
+                            </div>
+                            <div>
+                                <label class=" block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">RFQ
+                                    Reference</label>
+                                <select x-ref="rfqSelect" disabled class="cursor-not-allowed w-full text-xs"
+                                    placeholder="Search RFQ Number..."></select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-4 gap-4 mb-6">
+                            <div class="col-span-1">
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Item
+                                    Name <span class="text-red-500">*</span></label>
+                                <input x-model="form.Item_Name" type="text" required
+                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all">
+                            </div>
+                            <div class="col-span-1">
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Unit</label>
+                                <input x-model="form.Unit" type="text"
+                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all">
+                            </div>
+                            <div class="col-span-1">
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Req.
+                                    Quantity <span class="text-red-500">*</span></label>
+                                <input x-model.number="form.Required_Quantity" @input="updateFinalQuantity()"
+                                    type="number" required min="1" step="any"
+                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all">
+                            </div>
+                            <div class="col-span-1">
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Deliver
+                                    To / Plant</label>
+                                <input x-model="form.Deliver_to_Plant" type="text"
+                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all">
+                            </div>
+                        </div>
+
+                        <div class="mb-6 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
+                            <div
+                                class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                                <span class="text-xs font-semibold text-gray-700 tracking-wide">Quotation Comparison
+                                    Statement <span class="text-red-500">*</span></span>
+                                <button type="button" @click="addVendorRow()"
+                                    class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+
+                                    Add Vendor</button>
+                            </div>
+                            <div class="overflow-x-auto" style="overflow:visible;">
+                                <table class="w-full border-collapse min-w-[850px]">
+                                    <thead class="bg-white border-b border-gray-200">
+                                        <tr>
+                                            <th
+                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[18%]">
+                                                Vendor Name</th>
+                                            <th
+                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[10%]">
+                                                Basic Rate</th>
+                                            <th
+                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[9%]">
+                                                Disc %</th>
+                                            <th
+                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[10%]">
+                                                Freight</th>
+                                            <th
+                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[9%]">
+                                                GST %</th>
+                                            <th
+                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[12%]">
+                                                Landed Rate</th>
+                                            <th
+                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[16%]">
+                                                Payment Terms</th>
+                                            <th
+                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-[10%]">
+                                                Rank</th>
+                                            <th
+                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-8">
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="(vendor, index) in form.Quotation_Comparison_Statement"
+                                            :key="index">
+                                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+                                                <td class="px-2 py-2">
+                                                    <input x-model="vendor.Vendor_Name"
+                                                        @input="if(vendor.Rank === 'Yes') updateFinalized(vendor)"
+                                                        type="text" required
+                                                        class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <input x-model.number="vendor.Basic_Rate"
+                                                        @input="calculateVendor(vendor)" type="number" step="any"
+                                                        class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <input x-model.number="vendor.Disc" @input="calculateVendor(vendor)"
+                                                        type="number" step="any"
+                                                        class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <input x-model.number="vendor.Fright"
+                                                        @input="calculateVendor(vendor)" type="number" step="any"
+                                                        class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <input x-model.number="vendor.GST" @input="calculateVendor(vendor)"
+                                                        type="number" step="any"
+                                                        class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <input x-model.number="vendor.Landed_Rate" type="number" step="any"
+                                                        disabled
+                                                        class="w-full py-1.5 px-2 bg-gray-100 border border-gray-200 rounded text-[12px] font-semibold text-[#1B5CA8] cursor-not-allowed outline-none">
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <select x-model="vendor.Payment_Terms"
+                                                        class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
+                                                        <option value="">Select...</option>
+                                                        <option value="Advance">Advance</option>
+                                                        <option value="15 Days Credit">15 Days Credit</option>
+                                                        <option value="30 Days Credit">30 Days Credit</option>
+                                                        <option value="45 Days Credit">45 Days Credit</option>
+                                                    </select>
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <select x-model="vendor.Rank"
+                                                        @change="handleRankChange(vendor, index)"
+                                                        class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
+                                                        <option value="No">No</option>
+                                                        <option value="Yes">Yes</option>
+                                                    </select>
+                                                </td>
+                                                <td class="px-2 py-2 text-center">
+                                                    <button type="button" @click="removeVendorRow(index)"
+                                                        class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50"><i
+                                                            class="bi bi-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <h4 class="text-xs font-bold text-emerald-600 tracking-wide mb-3 border-b border-gray-100 pb-1">
+                            Final Decision</h4>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Finalized
+                                    Vendor</label>
+                                <input x-model="form.Finalized_Vendor" type="text" readonly
+                                    class="w-full py-2 px-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] text-gray-700 cursor-not-allowed outline-none transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Total
+                                    Landed Rate</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₹</span>
+                                    <input x-model.number="form.Total_Landed_Rate" type="number" step="any" readonly
+                                        class="w-full py-2 pl-7 pr-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] font-bold text-[#1B5CA8] cursor-not-allowed outline-none transition-all">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label
+                                class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Justification</label>
+                            <textarea x-model="form.Justification" rows="3"
+                                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all shadow-sm"></textarea>
+                        </div>
+
+                        <div class="flex justify-end gap-2 border-t border-gray-100 pt-4 mt-2">
+                            <button type="button" @click="closeEditModal()"
+                                class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button type="submit" :disabled="isEditSubmitting"
+                                class="inline-flex items-center justify-center min-w-[120px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70">
+                                <span x-show="!isEditSubmitting">Save Changes</span>
+                                <div x-show="isEditSubmitting" class="vc-spinner"
+                                    style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="isLoading" class="flex flex-col items-center justify-center py-24 gap-3">
+            <div class="vc-spinner"></div>
+            <div class="text-sm text-gray-400 font-medium">Loading Vendor Comparison…</div>
+        </div>
+
+        <div x-show="hasError" class="text-center py-24">
+            <i class="bi bi-alert-circle text-4xl text-red-400 mb-3 block"></i>
+            <div class="text-sm font-medium text-gray-600">Failed to load details</div>
+            <div class="text-xs text-gray-400 mt-1"
+                x-text="errorMessage || 'Please check the record ID and try again.'"></div>
+        </div>
+
+        <div x-show="!isLoading && !hasError" class="fade-in">
+
+            <div class="flex items-start justify-between mb-5">
+                <div>
+                    <nav class="flex items-center gap-1.5 text-xs mb-2.5">
+                        <button
+                            onclick="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',window:'same',url:'#Page:Vendor_Comparison'})"
+                            class="text-[#1B5CA8] hover:text-[#14457e] font-medium transition-colors no-underline cursor-pointer">
+                            Vendor Comparisons
+                        </button>
+                        <i class="bi bi-chevron-right text-[11px] text-gray-400"></i>
+                        <span class="text-gray-500 font-medium" x-text="vcNumber"></span>
+                    </nav>
+                    <div class="flex items-center gap-2.5">
+                        <h1 class="text-[17px] font-bold text-gray-900 leading-none" x-text="vcNumber"></h1>
+                        <span x-html="getStatusBadge(rec.Status || 'Pending')"></span>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-1">
+                        <span
+                            x-text="rec.Vendor_Comparison_Subject ? `Subject: ${rec.Vendor_Comparison_Subject} · ` : ''"></span>
+                        Created <span x-text="formatDate(rec.Added_Time)"></span>
+                    </div>
+                </div>
+
+                <!-- EDIT BUTTON -->
+                <div>
+                    <button @click="openEditModal()"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition-all shadow-sm">
+                        <i class="bi bi-pencil"></i> Edit Details
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-lg p-5 mb-4">
+                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">Process Progress</div>
+                <div class="relative flex justify-between items-start">
+                    <div class="step-connector">
+                        <div class="step-connector-fill"
+                            :style="`width: ${progressData.fillPct}%; background: ${progressData.isRejected ? '#dc2626' : '#1B5CA8'};`">
+                        </div>
+                    </div>
+
+                    <template x-for="(step, index) in processSteps" :key="step.key">
+                        <div class="flex flex-col items-center relative z-10"
+                            :style="`width: ${100 / processSteps.length}%`">
+                            <div class="w-[30px] h-[30px] rounded-full border-2 flex items-center justify-center text-[13px] transition-all duration-300"
+                                :class="getStepCircleClass(index)">
+                                <i class="bi" :class="getStepIcon(step, index)"></i>
+                            </div>
+                            <div class="text-[10px] mt-1.5 text-center leading-tight" :class="getStepLabelClass(index)"
+                                x-text="index === progressData.rejectedIdx ? 'Rejected' : step.label"></div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-5 gap-4">
+
+                <div class="col-span-3 space-y-4">
+
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
+                                    <i class="bi bi-list-columns-reverse"></i>
+                                </div>
+                                Comparison Details
+                            </div>
+                        </div>
+                        <div class="px-[18px] py-[15px]">
+                            <div class="grid grid-cols-2 gap-x-6 gap-y-0">
+                                <template x-for="field in detailFields" :key="field.label">
+                                    <div
+                                        class="flex justify-between items-center py-2 text-xs border-b border-dashed border-gray-100">
+                                        <span class="text-gray-500 font-medium" x-text="field.label"></span>
+                                        <template x-if="field.isHtml">
+                                            <span x-html="field.value"></span>
+                                        </template>
+                                        <template x-if="!field.isHtml">
+                                            <span class="text-gray-900"
+                                                :class="field.bold ? 'font-bold text-[13px]' : 'font-semibold'"
+                                                x-text="field.value || '–'"></span>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <template x-if="rec.Justification">
+                                <div class="mt-4 pt-3 border-t border-gray-100">
+                                    <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                                        Finalization Justification</div>
+                                    <div class="text-xs text-gray-700 leading-relaxed bg-blue-50 border border-blue-100 p-3 rounded"
+                                        x-text="rec.Justification"></div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
+                                    <i class="bi bi-people"></i>
+                                </div>
+                                Vendor Quotes
+                            </div>
+                        </div>
+
+                        <div x-show="vendors.length === 0" class="px-[18px] py-8 text-center text-gray-400 text-xs">
+                            <i class="bi bi-box-seam text-xl mb-1 block"></i> No vendor quotes found
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table x-show="vendors.length > 0" class="w-full border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-gray-50 border-b border-gray-200 whitespace-nowrap">
+                                        <th
+                                            class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">
+                                            Vendor</th>
+                                        <th
+                                            class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
+                                            Basic Rate</th>
+                                        <th
+                                            class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
+                                            Disc %</th>
+                                        <th
+                                            class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
+                                            GST %</th>
+                                        <th
+                                            class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
+                                            Freight</th>
+                                        <th
+                                            class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
+                                            Landed Rate</th>
+                                        <th
+                                            class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
+                                            Terms</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="(vendor, i) in vendors" :key="i">
+                                        <tr class="border-b border-gray-50 transition-colors"
+                                            :class="isFinalized(vendor.Vendor_Name) ? 'bg-emerald-50/50 hover:bg-emerald-50' : 'hover:bg-gray-50'">
+                                            <td class="px-4 py-2.5 text-gray-900 font-medium whitespace-nowrap">
+                                                <span x-text="vendor.Vendor_Name"></span>
+                                                <template x-if="isFinalized(vendor.Vendor_Name)">
+                                                    <i class="bi bi-check-circle-fill text-emerald-500 ml-1.5"
+                                                        title="Finalized Vendor"></i>
+                                                </template>
+                                            </td>
+                                            <td class="px-4 py-2.5 text-gray-700 text-right tabular-nums"
+                                                x-text="formatINR(vendor.Basic_Rate)"></td>
+                                            <td class="px-4 py-2.5 text-gray-700 text-right tabular-nums"
+                                                x-text="vendor.Disc ? vendor.Disc + '%' : '–'"></td>
+                                            <td class="px-4 py-2.5 text-gray-700 text-right tabular-nums"
+                                                x-text="vendor.GST ? vendor.GST + '%' : '–'"></td>
+                                            <td class="px-4 py-2.5 text-gray-700 text-right tabular-nums"
+                                                x-text="formatINR(vendor.Fright)"></td>
+                                            <td class="px-4 py-2.5 text-gray-900 font-bold text-right tabular-nums"
+                                                x-text="formatINR(vendor.Landed_Rate)"></td>
+                                            <td class="px-4 py-2.5 text-gray-500 text-right text-[11px] whitespace-nowrap"
+                                                x-text="vendor.Payment_Terms || '–'"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-center gap-2.5 fade-in" id="actionButtons" x-show="showActionButtons"
+                        x-cloak>
+                        <button @click="approveVC()"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors no-underline cursor-pointer shadow-sm">
+                            <i class="bi bi-check-lg"></i> <span class="btn-text">Finalize & Create Vendor</span>
+                        </button>
+                        <button @click="rejectVC()"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors no-underline cursor-pointer shadow-sm">
+                            <i class="bi bi-x-lg"></i> Reject
+                        </button>
+                        <button @click="cancelVC()"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors no-underline cursor-pointer shadow-sm">
+                            <i class="bi bi-slash-circle"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-span-2">
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-amber-50 text-amber-600">
+                                    <i class="bi bi-clock-history"></i>
+                                </div>
+                                Audit Trail
+                            </div>
+                        </div>
+                        <div class="px-[18px] py-[15px]">
+
+                            <div x-show="actions.length === 0" class="text-center py-8 text-gray-400">
+                                <i class="bi bi-clock-history-off text-xl mb-1.5 block"></i>
+                                <div class="text-xs font-medium text-gray-500">No activity recorded yet</div>
+                            </div>
+
+                            <div x-show="actions.length > 0" class="space-y-0">
+                                <template x-for="(action, i) in sortedActions" :key="i">
+                                    <div class="timeline-item relative pl-10 pb-5">
+                                        <div class="timeline-line"></div>
+                                        <div class="absolute left-0 top-0 w-[30px] h-[30px] rounded-full flex items-center justify-center border-2 border-white shadow-sm z-10"
+                                            :class="getAuditIconClass(action.Status).bg">
+                                            <i class="bi text-[13px]"
+                                                :class="getAuditIconClass(action.Status).icon"></i>
+                                        </div>
+                                        <div class="bg-gray-50 border border-gray-200 rounded-lg px-3.5 py-3">
+                                            <div class="flex items-center justify-between mb-1.5">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-xs font-semibold"
+                                                        :class="getAuditIconClass(action.Status).text"
+                                                        x-text="action.Status || '–'"></span>
+                                                    <span
+                                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border"
+                                                        :class="getAuditStageClass(action.Moved_To)">
+                                                        <i class="bi bi-arrow-right text-[9px] mr-1 opacity-60"></i>
+                                                        <span x-text="action.Moved_To || '–'"></span>
+                                                    </span>
+                                                </div>
+                                                <span class="text-[10px] text-gray-400"
+                                                    x-text="formatDate(action.Added_Time, true)"></span>
+                                            </div>
+                                            <template x-if="action.Comment">
+                                                <div class="text-xs text-gray-600 leading-relaxed mt-1.5 prose prose-xs max-w-none"
+                                                    x-text="action.Comment"></div>
+                                            </template>
+                                            <div class="flex items-center gap-1.5 mt-2 text-[11px] text-gray-500">
+                                                <div class="w-[18px] h-[18px] rounded-full bg-[#1B5CA8] text-white flex items-center justify-center text-[9px] font-bold"
+                                                    x-text="getInitials(action.Added_User)"></div>
+                                                <span class="font-medium" x-text="action.Added_User || '–'"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('vcWidget', () => ({
+                isLoading: true,
+                hasError: false,
+                errorMessage: '',
+                recordId: null,
+                rec: {},
+                vendors: [],
+                actions: [],
+
+                // Action Modal States
+                showModal: false,
+                modalTitle: '',
+                modalComment: '',
+                pendingStatus: '',
+                pendingStage: '',
+                modalBtnClass: '',
+                modalBtnHoverClass: '',
+                isSubmitting: false,
+
+                // Edit Modal States
+                isEditModalOpen: false,
+                isEditSubmitting: false,
+                form: {
+                    Vendor_Comparison_Subject: '', PR_Ref: '', RFQ_Ref: '', Item_Name: '', Unit: '', Required_Quantity: '', Deliver_to_Plant: '',
+                    Finalized_Vendor: '', Total_Landed_Rate: '', Justification: '',
+                    Quotation_Comparison_Statement: []
+                },
+                tsInstance: null,
+                rfqTsInstance: null,
+
+                // P2P Standard Stages
+                processSteps: [
+                    { key: 'purchase_requisition', label: 'Purchase Requisition', icon: 'bi-receipt' },
+                    { key: 'request_for_quotation', label: 'Request For Quotation', icon: 'bi-bucket' },
+                    { key: 'vendor_comparison', label: 'Vendor Comparison', icon: 'bi-shop-window' },
+                    { key: 'purchase_order', label: 'Purchase Order', icon: 'bi-cart-check' },
+                    { key: 'grn', label: 'GRN', icon: 'bi-box-seam' },
+                    { key: 'bill', label: 'Bill', icon: 'bi-coin' },
+                    { key: 'payment', label: 'Payment', icon: 'bi-cash' }
+                ],
+
+                initWidget() {
+                    ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
+                        this.recordId = params?.recordId || null;
+                        if (!this.recordId) {
+                            this.hasError = true;
+                            this.isLoading = false;
+                            this.errorMessage = 'No Record ID provided in URL parameters.';
+                            return;
+                        }
+                        this.fetchData();
+                    });
+                },
+
+                fetchData() {
+                    ZOHO.CREATOR.DATA.invokeCustomApi({
+                        api_name: "Fetch_Vendor_Comparison_Details",
+                        http_method: "GET",
+                        content_type: "application/json",
+                        query_params: 'recId=' + this.recordId
+                    }).then((response) => {
+                        if (!response || !response.result || response.result.length === 0) {
+                            throw new Error("No data returned");
+                        }
+                        this.rec = response.result[0];
+                        this.vendors = this.rec.Items || [];
+                        this.actions = this.rec.Actions || [];
+                        this.isLoading = false;
+                    }).catch((err) => {
+                        console.error('API Error:', err);
+                        this.hasError = true;
+                        this.isLoading = false;
+                    });
+                },
+
+                // ── Computed Properties ── //
+
+                get vcNumber() {
+                    return this.rec.VC_No ? 'VC-' + this.rec.VC_No : '–';
+                },
+
+                get detailFields() {
+                    return [
+                        { label: 'Comparison No.', value: this.vcNumber },
+                        { label: 'Item Required', value: this.rec.Item_Name },
+                        { label: 'Required Qty', value: (this.rec.Required_Quantity || 0) + ' ' + (this.rec.Unit || '') },
+                        { label: 'Deliver To', value: this.rec.Deliver_to_Plant },
+                        { label: 'Finalized Vendor', value: this.rec.Finalized_Vendor, isHtml: true, value: `<span class="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-bold">${this.rec.Finalized_Vendor || '–'}</span>` },
+                        { label: 'Total Landed Rate', value: this.formatINR(this.rec.Total_Landed_Rate), bold: true },
+                    ];
+                },
+
+                get sortedActions() {
+                    return [...this.actions].sort((a, b) => {
+                        let tA = a.Added_Time || "";
+                        let tB = b.Added_Time || "";
+                        return tA.localeCompare(tB);
+                    });
+                },
+
+                get showActionButtons() {
+                    const status = (this.rec.Status || '').toLowerCase();
+                    return status !== 'finalized' && status !== 'rejected' && status !== 'cancelled';
+                },
+
+                get modalBtnText() {
+                    return this.modalTitle ? this.modalTitle.split(' ')[0] : 'Submit';
+                },
+
+                // ── Action Submission Logic ── //
+
+                openModal(title, status, movedTo, btnBgClass, btnHoverClass) {
+                    this.modalTitle = title;
+                    this.pendingStatus = status;
+                    this.pendingStage = movedTo;
+                    this.modalBtnClass = btnBgClass;
+                    this.modalBtnHoverClass = btnHoverClass;
+                    this.modalComment = '';
+                    this.showModal = true;
+                },
+
+                closeModal() {
+                    if (this.isSubmitting) return;
+                    this.showModal = false;
+                },
+
+                approveVC() {
+                    this.openModal(
+                        "Approve Vendor Comparison",
+                        "Finalized",
+                        "Purchase Order",
+                        "bg-emerald-600",
+                        "hover:bg-emerald-700"
+                    );
+                },
+
+                rejectVC() {
+                    this.openModal(
+                        "Reject Vendor Comparison",
+                        "Rejected",
+                        "Vendor Comparison",
+                        "bg-red-600",
+                        "hover:bg-red-700"
+                    );
+                },
+
+                async submitAction() {
+                    this.isSubmitting = true;
+                    try {
+                        let prId = this.rec.PR_Ref && this.rec.PR_Ref.ID ? this.rec.PR_Ref.ID : undefined;
+
+                        // 1. Update the record status natively first (per requirements)
+                        const response = await ZOHO.CREATOR.DATA.updateRecordById({
+                            report_name: "Vendor_Comparison_Report",
+                            id: this.recordId,
+                            payload: {
+
+                                data: {
+                                    "Status": this.pendingStatus
+                                }
+                            }
+                        });
+
+                        this.isSubmitting = false;
+                        this.closeModal();
+
+                        if (response.code === 3000) {
+                            this.fetchData(); // Refresh UI State post submission
+                        } else {
+                            throw new Error(response.message || 'Action processing failed');
+                        }
+
+                        // // 2. Add Audit Trail Action
+                        // const config = {
+                        //     form_name: "PR_Action",
+                        //     payload: {
+                        //         "data": {
+                        //             "PR_Number": prId,
+                        //             "Vendor_Comparison": this.recordId,
+                        //             "Status": this.pendingStatus,
+                        //             "Moved_To": this.pendingStage,
+                        //             "Comment": this.modalComment.trim()
+                        //         }
+                        //     }
+                        // };
+                        // const response2 = await ZOHO.CREATOR.DATA.addRecords(config);
+
+                    } catch (err) {
+                        console.error("API Error: ", err);
+                        alert("An error occurred while submitting. Please try again.");
+                    } finally {
+                        this.isSubmitting = false;
+                    }
+                },
+
+                cancelVC() {
+                    ZOHO.CREATOR.UTIL.navigateParentURL({
+                        action: 'open',
+                        window: 'same',
+                        url: '#Page:Vendor_Comparison'
+                    });
+                },
+
+                // ── Edit Modal Logic ── //
+
+                openEditModal() {
+                    // Populate initial form state from rec
+                    this.form = {
+                        Vendor_Comparison_Subject: this.rec.Vendor_Comparison_Subject || '',
+                        PR_Ref: this.rec.PR_Ref ? this.rec.PR_Ref.ID : '',
+                        RFQ_Ref: (this.rec.RFQ_Ref && this.rec.RFQ_Ref.length > 0) ? this.rec.RFQ_Ref[0] : '',
+                        Item_Name: this.rec.Item_Name || '',
+                        Unit: this.rec.Unit || '',
+                        Required_Quantity: this.rec.Required_Quantity || '',
+                        Deliver_to_Plant: this.rec.Deliver_to_Plant || '',
+                        Finalized_Vendor: this.rec.Finalized_Vendor || '',
+                        Total_Landed_Rate: this.rec.Total_Landed_Rate || '',
+                        Justification: this.rec.Justification || '',
+                        Quotation_Comparison_Statement: []
+                    };
+
+                    // Map subform data
+                    if (this.vendors && this.vendors.length > 0) {
+                        this.form.Quotation_Comparison_Statement = this.vendors.map(v => ({
+                            ID: v.ID,
+                            Vendor_Name: v.Vendor_Name || '',
+                            Basic_Rate: v.Basic_Rate || '',
+                            Disc: v.Disc || '',
+                            Fright: v.Fright || '',
+                            GST: v.GST || '',
+                            Landed_Rate: v.Landed_Rate || '',
+                            Payment_Terms: v.Payment_Terms || '',
+                            Rank: (v.Rank && v.Rank.includes('Yes')) ? 'Yes' : 'No'
+                        }));
+                    } else {
+                        this.addVendorRow();
+                    }
+
+                    this.isEditModalOpen = true;
+
+                    // Initialize Tom Selects and set values
+                    setTimeout(() => {
+                        this.initPrTomSelect();
+                        this.initRfqTomSelect();
+
+                        if (this.form.PR_Ref && this.tsInstance) {
+                            this.tsInstance.addOption({ ID: this.form.PR_Ref, PR_Number: this.rec.PR_Ref.zc_display_value || 'Current PR' });
+                            this.tsInstance.setValue(this.form.PR_Ref);
+                        }
+                    }, 50);
+                },
+
+                closeEditModal() {
+                    if (this.isEditSubmitting) return;
+                    this.isEditModalOpen = false;
+                    if (this.tsInstance) { this.tsInstance.destroy(); this.tsInstance = null; }
+                    if (this.rfqTsInstance) { this.rfqTsInstance.destroy(); this.rfqTsInstance = null; }
+                },
+
+                async submitEditForm() {
+                    if (this.form.Quotation_Comparison_Statement.length === 0) {
+                        alert('Please add at least one vendor.');
+                        return;
+                    }
+
+                    this.isEditSubmitting = true;
+
+                    let itemsCollection = this.form.Quotation_Comparison_Statement.map(v => {
+                        let row = {
+                            "Vendor_Name": v.Vendor_Name,
+                            "Basic_Rate": parseFloat(v.Basic_Rate) || 0,
+                            "Disc": parseFloat(v.Disc) || 0,
+                            "Fright": parseFloat(v.Fright) || 0,
+                            "GST": parseFloat(v.GST) || 0,
+                            "Landed_Rate": parseFloat(v.Landed_Rate) || 0,
+                            "Payment_Terms": v.Payment_Terms || "",
+                            "Rank": v.Rank ? [v.Rank] : ["No"]
+                        };
+                        if (v.ID) row.ID = v.ID;
+                        return row;
+                    });
+
+                    const payload = {
+                        "data": {
+                            "Vendor_Comparison_Subject": this.form.Vendor_Comparison_Subject,
+                            // "PR_Ref": this.form.PR_Ref,
+                            // "RFQ_Ref": this.form.RFQ_Ref,
+                            "Item_Name": this.form.Item_Name,
+                            "Unit": this.form.Unit,
+                            "Required_Quantity": parseFloat(this.form.Required_Quantity) || 0,
+                            "Deliver_to_Plant": this.form.Deliver_to_Plant,
+                            "Quotation_Comparison_Statement": itemsCollection,
+                            "Finalized_Vendor": this.form.Finalized_Vendor,
+                            "Total_Landed_Rate": parseFloat(this.form.Total_Landed_Rate) || 0,
+                            "Justification": this.form.Justification
+                        }
+                    };
+
+                    try {
+                        const res = await ZOHO.CREATOR.DATA.updateRecordById({
+                            report_name: "Vendor_Comparison_Report",
+                            id: this.recordId,
+                            payload: payload
+                        });
+
+                        if (res.code === 3000) {
+                            this.closeEditModal();
+                            this.fetchData(); // Reload details
+                        } else {
+                            alert('Update failed: ' + (res.message || 'Error occurred'));
+                        }
+                    } catch (err) {
+                        console.error("Update Error:", err);
+                        alert("An error occurred during update.");
+                    } finally {
+                        this.isEditSubmitting = false;
+                    }
+                },
+
+                // ── Edit Subform Mechanics ── //
+                addVendorRow() {
+                    this.form.Quotation_Comparison_Statement.push({ Vendor_Name: '', Basic_Rate: '', Disc: '', Fright: '', GST: '', Landed_Rate: '', Payment_Terms: '', Rank: 'No' });
+                },
+
+                removeVendorRow(index) {
+                    this.form.Quotation_Comparison_Statement.splice(index, 1);
+                    this.updateFinalQuantity();
+                },
+
+                calculateVendor(vendor) {
+                    let basic = parseFloat(vendor.Basic_Rate) || 0;
+                    let discPct = parseFloat(vendor.Disc) || 0;
+                    let freight = parseFloat(vendor.Fright) || 0;
+                    let gstPct = parseFloat(vendor.GST) || 0;
+
+                    let discountAmount = basic * (discPct / 100);
+                    let basicAfterDisc = basic - discountAmount;
+                    let amountWithFreight = basicAfterDisc + freight;
+                    let gstAmount = amountWithFreight * (gstPct / 100);
+
+                    vendor.Landed_Rate = parseFloat((amountWithFreight + gstAmount).toFixed(2));
+
+                    if (vendor.Rank === 'Yes') {
+                        this.updateFinalized(vendor);
+                    }
+                },
+
+                handleRankChange(vendor, index) {
+                    if (vendor.Rank === 'Yes') {
+                        this.form.Quotation_Comparison_Statement.forEach((v, i) => {
+                            if (i !== index) v.Rank = 'No';
+                        });
+                        this.updateFinalized(vendor);
+                    } else {
+                        if (this.form.Finalized_Vendor === vendor.Vendor_Name) {
+                            this.form.Finalized_Vendor = '';
+                            this.form.Total_Landed_Rate = '';
+                        }
+                    }
+                },
+
+                updateFinalized(vendor) {
+                    this.form.Finalized_Vendor = vendor.Vendor_Name;
+                    let qty = parseFloat(this.form.Required_Quantity) || 0;
+                    let landedRate = parseFloat(vendor.Landed_Rate) || 0;
+                    this.form.Total_Landed_Rate = parseFloat((qty * landedRate).toFixed(2));
+                },
+
+                updateFinalQuantity() {
+                    let selectedVendor = this.form.Quotation_Comparison_Statement.find(v => v.Rank === 'Yes');
+                    if (selectedVendor) {
+                        this.updateFinalized(selectedVendor);
+                    } else {
+                        this.form.Total_Landed_Rate = '';
+                        this.form.Finalized_Vendor = '';
+                    }
+                },
+
+                // ── Tom Selects for Edit Modal ── //
+                initPrTomSelect() {
+                    const self = this;
+                    this.tsInstance = new TomSelect(this.$refs.prSelect, {
+                        valueField: 'ID',
+                        labelField: 'PR_Number',
+                        searchField: ['PR_Number', 'Requisition_Number'],
+                        create: false,
+                        maxItems: 1,
+                        placeholder: 'Search PR...',
+                        loadThrottle: 350,
+                        onChange: function (value) { self.form.PR_Ref = value; },
+                        load: function (query, callback) {
+                            if (!query.length) return callback();
+                            var q = query.replace(/'/g, "\\'");
+                            ZOHO.CREATOR.DATA.getRecords({ report_name: 'Purchase_Requisition_Report', criteria: `(PR_Number.contains("${q}") || Requisition_Number.contains("${q}"))` })
+                                .then(res => { callback((res.code === 3000 && res.data) ? res.data : []); })
+                                .catch(() => callback());
+                        },
+                        render: {
+                            option: function (data, escape) { return '<div class="font-mono">' + escape(data.PR_Number || data.Requisition_Number || 'Unknown') + '</div>'; },
+                            item: function (data, escape) { return '<div class="font-mono">' + escape(data.PR_Number || data.Requisition_Number || 'Unknown') + '</div>'; }
+                        }
+                    });
+                },
+
+                initRfqTomSelect() {
+                    const self = this;
+                    this.rfqTsInstance = new TomSelect(this.$refs.rfqSelect, {
+                        valueField: 'ID',
+                        labelField: 'RFQ_Ref_Number',
+                        searchField: ['RFQ_Ref_Number', 'RFQ_Number'],
+                        create: false,
+                        maxItems: 1,
+                        placeholder: 'Search RFQ...',
+                        loadThrottle: 350,
+                        onChange: function (value) { self.form.RFQ_Ref = value; },
+                        load: function (query, callback) {
+                            if (!query.length) return callback();
+                            var q = query.replace(/'/g, "\\'");
+                            ZOHO.CREATOR.DATA.getRecords({ report_name: 'Request_For_Quotation_Report', criteria: `(RFQ_Ref_Number.contains("${q}") || RFQ_Number.contains("${q}"))` })
+                                .then(res => { callback((res.code === 3000 && res.data) ? res.data : []); })
+                                .catch(() => callback());
+                        },
+                        render: {
+                            option: function (data, escape) { return '<div class="font-mono">' + escape(data.RFQ_Ref_Number || data.RFQ_Number || 'Unknown') + '</div>'; },
+                            item: function (data, escape) { return '<div class="font-mono">' + escape(data.RFQ_Ref_Number || data.RFQ_Number || 'Unknown') + '</div>'; }
+                        }
+                    });
+                },
+
+                // ── UI Helper Methods ── //
+
+                get progressData() {
+                    let completed = {};
+                    let rejectedStepKey = null;
+                    let currentStageKey = 'vendor_comparison';
+
+                    this.actions.forEach(a => {
+                        let key = this.stageToStepKey(a.Moved_To);
+                        if (key) {
+                            if (a.Status && a.Status.toLowerCase() === 'rejected') {
+                                rejectedStepKey = key;
+                            } else {
+                                completed[key] = true;
+                            }
+                        }
+                    });
+
+                    // Force early steps to true since we are at Vendor Comparison
+                    completed['purchase_requisition'] = true;
+                    completed['request_for_quotation'] = true;
+                    completed['vendor_comparison'] = true;
+
+                    let rejectedIdx = this.processSteps.findIndex(s => s.key === rejectedStepKey);
+                    let currentIdx = this.processSteps.findIndex(s => s.key === currentStageKey);
+
+                    this.processSteps.forEach((s, i) => {
+                        if (completed[s.key] && i > currentIdx) currentIdx = i;
+                    });
+
+                    let fillIdx = rejectedIdx !== -1 ? rejectedIdx : currentIdx;
+                    return {
+                        fillPct: (fillIdx / (this.processSteps.length - 1)) * 100,
+                        isRejected: rejectedIdx !== -1,
+                        rejectedIdx,
+                        currentIdx
+                    };
+                },
+
+                getStatusBadge(status) {
+                    const s = (status || 'pending').toLowerCase();
+                    let border = 'border-amber-200', bg = 'bg-amber-50', text = 'text-amber-800', dot = 'bg-amber-500', label = status || 'Pending';
+
+                    if (s === 'approved') { border = 'border-emerald-200'; bg = 'bg-emerald-50'; text = 'text-emerald-800'; dot = 'bg-emerald-600'; label = 'Approved'; }
+                    if (s === 'rejected') { border = 'border-red-200'; bg = 'bg-red-50'; text = 'text-red-800'; dot = 'bg-red-600'; label = 'Rejected'; }
+                    if (s === 'cancelled') { border = 'border-gray-300'; bg = 'bg-gray-100'; text = 'text-gray-700'; dot = 'bg-gray-500'; label = 'Cancelled'; }
+                    if (s === 'pending' || s === 'submitted') { border = 'border-blue-200'; bg = 'bg-blue-50'; text = 'text-blue-800'; dot = 'bg-blue-600'; label = 'Comparison Generated'; }
+
+                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border ${border} ${bg} ${text}"><span class="w-[5px] h-[5px] rounded-full ${dot} shrink-0"></span>${label}</span>`;
+                },
+
+                isFinalized(vendorName) {
+                    return this.rec.Finalized_Vendor && vendorName && this.rec.Finalized_Vendor.toLowerCase() === vendorName.toLowerCase();
+                },
+
+                getStepCircleClass(i) {
+                    const { isRejected, rejectedIdx, currentIdx } = this.progressData;
+                    const isRejectedStep = (i === rejectedIdx);
+                    const isDone = isRejected ? (i < rejectedIdx) : (i <= currentIdx);
+                    const isCurrent = (i === currentIdx) && !isRejectedStep;
+
+                    if (isRejectedStep) return 'bg-red-600 text-white border-red-600 shadow-md shadow-red-200';
+                    if (isDone && isCurrent) return 'bg-[#1B5CA8] text-white border-[#1B5CA8] shadow-md shadow-blue-200';
+                    if (isDone) return 'bg-emerald-600 text-white border-emerald-600';
+                    return 'bg-white text-gray-400 border-gray-300';
+                },
+
+                getStepIcon(step, i) {
+                    const { isRejected, rejectedIdx, currentIdx } = this.progressData;
+                    const isRejectedStep = (i === rejectedIdx);
+                    const isDone = isRejected ? (i < rejectedIdx) : (i <= currentIdx);
+                    const isCurrent = (i === currentIdx) && !isRejectedStep;
+
+                    if (isRejectedStep) return 'bi-x-lg text-[13px]';
+                    if (isDone && !isCurrent) return 'bi-check-lg text-[13px]';
+                    return `${step.icon} text-[13px]`;
+                },
+
+                getStepLabelClass(i) {
+                    const { isRejected, rejectedIdx, currentIdx } = this.progressData;
+                    if (i === rejectedIdx) return 'text-red-700 font-semibold';
+                    if (i === currentIdx && !isRejected) return 'text-[#1B5CA8] font-semibold';
+                    if ((isRejected && i < rejectedIdx) || (!isRejected && i < currentIdx)) return 'text-gray-700 font-medium';
+                    return 'text-gray-400';
+                },
+
+                getAuditIconClass(status) {
+                    if (status === 'Approved') return { bg: 'bg-emerald-50', text: 'text-emerald-600', icon: 'bi-check-lg text-emerald-600' };
+                    if (status === 'Rejected') return { bg: 'bg-red-50', text: 'text-red-600', icon: 'bi-x-lg text-red-600' };
+                    return { bg: 'bg-blue-50', text: 'text-blue-600', icon: 'bi-arrow-right text-blue-600' };
+                },
+
+                getAuditStageClass(stage) {
+                    const key = this.stageToStepKey(stage);
+                    if (key === 'purchase_order') return 'bg-blue-50 text-blue-700 border-blue-200';
+                    if (key === 'grn') return 'bg-violet-50 text-violet-700 border-violet-200';
+                    if (key === 'bill') return 'bg-cyan-50 text-cyan-700 border-cyan-200';
+                    if (key === 'payment') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                    return 'bg-gray-100 text-gray-600 border-gray-200';
+                },
+
+                // ── Formatters ── //
+
+                formatINR(amount) {
+                    if (amount == null || isNaN(amount)) return '₹ 0';
+                    const num = parseFloat(amount);
+                    let intPart = Math.abs(Math.round(num)).toString();
+                    const sign = num < 0 ? '-' : '';
+                    if (intPart.length > 3) {
+                        const last3 = intPart.slice(-3);
+                        const rest = intPart.slice(0, -3);
+                        intPart = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + last3;
+                    }
+                    return '₹ ' + sign + intPart;
+                },
+
+                formatDate(dateStr, includeTime = false) {
+                    if (!dateStr) return '–';
+                    try {
+                        const d = new Date(dateStr);
+                        if (isNaN(d.getTime())) return dateStr;
+                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        let res = String(d.getDate()).padStart(2, '0') + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+                        if (includeTime) {
+                            res += ' · ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        }
+                        return res;
+                    } catch (e) {
+                        return dateStr;
+                    }
+                },
+
+                getInitials(name) {
+                    if (!name || name === '–') return '?';
+                    return name.charAt(0).toUpperCase();
+                },
+
+                stageToStepKey(stage) {
+                    if (!stage) return null;
+                    const s = stage.toLowerCase().trim();
+                    if (s === 'purchase requisition') return 'purchase_requisition';
+                    if (s === 'request for quotation') return 'request_for_quotation';
+                    if (s === 'vendor comparison') return 'vendor_comparison';
+                    if (s === 'purchase order') return 'purchase_order';
+                    if (s === 'grn') return 'grn';
+                    if (s === 'bill') return 'bill';
+                    if (s === 'payment') return 'payment';
+                    return null;
+                }
+            }));
+        });
+    </script>
+</body>
+
+</html>

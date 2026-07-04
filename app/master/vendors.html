@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendor Master</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+  <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <style>
+    [x-cloak] {
+      display: none !important;
+    }
+
+    .sticky-action-cell {
+      position: sticky;
+      right: 0;
+      z-index: 2;
+      box-shadow: -4px 0 8px -2px rgba(0, 0, 0, 0.06);
+    }
+
+    .spinner {
+      border: 2.5px solid #e5e7eb;
+      border-top-color: #1B5CA8;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 p-6 font-[Lato] text-[13px] text-gray-700 antialiased">
+  <div x-data="vendorMaster()" x-init="initApp()" class="max-w-6xl mx-auto" x-cloak>
+
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-[16px] font-bold text-gray-900">Vendors Master</h2>
+      <div class="flex gap-2 items-center">
+        <div class="relative">
+          <i class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px]"></i>
+          <input x-model="searchQuery" @input.debounce.400ms="page = 1; fetchRecords()" type="text"
+            placeholder="Search vendors..."
+            class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[230px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10">
+        </div>
+        <button @click="openModal()"
+          class="px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] shadow-sm"><i
+            class="bi bi-plus-lg"></i> Add Vendor</button>
+      </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
+            <th class="px-4 py-2.5 text-[11px] font-semibold text-gray-500 text-left">Vendor No</th>
+            <th class="px-4 py-2.5 text-[11px] font-semibold text-gray-500 text-left">Display Name</th>
+            <th class="px-4 py-2.5 text-[11px] font-semibold text-gray-500 text-left">Email / Mobile</th>
+            <th
+              class="px-4 py-2.5 text-[11px] font-semibold text-gray-500 text-left bg-gray-50 sticky-action-cell w-[100px]">
+              Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr x-show="isLoading">
+            <td colspan="4" class="py-12 text-center">
+              <div class="flex flex-col items-center gap-3">
+                <div class="spinner"></div>
+                <div class="text-gray-400">Loading...</div>
+              </div>
+            </td>
+          </tr>
+          <tr x-show="!isLoading && paginatedRecords.length === 0">
+            <td colspan="4" class="py-12 text-center text-gray-400"><i class="bi bi-inboxes text-3xl block mb-2"></i>No
+              vendors found</td>
+          </tr>
+          <template x-for="rec in paginatedRecords" :key="rec.ID">
+            <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors">
+              <td class="px-4 py-3 font-mono text-[#1B5CA8]" x-text="rec.Vendor_Number || '–'"></td>
+              <td class="px-4 py-3 font-semibold text-gray-900" x-text="rec.Display_Name"></td>
+              <td class="px-4 py-3 text-gray-500">
+                <div x-text="rec.email || 'No email'"></div>
+                <div class="text-[11px] mt-0.5" x-text="rec.mobile || 'No mobile'"></div>
+              </td>
+              <td class="px-4 py-3 bg-white sticky-action-cell">
+                <button @click="editRecord(rec)"
+                  class="px-2 py-1 rounded bg-white text-[#1B5CA8] border border-gray-300 hover:bg-gray-50 text-[11px] font-medium"><i
+                    class="bi bi-pencil"></i> Edit</button>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+
+      <div x-show="records.length > 0"
+        class="flex items-center justify-between px-[13px] py-[9px] border-t border-gray-200 bg-gray-50 text-xs text-gray-500"
+        x-cloak>
+        <span
+          x-text="`Showing ${(page - 1) * perPage + 1}–${Math.min(page * perPage, records.length)} of ${records.length} records`"></span>
+        <div class="flex gap-1">
+          <button @click="page > 1 && page--" :disabled="page <= 1"
+            :class="{'opacity-40 cursor-not-allowed': page <= 1, 'hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]': page > 1}"
+            class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors"><i
+              class="bi bi-chevron-left"></i></button>
+
+          <template x-for="p in paginationArray" :key="p">
+            <template x-if="p === '...'">
+              <span class="flex items-center px-1 text-gray-400 text-xs">…</span>
+            </template>
+            <template x-if="p !== '...'">
+              <button @click="page = p"
+                :class="page === p ? 'border-[#1B5CA8] bg-[#1B5CA8] text-white font-semibold' : 'border-gray-300 bg-white text-gray-600 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]'"
+                class="min-w-[27px] h-[27px] px-1 border rounded inline-flex items-center justify-center transition-colors"
+                x-text="p"></button>
+            </template>
+          </template>
+
+          <button @click="page < totalPages && page++" :disabled="page >= totalPages"
+            :class="{'opacity-40 cursor-not-allowed': page >= totalPages, 'hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]': page < totalPages}"
+            class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors"><i
+              class="bi bi-chevron-right"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <div x-show="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40">
+      <div @click.away="closeModal()"
+        class="bg-white rounded-[11px] w-full max-w-4xl shadow-2xl flex flex-col overflow-hidden">
+        <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
+          <h3 class="text-[15px] font-bold text-gray-800" x-text="isEdit ? 'Edit Vendor' : 'New Vendor'"></h3>
+          <button @click="closeModal()" class="text-gray-400 hover:text-gray-700"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <form @submit.prevent="saveRecord" class="p-5 overflow-y-auto max-h-[80vh]">
+
+          <h4 class="text-xs font-bold text-[#1B5CA8] border-b border-gray-100 pb-1 mb-3">Primary Details</h4>
+          <div class="grid grid-cols-3 gap-4 mb-4">
+            <div><label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Display Name <span
+                  class="text-red-500">*</span></label><input x-model="form.Display_Name" type="text" required
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none">
+            </div>
+            <div><label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Legal Company Name</label><input
+                x-model="form.Company_Name" type="text"
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none">
+            </div>
+            <div><label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Group</label><input
+                x-model="form.group" type="text"
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none">
+            </div>
+            <div><label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Email</label><input
+                x-model="form.email" type="email"
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none">
+            </div>
+            <div><label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Mobile</label><input
+                x-model="form.mobile" type="text"
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Business Type</label>
+              <select x-model="form.Business_Type"
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none bg-white">
+                <option value="">Select...</option>
+                <option value="Business">Business</option>
+                <option value="Individual">Individual</option>
+                <option value="Agent">Agent</option>
+              </select>
+            </div>
+          </div>
+
+          <h4 class="text-xs font-bold text-[#1B5CA8] border-b border-gray-100 pb-1 mb-3 mt-6">Billing Address</h4>
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div><label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Address Line 1</label><input
+                x-model="form.Billing_Address.address_line_1" type="text"
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs"></div>
+            <div><label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Address Line 2</label><input
+                x-model="form.Billing_Address.address_line_2" type="text"
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs"></div>
+            <div><label class="block text-[11px] font-semibold text-gray-500 mb-1.5">City</label><input
+                x-model="form.Billing_Address.district_city" type="text"
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs"></div>
+            <div><label class="block text-[11px] font-semibold text-gray-500 mb-1.5">State</label><input
+                x-model="form.Billing_Address.state_province" type="text"
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs"></div>
+            <div><label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Postal Code</label><input
+                x-model="form.Billing_Address.postal_Code" type="text"
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs"></div>
+            <div><label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Country</label><input
+                x-model="form.Billing_Address.country" type="text"
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs"></div>
+          </div>
+
+          <div class="flex justify-between items-end border-b border-gray-100 pb-1 mt-6 mb-3">
+            <h4 class="text-xs font-bold text-[#1B5CA8]">GST Details</h4>
+            <button type="button" @click="addGridRow('GST_Details', {Registration_Type:'', GSTIN_No:'', PAN:''})"
+              class="text-[10px] bg-blue-50 text-blue-700 px-2 py-1 rounded">Add Row</button>
+          </div>
+          <template x-for="(row, idx) in form.GST_Details" :key="idx">
+            <div class="grid grid-cols-4 gap-2 mb-2 items-end">
+              <div><select x-model="row.Registration_Type" class="w-full py-1.5 px-2 border rounded text-xs">
+                  <option value="">Type...</option>
+                  <option value="Regular">Regular</option>
+                  <option value="Unregister">Unregister</option>
+                  <option value="Oversees">Oversees</option>
+                </select></div>
+              <div><input x-model="row.GSTIN_No" placeholder="GSTIN" class="w-full py-1.5 px-2 border rounded text-xs">
+              </div>
+              <div><input x-model="row.PAN" placeholder="PAN" class="w-full py-1.5 px-2 border rounded text-xs"></div>
+              <button type="button" @click="form.GST_Details.splice(idx,1)"
+                class="text-red-500 hover:bg-red-50 p-1.5 rounded"><i class="bi bi-trash"></i></button>
+            </div>
+          </template>
+
+          <div class="flex justify-between items-end border-b border-gray-100 pb-1 mt-6 mb-3">
+            <h4 class="text-xs font-bold text-[#1B5CA8]">Contact Details</h4>
+            <button type="button"
+              @click="addGridRow('Contact_Details', {Name:{first_name:'', last_name:''}, Email:'', Phone:''})"
+              class="text-[10px] bg-blue-50 text-blue-700 px-2 py-1 rounded">Add Row</button>
+          </div>
+          <template x-for="(row, idx) in form.Contact_Details" :key="idx">
+            <div class="grid grid-cols-5 gap-2 mb-2 items-end">
+              <div><input x-model="row.Name.first_name" placeholder="First Name"
+                  class="w-full py-1.5 px-2 border rounded text-xs"></div>
+              <div><input x-model="row.Name.last_name" placeholder="Last Name"
+                  class="w-full py-1.5 px-2 border rounded text-xs"></div>
+              <div><input x-model="row.Email" placeholder="Email" class="w-full py-1.5 px-2 border rounded text-xs">
+              </div>
+              <div><input x-model="row.Phone" placeholder="Phone" class="w-full py-1.5 px-2 border rounded text-xs">
+              </div>
+              <button type="button" @click="form.Contact_Details.splice(idx,1)"
+                class="text-red-500 hover:bg-red-50 p-1.5 rounded"><i class="bi bi-trash"></i></button>
+            </div>
+          </template>
+
+          <div class="flex justify-between items-end border-b border-gray-100 pb-1 mt-6 mb-3">
+            <h4 class="text-xs font-bold text-[#1B5CA8]">Bank Account Details</h4>
+            <button type="button"
+              @click="addGridRow('Bank_Account_Details', {Bank_Name:'', Account_Number:'', IFSC_Code:'', Swift_Code:'', Branch_Name:''})"
+              class="text-[10px] bg-blue-50 text-blue-700 px-2 py-1 rounded">Add Row</button>
+          </div>
+          <template x-for="(row, idx) in form.Bank_Account_Details" :key="idx">
+            <div class="grid grid-cols-6 gap-2 mb-2 items-end">
+              <div><input x-model="row.Bank_Name" placeholder="Bank" class="w-full py-1.5 px-2 border rounded text-xs">
+              </div>
+              <div><input x-model="row.Account_Number" placeholder="Account No"
+                  class="w-full py-1.5 px-2 border rounded text-xs"></div>
+              <div><input x-model="row.IFSC_Code" placeholder="IFSC" class="w-full py-1.5 px-2 border rounded text-xs">
+              </div>
+              <div><input x-model="row.Swift_Code" placeholder="Swift"
+                  class="w-full py-1.5 px-2 border rounded text-xs"></div>
+              <div><input x-model="row.Branch_Name" placeholder="Branch"
+                  class="w-full py-1.5 px-2 border rounded text-xs"></div>
+              <button type="button" @click="form.Bank_Account_Details.splice(idx,1)"
+                class="text-red-500 hover:bg-red-50 p-1.5 rounded"><i class="bi bi-trash"></i></button>
+            </div>
+          </template>
+
+          <div class="flex justify-end gap-2 border-t border-gray-100 pt-4 mt-4">
+            <button type="button" @click="closeModal()"
+              class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold">Cancel</button>
+            <button type="submit" :disabled="isSubmitting"
+              class="px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold disabled:opacity-70">
+              <span x-text="isSubmitting ? 'Saving...' : 'Save'"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('alpine:init', () => {
+      const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+      Alpine.data('vendorMaster', () => ({
+        records: [], isLoading: true, searchQuery: '', isModalOpen: false, isSubmitting: false, isEdit: false, editId: null,
+        page: 1, perPage: 10,
+        form: {},
+
+        get totalPages() { return Math.max(1, Math.ceil(this.records.length / this.perPage)); },
+        get paginatedRecords() {
+          const start = (this.page - 1) * this.perPage;
+          return this.records.slice(start, start + this.perPage);
+        },
+        get paginationArray() {
+          let pages = [];
+          for (let i = 1; i <= this.totalPages; i++) {
+            if (i <= 2 || i === this.totalPages || (i >= this.page - 1 && i <= this.page + 1)) pages.push(i);
+          }
+          let uniquePages = [...new Set(pages)].sort((a, b) => a - b);
+          let result = [];
+          for (let i = 0; i < uniquePages.length; i++) {
+            if (i > 0 && uniquePages[i] - uniquePages[i - 1] > 1) result.push('...');
+            result.push(uniquePages[i]);
+          }
+          return result;
+        },
+
+        getBlankForm() {
+          return {
+            Display_Name: '', Company_Name: '', group: '', email: '', mobile: '', Business_Type: '',
+            Billing_Address: { address_line_1: '', address_line_2: '', district_city: '', state_province: '', postal_Code: '', country: '' },
+            GST_Details: [], Contact_Details: [], Bank_Account_Details: []
+          };
+        },
+
+        initApp() { this.fetchRecords(); },
+
+        async fetchRecords() {
+          this.isLoading = true;
+          try {
+            let accumulated = [];
+            let cursor = null;
+            let criteria = '';
+
+            if (this.searchQuery) {
+              criteria = `(Display_Name.contains("${this.searchQuery.replace(/'/g, "\\'")}") || email.contains("${this.searchQuery}"))`;
+            }
+
+            do {
+              let config = { report_name: 'Vendor_Report', max_records: 200 };
+              if (criteria) config.criteria = criteria;
+              if (cursor) config.record_cursor = cursor;
+
+              let res = await ZOHO.CREATOR.DATA.getRecords(config);
+              if (res.code === 3000 && res.data) {
+                accumulated = accumulated.concat(res.data);
+                cursor = res.data.length >= 200 ? res.record_cursor : null;
+              } else {
+                cursor = null;
+              }
+            } while (cursor);
+
+            this.records = accumulated;
+          } catch (err) {
+            console.error(err);
+            this.records = [];
+          } finally {
+            this.isLoading = false;
+          }
+        },
+
+        openModal() { this.isEdit = false; this.editId = null; this.form = this.getBlankForm(); this.isModalOpen = true; },
+        addGridRow(gridName, skeleton) { this.form[gridName].push(skeleton); },
+        editRecord(rec) {
+          this.isEdit = true; this.editId = rec.ID;
+          this.form = this.getBlankForm();
+          Object.assign(this.form, rec);
+          if (!this.form.Billing_Address) this.form.Billing_Address = this.getBlankForm().Billing_Address;
+
+          if (Array.isArray(this.form.Contact_Details)) {
+            this.form.Contact_Details = this.form.Contact_Details.map(c => ({
+              Email: c.Email, Phone: c.Phone,
+              Name: { first_name: c.Name?.first_name || '', last_name: c.Name?.last_name || '' }
+            }));
+          } else { this.form.Contact_Details = []; }
+
+          this.form.GST_Details = Array.isArray(rec.GST_Details) ? [...rec.GST_Details] : [];
+          this.form.Bank_Account_Details = Array.isArray(rec.Bank_Account_Details) ? [...rec.Bank_Account_Details] : [];
+          this.isModalOpen = true;
+        },
+        closeModal() { this.isModalOpen = false; },
+        saveRecord() {
+          this.isSubmitting = true;
+          const cleanForm = JSON.parse(JSON.stringify(this.form));
+          const payload = { data: cleanForm };
+          const request = this.isEdit
+            ? ZOHO.CREATOR.DATA.updateRecords({ report_name: 'Vendor_Report', payload: { criteria: `ID=${this.editId}`, data: this.form } })
+            : ZOHO.CREATOR.DATA.addRecords({ form_name: 'Vendor', payload });
+
+          request.then(res => {
+            if (res.code === 3000) { Toast.fire({ icon: 'success', title: 'Vendor saved!' }); this.closeModal(); this.fetchRecords(); }
+            else throw new Error(res.message);
+          }).catch(err => Toast.fire({ icon: 'error', title: err.message || 'Error saving data' })).finally(() => this.isSubmitting = false);
+        }
+      }));
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Items Master</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.default.min.css" rel="stylesheet">
+
+  <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <style>
+    [x-cloak] {
+      display: none !important;
+    }
+
+    .sticky-action-cell {
+      position: sticky;
+      right: 0;
+      z-index: 2;
+      box-shadow: -4px 0 8px -2px rgba(0, 0, 0, 0.06);
+    }
+
+    .spinner {
+      border: 2.5px solid #e5e7eb;
+      border-top-color: #1B5CA8;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .ts-control {
+      border: 1px solid #d1d5db !important;
+      border-radius: 0.5rem !important;
+      padding: 0.4rem 0.75rem !important;
+      font-size: 0.75rem !important;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 p-6 font-[Lato] text-[13px] text-gray-700 antialiased">
+  <div x-data="itemMaster()" x-init="initApp()" class="max-w-6xl mx-auto" x-cloak>
+
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-[16px] font-bold text-gray-900">Items Master</h2>
+      <div class="flex gap-2 items-center">
+        <div class="relative">
+          <i class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px]"></i>
+          <input x-model="searchQuery" @input.debounce.400ms="page = 1; fetchRecords()" type="text"
+            placeholder="Search items..."
+            class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[230px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10">
+        </div>
+        <button @click="openModal()"
+          class="px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] shadow-sm"><i
+            class="bi bi-plus-lg"></i> Add Item</button>
+      </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
+            <th class="px-4 py-2.5 text-[11px] font-semibold text-gray-500 text-left">Item Name</th>
+            <th class="px-4 py-2.5 text-[11px] font-semibold text-gray-500 text-left">Category</th>
+            <th class="px-4 py-2.5 text-[11px] font-semibold text-gray-500 text-left">Price</th>
+            <th class="px-4 py-2.5 text-[11px] font-semibold text-gray-500 text-left">Status</th>
+            <th
+              class="px-4 py-2.5 text-[11px] font-semibold text-gray-500 text-left bg-gray-50 sticky-action-cell w-[100px]">
+              Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr x-show="isLoading">
+            <td colspan="5" class="py-12 text-center">
+              <div class="flex flex-col items-center gap-3">
+                <div class="spinner"></div>
+                <div class="text-gray-400">Loading...</div>
+              </div>
+            </td>
+          </tr>
+          <tr x-show="!isLoading && paginatedRecords.length === 0">
+            <td colspan="5" class="py-12 text-center text-gray-400"><i class="bi bi-inboxes text-3xl block mb-2"></i>No
+              items found</td>
+          </tr>
+          <template x-for="rec in paginatedRecords" :key="rec.ID">
+            <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors">
+              <td class="px-4 py-3 font-semibold text-[#1B5CA8]" x-text="rec.item_name"></td>
+              <td class="px-4 py-3" x-text="rec.category || '–'"></td>
+              <td class="px-4 py-3" x-text="rec.unit_price ? '₹ ' + rec.unit_price : '–'"></td>
+              <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                  :class="rec.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'"
+                  x-text="rec.status"></span></td>
+              <td class="px-4 py-3 bg-white sticky-action-cell">
+                <button @click="editRecord(rec)"
+                  class="px-2 py-1 rounded bg-white text-[#1B5CA8] border border-gray-300 hover:bg-gray-50 text-[11px] font-medium"><i
+                    class="bi bi-pencil"></i> Edit</button>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+
+      <div x-show="records.length > 0"
+        class="flex items-center justify-between px-[13px] py-[9px] border-t border-gray-200 bg-gray-50 text-xs text-gray-500"
+        x-cloak>
+        <span
+          x-text="`Showing ${(page - 1) * perPage + 1}–${Math.min(page * perPage, records.length)} of ${records.length} records`"></span>
+        <div class="flex gap-1">
+          <button @click="page > 1 && page--" :disabled="page <= 1"
+            :class="{'opacity-40 cursor-not-allowed': page <= 1, 'hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]': page > 1}"
+            class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors"><i
+              class="bi bi-chevron-left"></i></button>
+
+          <template x-for="p in paginationArray" :key="p">
+            <template x-if="p === '...'">
+              <span class="flex items-center px-1 text-gray-400 text-xs">…</span>
+            </template>
+            <template x-if="p !== '...'">
+              <button @click="page = p"
+                :class="page === p ? 'border-[#1B5CA8] bg-[#1B5CA8] text-white font-semibold' : 'border-gray-300 bg-white text-gray-600 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]'"
+                class="min-w-[27px] h-[27px] px-1 border rounded inline-flex items-center justify-center transition-colors"
+                x-text="p"></button>
+            </template>
+          </template>
+
+          <button @click="page < totalPages && page++" :disabled="page >= totalPages"
+            :class="{'opacity-40 cursor-not-allowed': page >= totalPages, 'hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]': page < totalPages}"
+            class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors"><i
+              class="bi bi-chevron-right"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <div x-show="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40">
+      <div @click.away="closeModal()"
+        class="bg-white rounded-[11px] w-full max-w-3xl shadow-2xl flex flex-col overflow-hidden">
+        <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
+          <h3 class="text-[15px] font-bold text-gray-800" x-text="isEdit ? 'Edit Item' : 'New Item'"></h3>
+          <button @click="closeModal()" class="text-gray-400 hover:text-gray-700"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <form @submit.prevent="saveRecord" class="p-5 overflow-y-auto max-h-[75vh]">
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="col-span-2">
+              <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Item Name <span
+                  class="text-red-500">*</span></label>
+              <input x-model="form.item_name" type="text" required
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none">
+            </div>
+            <div class="col-span-2">
+              <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Description</label>
+              <textarea x-model="form.description" rows="2"
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none"></textarea>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Unit Price (₹)</label>
+              <input x-model.number="form.unit_price" type="number" step="any"
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Unit Of Measure</label>
+              <select x-model="form.unit_of_measure"
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none bg-white">
+                <option value="">Select...</option>
+                <option value="Each">Each</option>
+                <option value="Kg">Kg</option>
+                <option value="Gm">Gm</option>
+                <option value="Liter">Liter</option>
+                <option value="Meter">Meter</option>
+                <option value="Pack">Pack</option>
+                <option value="Box">Box</option>
+                <option value="Dozen">Dozen</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Category</label>
+              <select x-model="form.category"
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none bg-white">
+                <option value="">Select...</option>
+                <option value="Raw Material">Raw Material</option>
+                <option value="Finished Goods">Finished Goods</option>
+                <option value="Office Supplies">Office Supplies</option>
+                <option value="Tools">Tools</option>
+                <option value="Consumables">Consumables</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Vendor Link</label>
+              <select x-ref="vendorSelect" class="w-full text-xs" placeholder="Search Vendor..."></select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">GST Rate (%)</label>
+              <input x-model.number="form.GST_Rate" type="number" step="any"
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">HSN/SAC Code</label>
+              <input x-model="form.HSN_SAC" type="text"
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Status <span
+                  class="text-red-500">*</span></label>
+              <select x-model="form.status" required
+                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none bg-white">
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="Discontinued">Discontinued</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 border-t border-gray-100 pt-4">
+            <button type="button" @click="closeModal()"
+              class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold">Cancel</button>
+            <button type="submit" :disabled="isSubmitting"
+              class="px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold disabled:opacity-70">
+              <span x-text="isSubmitting ? 'Saving...' : 'Save'"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('alpine:init', () => {
+      const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+      Alpine.data('itemMaster', () => ({
+        records: [], isLoading: true, searchQuery: '', isModalOpen: false, isSubmitting: false, isEdit: false, editId: null, tsInstance: null,
+        page: 1, perPage: 10,
+        form: { item_name: '', description: '', unit_price: '', unit_of_measure: '', Vendor: '', category: '', GST_Rate: '', HSN_SAC: '', status: 'Active' },
+
+        get totalPages() { return Math.max(1, Math.ceil(this.records.length / this.perPage)); },
+        get paginatedRecords() {
+          const start = (this.page - 1) * this.perPage;
+          return this.records.slice(start, start + this.perPage);
+        },
+        get paginationArray() {
+          let pages = [];
+          for (let i = 1; i <= this.totalPages; i++) {
+            if (i <= 2 || i === this.totalPages || (i >= this.page - 1 && i <= this.page + 1)) pages.push(i);
+          }
+          let uniquePages = [...new Set(pages)].sort((a, b) => a - b);
+          let result = [];
+          for (let i = 0; i < uniquePages.length; i++) {
+            if (i > 0 && uniquePages[i] - uniquePages[i - 1] > 1) result.push('...');
+            result.push(uniquePages[i]);
+          }
+          return result;
+        },
+
+        initApp() { this.fetchRecords(); },
+        async fetchRecords() {
+          this.isLoading = true;
+          try {
+            let accumulated = [];
+            let cursor = null;
+            let criteria = '';
+
+            if (this.searchQuery) {
+              criteria = `item_name.contains("${this.searchQuery.replace(/'/g, "\\'")}")`;
+            }
+
+            do {
+              let config = { report_name: 'Items_Report', max_records: 200 };
+              if (criteria) config.criteria = criteria;
+              if (cursor) config.record_cursor = cursor;
+
+              let res = await ZOHO.CREATOR.DATA.getRecords(config);
+              if (res.code === 3000 && res.data) {
+                accumulated = accumulated.concat(res.data);
+                cursor = res.data.length >= 200 ? res.record_cursor : null;
+              } else {
+                cursor = null;
+              }
+            } while (cursor);
+
+            this.records = accumulated;
+          } catch (err) {
+            console.error(err);
+            this.records = [];
+          } finally {
+            this.isLoading = false;
+          }
+        },
+
+        openModal() {
+          this.isEdit = false; this.editId = null;
+          this.form = { item_name: '', description: '', unit_price: '', unit_of_measure: '', Vendor: '', category: '', GST_Rate: '', HSN_SAC: '', status: 'Active' };
+          this.isModalOpen = true;
+          setTimeout(() => this.initVendorSelect(), 50);
+        },
+        editRecord(rec) {
+          this.isEdit = true; this.editId = rec.ID;
+          this.form = { ...rec, Vendor: rec.Vendor?.ID || '' };
+          this.isModalOpen = true;
+          setTimeout(() => this.initVendorSelect(rec.Vendor), 50);
+        },
+        closeModal() { this.isModalOpen = false; if (this.tsInstance) this.tsInstance.destroy(); },
+        initVendorSelect(preselectedObj = null) {
+          if (this.tsInstance) this.tsInstance.destroy();
+          const self = this;
+          this.tsInstance = new TomSelect(this.$refs.vendorSelect, {
+            valueField: 'ID', labelField: 'Display_Name', searchField: ['Display_Name', 'Company_Name'], maxItems: 1,
+            onChange: function (val) { self.form.Vendor = val; },
+            load: function (query, callback) {
+              if (!query.length) return callback();
+              ZOHO.CREATOR.DATA.getRecords({ report_name: 'Vendor_Report', criteria: `(Display_Name.contains("${query}") || Company_Name.contains("${query}"))` })
+                .then(res => callback(res.code === 3000 ? res.data : [])).catch(() => callback());
+            }
+          });
+          if (preselectedObj && preselectedObj.ID) {
+            this.tsInstance.addOption(preselectedObj);
+            this.tsInstance.setValue(preselectedObj.ID);
+          }
+        },
+        saveRecord() {
+          this.isSubmitting = true;
+          const cleanForm = JSON.parse(JSON.stringify(this.form));
+          const payload = { data: cleanForm };
+          const request = this.isEdit
+            ? ZOHO.CREATOR.DATA.updateRecords({ report_name: 'Items_Report', payload: { criteria: `ID=${this.editId}`, data: this.form } })
+            : ZOHO.CREATOR.DATA.addRecords({ form_name: 'Items_Master', payload });
+
+          request.then(res => {
+            if (res.code === 3000) { Toast.fire({ icon: 'success', title: 'Item saved!' }); this.closeModal(); this.fetchRecords(); }
+            else throw new Error(res.message);
+          }).catch(err => Toast.fire({ icon: 'error', title: err.message || 'Error saving data' })).finally(() => this.isSubmitting = false);
+        }
+      }));
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RFQ Listing & Approval</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+    rel="stylesheet">
+
+  <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.default.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <style>
+    [x-cloak] {
+      display: none !important;
+    }
+
+    /* Modal overlay */
+    .rfq-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .rfq-modal-bg {
+      position: absolute;
+      inset: 0;
+      background: rgba(17, 24, 39, 0.4);
+    }
+
+    .rfq-modal-box {
+      position: relative;
+      z-index: 1;
+      background: #fff;
+      border-radius: 11px;
+      width: 100%;
+      max-width: 440px;
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+    }
+
+    /* Pill active state */
+    .pill-active {
+      color: #1B5CA8 !important;
+      background: #fff !important;
+      font-weight: 600 !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Sticky Actions column */
+    .sticky-action-cell {
+      position: sticky;
+      right: 0;
+      z-index: 2;
+      box-shadow: -4px 0 8px -2px rgba(0, 0, 0, 0.06);
+    }
+
+    thead .sticky-action-cell {
+      z-index: 3;
+    }
+
+    th[data-sort] {
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    th[data-sort]:hover {
+      background: #e9ecf1;
+    }
+
+    .sort-indicator {
+      display: inline-block;
+      width: 14px;
+      text-align: center;
+      font-size: 10px;
+      color: #9ca3af;
+      margin-left: 2px;
+      vertical-align: middle;
+    }
+
+    th[data-sort].sort-active .sort-indicator {
+      color: #1B5CA8;
+    }
+
+    .rfq-spinner {
+      border: 2.5px solid #e5e7eb;
+      border-top-color: #1B5CA8;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Tom Select overrides */
+    .ts-control {
+      border: 1px solid #e5e7eb !important;
+      border-radius: 0.5rem !important;
+      font-size: 0.8125rem !important;
+      padding: 0.5rem 0.75rem !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+      font-family: inherit;
+      background-color: #f9fafb !important;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .ts-control.focus {
+      border-color: #1B5CA8 !important;
+      background-color: #ffffff !important;
+      box-shadow: 0 0 0 3px rgba(27, 92, 168, 0.15) !important;
+    }
+
+    .ts-dropdown {
+      border-radius: 0.5rem !important;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+      border: 1px solid #f3f4f6 !important;
+      padding: 0.35rem !important;
+      margin-top: 4px !important;
+      font-size: 0.8125rem !important;
+    }
+
+    .ts-dropdown .option {
+      border-radius: 0.375rem !important;
+      padding: 0.5rem 0.75rem !important;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .ts-dropdown .active {
+      background-color: #f3f4f6 !important;
+      color: #111827 !important;
+    }
+
+    .ts-dropdown .option:hover {
+      background-color: #e5e7eb !important;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 p-6">
+  <div id="app" x-data="rfqWidget()"
+    class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-6xl mx-auto" x-cloak>
+
+    <div class="grid grid-cols-4 gap-2.5 mb-4">
+      <div
+        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-[#1B5CA8]">
+        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Total</div>
+        <div class="text-[25px] font-bold leading-none text-[#1B5CA8]" x-text="stats.total"></div>
+        <div class="text-[11px] text-gray-400 mt-1.5">All requests</div>
+      </div>
+      <div
+        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-amber-500">
+        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Pending</div>
+        <div class="text-[25px] font-bold leading-none text-amber-500" x-text="stats.pending"></div>
+        <div class="text-[11px] text-gray-400 mt-1.5">Submitted / Draft</div>
+      </div>
+      <div
+        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-emerald-600">
+        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Approved</div>
+        <div class="text-[25px] font-bold leading-none text-emerald-600" x-text="stats.approved"></div>
+        <div class="text-[11px] text-gray-400 mt-1.5">Approved / Consumed</div>
+      </div>
+      <div
+        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-red-600">
+        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Rejected</div>
+        <div class="text-[25px] font-bold leading-none text-red-600" x-text="stats.rejected"></div>
+        <div class="text-[11px] text-gray-400 mt-1.5">Declined</div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between mt-[18px] mb-2">
+      <span class="text-[13.5px] font-medium text-gray-900">Request for Quotations</span>
+    </div>
+
+    <div class="flex items-center justify-between gap-2.5 mb-2 flex-wrap">
+      <div class="flex bg-gray-100 rounded-full p-[3px] gap-[2px]">
+        <button @click="setFilter('all')"
+          :class="filter === 'all' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
+          class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">
+          All (<span x-text="stats.total"></span>)
+        </button>
+        <button @click="setFilter('pending')"
+          :class="filter === 'pending' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
+          class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">
+          Pending (<span x-text="stats.pending"></span>)
+        </button>
+        <button @click="setFilter('approved')"
+          :class="filter === 'approved' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
+          class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">
+          Approved (<span x-text="stats.approved"></span>)
+        </button>
+        <button @click="setFilter('rejected')"
+          :class="filter === 'rejected' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
+          class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">
+          Rejected (<span x-text="stats.rejected"></span>)
+        </button>
+      </div>
+
+      <div class="flex gap-2 items-center">
+        <div class="relative">
+          <i
+            class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px] pointer-events-none"></i>
+          <input x-model="search"
+            class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[190px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10"
+            type="text" placeholder="Search by RFQ #, Dept…">
+        </div>
+        <button @click="openCreateModal()"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-all shadow-sm">
+          <i class="bi bi-plus-lg"></i> Create RFQ
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
+      <table class="w-full border-collapse" style="min-width:914px">
+        <colgroup>
+          <col style="width:130px">
+          <col style="width:130px">
+          <col style="width:110px">
+          <col style="width:110px">
+          <col style="width:100px">
+          <col style="width:100px">
+          <col style="width:110px">
+          <col style="width:140px">
+        </colgroup>
+        <thead>
+          <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
+            <template
+              x-for="col in ['rfq_number', 'department', 'pr_ref', 'requester', 'req_date', 'due_date', 'status']"
+              :key="col">
+              <th @click="toggleSort(col)" data-sort
+                class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap"
+                :class="sortCol === col ? 'sort-active' : ''">
+                <span
+                  x-text="{rfq_number: 'RFQ #', department: 'Department', pr_ref: 'PR Ref', requester: 'Requester', req_date: 'Request Date', due_date: 'Due Date', status: 'Status'}[col]"></span>
+                <span class="sort-indicator" x-text="sortCol === col ? (sortDir === 'asc' ? '▲' : '▼') : ''"></span>
+              </th>
+            </template>
+            <th
+              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap bg-gray-50 sticky-action-cell">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr x-show="isLoading">
+            <td colspan="8" class="px-3 py-12 text-center">
+              <div class="flex flex-col items-center gap-3">
+                <div class="rfq-spinner"></div>
+                <div class="text-sm text-gray-400 font-medium">Loading RFQs…</div>
+              </div>
+            </td>
+          </tr>
+
+          <tr x-show="!isLoading && paginatedRecords.length === 0">
+            <td colspan="8" class="px-3 py-12 text-center">
+              <div class="text-gray-400">
+                <i class="bi bi-clipboard-x text-3xl mb-2 block"></i>
+                <div class="text-sm font-medium text-gray-500">No records found</div>
+              </div>
+            </td>
+          </tr>
+
+          <template x-for="rec in paginatedRecords" :key="rec.ID">
+            <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors duration-150 group">
+              <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap">
+                <span class="font-semibold text-[#1B5CA8] font-mono text-[11px]"
+                  x-text="rec.RFQ_Ref_Number || rec.RFQ_Number"></span>
+              </td>
+              <td
+                class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900"
+                x-text="rec['Department_Unit.Name'] || '–'"></td>
+              <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap">
+                <template x-if="rec.PR_Ref && rec.PR_Ref.ID">
+                  <a href="javascript:void(0)"
+                    @click="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:PR_Detailed?recordId='+rec.PR_Ref.ID,window:'same'})"
+                    class="text-[#1B5CA8] hover:underline font-mono text-[11px] font-semibold"
+                    x-text="rec.PR_Ref.zc_display_value || rec.PR_Ref.PR_Number || 'PR'"></a>
+                </template>
+                <template x-if="!(rec.PR_Ref && rec.PR_Ref.ID)">
+                  <span class="text-gray-400">–</span>
+                </template>
+              </td>
+              <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[12px]"
+                x-text="rec.Added_User?.display_value || rec.Added_User || '–'"></td>
+              <td
+                class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-gray-500"
+                x-text="formatDate(rec.Request_Date)"></td>
+              <td
+                class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-gray-500"
+                x-text="formatDate(rec.Due_Date)"></td>
+              <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap">
+                <span
+                  class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap border"
+                  :class="getStatusStyle(rec).classes">
+                  <span class="w-[5px] h-[5px] rounded-full shrink-0" :class="getStatusStyle(rec).dot"></span>
+                  <span x-text="rec.Status || 'Submitted'"></span>
+                </span>
+              </td>
+              <td
+                class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap bg-white group-hover:bg-[#EBF3FC] sticky-action-cell">
+                <div class="flex items-center gap-1.5">
+                  <button
+                    @click="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:RFQ_Detailed?recordId='+rec.ID,window:'same'})"
+                    class="inline-flex items-center gap-[3px] px-2 py-[3px] rounded bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 text-[11px] font-medium transition-colors">
+                    <i class="bi bi-box-arrow-up-right"></i> View
+                  </button>
+
+                  <!-- <template x-if="normalizeStatusGroup(rec) === 'pending'">
+                    <div class="flex gap-1.5">
+                      <button @click="updateRecordStatus(rec.ID, 'Approved')"
+                        class="inline-flex items-center gap-[3px] px-2 py-[3px] rounded bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 text-[11px] font-medium transition-colors">
+                        <i class="bi bi-check-lg"></i> Approve
+                      </button>
+                      <button @click="updateRecordStatus(rec.ID, 'Rejected')"
+                        class="inline-flex items-center gap-[3px] px-2 py-[3px] rounded bg-white text-red-600 border border-red-600 hover:bg-red-50 text-[11px] font-medium transition-colors">
+                        <i class="bi bi-x-lg"></i> Reject
+                      </button>
+                    </div>
+                  </template> -->
+                </div>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+
+      <div x-show="!isLoading && totalPages > 0"
+        class="flex items-center justify-between px-[13px] py-[9px] border-t border-gray-200 bg-gray-50 text-xs text-gray-500">
+        <span>Showing <span x-text="(page - 1) * perPage + 1"></span>–<span
+            x-text="Math.min(page * perPage, filteredRecords.length)"></span> of <span
+            x-text="filteredRecords.length"></span> records</span>
+        <div class="flex gap-1">
+          <button @click="page > 1 ? page-- : null" :disabled="page <= 1"
+            class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <template x-for="p in getPagesArray()" :key="p">
+            <button @click="typeof p === 'number' ? page = p : null"
+              :class="page === p ? 'border-[#1B5CA8] bg-[#1B5CA8] text-white font-semibold' : (typeof p === 'number' ? 'border-gray-300 bg-white text-gray-600 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]' : 'border-transparent bg-transparent text-gray-400 cursor-default')"
+              class="min-w-[27px] h-[27px] px-1 border rounded inline-flex items-center justify-center transition-colors">
+              <span x-text="p"></span>
+            </button>
+          </template>
+          <button @click="page < totalPages ? page++ : null" :disabled="page >= totalPages"
+            class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div x-show="isModalOpen" style="display: none;" class="rfq-modal-overlay active">
+      <div class="rfq-modal-bg" x-show="isModalOpen" x-transition.opacity @click="closeModal()"></div>
+      <div class="rfq-modal-box max-w-3xl" style="max-height: 90vh; overflow-y: auto;" x-show="isModalOpen"
+        x-transition>
+        <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
+          <h3 class="text-[15px] font-bold text-gray-800">New Request For Quotation</h3>
+          <button @click="closeModal()" class="text-gray-400 hover:text-gray-700 transition-colors"><i
+              class="bi bi-x-lg text-lg"></i></button>
+        </div>
+
+        <form @submit.prevent="submitRFQ" class="p-5">
+          <div class="grid grid-cols-2 gap-4 mb-5">
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Department /
+                Unit</label>
+              <select id="rfqDept" class="w-full text-xs"></select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Request Date
+                <span class="text-red-500">*</span></label>
+              <input type="date" x-model="rfqForm.reqDate" required
+                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Due Date <span
+                  class="text-red-500">*</span></label>
+              <input type="date" x-model="rfqForm.dueDate" :min="todayDate" required
+                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">PR Ref <span
+                  class="text-gray-400 font-normal ml-0.5">(Optional)</span></label>
+              <select id="rfqPrRef" class="w-full text-xs"></select>
+            </div>
+          </div>
+
+          <div class="mb-5 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
+            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+              <span class="text-xs font-semibold text-gray-700  tracking-wide">Items <span
+                  class="text-red-500">*</span></span>
+              <button type="button" @click="addItemRow()"
+                class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+
+                Add Item</button>
+            </div>
+            <div class="overflow-x-auto" style="overflow:visible;">
+              <table class="w-full border-collapse min-w-[600px]">
+                <thead class="bg-white border-b border-gray-200">
+                  <tr>
+                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[35%]">Item
+                    </th>
+                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[15%]">Unit
+                    </th>
+                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[12%]">Qty</th>
+                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left">Comment</th>
+                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-center w-10"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="(item, index) in rfqForm.items" :key="item.uid">
+                    <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors bg-white">
+                      <td class="px-3 py-2 relative">
+                        <select x-init="initItemSelect($el, item)" class="w-full text-xs" required></select>
+                      </td>
+                      <td class="px-3 py-2"><input type="text" x-model="item.unit"
+                          class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]"
+                          placeholder="e.g. Kg, Pcs"></td>
+                      <td class="px-3 py-2"><input type="number" x-model.number="item.quantity" required min="1"
+                          class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
+                      </td>
+                      <td class="px-3 py-2"><input type="text" x-model="item.comment" placeholder="Optional"
+                          class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
+                      </td>
+                      <td class="px-3 py-2 text-center">
+                        <button type="button" @click="removeItemRow(index)"
+                          class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50"><i
+                            class="bi bi-trash"></i></button>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="mb-5">
+            <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Purpose</label>
+            <textarea x-model="rfqForm.purpose" rows="2"
+              class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></textarea>
+          </div>
+
+          <div class="flex justify-end gap-2 border-t border-gray-100 pt-4">
+            <button type="button" @click="closeModal()"
+              class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
+            <button type="submit" :disabled="isSubmitting"
+              class="inline-flex items-center justify-center min-w-[90px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70">
+              <span x-show="!isSubmitting">Submit RFQ</span>
+              <div x-show="isSubmitting" class="rfq-spinner"
+                style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('alpine:init', () => {
+      const Toast = Swal.mixin({
+        toast: true, position: 'top-end', showConfirmButton: false, timer: 3500, timerProgressBar: true,
+        customClass: { popup: 'font-[Lato] text-sm' }
+      });
+
+      Alpine.data('rfqWidget', () => ({
+        REPORT_NAME: 'Request_For_Quotation_Report',
+        ITEMS_REPORT_NAME: 'Items_Report',
+        UNIT_REPORT_NAME: 'Unit_Report',
+        PR_REPORT_NAME: 'Purchase_Requisition_Report',
+
+        allRecords: [],
+        itemMasters: [],
+        unitMasters: [],
+
+        filter: 'all',
+        search: '',
+        isLoading: true,
+        sortCol: 'req_date',
+        sortDir: 'desc',
+        page: 1,
+        perPage: 10,
+
+        stats: { total: '-', pending: '-', approved: '-', rejected: '-' },
+
+        isModalOpen: false,
+        isSubmitting: false,
+        todayDate: dayjs().format('YYYY-MM-DD'),
+
+        rfqForm: { dept: '', reqDate: '', dueDate: '', prRef: '', purpose: '', items: [] },
+
+        // TS instances manager
+        tsInstances: { dept: null, pr: null, items: [] },
+
+        init() {
+          this.fetchRecords();
+          this.fetchItemMasters();
+          this.fetchUnitMasters();
+
+          this.$watch('search', Alpine.debounce(() => {
+            this.page = 1;
+            this.fetchRecords();
+          }, 400));
+
+          this.$watch('filter', () => {
+            this.page = 1;
+            this.fetchRecords();
+          });
+        },
+
+        // --- Computed Properties ---
+        get filteredRecords() {
+          let recs = [...this.allRecords];
+
+          return recs.sort((a, b) => {
+            let va = this.getSortValue(a, this.sortCol);
+            let vb = this.getSortValue(b, this.sortCol);
+            let cmp = 0;
+            if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+            else {
+              va = String(va).toLowerCase();
+              vb = String(vb).toLowerCase();
+              cmp = va < vb ? -1 : va > vb ? 1 : 0;
+            }
+            return this.sortDir === 'asc' ? cmp : -cmp;
+          });
+        },
+
+        get paginatedRecords() {
+          const start = (this.page - 1) * this.perPage;
+          return this.filteredRecords.slice(start, start + this.perPage);
+        },
+
+        get totalPages() {
+          return Math.max(1, Math.ceil(this.filteredRecords.length / this.perPage));
+        },
+
+        // --- Data Fetching ---
+        buildCriteria() {
+          let criteria = [];
+
+          if (this.search.trim()) {
+            let q = this.search.trim().replace(/'/g, "\\'");
+            criteria.push(`(Department_Unit.contains("${q}") || RFQ_Ref_Number.contains("${q}"))`);
+          }
+
+          if (this.filter === 'pending') criteria.push('(Status == "Submitted" || Status == "Draft")');
+          else if (this.filter === 'approved') criteria.push('(Status == "Approved" || Status == "Consumed")');
+          else if (this.filter === 'rejected') criteria.push('(Status == "Rejected")');
+
+          return criteria.join(' && ');
+        },
+
+        async fetchRecords() {
+          this.isLoading = true;
+          try {
+            let accumulated = [];
+            let cursor = null;
+            let crit = this.buildCriteria();
+
+            do {
+              let config = { report_name: this.REPORT_NAME, max_records: 200 };
+              if (crit) config.criteria = crit;
+              if (cursor) config.record_cursor = cursor;
+
+              let res = await ZOHO.CREATOR.DATA.getRecords(config);
+              if (res.code === 3000 && res.data) {
+                accumulated = accumulated.concat(res.data);
+                cursor = res.data.length >= 200 ? res.record_cursor : null;
+              } else {
+                cursor = null;
+              }
+            } while (cursor);
+
+            this.allRecords = accumulated;
+            this.computeStats();
+          } catch (err) {
+            console.error('Fetch error', err);
+            this.allRecords = [];
+          } finally {
+            this.isLoading = false;
+          }
+        },
+
+        async computeStats() {
+          let q = this.search.trim().replace(/'/g, "\\'");
+          let searchCrit = q ? `(Department_Unit.contains("${q}") || RFQ_Ref_Number.contains("${q}"))` : '';
+
+          const build = (statusCrit) => [searchCrit, statusCrit].filter(Boolean).join(' && ');
+
+          const map = [
+            { key: 'total', crit: build('') },
+            { key: 'pending', crit: build('(Status == "Submitted" || Status == "Draft")') },
+            { key: 'approved', crit: build('(Status == "Approved" || Status == "Consumed")') },
+            { key: 'rejected', crit: build('(Status == "Rejected")') }
+          ];
+
+          for (let m of map) {
+            let config = { report_name: this.REPORT_NAME };
+            if (m.crit) config.criteria = m.crit;
+            try {
+              let res = await ZOHO.CREATOR.DATA.getRecordCount(config);
+              this.stats[m.key] = res.result ? res.result.records_count : 0;
+            } catch (e) {
+              this.stats[m.key] = 0;
+            }
+          }
+        },
+
+        async fetchItemMasters() {
+          try {
+            let res = await ZOHO.CREATOR.DATA.getRecords({ report_name: this.ITEMS_REPORT_NAME, criteria: 'status == "Active"', max_records: 200 });
+            if (res.code === 3000) this.itemMasters = res.data;
+          } catch (err) { console.error('Failed to load items', err); }
+        },
+
+        async fetchUnitMasters() {
+          try {
+            let res = await ZOHO.CREATOR.DATA.getRecords({ report_name: this.UNIT_REPORT_NAME, max_records: 200 });
+            if (res.code === 3000) this.unitMasters = res.data;
+          } catch (err) { console.error('Failed to load units', err); }
+        },
+
+        // --- Action: Update Record Status ---
+        async updateRecordStatus(recordId, newStatus) {
+          try {
+            Swal.fire({
+              title: `Processing...`,
+              allowOutsideClick: false,
+              didOpen: () => { Swal.showLoading(); }
+            });
+
+            const payload = {
+              report_name: this.REPORT_NAME,
+              // id: recordId,
+              payload: {
+                criteria: `ID=${recordId}`,
+                data: {
+                  Status: newStatus
+                }
+              }
+            };
+
+            const response = await ZOHO.CREATOR.DATA.updateRecords(payload);
+            if (response.code === 3000) {
+              Swal.fire({ icon: 'success', title: `RFQ ${newStatus}!`, toast: true, position: 'top-end', timer: 3000, showConfirmButton: false });
+              this.fetchRecords();
+            } else {
+              throw new Error(response.message || 'Update failed');
+            }
+          } catch (err) {
+            console.error(err);
+            Swal.fire({ icon: 'error', title: 'Action Failed', text: err.message || 'Failed to update record.' });
+          }
+        },
+
+        // --- UI Helpers ---
+        setFilter(f) { this.filter = f; },
+
+        toggleSort(col) {
+          if (this.sortCol === col) {
+            this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+          } else {
+            this.sortCol = col;
+            this.sortDir = (col === 'req_date' || col === 'due_date') ? 'desc' : 'asc';
+          }
+          this.page = 1;
+        },
+
+        normalizeStatusGroup(rec) {
+          if (!rec || !rec.Status) return 'pending';
+          const st = rec.Status.toLowerCase();
+          if (st === 'rejected') return 'rejected';
+          if (st === 'approved' || st === 'consumed') return 'approved';
+          return 'pending';
+        },
+
+        getStatusStyle(rec) {
+          const group = this.normalizeStatusGroup(rec);
+          const map = {
+            pending: { classes: 'border-amber-200 bg-amber-50 text-amber-800', dot: 'bg-amber-500' },
+            approved: { classes: 'border-emerald-200 bg-emerald-50 text-emerald-800', dot: 'bg-emerald-600' },
+            rejected: { classes: 'border-red-200 bg-red-50 text-red-800', dot: 'bg-red-600' }
+          };
+          return map[group] || map.pending;
+        },
+
+        formatDate(dateStr) {
+          if (!dateStr) return '–';
+          const d = dayjs(dateStr);
+          return d.isValid() ? d.format('DD MMM YYYY') : dateStr;
+        },
+
+        getSortValue(rec, col) {
+          switch (col) {
+            case 'rfq_number':
+              var refVal = (rec.RFQ_Ref_Number || rec.RFQ_Number || '').toString();
+              var numMatch = refVal.match(/(\d+)\s*$/);
+              return numMatch ? parseInt(numMatch[1], 10) : refVal.toLowerCase();
+            case 'department': return (rec['Department_Unit.Name'] || '').toString();
+            case 'pr_ref': return (rec.PR_Ref?.zc_display_value || rec.PR_Ref?.PR_Number || '').toString();
+            case 'req_date': return rec.Request_Date ? dayjs(rec.Request_Date).valueOf() : 0;
+            case 'due_date': return rec.Due_Date ? dayjs(rec.Due_Date).valueOf() : 0;
+            case 'status': return this.normalizeStatusGroup(rec);
+            default: return '';
+          }
+        },
+
+        getPagesArray() {
+          let pages = [];
+          for (let p = 1; p <= this.totalPages; p++) {
+            if (p <= 2 || p === this.totalPages || (p >= this.page - 1 && p <= this.page + 1)) pages.push(p);
+          }
+          pages = [...new Set(pages)].sort((a, b) => a - b);
+          let finalPages = [];
+          for (let i = 0; i < pages.length; i++) {
+            if (i > 0 && pages[i] - pages[i - 1] > 1) finalPages.push('…');
+            finalPages.push(pages[i]);
+          }
+          return finalPages;
+        },
+
+        // --- Form & Modal Logic ---
+        openCreateModal() {
+          this.rfqForm = {
+            dept: '', reqDate: this.todayDate, dueDate: '', prRef: '', purpose: '',
+            items: []
+          };
+          this.isModalOpen = true;
+
+          this.$nextTick(() => {
+            this.initDeptSelect();
+            this.initPrSelect();
+            this.addItemRow(); // Default row
+          });
+        },
+
+        closeModal() {
+          this.isModalOpen = false;
+          if (this.tsInstances.dept) this.tsInstances.dept.destroy();
+          if (this.tsInstances.pr) this.tsInstances.pr.destroy();
+          this.tsInstances.items.forEach(ts => ts && ts.destroy());
+          this.tsInstances.items = [];
+        },
+
+        addItemRow() {
+          this.rfqForm.items.push({ uid: Date.now() + Math.random(), id: '', unit: '', quantity: 1, comment: '' });
+        },
+
+        removeItemRow(index) {
+          this.rfqForm.items.splice(index, 1);
+          if (this.tsInstances.items[index]) {
+            this.tsInstances.items[index].destroy();
+            this.tsInstances.items.splice(index, 1);
+          }
+        },
+
+        // TomSelect Initializers for Modal
+        initDeptSelect() {
+          this.tsInstances.dept = new TomSelect(document.getElementById('rfqDept'), {
+            valueField: 'ID', labelField: 'Name', searchField: 'Name',
+            options: this.unitMasters, maxItems: 1, placeholder: 'Select Department...',
+            onChange: (val) => { this.rfqForm.dept = val; },
+            render: {
+              option: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`,
+              item: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`
+            }
+          });
+        },
+
+        initPrSelect() {
+          this.tsInstances.pr = new TomSelect(document.getElementById('rfqPrRef'), {
+            valueField: 'ID', labelField: 'PR_Number', searchField: ['PR_Number', 'Requisition_Number'],
+            maxItems: 1, placeholder: 'Search PR...', loadThrottle: 350,
+            onChange: (val) => {
+              this.rfqForm.prRef = val;
+              if (val) this.fetchPRDetailsForRFQ(val);
+            },
+            load: (query, callback) => {
+              if (!query.length) return callback();
+              var q = query.replace(/'/g, "\\'");
+              ZOHO.CREATOR.DATA.getRecords({
+                report_name: this.PR_REPORT_NAME,
+                criteria: `(PR_Number.contains("${q}") || Requisition_Number.contains("${q}"))`
+              }).then(res => callback(res.code === 3000 ? res.data : [])).catch(() => callback());
+            },
+            render: {
+              option: (d, e) => `<div class="font-mono">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>`,
+              item: (d, e) => `<div class="font-mono">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>`
+            }
+          });
+        },
+
+        initItemSelect(el, itemRef) {
+          let ts = new TomSelect(el, {
+            valueField: 'ID', labelField: 'item_name', searchField: 'item_name',
+            options: this.itemMasters, maxItems: 1, placeholder: 'Search item...',
+            onChange: (val) => { itemRef.id = val; },
+            render: {
+              option: (d, e) => `<div class="font-medium">${e(d.item_name)}</div>`,
+              item: (d, e) => `<div class="font-medium">${e(d.item_name)}</div>`
+            }
+          });
+
+          if (itemRef.id) {
+            // Ensure option exists if auto-populated from PR
+            if (!ts.options[itemRef.id]) {
+              ts.addOption({ ID: String(itemRef.id), item_name: itemRef.tempName || 'Item #' + itemRef.id });
+            }
+            ts.setValue(itemRef.id);
+          }
+          this.tsInstances.items.push(ts);
+        },
+
+        async fetchPRDetailsForRFQ(prId) {
+          Toast.fire({ icon: 'info', title: 'Fetching PR details...' });
+          try {
+            let res = await ZOHO.CREATOR.DATA.invokeCustomApi({
+              api_name: "Fetch_PR_Details", http_method: "GET", query_params: 'recId=' + prId
+            });
+
+            if (res && res.result && res.result.length > 0) {
+              const items = res.result[0].Items || [];
+
+              // Clear TS instances
+              this.tsInstances.items.forEach(ts => ts && ts.destroy());
+              this.tsInstances.items = [];
+              this.rfqForm.items = [];
+
+              if (items.length === 0) {
+                this.addItemRow();
+                Toast.fire({ icon: 'warning', title: 'No items found in PR' });
+                return;
+              }
+
+              items.forEach(prItem => {
+                this.rfqForm.items.push({
+                  uid: Date.now() + Math.random(),
+                  id: prItem.Item.ID,
+                  tempName: prItem.Item.item_name, // fallback for TomSelect render
+                  unit: prItem.Unit || '',
+                  quantity: prItem.Quantity || 1,
+                  comment: ''
+                });
+              });
+              Toast.fire({ icon: 'success', title: 'Items loaded from PR' });
+            }
+          } catch (err) {
+            Toast.fire({ icon: 'error', title: 'Failed to fetch PR details' });
+          }
+        },
+
+        async submitRFQ() {
+          if (this.rfqForm.items.length === 0 || this.rfqForm.items.some(i => !i.id)) {
+            Toast.fire({ icon: 'error', title: 'Please complete all item selections.' });
+            return;
+          }
+
+          this.isSubmitting = true;
+          try {
+            const payload = {
+              data: {
+                Department_Unit: this.rfqForm.dept,
+                Request_Date: dayjs(this.rfqForm.reqDate).format('DD-MMM-YYYY'),
+                Due_Date: dayjs(this.rfqForm.dueDate).format('DD-MMM-YYYY'),
+                PR_Ref: this.rfqForm.prRef,
+                Purpose: this.rfqForm.purpose,
+                Status: "Submitted",
+                Items: this.rfqForm.items.map(i => ({
+                  Item: i.id, Unit: i.unit, Quantity: i.quantity, Comment: i.comment
+                }))
+              }
+            };
+
+            let res = await ZOHO.CREATOR.DATA.addRecords({ form_name: "Request_For_Quotation", payload });
+            if (res.code === 3000) {
+              Toast.fire({ icon: 'success', title: 'RFQ created successfully!' });
+              this.closeModal();
+              this.search = '';
+              this.fetchRecords();
+            } else {
+              throw new Error(res.message);
+            }
+          } catch (err) {
+            Toast.fire({ icon: 'error', title: err.message || 'Submission failed.' });
+          } finally {
+            this.isSubmitting = false;
+          }
+        }
+      }));
+    });
+  </script>
+</body>
+
+</html>

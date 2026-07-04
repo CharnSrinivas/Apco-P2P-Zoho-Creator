@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PR Approval & Creation</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+    rel="stylesheet">
+
+  <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.default.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+  <style>
+    /* ── Modal overlay ── */
+    .pr-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .pr-modal-overlay.active {
+      display: flex;
+    }
+
+    .pr-modal-bg {
+      position: absolute;
+      inset: 0;
+      background: rgba(17, 24, 39, 0.4);
+      animation: fadeIn 0.15s ease-out;
+    }
+
+    .pr-modal-box {
+      position: relative;
+      z-index: 1;
+      background: #fff;
+      border-radius: 11px;
+      width: 100%;
+      max-width: 440px;
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+      animation: slideUp 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── Loading skeleton pulse ── */
+    .skeleton-pulse {
+      background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 4px;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -200% 0;
+      }
+    }
+
+    /* ── Pill active state ── */
+    .pill-active {
+      color: #1B5CA8 !important;
+      background: #fff !important;
+      font-weight: 600 !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    /* ── Sticky Actions column ── */
+    .sticky-action-cell {
+      position: sticky;
+      right: 0;
+      z-index: 2;
+      box-shadow: -4px 0 8px -2px rgba(0, 0, 0, 0.06);
+    }
+
+    thead .sticky-action-cell {
+      z-index: 3;
+    }
+
+    /* ── Sortable headers ── */
+    th[data-sort] {
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    th[data-sort]:hover {
+      background: #e9ecf1;
+    }
+
+    .sort-indicator {
+      display: inline-block;
+      width: 14px;
+      text-align: center;
+      font-size: 10px;
+      color: #9ca3af;
+      margin-left: 2px;
+      vertical-align: middle;
+    }
+
+    th[data-sort].sort-active .sort-indicator {
+      color: #1B5CA8;
+    }
+
+    /* ── Spinner ── */
+    .pr-spinner {
+      border: 2.5px solid #e5e7eb;
+      border-top-color: #1B5CA8;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ── Tom Select overrides to match Tailwind design ── */
+    .ts-control {
+      border: 1px solid #e5e7eb !important;
+      border-radius: 0.5rem !important;
+      font-size: 0.8125rem !important;
+      padding: 0.5rem 0.75rem !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+      font-family: inherit;
+      background-color: #f9fafb !important;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .ts-control.focus {
+      border-color: #1B5CA8 !important;
+      background-color: #ffffff !important;
+      box-shadow: 0 0 0 3px rgba(27, 92, 168, 0.15) !important;
+    }
+
+    .ts-dropdown {
+      border-radius: 0.5rem !important;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+      border: 1px solid #f3f4f6 !important;
+      padding: 0.35rem !important;
+      margin-top: 4px !important;
+      font-size: 0.8125rem !important;
+    }
+
+    .ts-dropdown .option {
+      border-radius: 0.375rem !important;
+      padding: 0.5rem 0.75rem !important;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .ts-dropdown .active {
+      background-color: #f3f4f6 !important;
+      color: #111827 !important;
+    }
+
+    .ts-dropdown .option:hover {
+      background-color: #e5e7eb !important;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 p-6">
+  <div id="app" class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-6xl mx-auto">
+    <div class="grid grid-cols-4 gap-2.5 mb-4">
+      <div
+        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-[#1B5CA8]">
+        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Total</div>
+        <div class="text-[25px] font-bold leading-none text-[#1B5CA8]" id="statTotal">–</div>
+        <div class="text-[11px] text-gray-400 mt-1.5">All purchase requests</div>
+      </div>
+      <div
+        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-amber-500">
+        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Pending</div>
+        <div class="text-[25px] font-bold leading-none text-amber-500" id="statPending">–</div>
+        <div class="text-[11px] text-gray-400 mt-1.5">Awaiting action</div>
+      </div>
+      <div
+        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-emerald-600">
+        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Approved</div>
+        <div class="text-[25px] font-bold leading-none text-emerald-600" id="statApproved">–</div>
+        <div class="text-[11px] text-gray-400 mt-1.5">Processed</div>
+      </div>
+      <div
+        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-red-600">
+        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Rejected</div>
+        <div class="text-[25px] font-bold leading-none text-red-600" id="statRejected">–</div>
+        <div class="text-[11px] text-gray-400 mt-1.5">Declined</div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between mt-[18px] mb-2">
+      <span class="text-[13.5px] font-medium text-gray-900">Purchase Requests</span>
+    </div>
+
+    <div class="flex items-center justify-between gap-2.5 mb-2 flex-wrap">
+      <div class="flex bg-gray-100 rounded-full p-[3px] gap-[2px]" id="filterTabs">
+        <button data-filter="all"
+          class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150 pill-active">All (<span
+            id="tabAll">0</span>)</button>
+        <button data-filter="pending"
+          class="px-3 py-1 text-xs font-medium text-gray-600 rounded-full hover:bg-white hover:text-[#1B5CA8] transition-all duration-150">Pending
+          (<span id="tabPending">0</span>)</button>
+        <button data-filter="approved"
+          class="px-3 py-1 text-xs font-medium text-gray-600 rounded-full hover:bg-white hover:text-[#1B5CA8] transition-all duration-150">Approved
+          (<span id="tabApproved">0</span>)</button>
+        <button data-filter="rejected"
+          class="px-3 py-1 text-xs font-medium text-gray-600 rounded-full hover:bg-white hover:text-[#1B5CA8] transition-all duration-150">Rejected
+          (<span id="tabRejected">0</span>)</button>
+      </div>
+
+      <div class="flex gap-2 items-center">
+        <div class="relative">
+          <i class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px] pointer-events-none"
+            aria-hidden="true"></i>
+          <input id="searchInput"
+            class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[190px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10"
+            type="text" placeholder="Search by PR #, title…">
+        </div>
+        <button onclick="window._prApproval.openCreateModal()"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-all shadow-sm">
+          <i class="bi bi-plus-lg"></i> Create PR
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
+      <table class="w-full border-collapse" style="min-width:804px">
+        <colgroup>
+          <col style="width:120px">
+          <col style="width:108px">
+          <col style="width:108px">
+          <col style="width:90px">
+          <col style="width:90px">
+          <col style="width:90px">
+          <col style="width:108px">
+          <col style="width:90px">
+          <col style="width:auto">
+        </colgroup>
+        <thead>
+          <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
+            <th data-sort="pr_number"
+              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
+              PR #<span class="sort-indicator"></span></th>
+            <th data-sort="unit"
+              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
+              Unit<span class="sort-indicator"></span></th>
+            <th data-sort="requester"
+              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
+              Requester<span class="sort-indicator"></span></th>
+            <th data-sort="date"
+              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
+              Date<span class="sort-indicator"></span></th>
+            <th data-sort="stage"
+              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
+              Stage<span class="sort-indicator"></span></th>
+            <th data-sort="rfq"
+              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-center whitespace-nowrap">
+              RFQ<span class="sort-indicator"></span></th>
+            <th data-sort="status"
+              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
+              Status<span class="sort-indicator"></span></th>
+            <th
+              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap bg-gray-50 sticky-action-cell">
+              Actions</th>
+          </tr>
+        </thead>
+        <tbody id="prTableBody">
+          <tr id="loadingRow">
+            <td colspan="8" class="px-3 py-12 text-center">
+              <div class="flex flex-col items-center gap-3">
+                <div class="pr-spinner"></div>
+                <div class="text-sm text-gray-400 font-medium">Loading purchase requests…</div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div id="paginationContainer"
+        class="flex items-center justify-between px-[13px] py-[9px] border-t border-gray-200 bg-gray-50 text-xs text-gray-500"
+        style="display:none;">
+        <span id="paginationInfo">Showing 0 records</span>
+        <div class="flex gap-1" id="paginationButtons"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalContainer"></div>
+
+  <script>
+    (function () {
+      'use strict';
+      const REPORT_NAME = 'Purchase_Requisition_Report';
+      const ITEMS_REPORT_NAME = 'Items_Report';
+      const DEPARTMENTS_REPORT_NAME = 'Unit_Report';
+      const PER_PAGE = 10;
+      const FETCH_BATCH_SIZE = 200;
+
+      // ── State ──
+      let allRecords = [], filteredRecords = [], itemMasters = [], departmentMasters = [];
+      let currentFilter = 'all', currentPage = 1, searchQuery = '', isLoading = true;
+      let sortColumn = 'date', sortDirection = 'desc';
+
+      // ── DOM refs ──
+      const $statTotal = document.getElementById('statTotal'), $statPending = document.getElementById('statPending');
+      const $statApproved = document.getElementById('statApproved'), $statRejected = document.getElementById('statRejected');
+      const $tabAll = document.getElementById('tabAll'), $tabPending = document.getElementById('tabPending');
+      const $tabApproved = document.getElementById('tabApproved'), $tabRejected = document.getElementById('tabRejected');
+      const $tableBody = document.getElementById('prTableBody'), $pagination = document.getElementById('paginationContainer');
+      const $pagInfo = document.getElementById('paginationInfo'), $pagButtons = document.getElementById('paginationButtons');
+      const $searchInput = document.getElementById('searchInput'), $filterTabs = document.getElementById('filterTabs');
+      const $modalContainer = document.getElementById('modalContainer');
+
+      // ════════════════════════════════════════════
+      //  HELPERS & LIBRARIES
+      // ════════════════════════════════════════════
+
+      function normalizeStatus(rec) {
+        if (!rec) return 'pending';
+        if (rec.Status && rec.Status.toLowerCase() === 'rejected') return 'rejected';
+        var stage = rec.Current_Stage;
+        if (!stage || stage === 'Purchase Requisition') return 'pending';
+        if (['Request For Quotation', "Vendor Comparison", 'Purchase Order', "Bill", "Payment"].includes(stage))
+          return 'approved';
+        return 'pending';
+      }
+
+      // Replaced Regex with Native Intl API
+      function formatINR(amount) {
+        if (amount == null || isNaN(amount)) return '₹ 0';
+        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
+      }
+
+      // Replaced complex Date manual logic with Day.js
+      function formatDate(dateStr) {
+        if (!dateStr) return '–';
+        const d = dayjs(dateStr);
+        return d.isValid() ? d.format('DD MMM YYYY') : dateStr;
+      }
+
+      // Replaced complex Date formatting with Day.js
+      function formatZohoDateSubmission(dateString) {
+        if (!dateString) return "";
+        const d = dayjs(dateString);
+        return d.isValid() ? d.format('DD-MMM-YYYY') : dateString;
+      }
+
+      function esc(str) {
+        if (!str) return '–';
+        const div = document.createElement('div');
+        div.textContent = String(str);
+        return div.innerHTML;
+      }
+
+      function getStatusBadge(rec) {
+        const norm = normalizeStatus(rec);
+        const stageLabel = rec.Current_Stage || 'Purchase Requisition';
+        const map = {
+          pending: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500', label: stageLabel },
+          approved: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600', label: stageLabel },
+          rejected: { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600', label: 'Rejected' },
+        };
+        return map[norm] || map.pending;
+      }
+
+      function getSortValue(rec, col) {
+        switch (col) {
+          case 'pr_number':
+            var prVal = (rec.PR_Number || rec.Requisition_Number || '').toString();
+            var numMatch = prVal.match(/(\d+)\s*$/);
+            return numMatch ? parseInt(numMatch[1], 10) : prVal.toLowerCase();
+          case 'unit': return (rec.Unit || '').toString().toLowerCase();
+          case 'date':
+            // Greatly simplified sorting Date using Day.js
+            return rec.PR_Date ? dayjs(rec.PR_Date).valueOf() : 0;
+          case 'stage': return (rec.Current_Stage || '').toString().toLowerCase();
+          case 'status': return normalizeStatus(rec);
+          default: return '';
+        }
+      }
+
+      // ════════════════════════════════════════════
+      //  TOAST (SweetAlert2) & MODAL SYSTEM
+      // ════════════════════════════════════════════
+
+      // Configured SweetAlert2 to replace the manual CSS toast notification logic
+      const Toast = Swal.mixin({
+        toast: true, position: 'top-end', showConfirmButton: false, timer: 3500, timerProgressBar: true,
+        customClass: { popup: 'font-[Lato] text-sm' }
+      });
+
+      function showToast(message, type) {
+        Toast.fire({ icon: type, title: message });
+      }
+
+      function openModal(html) {
+        $modalContainer.innerHTML = `
+          <div class="pr-modal-overlay active" id="activeModal">
+            <div class="pr-modal-bg" id="modalBg"></div>
+            ${html}
+          </div>`;
+        document.getElementById('modalBg').addEventListener('click', closeModal);
+        document.querySelectorAll('[data-close-modal]').forEach(el => el.addEventListener('click', closeModal));
+      }
+
+      function closeModal() {
+        // Destroy Tom Select instances on close to prevent memory leaks
+        if (window._prTomSelects) {
+          window._prTomSelects.forEach(ts => ts.destroy());
+          window._prTomSelects = [];
+        }
+        if (window._prUnitTomSelect) {
+          window._prUnitTomSelect.destroy();
+          window._prUnitTomSelect = null;
+        }
+        $modalContainer.innerHTML = '';
+      }
+
+      function fetchDepartmentMasters() {
+        ZOHO.CREATOR.DATA.getRecords({ report_name: DEPARTMENTS_REPORT_NAME, max_records: 200 })
+          .then(function (response) {
+            if (response.code === 3000 && response.data) {
+              departmentMasters = response.data;
+              if (window._prUnitTomSelect) {
+                window._prUnitTomSelect.addOption(departmentMasters);
+                window._prUnitTomSelect.refreshOptions(false);
+              }
+            }
+          }).catch(err => console.error('Failed to load department masters:', err));
+      }
+
+      // ════════════════════════════════════════════
+      //  PR CREATION SYSTEM & ITEMS DROPDOWN
+      // ════════════════════════════════════════════
+
+      function fetchItemMasters() {
+        ZOHO.CREATOR.DATA.getRecords({ report_name: ITEMS_REPORT_NAME, criteria: 'status == "Active"', max_records: 200 })
+          .then(function (response) {
+            if (response.code === 3000 && response.data) {
+              itemMasters = response.data;
+              // Update any already-rendered Tom Select dropdowns in the modal
+              if (window._prTomSelects) {
+                window._prTomSelects.forEach(ts => { ts.addOption(itemMasters); ts.refreshOptions(false); });
+              }
+            }
+          }).catch(err => console.error('Failed to load item masters:', err));
+      }
+
+      function openCreatePRModal() {
+        window._prTomSelects = []; // Reset Tom Select tracker arrays for the new modal instance
+        const today = new Date().toISOString().split('T')[0];
+
+        const html = `
+          <div class="pr-modal-box max-w-3xl" style="max-height: 90vh; overflow-y: auto;">
+            <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
+              <h3 class="text-[15px] font-bold text-gray-800">New Purchase Requisition</h3>
+              <button data-close-modal class="text-gray-400 hover:text-gray-700 transition-colors"><i class="bi bi-x-lg text-lg"></i></button>
+            </div>
+            
+            <form id="createPrForm" onsubmit="window._prApproval.submitNewPR(event)" class="p-5">
+              <div class="grid grid-cols-2 gap-4 mb-5">
+                <div>
+                  <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Unit / Department <span class="text-red-500">*</span></label>
+                  <select id="prUnit" required class="w-full text-xs ts-unit-select" placeholder="Select Unit..."></select>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Due Date <span class="text-red-500">*</span></label>
+                  <input type="date" id="prDueDate" min="${today}" required class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
+                </div>
+              </div>
+              <div class="mb-5 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
+                <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                  <span class="text-xs font-semibold text-gray-700  tracking-wide">Items <span class="text-red-500">*</span></span>
+                  <button type="button" onclick="window._prApproval.addGridRow()" class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+ Add Item</button>
+                </div>
+                <div class="overflow-x-auto" style="overflow:visible;">
+                  <table class="w-full border-collapse min-w-[600px]">
+                    <thead class="bg-white border-b border-gray-200">
+                      <tr>
+                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[35%]">Item</th>
+                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[12%]">Qty</th>
+                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[20%]">Due Date</th>
+                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left">Comment</th>
+                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-center w-10"></th>
+                      </tr>
+                    </thead>
+                    <tbody id="prItemsGrid" class="bg-white"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="">
+                <div id="rfqContainer" class="mb-3 hidden">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <label class="block text-[11px] font-semibold text-gray-500  tracking-wide">Request For Quotation</label>
+                    <span id="rfqMessage" class="text-[10.5px] text-amber-700 font-medium bg-amber-50 px-2 py-0.5 rounded border border-amber-200 shadow-sm hidden"></span>
+                  </div>
+                  <div class="flex items-center gap-4">
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                      <input type="radio" name="Request_For_Quotation" value="No" checked class="w-3.5 h-3.5 text-[#1B5CA8] focus:ring-[#1B5CA8]">
+                      <span class="text-[13px] text-gray-700">No</span>
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                      <input type="radio" name="Request_For_Quotation" value="Yes" class="w-3.5 h-3.5 text-[#1B5CA8] focus:ring-[#1B5CA8]">
+                      <span class="text-[13px] text-gray-700">Yes</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Attachments</label>
+                  <input type="file" id="prFiles" multiple class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-[#EBF3FC] file:text-[#1B5CA8] hover:file:bg-[#d8e8fa] transition-colors cursor-pointer border border-gray-200 rounded-lg bg-gray-50 py-1.5 px-2">
+                </div>
+                <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Description</label>
+                <textarea id="prDescription" rows="2" class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></textarea>
+              </div>
+
+              <div class="flex justify-end gap-2 border-t border-gray-100 pt-4 mt-2">
+                <button type="button" data-close-modal class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
+                <button type="submit" id="prSubmitBtn" class="inline-flex items-center justify-center min-w-[90px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm">
+                  Submit PR
+                </button>
+              </div>
+            </form>
+          </div>`;
+
+        openModal(html);
+        addGridRow(); // Add first empty row by default
+
+        const unitSelectEl = document.getElementById('prUnit');
+        window._prUnitTomSelect = new TomSelect(unitSelectEl, {
+          valueField: 'ID', // Generic or 'Department_Name'
+          labelField: 'Name',
+          searchField: 'Name',
+          options: departmentMasters,
+          create: true, // Allow user to type unit if not in list
+          maxItems: 1,
+          placeholder: 'Select Unit...'
+        });
+
+        // Items change listener for RFQ logic
+        document.getElementById('prItemsGrid').addEventListener('change', function (e) {
+          if (e.target.name === 'item_id') {
+            window._prApproval.checkItemsInGRN();
+          }
+        });
+      }
+
+      function checkItemsInGRN() {
+        const itemRows = document.querySelectorAll('#prItemsGrid .item-row');
+        const itemsToCheck = [];
+        itemRows.forEach(row => {
+          const select = row.querySelector('[name="item_id"]');
+          const itemId = select.value;
+          const itemName = select.options[select.selectedIndex]?.text || 'Unknown Item';
+          if (itemId) itemsToCheck.push({ id: itemId, name: itemName });
+        });
+
+        const rfqContainer = document.getElementById('rfqContainer');
+        const rfqMessage = document.getElementById('rfqMessage');
+
+        if (itemsToCheck.length === 0) {
+          rfqContainer.classList.add('hidden');
+          const noRadio = document.querySelector('input[name="Request_For_Quotation"][value="No"]');
+          if (noRadio) noRadio.checked = true;
+          return;
+        }
+
+        const checks = itemsToCheck.map(item => {
+          return ZOHO.CREATOR.DATA.invokeCustomApi({
+            api_name: "Check_Items_In_GRN",
+            http_method: "POST",
+            payload: {
+              itemIds: item.id
+            }
+          }).then(function (response) {
+            try {
+              let resultArr = response.data || response.result || response;
+              if (typeof resultArr === 'string') resultArr = JSON.parse(resultArr);
+              if (resultArr.response) resultArr = resultArr.response;
+
+              // "You will get list of GRNs data in result array. if array len is 0 then item is not used"
+              if (Array.isArray(resultArr) && resultArr.length === 0) {
+                return item.name;
+              }
+              return null;
+            } catch (e) {
+              console.error("Error parsing GRN response", e);
+              return null;
+            }
+          }).catch(err => {
+            console.error("GRN check failed", err);
+            return null;
+          });
+        });
+
+        Promise.all(checks).then(results => {
+          const notFinalized = results.filter(name => name !== null);
+          if (notFinalized.length > 0) {
+            rfqContainer.classList.remove('hidden');
+            const yesRadio = document.querySelector('input[name="Request_For_Quotation"][value="Yes"]');
+            if (yesRadio) yesRadio.checked = true;
+
+            if (rfqMessage) {
+              rfqMessage.classList.remove('hidden');
+              rfqMessage.innerHTML = "No goods received for the following item(s): <strong>" + notFinalized.join(", ") + "</strong>";
+            }
+          } else {
+            rfqContainer.classList.add('hidden');
+            const noRadio = document.querySelector('input[name="Request_For_Quotation"][value="No"]');
+            if (noRadio) noRadio.checked = true;
+
+            if (rfqMessage) rfqMessage.classList.add('hidden');
+          }
+        });
+      }
+
+      function addGridRow() {
+        const grid = document.getElementById('prItemsGrid');
+        const prDueDateVal = document.getElementById('prDueDate') ? document.getElementById('prDueDate').value : '';
+        const row = document.createElement('tr');
+        row.className = "border-b border-gray-100 last:border-0 item-row hover:bg-gray-50/50 transition-colors";
+
+        // Removed custom ul/li/inputs in favor of standard Select element
+        row.innerHTML = `
+          <td class="px-3 py-2 relative">
+            <select name="item_id" required class="w-full text-xs ts-item-select" placeholder="Search item..."></select>
+          </td>
+          <td class="px-3 py-2"><input type="number" required min="1" name="quantity" class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></td>
+          <td class="px-3 py-2"><input type="date" required name="due_date" value="${prDueDateVal}" class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></td>
+          <td class="px-3 py-2"><input type="text" name="comment" placeholder="Optional" class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></td>
+          <td class="px-3 py-2 text-center">
+            <button type="button" onclick="this.closest('tr').remove(); window._prApproval.checkItemsInGRN();" class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50"><i class="bi bi-trash"></i></button>
+          </td>
+        `;
+        grid.appendChild(row);
+
+        // Initialize Tom Select on the new row for fully-featured autocomplete
+        const selectEl = row.querySelector('.ts-item-select');
+        const ts = new TomSelect(selectEl, {
+          valueField: 'ID',
+          labelField: 'item_name',
+          searchField: 'item_name',
+          options: itemMasters,
+          create: false,
+          maxItems: 1,
+          placeholder: 'Search item...',
+          render: {
+            option: function (data, escape) { return '<div class="font-medium">' + escape(data.item_name) + '</div>'; },
+            item: function (data, escape) { return '<div class="font-medium">' + escape(data.item_name) + '</div>'; }
+          }
+        });
+        window._prTomSelects.push(ts);
+      }
+
+      function submitNewPR(event) {
+        event.preventDefault();
+
+        const submitBtn = document.getElementById('prSubmitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<div class="pr-spinner" style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>';
+
+        const itemRows = document.querySelectorAll('#prItemsGrid .item-row');
+        if (itemRows.length === 0) {
+          showToast('Please add at least one item.', 'error');
+          submitBtn.disabled = false; submitBtn.innerHTML = 'Submit PR'; return;
+        }
+
+        const itemsCollection = [];
+        let validationError = false;
+
+        itemRows.forEach(row => {
+          const itemId = row.querySelector('[name="item_id"]').value; // Still perfectly gets the TomSelect value
+          if (!itemId) validationError = true;
+
+          itemsCollection.push({
+            "Item": itemId,
+            "Quantity": parseInt(row.querySelector('[name="quantity"]').value, 10),
+            "Due_Date": formatZohoDateSubmission(row.querySelector('[name="due_date"]').value),
+            "Comment": row.querySelector('[name="comment"]').value || ""
+          });
+        });
+
+        if (validationError) {
+          showToast('Please select a valid item from the dropdown for all rows.', 'error');
+          submitBtn.disabled = false; submitBtn.innerHTML = 'Submit PR'; return;
+        }
+
+        const payload = {
+          "data": {
+            "Department": document.getElementById('prUnit').value,
+            "PR_Date": formatZohoDateSubmission(new Date().toISOString().split('T')[0]),
+            "Due_Date": formatZohoDateSubmission(document.getElementById('prDueDate').value),
+            "Status": "Submitted",
+            "Current_Stage": "Purchase Requisition",
+            "description": document.getElementById('prDescription').value,
+            "Request_For_Quotation": document.querySelector('input[name="Request_For_Quotation"]:checked') ? document.querySelector('input[name="Request_For_Quotation"]:checked').value : "No",
+            "Items": itemsCollection
+          }
+        };
+
+        ZOHO.CREATOR.DATA.addRecords({ form_name: "Purchase_Requisition", payload }).then(function (response) {
+          if (response.code === 3000 && response.data) {
+            const newRecordId = response.data.ID;
+            const fileInput = document.getElementById('prFiles');
+
+            // Replaced manual looping increments with cleaner Promise.all
+            if (fileInput.files.length > 0) {
+              const uploadPromises = Array.from(fileInput.files).map(file => {
+                return ZOHO.CREATOR.FILE.uploadFile({ report_name: REPORT_NAME, field_name: "Attachments", file: file, id: newRecordId });
+              });
+
+              Promise.all(uploadPromises)
+                .then(() => completeSubmission())
+                .catch(err => { console.error("File upload failed", err); completeSubmission(); });
+            } else {
+              completeSubmission();
+            }
+          } else {
+            submitBtn.disabled = false; submitBtn.innerHTML = 'Submit PR';
+            showToast('Failed to create PR: ' + (response.message || 'Error'), 'error');
+          }
+        }).catch(function (err) {
+          submitBtn.disabled = false; submitBtn.innerHTML = 'Submit PR';
+          showToast('Submission error. Check console.', 'error');
+          console.error(err);
+        });
+
+        function completeSubmission() {
+          closeModal();
+          showToast('Purchase Requisition created successfully!', 'success');
+          searchQuery = '';
+          if (document.getElementById('searchInput')) document.getElementById('searchInput').value = '';
+          fetchRecords();
+        }
+      }
+
+      // ════════════════════════════════════════════
+      //  STATS & COUNTS
+      // ════════════════════════════════════════════
+
+      function computeStats() {
+        var q = searchQuery.replace(/'/g, "\\'");
+        var searchCrit = searchQuery ? `(PR_Number=("${q}") || Requisition_Number=("${q}")` : '';
+
+        function combineCriteria(statusCrit) {
+          var parts = [];
+          if (searchCrit) parts.push(searchCrit);
+          if (statusCrit) parts.push(statusCrit);
+          return parts.join(' && ');
+        }
+
+        const counts = [
+          { el: $statTotal, tabEl: $tabAll, crit: combineCriteria('') },
+          { el: $statPending, tabEl: $tabPending, crit: combineCriteria('(Current_Stage == "Purchase Requisition" && Status != "Rejected")') },
+          { el: $statApproved, tabEl: $tabApproved, crit: combineCriteria('(( Current_Stage == "Request For Quotation" || Current_Stage == "Vendor Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill" || Current_Stage == "Payment") && Status != "Rejected")') },
+          { el: $statRejected, tabEl: $tabRejected, crit: combineCriteria('(Status == "Rejected")') }
+        ];
+
+        counts.forEach(c => {
+          var config = { report_name: REPORT_NAME };
+          if (c.crit) config.criteria = c.crit;
+          ZOHO.CREATOR.DATA.getRecordCount(config).then(function (response) {
+            var count = response.result ? response.result.records_count : 0;
+            c.el.textContent = count; c.tabEl.textContent = count;
+          });
+        });
+      }
+
+      // ════════════════════════════════════════════
+      //  DATA FETCHING & SORTING
+      // ════════════════════════════════════════════
+
+      function buildStatusCriteria(filter) {
+        if (!filter || filter === 'all') return '';
+        if (filter === 'pending') return '(Current_Stage == "Purchase Requisition" && Status != "Rejected")';
+        if (filter === 'approved') return '(( Current_Stage == "Request For Quotation" || Current_Stage == "Vendor Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill" || Current_Stage == "Payment") && Status != "Rejected")';
+        if (filter === 'rejected') return '(Status == "Rejected")';
+        return '';
+      }
+
+      function fetchAllRecords(criteria) {
+        var accumulated = [];
+        function fetchBatch(cursor) {
+          var config = { report_name: REPORT_NAME, max_records: FETCH_BATCH_SIZE };
+          if (criteria) config.criteria = criteria;
+          if (cursor) config.record_cursor = cursor;
+
+          return ZOHO.CREATOR.DATA.getRecords(config).then(function (response) {
+            if (response.code === 3000 && response.data && response.data.length > 0) {
+              accumulated = accumulated.concat(response.data);
+              if (response.data.length >= FETCH_BATCH_SIZE && response.record_cursor) return fetchBatch(response.record_cursor);
+            }
+            return accumulated;
+          });
+        }
+        return fetchBatch(null);
+      }
+
+      function fetchRecords() {
+        isLoading = true;
+        $tableBody.innerHTML = `<tr><td colspan="8" class="px-3 py-12 text-center"><div class="flex flex-col items-center gap-3"><div class="pr-spinner"></div><div class="text-sm text-gray-400 font-medium">Loading purchase requests…</div></div></td></tr>`;
+
+        var q = searchQuery.replace(/'/g, "\\'");
+        var searchCrit = searchQuery ? `Unit=("${q}") || PR_Number=("${q}") || Current_Stage=("${q}")` : '';
+        var statusCrit = buildStatusCriteria(currentFilter);
+        var criteria = [searchCrit, statusCrit].filter(Boolean).join(' && ');
+
+        fetchAllRecords(criteria).then(function (records) {
+          allRecords = records; isLoading = false; currentPage = 1;
+          applySortAndRender(); computeStats();
+        }).catch(function (err) {
+          // console.error('Error fetching records:', err);
+          // showToast('Failed to load purchase requests.', 'error');
+          isLoading = false; allRecords = []; filteredRecords = [];
+          $tableBody.innerHTML = `<tr>
+            <td colspan="8" class="px-3 py-12 text-center">
+              <div class="text-gray-400">
+                <i class="bi bi-clipboard-x text-3xl mb-2 block"></i>
+                <div class="text-sm font-medium text-gray-500">No records found</div>
+              </div>
+            </td>
+          </tr>`
+          //`<tr><td colspan="8" class="px-3 py-12 text-center"><div class="text-gray-400"><i class="bi bi-alert-circle text-3xl mb-2 block text-red-400"></i><div class="text-sm font-medium text-gray-500">Not records found</div></div></td></tr>`;
+        });
+      }
+
+      function applySortAndRender() {
+        allRecords.sort(function (a, b) {
+          var va = getSortValue(a, sortColumn), vb = getSortValue(b, sortColumn), cmp = 0;
+          if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+          else { va = String(va); vb = String(vb); cmp = va < vb ? -1 : va > vb ? 1 : 0; }
+          return sortDirection === 'asc' ? cmp : -cmp;
+        });
+
+        filteredRecords = allRecords;
+        updateSortIndicators(); renderTable(); renderPagination();
+      }
+
+      function handleSortClick(col) {
+        if (sortColumn === col) sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        else { sortColumn = col; sortDirection = (col === 'date' || col === 'amount') ? 'desc' : 'asc'; }
+        currentPage = 1; applySortAndRender();
+      }
+
+      function updateSortIndicators() {
+        document.querySelectorAll('th[data-sort]').forEach(function (th) {
+          var indicator = th.querySelector('.sort-indicator'), col = th.getAttribute('data-sort');
+          if (col === sortColumn) { th.classList.add('sort-active'); indicator.textContent = sortDirection === 'asc' ? '▲' : '▼'; }
+          else { th.classList.remove('sort-active'); indicator.textContent = ''; }
+        });
+      }
+
+      function setFilter(filter) {
+        currentFilter = filter; currentPage = 1;
+        $filterTabs.querySelectorAll('button').forEach(function (tab) {
+          tab.classList.remove('pill-active'); tab.classList.add('text-gray-600');
+          if (tab.getAttribute('data-filter') === filter) { tab.classList.add('pill-active'); tab.classList.remove('text-gray-600'); }
+        });
+        fetchRecords();
+      }
+
+      // ════════════════════════════════════════════
+      //  TABLE RENDERING (client-side paged)
+      // ════════════════════════════════════════════
+
+      function renderTable() {
+        if (filteredRecords.length === 0) {
+          $tableBody.innerHTML = `<tr><td colspan="8" class="px-3 py-12 text-center"><div class="text-gray-400"><i class="bi bi-clipboard-x text-3xl mb-2 block"></i><div class="text-sm font-medium text-gray-500">No records found</div></div></td></tr>`;
+          return;
+        }
+
+        var startIdx = (currentPage - 1) * PER_PAGE, endIdx = startIdx + PER_PAGE;
+        var pageRecords = filteredRecords.slice(startIdx, endIdx);
+        var html = '';
+
+        pageRecords.forEach(function (rec) {
+          const badge = getStatusBadge(rec);
+          const norm = normalizeStatus(rec);
+          const isPending = norm === 'pending';
+          const statusLabel = norm === 'pending' ? 'Pending' : norm === 'approved' ? 'Approved' : 'Rejected';
+          const sb = norm === 'approved' ? { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' } :
+            norm === 'rejected' ? { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600' } :
+              { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' };
+
+          const prNum = esc(rec.PR_Number || 'PR-' + rec.Requisition_Number);
+          const requesterName = esc(rec.Added_User && rec.Added_User.display_value ? rec.Added_User.display_value : rec.Added_User);
+
+          html += `
+          <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors duration-150 group">
+            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap"><span class="font-semibold text-[#1B5CA8] font-mono text-[11px]">${prNum}</span></td>
+            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900">${esc(rec.Unit)}</td>
+            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[12px]">${requesterName}</td>
+            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-gray-500">${formatDate(rec.PR_Date)}</td>
+            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap">
+              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap border ${badge.border} ${badge.bg} ${badge.text}">
+                <span class="w-[5px] h-[5px] rounded-full ${badge.dot} shrink-0"></span>${esc(badge.label)}
+              </span>
+            </td>
+            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-center">
+              <span class="inline-flex items-center justify-center font-medium text-[11px] ${rec.Request_For_Quotation === 'Yes' ? 'text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded' : 'text-gray-500'}">${rec.Request_For_Quotation || 'No'}</span>
+            </td>
+            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap">
+              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap border ${sb.border} ${sb.bg} ${sb.text}">
+                <span class="w-[5px] h-[5px] rounded-full ${sb.dot} shrink-0"></span>${statusLabel}
+              </span>
+            </td>
+            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap bg-white group-hover:bg-[#EBF3FC] sticky-action-cell">
+              <div class="flex items-center gap-1.5">
+                <button onclick="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:PR_Detailed?recordId=${rec.ID}',window:'same'})" class="inline-flex items-center gap-[3px] px-2 py-[3px] rounded bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 text-[11px] font-medium transition-colors"><i class="bi bi-box-arrow-up-right"></i> View</button>
+              </div>
+            </td>
+          </tr>`;
+        });
+        $tableBody.innerHTML = html;
+      }
+
+      function renderPagination() {
+        const totalRecs = filteredRecords.length;
+        const totalPages = Math.max(1, Math.ceil(totalRecs / PER_PAGE));
+
+        if (totalRecs === 0) { $pagination.style.display = 'none'; return; }
+
+        $pagination.style.display = 'flex';
+        const start = (currentPage - 1) * PER_PAGE + 1, end = Math.min(currentPage * PER_PAGE, totalRecs);
+        $pagInfo.textContent = `Showing ${start}–${end} of ${totalRecs} records`;
+
+        var btns = '';
+        if (currentPage <= 1) btns += `<button class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center opacity-40 cursor-not-allowed" disabled><i class="bi bi-chevron-left"></i></button>`;
+        else btns += `<button onclick="window._prApproval.goToPage(${currentPage - 1})" class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC] inline-flex items-center justify-center transition-colors"><i class="bi bi-chevron-left"></i></button>`;
+
+        var pages = [];
+        for (var pg = 1; pg <= totalPages; pg++) { if (pg <= 2 || pg === totalPages || (pg >= currentPage - 1 && pg <= currentPage + 1)) pages.push(pg); }
+        pages = pages.filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b);
+
+        for (var i = 0; i < pages.length; i++) {
+          if (i > 0 && pages[i] - pages[i - 1] > 1) btns += `<span class="flex items-center px-1 text-gray-400 text-xs">…</span>`;
+          if (pages[i] === currentPage) btns += `<button class="min-w-[27px] h-[27px] px-1 border border-[#1B5CA8] rounded bg-[#1B5CA8] text-white font-semibold inline-flex items-center justify-center">${pages[i]}</button>`;
+          else btns += `<button onclick="window._prApproval.goToPage(${pages[i]})" class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC] inline-flex items-center justify-center transition-colors">${pages[i]}</button>`;
+        }
+
+        if (currentPage >= totalPages) btns += `<button class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center opacity-40 cursor-not-allowed" disabled><i class="bi bi-chevron-right"></i></button>`;
+        else btns += `<button onclick="window._prApproval.goToPage(${currentPage + 1})" class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC] inline-flex items-center justify-center transition-colors"><i class="bi bi-chevron-right"></i></button>`;
+
+        $pagButtons.innerHTML = btns;
+      }
+
+      function goToPage(page) {
+        var totalPages = Math.max(1, Math.ceil(filteredRecords.length / PER_PAGE));
+        currentPage = Math.max(1, Math.min(page, totalPages));
+        renderTable(); renderPagination();
+        $tableBody.closest('table').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      // ════════════════════════════════════════════
+      //  EVENT LISTENERS
+      // ════════════════════════════════════════════
+
+      $filterTabs.addEventListener('click', function (e) {
+        var btn = e.target.closest('button[data-filter]');
+        if (btn) setFilter(btn.getAttribute('data-filter'));
+      });
+
+      document.querySelectorAll('th[data-sort]').forEach(th => th.addEventListener('click', function () { handleSortClick(this.getAttribute('data-sort')); }));
+
+      var searchTimer = null;
+      $searchInput.addEventListener('input', function () {
+        clearTimeout(searchTimer); var value = this.value;
+        searchTimer = setTimeout(function () { searchQuery = value.trim(); currentPage = 1; fetchRecords(); }, 400);
+      });
+
+      // ════════════════════════════════════════════
+      //  PUBLIC API
+      // ════════════════════════════════════════════
+
+      window._prApproval = {
+        goToPage: function (page) { goToPage(page); },
+        openCreateModal: function () { openCreatePRModal(); },
+        addGridRow: function () { addGridRow(); },
+        submitNewPR: function (event) { submitNewPR(event); },
+        checkItemsInGRN: function () { checkItemsInGRN(); }
+      };
+
+      // ════════════════════════════════════════════
+      //  INIT 
+      // ════════════════════════════════════════════
+      document.addEventListener("DOMContentLoaded", function () { fetchRecords(); fetchItemMasters(); fetchDepartmentMasters(); });
+    })();
+  </script>
+</body>
+
+</html>

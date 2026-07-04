@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RFQ Detail</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
+    <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* Hide Alpine template until loaded */
+        [x-cloak] {
+            display: none !important;
+        }
+
+        /* ── Loading spinner ── */
+        .pr-spinner {
+            border: 2.5px solid #e5e7eb;
+            border-top-color: #1B5CA8;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            animation: spin 0.7s linear infinite;
+        }
+
+        /* ── Button Spinner ── */
+        .btn-spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── Progress stepper connector ── */
+        .step-connector {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            right: 14px;
+            height: 3px;
+            background: #e5e7eb;
+            z-index: 0;
+        }
+
+        .step-connector-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            transition: width 0.6s ease;
+        }
+
+        /* ── Timeline connector ── */
+        .timeline-line {
+            position: absolute;
+            left: 15px;
+            top: 32px;
+            bottom: 0;
+            width: 2px;
+            background: #e5e7eb;
+        }
+
+        .timeline-item:last-child .timeline-line {
+            display: none;
+        }
+
+        /* ── Fade in ── */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.35s ease-out both;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 p-6">
+
+    <div id="app" x-data="rfqWidget()" x-init="initWidget()" x-cloak
+        class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-5xl mx-auto">
+
+        <!-- ── Action Modal ── -->
+        <div x-show="showModal" style="display: none;"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm transition-opacity">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden fade-in mx-4 border border-gray-200"
+                @click.away="closeModal()">
+                <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
+                    <h3 class="text-[14px] font-bold text-gray-800" x-text="modalTitle"></h3>
+                    <button @click="closeModal()"
+                        class="text-gray-400 hover:text-gray-700 cursor-pointer transition-colors">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="p-5 bg-gray-50/50">
+                    <label class="block text-xs font-semibold text-gray-700 mb-2">
+                        Comment <span class="text-gray-400 font-normal text-[11px]">(Optional)</span>
+                    </label>
+                    <textarea x-model="modalComment" rows="3"
+                        class="w-full border border-gray-300 rounded-lg p-3 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1B5CA8]/20 focus:border-[#1B5CA8] transition-all shadow-sm"
+                        placeholder="Enter your remarks here..."></textarea>
+                </div>
+                <div class="px-5 py-3.5 bg-white flex justify-end gap-2.5 border-t border-gray-100">
+                    <button @click="closeModal()" :disabled="isSubmitting"
+                        class="px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors cursor-pointer shadow-sm disabled:opacity-50">
+                        Cancel
+                    </button>
+                    <button @click="submitAction()" :disabled="isSubmitting"
+                        :class="modalBtnClass + ' ' + modalBtnHoverClass"
+                        class="px-4 py-2 rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer shadow-sm flex items-center gap-1.5 disabled:opacity-70">
+                        <template x-if="isSubmitting">
+                            <div class="btn-spinner mr-1"></div>
+                        </template>
+                        <span x-text="isSubmitting ? 'Submitting...' : modalBtnText"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="isLoading" class="flex flex-col items-center justify-center py-24 gap-3">
+            <div class="pr-spinner"></div>
+            <div class="text-sm text-gray-400 font-medium">Loading RFQ details…</div>
+        </div>
+
+        <div x-show="hasError" class="text-center py-24">
+            <i class="bi bi-alert-circle text-4xl text-red-400 mb-3 block"></i>
+            <div class="text-sm font-medium text-gray-600">Failed to load RFQ details</div>
+            <div class="text-xs text-gray-400 mt-1"
+                x-text="errorMessage || 'Please check the record ID and try again.'"></div>
+        </div>
+
+        <div x-show="!isLoading && !hasError" class="fade-in">
+
+            <div class="mb-5">
+                <nav class="flex items-center gap-1.5 text-xs mb-2.5">
+                    <button
+                        onclick="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',window:'same',url:'#Page:Request_For_Quotations'})"
+                        class="text-[#1B5CA8] hover:text-[#14457e] font-medium transition-colors no-underline cursor-pointer">
+                        Request For Quotations
+                    </button>
+                    <i class="bi bi-chevron-right text-[11px] text-gray-400"></i>
+                    <span class="text-gray-500 font-medium" x-text="rfqNumber"></span>
+                </nav>
+                <div class="flex items-center gap-2.5">
+                    <h1 class="text-[17px] font-bold text-gray-900 leading-none" x-text="rfqNumber"></h1>
+                    <span x-html="getStatusBadge(rec.Status)"></span>
+                </div>
+                <div class="text-xs text-gray-400 mt-1">
+                    <span x-text="rec.PR_Ref_Number ? `Ref: ${rec.PR_Ref_Number} · ` : ''"></span>
+                    Requested <span x-text="formatDate(rec.Request_Date)"></span>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-lg p-5 mb-4">
+                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">Process Progress</div>
+                <div class="relative flex justify-between items-start">
+                    <div class="step-connector">
+                        <div class="step-connector-fill"
+                            :style="`width: ${progressData.fillPct}%; background: ${progressData.isRejected ? '#dc2626' : '#1B5CA8'};`">
+                        </div>
+                    </div>
+
+                    <template x-for="(step, index) in processSteps" :key="step.key">
+                        <div class="flex flex-col items-center relative z-10"
+                            :style="`width: ${100 / processSteps.length}%`">
+                            <div class="w-[30px] h-[30px] rounded-full border-2 flex items-center justify-center text-[13px] transition-all duration-300"
+                                :class="getStepCircleClass(index)">
+                                <i class="bi" :class="getStepIcon(step, index)"></i>
+                            </div>
+                            <div class="text-[10px] mt-1.5 text-center leading-tight" :class="getStepLabelClass(index)"
+                                x-text="index === progressData.rejectedIdx ? 'Rejected' : step.label"></div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-5 gap-4">
+
+                <div class="col-span-3 space-y-4">
+
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
+                                    <i class="bi bi-file-text"></i>
+                                </div>
+                                Quotation Request Details
+                            </div>
+                        </div>
+                        <div class="px-[18px] py-[15px]">
+                            <div class="grid grid-cols-2 gap-x-6 gap-y-0">
+                                <template x-for="field in detailFields" :key="field.label">
+                                    <div
+                                        class="flex justify-between items-center py-2 text-xs border-b border-dashed border-gray-100">
+                                        <span class="text-gray-500 font-medium" x-text="field.label"></span>
+                                        <template x-if="field.isHtml">
+                                            <span x-html="field.value"></span>
+                                        </template>
+                                        <template x-if="!field.isHtml">
+                                            <span class="text-gray-900 font-semibold"
+                                                x-text="field.value || '–'"></span>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
+                                    <i class="bi bi-list"></i>
+                                </div>
+                                Required Line Items
+                            </div>
+                        </div>
+
+                        <div x-show="items.length === 0" class="px-[18px] py-8 text-center text-gray-400 text-xs">
+                            <i class="bi bi-box-seam text-xl mb-1 block"></i> No line items found
+                        </div>
+
+                        <table x-show="items.length > 0" class="w-full border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-200">
+                                    <th
+                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">
+                                        #</th>
+                                    <th
+                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">
+                                        Item</th>
+                                    <th
+                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
+                                        Qty</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="(item, i) in items" :key="i">
+                                    <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                                        <td class="px-4 py-2.5 text-gray-400 font-mono" x-text="i + 1"></td>
+                                        <td class="px-4 py-2.5 text-gray-900 font-medium">
+                                            <span x-text="getItemName(item)"></span>
+                                            <template x-if="item.Comment">
+                                                <div class="text-[11px] text-gray-400 font-normal mt-0.5"
+                                                    x-text="item.Comment"></div>
+                                            </template>
+                                        </td>
+                                        <td class="px-4 py-2.5 text-gray-700 text-right tabular-nums"
+                                            x-text="item.Quantity || 0"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-center gap-2.5 fade-in" id="actionButtons" x-show="showActionButtons"
+                        x-cloak>
+                        <button @click="approveRFQ()"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors no-underline cursor-pointer shadow-sm">
+                            <i class="bi bi-check-lg"></i> <span class="btn-text">Approve & Submit For Vendor Comparison</span>
+                        </button>
+                        <button @click="rejectRFQ()"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors no-underline cursor-pointer shadow-sm">
+                            <i class="bi bi-x-lg"></i> Reject
+                        </button>
+                        <button @click="cancelRFQ()"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors no-underline cursor-pointer shadow-sm">
+                            <i class="bi bi-slash-circle"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-span-2">
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-amber-50 text-amber-600">
+                                    <i class="bi bi-clock-history"></i>
+                                </div>
+                                Audit Trail
+                            </div>
+                        </div>
+                        <div class="px-[18px] py-[15px]">
+
+                            <div x-show="actions.length === 0" class="text-center py-8 text-gray-400">
+                                <i class="bi bi-clock-history-off text-xl mb-1.5 block"></i>
+                                <div class="text-xs font-medium text-gray-500">No activity recorded yet</div>
+                            </div>
+
+                            <div x-show="actions.length > 0" class="space-y-0">
+                                <template x-for="(action, i) in sortedActions" :key="i">
+                                    <div class="timeline-item relative pl-10 pb-5">
+                                        <div class="timeline-line"></div>
+
+                                        <div class="absolute left-0 top-0 w-[30px] h-[30px] rounded-full flex items-center justify-center border-2 border-white shadow-sm z-10"
+                                            :class="getAuditIconClass(action.Status).bg">
+                                            <i class="bi text-[13px]"
+                                                :class="getAuditIconClass(action.Status).icon"></i>
+                                        </div>
+
+                                        <div class="bg-gray-50 border border-gray-200 rounded-lg px-3.5 py-3">
+                                            <div class="flex items-center justify-between mb-1.5">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-xs font-semibold"
+                                                        :class="getAuditIconClass(action.Status).text"
+                                                        x-text="action.Status || '–'"></span>
+                                                    <span
+                                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border"
+                                                        :class="getAuditStageClass(action.Moved_To)">
+                                                        <i class="bi bi-arrow-right text-[9px] mr-1 opacity-60"></i>
+                                                        <span x-text="action.Moved_To || '–'"></span>
+                                                    </span>
+                                                </div>
+                                                <span class="text-[10px] text-gray-400"
+                                                    x-text="formatDate(action.Added_Time, true)"></span>
+                                            </div>
+
+                                            <template x-if="action.Comment">
+                                                <div class="text-xs text-gray-600 leading-relaxed mt-1.5 prose prose-xs max-w-none"
+                                                    x-text="action.Comment"></div>
+                                            </template>
+
+                                            <div class="flex items-center gap-1.5 mt-2 text-[11px] text-gray-500">
+                                                <div class="w-[18px] h-[18px] rounded-full bg-[#1B5CA8] text-white flex items-center justify-center text-[9px] font-bold"
+                                                    x-text="getInitials(action.Added_User)"></div>
+                                                <span class="font-medium" x-text="action.Added_User || '–'"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('rfqWidget', () => ({
+                isLoading: true,
+                hasError: false,
+                errorMessage: '',
+                recordId: null,
+                rec: {},
+                items: [],
+                actions: [],
+
+                // Modal States
+                showModal: false,
+                modalTitle: '',
+                modalComment: '',
+                pendingStatus: '',
+                pendingStage: '',
+                modalBtnClass: '',
+                modalBtnHoverClass: '',
+                isSubmitting: false,
+
+                // P2P Standard Stages
+                processSteps: [
+                    { key: 'purchase_requisition', label: 'Purchase Requisition', icon: 'bi-receipt' },
+                    { key: 'request_for_quotation', label: 'Request For Quotation', icon: 'bi-bucket' },
+                    { key: 'vendor_comparison', label: 'Vendor Comparison', icon: 'bi-shop-window' },
+                    { key: 'purchase_order', label: 'Purchase Order', icon: 'bi-cart-check' },
+                    { key: 'grn', label: 'GRN', icon: 'bi-box-seam' },
+                    { key: 'bill', label: 'Bill', icon: 'bi-coin' },
+                    { key: 'payment', label: 'Payment', icon: 'bi-cash' }
+                ],
+
+                initWidget() {
+                    ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
+                        this.recordId = params?.recordId || null;
+                        if (!this.recordId) {
+                            this.hasError = true;
+                            this.isLoading = false;
+                            this.errorMessage = 'No Record ID provided in URL parameters.';
+                            return;
+                        }
+                        this.fetchData();
+                    });
+                },
+
+                fetchData() {
+                    ZOHO.CREATOR.DATA.invokeCustomApi({
+                        api_name: "Get_RFQ_Details",
+                        http_method: "GET",
+                        content_type: "application/json",
+                        query_params: 'recId=' + this.recordId
+                    }).then((response) => {
+                        if (!response || !response.result || response.result.length === 0) {
+                            throw new Error("No data returned");
+                        }
+                        this.rec = response.result[0];
+                        this.items = this.rec.Items || [];
+                        this.actions = this.rec.Actions || [];
+                        this.isLoading = false;
+                    }).catch((err) => {
+                        console.error('API Error:', err);
+                        this.hasError = true;
+                        this.isLoading = false;
+                    });
+                },
+
+                // ── Computed Properties ── //
+                get rfqNumber() {
+                    return this.rec.RFQ_Ref_Number || (this.rec.RFQ_Number ? 'RFQ-' + this.rec.RFQ_Number : '–');
+                },
+
+                get detailFields() {
+                    return [
+                        { label: 'RFQ Number', value: this.rfqNumber },
+                        { label: 'PR Reference', value: this.rec.PR_Ref_Number },
+                        { label: 'Requester', value: this.rec.Added_User },
+                        { label: 'Request Date', value: this.formatDate(this.rec.Request_Date) },
+                        { label: 'Due Date', value: this.formatDate(this.rec.Due_Date) },
+                        { label: 'Status', value: this.getStatusBadge(this.rec.Status), isHtml: true },
+                    ];
+                },
+
+                get sortedActions() {
+                    return [...this.actions].sort((a, b) => {
+                        let tA = a.Added_Time || "";
+                        let tB = b.Added_Time || "";
+                        return tA.localeCompare(tB);
+                    });
+                },
+
+                get showActionButtons() {
+                    if (!this.rec.PR_Ref || this.rec.PR_Ref.length === 0) return false;
+                    const status = (this.rec.Status || '').toLowerCase();
+                    return status !== 'approved' && status !== 'rejected' && status !== 'cancelled';
+                },
+
+                get modalBtnText() {
+                    return this.modalTitle ? this.modalTitle.split(' ')[0] : 'Submit';
+                },
+
+                // ── Modal & Submission Logic ── //
+                openModal(title, status, movedTo, btnBgClass, btnHoverClass) {
+                    this.modalTitle = title;
+                    this.pendingStatus = status;
+                    this.pendingStage = movedTo;
+                    this.modalBtnClass = btnBgClass;
+                    this.modalBtnHoverClass = btnHoverClass;
+                    this.modalComment = '';
+                    this.showModal = true;
+                },
+
+                closeModal() {
+                    if (this.isSubmitting) return;
+                    this.showModal = false;
+                },
+
+                approveRFQ() {
+                    this.openModal(
+                        "Approve RFQ",
+                        "Approved",
+                        "Vendor Comparison",
+                        "bg-emerald-600",
+                        "hover:bg-emerald-700"
+                    );
+                },
+
+                rejectRFQ() {
+                    this.openModal(
+                        "Reject RFQ",
+                        "Rejected",
+                        "Vendor Comparison",
+                        "bg-red-600",
+                        "hover:bg-red-700"
+                    );
+                },
+
+                async submitAction() {
+                    this.isSubmitting = true;
+                    try {
+                        let prId = Array.isArray(this.rec.PR_Ref) ? (this.rec.PR_Ref[0]) : undefined;
+                        const config = {
+                            form_name: "PR_Action", // Note: Change this to 'RFQ_Action' if your system uses specific action forms per module.
+                            payload: {
+                                "data": {
+                                    "PR_Number": prId,
+                                    "Request_For_Quotation": this.recordId,
+                                    "Status": this.pendingStatus,
+                                    "Moved_To": this.pendingStage,
+                                    "Comment": this.modalComment.trim()
+                                }
+                            }
+                        };
+                        const response = await ZOHO.CREATOR.DATA.addRecords(config);
+                        this.isSubmitting = false;
+                        this.closeModal()
+                        if (response.code === 3000) {
+                            this.fetchData(); // Refresh the details & UI
+                        } else {
+                            throw new Error(response.message || 'Action processing failed');
+                        }
+                    } catch (err) {
+                        console.error("API Error: ", err);
+                        alert("An error occurred while submitting. Please try again.");
+                    } finally {
+                        this.isSubmitting = false;
+                    }
+                },
+
+                cancelRFQ() {
+                    ZOHO.CREATOR.UTIL.navigateParentURL({
+                        action: 'open',
+                        window: 'same',
+                        url: '#Page:Request_For_Quotations'
+                    });
+                },
+
+                get progressData() {
+                    let completed = {};
+                    let rejectedStepKey = null;
+                    let currentStageKey = 'request_for_quotation'; // Based on context
+
+                    this.actions.forEach(a => {
+                        let key = this.stageToStepKey(a.Moved_To);
+                        if (key) {
+                            if (a.Status && a.Status.toLowerCase() === 'rejected') {
+                                rejectedStepKey = key;
+                            } else {
+                                completed[key] = true;
+                            }
+                        }
+                    });
+
+                    completed['purchase_requisition'] = true;
+                    completed['request_for_quotation'] = true;
+
+                    let rejectedIdx = this.processSteps.findIndex(s => s.key === rejectedStepKey);
+                    let currentIdx = this.processSteps.findIndex(s => s.key === currentStageKey);
+
+                    this.processSteps.forEach((s, i) => {
+                        if (completed[s.key] && i > currentIdx) currentIdx = i;
+                    });
+
+                    let fillIdx = rejectedIdx !== -1 ? rejectedIdx : currentIdx;
+                    return {
+                        fillPct: (fillIdx / (this.processSteps.length - 1)) * 100,
+                        isRejected: rejectedIdx !== -1,
+                        rejectedIdx,
+                        currentIdx
+                    };
+                },
+
+                // ── UI Helper Methods ── //
+                getStepCircleClass(i) {
+                    const { isRejected, rejectedIdx, currentIdx } = this.progressData;
+                    const isRejectedStep = (i === rejectedIdx);
+                    const isDone = isRejected ? (i < rejectedIdx) : (i <= currentIdx);
+                    const isCurrent = (i === currentIdx) && !isRejectedStep;
+
+                    if (isRejectedStep) return 'bg-red-600 text-white border-red-600 shadow-md shadow-red-200';
+                    if (isDone && isCurrent) return 'bg-[#1B5CA8] text-white border-[#1B5CA8] shadow-md shadow-blue-200';
+                    if (isDone) return 'bg-emerald-600 text-white border-emerald-600';
+                    return 'bg-white text-gray-400 border-gray-300';
+                },
+
+                getStepIcon(step, i) {
+                    const { isRejected, rejectedIdx, currentIdx } = this.progressData;
+                    const isRejectedStep = (i === rejectedIdx);
+                    const isDone = isRejected ? (i < rejectedIdx) : (i <= currentIdx);
+                    const isCurrent = (i === currentIdx) && !isRejectedStep;
+
+                    if (isRejectedStep) return 'bi-x-lg text-[13px]';
+                    if (isDone && !isCurrent) return 'bi-check-lg text-[13px]';
+                    return `${step.icon} text-[13px]`;
+                },
+
+                getStepLabelClass(i) {
+                    const { isRejected, rejectedIdx, currentIdx } = this.progressData;
+                    if (i === rejectedIdx) return 'text-red-700 font-semibold';
+                    if (i === currentIdx && !isRejected) return 'text-[#1B5CA8] font-semibold';
+                    if ((isRejected && i < rejectedIdx) || (!isRejected && i < currentIdx)) return 'text-gray-700 font-medium';
+                    return 'text-gray-400';
+                },
+
+                getStatusBadge(status) {
+                    const s = (status || 'submitted').toLowerCase();
+                    let border = 'border-amber-200', bg = 'bg-amber-50', text = 'text-amber-800', dot = 'bg-amber-500', label = status || 'Submitted';
+
+                    if (s === 'approved') { border = 'border-emerald-200'; bg = 'bg-emerald-50'; text = 'text-emerald-800'; dot = 'bg-emerald-600'; label = 'Approved'; }
+                    if (s === 'rejected') { border = 'border-red-200'; bg = 'bg-red-50'; text = 'text-red-800'; dot = 'bg-red-600'; label = 'Rejected'; }
+                    if (s === 'cancelled') { border = 'border-gray-300'; bg = 'bg-gray-100'; text = 'text-gray-700'; dot = 'bg-gray-500'; label = 'Cancelled'; }
+
+                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border ${border} ${bg} ${text}"><span class="w-[5px] h-[5px] rounded-full ${dot} shrink-0"></span>${label}</span>`;
+                },
+
+                getAuditIconClass(status) {
+                    if (status === 'Approved') return { bg: 'bg-emerald-50', text: 'text-emerald-600', icon: 'bi-check-lg text-emerald-600' };
+                    if (status === 'Rejected') return { bg: 'bg-red-50', text: 'text-red-600', icon: 'bi-x-lg text-red-600' };
+                    return { bg: 'bg-blue-50', text: 'text-blue-600', icon: 'bi-arrow-right text-blue-600' };
+                },
+
+                getAuditStageClass(stage) {
+                    const key = this.stageToStepKey(stage);
+                    if (key === 'purchase_order') return 'bg-blue-50 text-blue-700 border-blue-200';
+                    if (key === 'grn') return 'bg-violet-50 text-violet-700 border-violet-200';
+                    if (key === 'bill') return 'bg-cyan-50 text-cyan-700 border-cyan-200';
+                    if (key === 'payment') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                    return 'bg-gray-100 text-gray-600 border-gray-200';
+                },
+
+                // ── Formatters ── //
+                getItemName(itemObj) {
+                    if (itemObj.Item && typeof itemObj.Item === 'object') {
+                        return itemObj.Item.display_value || itemObj.Item.item_name || '–';
+                    }
+                    return itemObj.Item ? `Item #${itemObj.Item}` : '–';
+                },
+
+                formatDate(dateStr, includeTime = false) {
+                    if (!dateStr) return '–';
+                    try {
+                        const d = new Date(dateStr);
+                        if (isNaN(d.getTime())) return dateStr;
+                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        let res = String(d.getDate()).padStart(2, '0') + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+                        if (includeTime) {
+                            res += ' · ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        }
+                        return res;
+                    } catch (e) {
+                        return dateStr;
+                    }
+                },
+
+                getInitials(name) {
+                    if (!name || name === '–') return '?';
+                    return name.charAt(0).toUpperCase();
+                },
+
+                stageToStepKey(stage) {
+                    if (!stage) return null;
+                    const s = stage.toLowerCase().trim();
+                    if (s === 'purchase requisition') return 'purchase_requisition';
+                    if (s === 'request for quotation') return 'request_for_quotation';
+                    if (s === 'vendor comparison') return 'vendor_comparison';
+                    if (s === 'purchase order') return 'purchase_order';
+                    if (s === 'grn') return 'grn';
+                    if (s === 'bill') return 'bill';
+                    if (s === 'payment') return 'payment';
+                    return null;
+                }
+            }));
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GRN Approval Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
+  <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+    rel="stylesheet">
+  <style>
+    /* ── Toast banner ── */
+    .pr-toast {
+      animation: prToastIn 0.3s ease-out, prToastOut 0.3s ease-in 4s forwards;
+    }
+
+    @keyframes prToastIn {
+      from {
+        opacity: 0;
+        transform: translateY(-12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes prToastOut {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      to {
+        opacity: 0;
+        transform: translateY(-12px);
+      }
+    }
+
+    /* ── Pill active state ── */
+    .pill-active {
+      color: #1B5CA8 !important;
+      background: #fff !important;
+      font-weight: 600 !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    /* ── Sticky Actions column ── */
+    .sticky-action-cell {
+      position: sticky;
+      right: 0;
+      z-index: 2;
+      box-shadow: -4px 0 8px -2px rgba(0, 0, 0, 0.06);
+    }
+
+    thead .sticky-action-cell {
+      z-index: 3;
+    }
+
+    /* ── Sortable headers ── */
+    th[data-sort] {
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    th[data-sort]:hover {
+      background: #e9ecf1;
+    }
+
+    .sort-indicator {
+      display: inline-block;
+      width: 14px;
+      text-align: center;
+      font-size: 10px;
+      color: #9ca3af;
+      margin-left: 2px;
+      vertical-align: middle;
+    }
+
+    th[data-sort].sort-active .sort-indicator {
+      color: #1B5CA8;
+    }
+
+    /* ── Spinner ── */
+    .grn-spinner {
+      border: 2.5px solid #e5e7eb;
+      border-top-color: #1B5CA8;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 p-6">
+
+  <div id="app" class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-6xl mx-auto">
+
+    <div id="toastContainer"></div>
+
+    <div class="grid grid-cols-4 gap-2.5 mb-4">
+      <div
+        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-[#1B5CA8]">
+        <div class="text-[11px] font-medium text-gray-500 uppercase tracking-wide mb-1.5">Total GRNs</div>
+        <div class="text-[25px] font-bold leading-none text-[#1B5CA8]" id="statTotal">–</div>
+      </div>
+      <div
+        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-amber-500">
+        <div class="text-[11px] font-medium text-gray-500 uppercase tracking-wide mb-1.5">Pending (Submitted)</div>
+        <div class="text-[25px] font-bold leading-none text-amber-500" id="statPending">–</div>
+      </div>
+      <div
+        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-emerald-600">
+        <div class="text-[11px] font-medium text-gray-500 uppercase tracking-wide mb-1.5">Approved</div>
+        <div class="text-[25px] font-bold leading-none text-emerald-600" id="statApproved">–</div>
+      </div>
+      <div
+        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-red-600">
+        <div class="text-[11px] font-medium text-gray-500 uppercase tracking-wide mb-1.5">Rejected</div>
+        <div class="text-[25px] font-bold leading-none text-red-600" id="statRejected">–</div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between mt-[18px] mb-2">
+      <span class="text-[13.5px] font-medium text-gray-900">Goods Receipt Notes (Approvals)</span>
+    </div>
+
+    <div class="flex items-center justify-between gap-2.5 mb-2 flex-wrap">
+      <div class="flex bg-gray-100 rounded-full p-[3px] gap-[2px]" id="filterTabs">
+        <button data-filter="all"
+          class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150 pill-active">All (<span
+            id="tabAll">0</span>)</button>
+        <button data-filter="Submitted"
+          class="px-3 py-1 text-xs font-medium text-gray-600 rounded-full hover:bg-white hover:text-[#1B5CA8] transition-all duration-150">Pending
+          (<span id="tabPending">0</span>)</button>
+        <button data-filter="Approved"
+          class="px-3 py-1 text-xs font-medium text-gray-600 rounded-full hover:bg-white hover:text-[#1B5CA8] transition-all duration-150">Approved
+          (<span id="tabApproved">0</span>)</button>
+        <button data-filter="Rejected"
+          class="px-3 py-1 text-xs font-medium text-gray-600 rounded-full hover:bg-white hover:text-[#1B5CA8] transition-all duration-150">Rejected
+          (<span id="tabRejected">0</span>)</button>
+      </div>
+
+      <div class="relative">
+        <i class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px]"></i>
+        <input id="searchInput"
+          class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[230px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10"
+          type="text" placeholder="Search GRN #, PO Ref...">
+      </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
+      <table class="w-full border-collapse" style="min-width:850px">
+        <thead>
+          <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
+            <th data-sort="grn_number"
+              class="px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase text-left whitespace-nowrap">GRN #<span
+                class="sort-indicator"></span></th>
+            <th data-sort="po_ref"
+              class="px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase text-left whitespace-nowrap">PO
+              Ref<span class="sort-indicator"></span></th>
+            <th data-sort="pr_ref"
+              class="px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase text-left whitespace-nowrap">PR
+              Ref<span class="sort-indicator"></span></th>
+            <th data-sort="delivery_date"
+              class="px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase text-left whitespace-nowrap">Delivery
+              Date<span class="sort-indicator"></span></th>
+            <th data-sort="amount"
+              class="px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase text-right whitespace-nowrap">
+              Amount<span class="sort-indicator"></span></th>
+            <th data-sort="status"
+              class="px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase text-left whitespace-nowrap">
+              Status<span class="sort-indicator"></span></th>
+            <th
+              class="px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase text-left whitespace-nowrap bg-gray-50 sticky-action-cell">
+              Actions</th>
+          </tr>
+        </thead>
+        <tbody id="grnTableBody">
+          <tr>
+            <td colspan="7" class="px-3 py-12 text-center">
+              <div class="flex flex-col items-center gap-3">
+                <div class="grn-spinner"></div>
+                <div class="text-sm text-gray-400 font-medium">Loading Goods Receipts…</div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div id="paginationContainer"
+        class="flex items-center justify-between px-[13px] py-[9px] border-t border-gray-200 bg-gray-50 text-xs text-gray-500"
+        style="display:none;">
+        <span id="paginationInfo">Showing 0 records</span>
+        <div class="flex gap-1" id="paginationButtons"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+      // Update this report name to match your actual GRN report link name in Zoho Creator
+      const REPORT_NAME = 'GRN_Report';
+      const PER_PAGE = 10;
+      const FETCH_BATCH_SIZE = 200;
+
+      let allRecords = [], filteredRecords = [];
+      let currentFilter = 'all', currentPage = 1, searchQuery = '';
+      let sortColumn = 'delivery_date', sortDirection = 'desc';
+
+      const $tableBody = document.getElementById('grnTableBody');
+      const $pagination = document.getElementById('paginationContainer');
+      const $pagInfo = document.getElementById('paginationInfo');
+      const $pagButtons = document.getElementById('paginationButtons');
+
+      // Helpers
+      function formatINR(amount) {
+        if (amount == null || isNaN(amount)) return '₹ 0';
+        const num = parseFloat(amount);
+        let intPart = num.toFixed(0);
+        if (intPart.length > 3) {
+          intPart = intPart.slice(0, -3).replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + intPart.slice(-3);
+        }
+        return '₹ ' + intPart;
+      }
+
+      function formatDate(dateStr) {
+        if (!dateStr) return '–';
+        try {
+          const d = new Date(dateStr);
+          if (isNaN(d.getTime())) return dateStr;
+          const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+          return String(d.getDate()).padStart(2, '0') + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+        } catch (e) { return dateStr; }
+      }
+
+      function esc(str) {
+        return str ? String(str).replace(/[&<>'"]/g,
+          tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])) : '–';
+      }
+
+      function getStatus(rec) {
+        return rec.status || rec.Status || 'Submitted';
+      }
+
+      // Get sortable values tailored for GRN fields
+      function getSortValue(rec, col) {
+        switch (col) {
+          case 'grn_number': return parseInt((rec.GRN_Ref_Number || '').match(/\d+$/)?.[0] || 0, 10);
+          case 'po_ref': return (rec.PO_Ref_Number || '').toLowerCase();
+          case 'pr_ref': return (rec.PR_Ref_Number || '').toLowerCase();
+          case 'amount': return parseFloat(String(rec.Total_Amount).replace(/[,\s]/g, '')) || 0;
+          case 'delivery_date': return rec.delivery_date ? new Date(rec.delivery_date).getTime() : 0;
+          case 'status': return getStatus(rec).toLowerCase();
+          default: return '';
+        }
+      }
+
+      // Criteria Builders
+      function buildSearchCriteria() {
+        if (!searchQuery) return '';
+        const q = searchQuery.replace(/'/g, "\\'");
+        // Account for both lowercase 'status' or uppercase 'Status' based on typical schema
+        return `GRN_Ref_Number=("${q}") || PO_Ref_Number=("${q}") || status=("${q}")`;
+      }
+
+      function buildStatusCriteria(filter) {
+        if (filter === 'Submitted') return '(status == "Submitted")';
+        if (filter === 'Approved') return '(status == "Approved")';
+        if (filter === 'Rejected') return '(status == "Rejected")';
+        return '';
+      }
+
+      function buildFullCriteria(statusFilter) {
+        const parts = [buildSearchCriteria(), buildStatusCriteria(statusFilter)].filter(Boolean);
+        return parts.join(' && ');
+      }
+
+      // Backend Counts
+      function computeStats() {
+        const searchCrit = buildSearchCriteria();
+        const combine = (crit) => [searchCrit, crit].filter(Boolean).join(' && ');
+
+        const fetchCount = (crit, el1, el2) => {
+          const config = { report_name: REPORT_NAME };
+          if (crit) config.criteria = crit;
+          ZOHO.CREATOR.DATA.getRecordCount(config).then(res => {
+            const count = res.result ? res.result.records_count : 0;
+            document.getElementById(el1).textContent = count;
+            document.getElementById(el2).textContent = count;
+          }).catch(() => {
+            // Fallback to 0 if API errors (e.g. invalid report name)
+            document.getElementById(el1).textContent = 0;
+            document.getElementById(el2).textContent = 0;
+          });
+        };
+
+        fetchCount('', 'statTotal', 'tabAll');
+        fetchCount('(status == "Submitted")', 'statPending', 'tabPending');
+        fetchCount('(status == "Approved")', 'statApproved', 'tabApproved');
+        fetchCount('(status == "Rejected")', 'statRejected', 'tabRejected');
+      }
+
+      // Multi-fetch pagination logic
+      function fetchAllRecords(criteria) {
+        let accumulated = [];
+        function fetchBatch(cursor) {
+          const config = { report_name: REPORT_NAME, max_records: FETCH_BATCH_SIZE };
+          if (criteria) config.criteria = criteria;
+          if (cursor) config.record_cursor = cursor;
+          return ZOHO.CREATOR.DATA.getRecords(config).then(res => {
+            if (res.code === 3000 && res.data && res.data.length > 0) {
+              accumulated = accumulated.concat(res.data);
+              if (res.data.length >= FETCH_BATCH_SIZE && res.record_cursor) {
+                return fetchBatch(res.record_cursor);
+              }
+            }
+            return accumulated;
+          }).catch(err => {
+            console.error("Error fetching GRN records:", err);
+            return accumulated;
+          });
+        }
+        return fetchBatch(null);
+      }
+
+      function fetchRecords() {
+        $tableBody.innerHTML = `<tr><td colspan="7" class="px-3 py-12 text-center"><div class="grn-spinner mx-auto mb-3"></div><div class="text-sm text-gray-400">Loading...</div></td></tr>`;
+        fetchAllRecords(buildFullCriteria(currentFilter)).then(records => {
+          allRecords = records;
+          currentPage = 1;
+          applySortAndRender();
+          computeStats();
+        });
+      }
+
+      // Sorting
+      function applySortAndRender() {
+        allRecords.sort((a, b) => {
+          let va = getSortValue(a, sortColumn), vb = getSortValue(b, sortColumn);
+          let cmp = (typeof va === 'number' && typeof vb === 'number') ? va - vb : String(va).localeCompare(String(vb));
+          return sortDirection === 'asc' ? cmp : -cmp;
+        });
+        filteredRecords = allRecords;
+
+        document.querySelectorAll('th[data-sort]').forEach(th => {
+          const isAct = th.getAttribute('data-sort') === sortColumn;
+          th.classList.toggle('sort-active', isAct);
+          th.querySelector('.sort-indicator').textContent = isAct ? (sortDirection === 'asc' ? '▲' : '▼') : '';
+        });
+
+        renderTable();
+        renderPagination();
+      }
+
+      // Rendering Table
+      function renderTable() {
+        if (filteredRecords.length === 0) {
+          $tableBody.innerHTML = `<tr><td colspan="7" class="px-3 py-12 text-center text-gray-400"><i class="bi bi-clipboard-x text-3xl mb-2 block"></i><div>No GRNs found</div></td></tr>`;
+          return;
+        }
+
+        const startIdx = (currentPage - 1) * PER_PAGE;
+        const pageRecords = filteredRecords.slice(startIdx, startIdx + PER_PAGE);
+        let html = '';
+
+        pageRecords.forEach(rec => {
+          const status = getStatus(rec);
+          const isPending = status.toLowerCase() === 'submitted';
+
+          let badgeCfg = { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' }; // Pending/Submitted
+          if (status === 'Approved') badgeCfg = { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' };
+          if (status === 'Rejected') badgeCfg = { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600' };
+
+          html += `
+          <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors duration-150 group">
+            <td class="px-3 py-[9px] whitespace-nowrap"><span class="font-semibold text-[#1B5CA8] font-mono text-[11px]">${esc(rec.GRN_Ref_Number || rec.GRN_Number)}</span></td>
+            <td class="px-3 py-[9px] whitespace-nowrap font-medium text-gray-600 text-[11px]">${esc(rec.PO_Ref_Number)}</td>
+            <td class="px-3 py-[9px] whitespace-nowrap font-medium text-gray-500 text-[11px]">${esc(rec.PR_Ref_Number)}</td>
+            <td class="px-3 py-[9px] whitespace-nowrap text-[11px] text-gray-500">${formatDate(rec.delivery_date)}</td>
+            <td class="px-3 py-[9px] whitespace-nowrap font-semibold text-gray-900 text-right tabular-nums text-[12px]">${formatINR(rec.Total_Amount)}</td>
+            <td class="px-3 py-[9px] whitespace-nowrap">
+              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold border ${badgeCfg.border} ${badgeCfg.bg} ${badgeCfg.text}">
+                <span class="w-[5px] h-[5px] rounded-full ${badgeCfg.dot}"></span>${esc(status)}
+              </span>
+            </td>
+            <td class="px-3 py-[9px] whitespace-nowrap bg-white group-hover:bg-[#EBF3FC] sticky-action-cell">
+              <div class="flex items-center gap-1.5">
+                <button onclick="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:GRN_Detailed?recordId=${rec.ID}',window:'same'})"
+                  class="inline-flex items-center gap-1 px-2 py-1 rounded bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 text-[11px] font-medium">
+                  <i class="bi bi-eye"></i> View
+                </button>
+                ${isPending ? `
+                <button onclick="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:GRN_Detailed?recordId=${rec.ID}',window:'same'})"
+                  class="inline-flex items-center gap-1 px-2 py-1 rounded bg-[#1B5CA8] text-white border border-[#1B5CA8] hover:bg-[#14457e] text-[11px] font-medium">
+                  <i class="bi bi-ui-checks"></i> Review
+                </button>` : ``}
+              </div>
+            </td>
+          </tr>`;
+        });
+        $tableBody.innerHTML = html;
+      }
+
+      // Pagination render logic
+      function renderPagination() {
+        const total = filteredRecords.length, totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+        if (total === 0) { $pagination.style.display = 'none'; return; }
+
+        $pagination.style.display = 'flex';
+        $pagInfo.textContent = `Showing ${(currentPage - 1) * PER_PAGE + 1}–${Math.min(currentPage * PER_PAGE, total)} of ${total}`;
+
+        let btns = `<button onclick="window._grnDash.go(${currentPage - 1})" class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 disabled:opacity-40" ${currentPage <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left"></i></button>`;
+        for (let p = 1; p <= totalPages; p++) {
+          if (p <= 2 || p === totalPages || Math.abs(p - currentPage) <= 1) {
+            btns += `<button onclick="window._grnDash.go(${p})" class="min-w-[27px] h-[27px] border rounded text-xs ${p === currentPage ? 'border-[#1B5CA8] bg-[#1B5CA8] text-white' : 'border-gray-300 bg-white hover:bg-gray-50'}">${p}</button>`;
+          } else if (p === 3 || p === totalPages - 1) {
+            btns += `<span class="px-1 text-gray-400">…</span>`;
+          }
+        }
+        btns += `<button onclick="window._grnDash.go(${currentPage + 1})" class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 disabled:opacity-40" ${currentPage >= totalPages ? 'disabled' : ''}><i class="bi bi-chevron-right"></i></button>`;
+
+        // Remove duplicate ellipses generated by simple loop
+        $pagButtons.innerHTML = btns.replace(/(<span[^>]*>…<\/span>)+/g, '<span class="px-1 text-gray-400 text-xs">…</span>');
+      }
+
+      // Event Listeners
+      document.getElementById('filterTabs').addEventListener('click', e => {
+        const btn = e.target.closest('button[data-filter]');
+        if (btn) {
+          currentFilter = btn.dataset.filter;
+          document.querySelectorAll('#filterTabs button').forEach(b => b.className = 'px-3 py-1 text-xs font-medium text-gray-600 rounded-full hover:bg-white hover:text-[#1B5CA8] transition-all duration-150');
+          btn.className = 'px-3 py-1 text-xs font-medium rounded-full transition-all duration-150 pill-active';
+          fetchRecords();
+        }
+      });
+
+      document.querySelectorAll('th[data-sort]').forEach(th => th.addEventListener('click', function () {
+        const col = this.dataset.sort;
+        sortDirection = (sortColumn === col && sortDirection === 'desc') ? 'asc' : 'desc';
+        sortColumn = col;
+        applySortAndRender();
+      }));
+
+      let timer;
+      document.getElementById('searchInput').addEventListener('input', e => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { searchQuery = e.target.value.trim(); fetchRecords(); }, 400);
+      });
+
+      window._grnDash = { go: p => { currentPage = Math.max(1, Math.min(p, Math.ceil(filteredRecords.length / PER_PAGE))); renderTable(); renderPagination(); } };
+
+      document.addEventListener("DOMContentLoaded", fetchRecords);
+    })();
+  </script>
+</body>
+
+</html>

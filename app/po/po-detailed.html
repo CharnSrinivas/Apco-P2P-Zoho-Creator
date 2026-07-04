@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PR Detail</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
+    <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+        rel="stylesheet">
+    <style>
+        /* ── Loading spinner ── */
+        po-s {
+            border: 2.5px solid #e5e7eb;
+            border-top-color: #1B5CA8;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── Progress stepper connector ── */
+        .step-connector {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            right: 14px;
+            height: 3px;
+            background: #e5e7eb;
+            z-index: 0;
+        }
+
+        .step-connector-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: #1B5CA8;
+            transition: width 0.6s ease;
+        }
+
+        /* ── Timeline connector ── */
+        .timeline-line {
+            position: absolute;
+            left: 15px;
+            top: 32px;
+            bottom: 0;
+            width: 2px;
+            background: #e5e7eb;
+        }
+
+        .timeline-item:last-child .timeline-line {
+            display: none;
+        }
+
+        /* ── Fade in ── */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.35s ease-out both;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 p-6">
+
+    <div id="app" class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-5xl mx-auto">
+
+        <!-- ── Loading State ── -->
+        <div id="loadingState" class="flex flex-col items-center justify-center py-24 gap-3">
+            <div class="po-spinner"></div>
+            <div class="text-sm text-gray-400 font-medium">Loading PR details…</div>
+        </div>
+
+        <!-- ── Error State ── -->
+        <div id="errorState" class="hidden text-center py-24">
+            <i class="bi bi-alert-circle text-4xl text-red-400 mb-3 block"></i>
+            <div class="text-sm font-medium text-gray-600">Failed to load PR details</div>
+            <div class="text-xs text-gray-400 mt-1">Please check the record ID and try again.</div>
+        </div>
+
+        <!-- ── Main Content (hidden until loaded) ── -->
+        <div id="mainContent" class="hidden">
+
+            <!-- ───── Breadcrumb + Header ───── -->
+            <div class="mb-5">
+                <nav class="flex items-center gap-1.5 text-xs mb-2.5">
+                    <button
+                        onclick="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',window:'same',url:'#Page:PO_Approval'})"
+                        class=" text-[#1B5CA8] hover:text-[#14457e] font-medium transition-colors no-underline">
+                        Purchase Orders
+                    </button>
+                    <i class="bi bi-chevron-right text-[11px] text-gray-400"></i>
+                    <span class="text-gray-500 font-medium" id="breadcrumbPrNum">–</span>
+                </nav>
+                <div class="flex items-center gap-2.5">
+                    <h1 class="text-[17px] font-bold text-gray-900 leading-none" id="headerPrNum">–</h1>
+                    <span id="headerBadge"></span>
+                </div>
+                <div class="text-xs text-gray-400 mt-1" id="headerSub">–</div>
+            </div>
+
+            <!-- ───── Progress Indicator ───── -->
+            <div class="bg-white border border-gray-200 rounded-lg p-5 mb-4 fade-in">
+                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">Process Progress</div>
+                <div class="relative flex justify-between items-start" id="progressContainer">
+                    <!-- Connector bar -->
+                    <div class="step-connector">
+                        <div class="step-connector-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                    <!-- Steps rendered by JS -->
+                </div>
+            </div>
+
+            <!-- ───── Two Column Layout ───── -->
+            <div class="grid grid-cols-5 gap-4">
+
+                <!-- ── Left: PR Details (3 cols) ── -->
+                <div class="col-span-3 space-y-4">
+
+                    <!-- PR Info Card -->
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden fade-in">
+                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
+                                    <i class="bi bi-file-text"></i>
+                                </div>
+                                Requisition Details
+                            </div>
+                        </div>
+                        <div class="px-[18px] py-[15px]" id="prDetailsBody">
+                            <!-- Filled by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Items Table Card -->
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden fade-in">
+                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
+                                    <i class="bi bi-list"></i>
+                                </div>
+                                Line Items
+                            </div>
+                        </div>
+                        <div id="itemsTableBody">
+                            <!-- Filled by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-center gap-2.5 fade-in" id="actionButtons" style="display:none;">
+                        <button id="approveBtn"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors no-underline cursor-pointer shadow-sm">
+                            <i class="bi bi-check-lg"></i> Approve
+                        </button>
+                        <button id="rejectBtn"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors no-underline cursor-pointer shadow-sm">
+                            <i class="bi bi-x-lg"></i> Reject
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── Right: Audit Trail (2 cols) ── -->
+                <div class="col-span-2">
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden fade-in">
+                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-amber-50 text-amber-600">
+                                    <i class="bi bi-clock-history"></i>
+                                </div>
+                                Audit Trail
+                            </div>
+                        </div>
+                        <div class="px-[18px] py-[15px]" id="auditTrailBody">
+                            <!-- Filled by JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+        (function () {
+            'use strict';
+
+            // ── Config ──
+
+            // P2P Process steps
+            const PROCESS_STEPS = [
+                { key: 'purchase_requisition', label: 'Purchase Requisition', icon: 'bi-receipt' },
+                { key: 'purchase_order', label: 'Purchase Order', icon: 'bi-cart-check' },
+                { key: 'grn', label: 'GRN', icon: 'bi-box-seam' },
+                { key: 'bill', label: 'Bill', icon: 'bi-coin' },
+                { key: 'payment', label: 'Payment', icon: 'bi-cash' }
+            ];
+
+            // ── DOM refs ──
+            const $loading = document.getElementById('loadingState');
+            const $error = document.getElementById('errorState');
+            const $main = document.getElementById('mainContent');
+            const $headerPrNum = document.getElementById('headerPrNum');
+            const $headerBadge = document.getElementById('headerBadge');
+            const $headerSub = document.getElementById('headerSub');
+            const $progressContainer = document.getElementById('progressContainer');
+            const $progressFill = document.getElementById('progressFill');
+            const $prDetails = document.getElementById('prDetailsBody');
+            const $itemsTable = document.getElementById('itemsTableBody');
+            const $actionButtons = document.getElementById('actionButtons');
+            const $auditTrail = document.getElementById('auditTrailBody');
+            const $breadcrumbPrNum = document.getElementById('breadcrumbPrNum');
+            const $approveBtn = document.getElementById('approveBtn');
+            const $rejectBtn = document.getElementById('rejectBtn');
+
+
+            // ════════════════════════════════════════════
+            //  HELPERS
+            // ════════════════════════════════════════════
+
+            function esc(str) {
+                if (str == null || str === '') return '–';
+                const div = document.createElement('div');
+                div.textContent = String(str);
+                return div.innerHTML;
+            }
+
+            function formatINR(amount) {
+                if (amount == null || isNaN(amount)) return '₹ 0';
+                const num = parseFloat(amount);
+                let intPart = Math.abs(Math.round(num)).toString();
+                const sign = num < 0 ? '-' : '';
+                if (intPart.length > 3) {
+                    const last3 = intPart.slice(-3);
+                    const rest = intPart.slice(0, -3);
+                    intPart = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + last3;
+                }
+                return '₹ ' + sign + intPart;
+            }
+
+            function formatDate(dateStr) {
+                if (!dateStr) return '–';
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                try {
+                    const d = new Date(dateStr);
+                    if (isNaN(d.getTime())) return dateStr;
+                    return String(d.getDate()).padStart(2, '0') + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+                } catch (e) {
+                    return dateStr;
+                }
+            }
+
+            function getDisplayName(field) {
+                if (!field) return '–';
+                if (typeof field === 'object' && field.display_value) return field.display_value;
+                if (typeof field === 'object' && field.first_name) {
+                    return ((field.first_name || '') + ' ' + (field.last_name || '')).trim() || '–';
+                }
+                return String(field);
+            }
+
+            function normalizeStatus(status) {
+                if (!status) return 'submitted';
+                const s = status.toLowerCase();
+                if (s === 'submitted' || s === 'draft') return 'submitted';
+                if (s === 'approved') return 'approved';
+                if (s === 'rejected') return 'rejected';
+                if (s === 'cancelled') return 'cancelled';
+                return 'submitted';
+            }
+
+            function getStatusBadgeHTML(status) {
+                const norm = normalizeStatus(status);
+                const config = {
+                    submitted: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500', label: status || 'Submitted' },
+                    approved: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600', label: 'Approved' },
+                    rejected: { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600', label: 'Rejected' },
+                    cancelled: { border: 'border-gray-300', bg: 'bg-gray-100', text: 'text-gray-700', dot: 'bg-gray-500', label: 'Cancelled' },
+                };
+                const c = config[norm] || config.submitted;
+                return '<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border ' + c.border + ' ' + c.bg + ' ' + c.text + '"><span class="w-[5px] h-[5px] rounded-full ' + c.dot + ' shrink-0"></span>' + esc(c.label) + '</span>';
+            }
+
+            /** Map a Moved_To stage value to its step key */
+            function stageToStepKey(stage) {
+                if (!stage) return null;
+                const s = stage.toLowerCase().trim();
+                if (s === 'purchase requisition') return 'purchase_requisition';
+                if (s === 'purchase order') return 'purchase_order';
+                if (s === 'grn') return 'grn';
+                if (s === 'bill') return 'bill';
+                if (s === 'payment') return 'payment';
+                return null;
+            }
+
+            // recordId is fetched via ZOHO.CREATOR.UTIL.getQueryParams() in the init block
+
+
+            // ════════════════════════════════════════════
+            //  PROGRESS INDICATOR
+            // ════════════════════════════════════════════
+
+            function renderProgress(rec, actions) {
+                var currentStageKey = stageToStepKey(rec.Current_Stage);
+
+                // Determine which steps are completed and find rejected step
+                // based purely on actions data (not rec.Status)
+                var completed = {};
+                var rejectedStepKey = null;   // the PROCESS_STEPS key that was rejected
+                completed['purchase_requisition'] = true; // always completed if PR exists
+
+                if (actions && actions.length) {
+                    actions.forEach(function (action) {
+                        var stepKey = stageToStepKey(action.Moved_To);
+                        if (stepKey) {
+                            if (action.Status && action.Status.toLowerCase() === 'rejected') {
+                                rejectedStepKey = stepKey;
+                            } else {
+                                completed[stepKey] = true;
+                            }
+                        }
+                    });
+                }
+
+                // Map rejectedStepKey → PROCESS_STEPS index
+                var rejectedIdx = -1;
+                if (rejectedStepKey) {
+                    PROCESS_STEPS.forEach(function (step, i) {
+                        if (step.key === rejectedStepKey) rejectedIdx = i;
+                    });
+                }
+
+                // Find the current step index from Current_Stage
+                var currentIdx = 0;
+                if (currentStageKey) {
+                    PROCESS_STEPS.forEach(function (step, i) {
+                        if (step.key === currentStageKey) currentIdx = i;
+                    });
+                } else {
+                    // Fallback: use highest completed step
+                    PROCESS_STEPS.forEach(function (step, i) {
+                        if (completed[step.key] && i > currentIdx) currentIdx = i;
+                    });
+                }
+
+                // If rejected, ensure the fill goes up to the rejected step
+                var isRejected = (rejectedIdx !== -1);
+                var fillIdx = isRejected ? rejectedIdx : currentIdx;
+
+                // Build step HTML
+                var stepsHtml = '';
+                PROCESS_STEPS.forEach(function (step, i) {
+                    var isRejectedStep = (i === rejectedIdx);
+                    var isDone = isRejected
+                        ? i < rejectedIdx         // steps before rejected are done
+                        : i <= currentIdx;         // normal flow: up to current are done
+                    var isCurrent = (i === currentIdx) && !isRejectedStep;
+
+                    var circleClass, labelClass;
+                    if (isRejectedStep) {
+                        circleClass = 'bg-red-600 text-white border-red-600 shadow-md shadow-red-200';
+                        labelClass = 'text-red-700 font-semibold';
+                    } else if (isDone && isCurrent) {
+                        circleClass = 'bg-[#1B5CA8] text-white border-[#1B5CA8] shadow-md shadow-blue-200';
+                        labelClass = 'text-[#1B5CA8] font-semibold';
+                    } else if (isDone) {
+                        circleClass = 'bg-emerald-600 text-white border-emerald-600';
+                        labelClass = 'text-gray-700 font-medium';
+                    } else {
+                        circleClass = 'bg-white text-gray-400 border-gray-300';
+                        labelClass = 'text-gray-400';
+                    }
+
+                    var iconHtml;
+                    if (isRejectedStep) {
+                        iconHtml = '<i class="bi bi-x-lg text-[13px]"></i>';
+                    } else if (isDone && !isCurrent) {
+                        iconHtml = '<i class="bi bi-check-lg text-[13px]"></i>';
+                    } else {
+                        iconHtml = '<i class="bi ' + step.icon + ' text-[13px]"></i>';
+                    }
+
+                    var stepLabel = isRejectedStep ? 'Rejected' : step.label;
+
+                    stepsHtml += '<div class="flex flex-col items-center relative z-10" style="width: ' + (100 / PROCESS_STEPS.length) + '%">'
+                        + '<div class="w-[30px] h-[30px] rounded-full border-2 flex items-center justify-center text-[13px] ' + circleClass + ' transition-all duration-300">'
+                        + iconHtml
+                        + '</div>'
+                        + '<div class="text-[10px] mt-1.5 text-center leading-tight ' + labelClass + '">'
+                        + stepLabel
+                        + '</div></div>';
+                });
+
+                // Remove old step divs, keep connector
+                var oldSteps = $progressContainer.querySelectorAll('.flex.flex-col');
+                oldSteps.forEach(function (el) { el.remove(); });
+                $progressContainer.insertAdjacentHTML('beforeend', stepsHtml);
+
+                // Fill progress bar
+                var fillPct = (fillIdx / (PROCESS_STEPS.length - 1)) * 100;
+                $progressFill.style.width = fillPct + '%';
+                $progressFill.style.background = isRejected ? '#dc2626' : '#1B5CA8';
+            }
+
+
+            // ════════════════════════════════════════════
+            //  PR DETAILS PANEL
+            // ════════════════════════════════════════════
+
+            function renderDetails(rec) {
+                var poNum = rec.PO_Ref_Number || 'PO-' + rec.PO_Number;
+
+                // Header + breadcrumb
+                $headerPrNum.textContent = poNum;
+                $breadcrumbPrNum.textContent = poNum;
+                $headerBadge.innerHTML = getStatusBadgeHTML(rec.Status)
+                    + (rec.Current_Stage ? ' <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium tracking-wide border border-blue-200 bg-blue-50 text-blue-700"><i class="bi bi-geo-alt text-[10px]"></i>' + esc(rec.Current_Stage) + '</span>' : '');
+                $headerSub.textContent = (rec.Department || '–') + ' · Requested ' + formatDate(rec.order_date);
+
+                // Details grid
+                var fields = [
+                    { label: 'PO Number', value: poNum },
+                    { label: 'Department', value: rec.department },
+                    { label: 'Requester', value: getDisplayName(rec.Added_User) },
+                    { label: 'Order Date', value: formatDate(rec.order_date) },
+                    { label: 'Delivery Date', value: formatDate(rec.delivery_date) },
+                    { label: 'Status', value: null, html: getStatusBadgeHTML(rec.Status) },
+                    { label: 'Total Amount', value: formatINR(rec.Total_Amount), bold: true },
+                    { label: 'Discount', value: (rec.Discount || '0') + '%' },
+                ];
+
+                var html = '<div class="grid grid-cols-2 gap-x-6 gap-y-0">';
+                fields.forEach(function (f) {
+                    html += '<div class="flex justify-between items-center py-2 text-xs border-b border-dashed border-gray-100">'
+                        + '<span class="text-gray-500 font-medium">' + f.label + '</span>';
+                    if (f.html) {
+                        html += '<span>' + f.html + '</span>';
+                    } else {
+                        html += '<span class="text-gray-900 ' + (f.bold ? 'font-bold text-[13px]' : 'font-semibold') + '">' + esc(f.value) + '</span>';
+                    }
+                    html += '</div>';
+                });
+                html += '</div>';
+
+                // Description
+                if (rec.description) {
+                    html += '<div class="mt-4 pt-3 border-t border-gray-100">'
+                        + '<div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">Description</div>'
+                        + '<div class="text-xs text-gray-700 leading-relaxed prose prose-xs max-w-none">' + rec.description + '</div>'
+                        + '</div>';
+                }
+
+                $prDetails.innerHTML = html;
+            }
+
+
+            // ════════════════════════════════════════════
+            //  LINE ITEMS TABLE
+            // ════════════════════════════════════════════
+
+            function renderItems(items, totalAmount) {
+                if (!items || !items.length) {
+                    $itemsTable.innerHTML = '<div class="px-[18px] py-8 text-center text-gray-400 text-xs">'
+                        + '<i class="bi bi-box-seam text-xl mb-1 block"></i>'
+                        + 'No line items</div>';
+                    return;
+                }
+
+                var html = '<table class="w-full border-collapse text-xs">'
+                    + '<thead><tr class="bg-gray-50 border-b border-gray-200">'
+                    + '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">#</th>'
+                    + '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">Item</th>'
+                    + '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">Qty</th>'
+                    + '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">Amount</th>'
+                    + '</tr></thead><tbody>';
+
+                items.forEach(function (item, i) {
+                    // Handle both object (display_value / item_name) and raw ID formats
+                    var rawItem = item.Item;
+                    var itemName = '-';
+                    if (rawItem && typeof rawItem === 'object') {
+                        itemName = rawItem.display_value || rawItem.item_name || '-';
+                    } else if (rawItem) {
+                        itemName = 'Item #' + rawItem;
+                    }
+                    var qty = item.Quantity || 0;
+                    var amount = parseFloat(item.Amount) || 0;
+                    var comment = item.Comment || '';
+
+                    html += '<tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">'
+                        + '<td class="px-4 py-2.5 text-gray-400 font-mono">' + (i + 1) + '</td>'
+                        + '<td class="px-4 py-2.5 text-gray-900 font-medium">' + esc(itemName)
+                        + (comment ? '<div class="text-[11px] text-gray-400 font-normal mt-0.5">' + esc(comment) + '</div>' : '')
+                        + '</td>'
+                        + '<td class="px-4 py-2.5 text-gray-700 text-right tabular-nums">' + esc(qty) + '</td>'
+                        + '<td class="px-4 py-2.5 text-gray-900 font-semibold text-right tabular-nums">' + formatINR(amount) + '</td>'
+                        + '</tr>';
+                });
+
+                // Total row — uses Total_Amount from PR response
+                html += '<tr class="bg-gray-50 border-t border-gray-200">'
+                    + '<td colspan="3" class="px-4 py-2.5 text-right text-[11px] font-semibold text-gray-500 uppercase">Total</td>'
+                    + '<td class="px-4 py-2.5 text-right font-bold text-gray-900 text-[13px]">' + formatINR(totalAmount) + '</td>'
+                    + '</tr></tbody></table>';
+
+                $itemsTable.innerHTML = html;
+            }
+
+
+            // ════════════════════════════════════════════
+            //  ACTION BUTTONS
+            // ════════════════════════════════════════════
+
+            function renderActionButtons(rec) {
+                // Show action buttons only at Purchase Requisition stage (and not rejected)
+                var isRejected = rec.Status && rec.Status.toLowerCase() === 'rejected';
+                var isPRStage = rec.Current_Stage === 'Purchase Requisition';
+                if (isPRStage && !isRejected) {
+                    $actionButtons.style.display = 'flex';
+                } else {
+                    $actionButtons.style.display = 'none';
+                }
+            }
+
+
+            // ════════════════════════════════════════════
+            //  AUDIT TRAIL
+            // ════════════════════════════════════════════
+
+            function renderAuditTrail(actions, prRec) {
+                if (!actions || actions.length === 0) {
+                    $auditTrail.innerHTML = '<div class="text-center py-8 text-gray-400">'
+                        + '<i class="bi bi-clock-history-off text-xl mb-1.5 block"></i>'
+                        + '<div class="text-xs font-medium text-gray-500">No activity recorded yet</div>'
+                        + '<div class="text-[11px] text-gray-400 mt-0.5">Actions will appear here after approval steps.</div>'
+                        + '</div>';
+                    return;
+                }
+
+                // Sort by ID ascending (oldest first)
+                var sorted = actions.slice().sort(function (a, b) {
+                    return (parseInt(a.ID) || 0) - (parseInt(b.ID) || 0);
+                });
+
+                var html = '<div class="space-y-0">';
+
+                sorted.forEach(function (action, i) {
+                    var status = action.Status || '–';
+                    var stage = action.Moved_To || '–';
+                    var comment = action.Comment || '';
+                    var performer = action.Added_User || '-';
+                    var addedTime = action.Added_Time ? formatDate(action.Added_Time) : '–';
+
+                    // Status icon + color
+                    var iconBg, iconColor, iconName;
+                    if (status === 'Approved') {
+                        iconBg = 'bg-emerald-50'; iconColor = 'text-emerald-600'; iconName = 'bi-check-lg';
+                    } else if (status === 'Rejected') {
+                        iconBg = 'bg-red-50'; iconColor = 'text-red-600'; iconName = 'bi-x-lg';
+                    } else {
+                        iconBg = 'bg-blue-50'; iconColor = 'text-blue-600'; iconName = 'bi-arrow-right';
+                    }
+
+                    // Stage badge color
+                    var stageBg = 'bg-gray-100 text-gray-600 border-gray-200';
+                    var stageKey = stageToStepKey(stage);
+                    if (stageKey === 'purchase_order') stageBg = 'bg-blue-50 text-blue-700 border-blue-200';
+                    else if (stageKey === 'grn') stageBg = 'bg-violet-50 text-violet-700 border-violet-200';
+                    else if (stageKey === 'bill') stageBg = 'bg-cyan-50 text-cyan-700 border-cyan-200';
+                    else if (stageKey === 'payment') stageBg = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+
+                    var initials = performer !== '–' ? performer.charAt(0).toUpperCase() : '?';
+
+                    html += '<div class="bimeline-item relative pl-10 pb-5">'
+                        + '<div class="bimeline-line"></div>'
+                        // Icon
+                        + '<div class="absolute left-0 top-0 w-[30px] h-[30px] rounded-full ' + iconBg + ' flex items-center justify-center border-2 border-white shadow-sm z-10">'
+                        + '<i class="bi ' + iconName + ' text-[13px] ' + iconColor + '"></i>'
+                        + '</div>'
+                        // Content
+                        + '<div class="bg-gray-50 border border-gray-200 rounded-lg px-3.5 py-3">'
+                        + '<div class="flex items-center justify-between mb-1.5">'
+                        + '<div class="flex items-center gap-2">'
+                        + '<span class="text-xs font-semibold ' + (status === 'Approved' ? 'text-emerald-700' : status === 'Rejected' ? 'text-red-700' : 'text-gray-700') + '">' + esc(status) + '</span>'
+                        + '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border ' + stageBg + '">'
+                        + '<i class="bi bi-arrow-right text-[9px] mr-1 opacity-60"></i>' + esc(stage) + '</span>'
+                        + '</div>'
+                        + '<span class="text-[10px] text-gray-400">' + esc(addedTime) + '</span>'
+                        + '</div>'
+                        + (comment ? '<div class="text-xs text-gray-600 leading-relaxed mt-1.5 prose prose-xs max-w-none">' + comment + '</div>' : '')
+                        + '<div class="flex items-center gap-1.5 mt-2 text-[11px] text-gray-500">'
+                        + '<div class="w-[18px] h-[18px] rounded-full bg-[#1B5CA8] text-white flex items-center justify-center text-[9px] font-bold">' + initials + '</div>'
+                        + '<span class="font-medium">' + esc(performer) + '</span>'
+                        + '</div></div></div>';
+                });
+
+                html += '</div>';
+                $auditTrail.innerHTML = html;
+            }
+
+
+            // ════════════════════════════════════════════
+            //  DATA FETCHING (via Custom API)
+            // ════════════════════════════════════════════
+
+            function fetchDetail(recordId) {
+                $loading.classList.remove('hidden');
+                $error.classList.add('hidden');
+                $main.classList.add('hidden');
+                ZOHO.CREATOR.DATA.invokeCustomApi({
+                    api_name: "Fetch_Po_Details",
+                    http_method: "GET",
+                    content_type: "application/json",
+                    query_params: 'recId=' + recordId
+                }).then(function (response) {
+                    console.log("Custom API response:", response);
+
+                    // Handle empty / not-found result
+                    if (!response || !response.result || response.result.length === 0) {
+                        $loading.classList.add('hidden');
+                        $error.classList.remove('hidden');
+                        return;
+                    }
+
+                    var rec = response.result[0];
+
+                    // ── Render PR details & action buttons ──
+                    renderDetails(rec);
+                    renderActionButtons(rec);
+
+                    $loading.classList.add('hidden');
+                    $main.classList.remove('hidden');
+
+                    // ── Render line items (already embedded in response) ──
+                    var items = (rec.Items && rec.Items.length) ? rec.Items : [];
+                    renderItems(items, rec.Total_Amount);
+
+                    // ── Render progress & audit trail from embedded Actions ──
+                    var actions = (rec.Actions && rec.Actions.length) ? rec.Actions : [];
+                    renderProgress(rec, actions);
+                    renderAuditTrail(actions, rec);
+
+                    // ── Action button handlers ──
+                    $approveBtn.onclick = function () {
+                        ZOHO.CREATOR.UTIL.navigateParentURL({
+                            action: 'open',
+                            window: 'same',
+                            url: '#Form:PR_Action?zc_LoadIn=dialog&PR_Number=' + recordId + '&Status=Approved&zc_SubmitVal=Approve&zc_BgClr=transparent&zc_BtnBgClr=green&zc_Header=false&zc_TextAreaHeight=40px'
+                        });
+                    };
+
+                    $rejectBtn.onclick = function () {
+                        ZOHO.CREATOR.UTIL.navigateParentURL({
+                            action: 'open',
+                            window: 'same',
+                            url: '#Form:PR_Action?zc_LoadIn=dialog&PR_Number=' + recordId + '&Status=Rejected&zc_SubmitVal=Reject&zc_BgClr=transparent&zc_BtnBgClr=red&zc_Header=false&zc_TextAreaHeight=40px'
+                        });
+                    };
+
+                }).catch(function (err) {
+                    console.error('Error loading PR detail:', err);
+                    $loading.classList.add('hidden');
+                    $error.classList.remove('hidden');
+                });
+            }
+
+
+            // ════════════════════════════════════════════
+            //  INIT
+            // ════════════════════════════════════════════
+
+            // v2: No ZOHO.CREATOR.init() needed — SDK initialises automatically.
+            // getQueryParams() is now Promise-based in v2.
+            ZOHO.CREATOR.UTIL.getQueryParams().then(function (params) {
+                var recordId = params && params.recordId ? params.recordId : null;
+                console.log({ params })
+                if (!recordId) {
+                    $loading.classList.add('hidden');
+                    $error.classList.remove('hidden');
+                    return;
+                }
+                fetchDetail(recordId);
+            });
+
+        })();
+    </script>
+
+</body>
+
+</html>
