@@ -12,7 +12,7 @@
     <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -108,7 +108,6 @@
     <div id="app" x-data="rfqWidget()" x-init="initWidget()" x-cloak
         class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-5xl mx-auto">
 
-        <!-- ── Action Modal ── -->
         <div x-show="showModal" style="display: none;"
             class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm transition-opacity">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden fade-in mx-4 border border-gray-200 flex flex-col max-h-[90vh]"
@@ -133,7 +132,7 @@
                         class="px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors cursor-pointer shadow-sm disabled:opacity-50">
                         Cancel
                     </button>
-                    <button @click="submitAction()" :disabled="isSubmitting || hasQtyError"
+                    <button @click="submitAction()" :disabled="isSubmitting"
                         :class="modalBtnClass + ' ' + modalBtnHoverClass"
                         class="px-4 py-2 rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer shadow-sm flex items-center gap-1.5 disabled:opacity-70">
                         <template x-if="isSubmitting">
@@ -260,6 +259,9 @@
                                         class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">
                                         Item</th>
                                     <th
+                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">
+                                        Vendors</th>
+                                    <th
                                         class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
                                         Qty</th>
                                 </tr>
@@ -275,6 +277,7 @@
                                                     x-text="item.Comment"></div>
                                             </template>
                                         </td>
+                                        <td class="px-4 py-2.5 text-gray-600" x-text="getVendorName(item)"></td>
                                         <td class="px-4 py-2.5 text-gray-700 text-right tabular-nums"
                                             x-text="item.Quantity || 0"></td>
                                     </tr>
@@ -282,18 +285,23 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="flex items-center gap-1.5">
+                        <button @click="downloadPDF()"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#1B5CA8] text-white hover:bg-[#14457e] transition-colors cursor-pointer shadow-sm">
+                            <i class="bi bi-file-earmark-pdf"></i> Download PDF
+                        </button>
+                        <div class="flex items-center gap-2.5 fade-in" id="actionButtons" x-show="showActionButtons"
+                            x-cloak>
+                            <button @click="approveRFQ()"
+                                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors no-underline cursor-pointer shadow-sm">
+                                <i class="bi bi-check-lg"></i> <span class="btn-text">Submit For Quote Comparison</span>
+                            </button>
+                            <button @click="rejectRFQ()"
+                                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors no-underline cursor-pointer shadow-sm">
+                                <i class="bi bi-x-lg"></i> Reject
+                            </button>
+                        </div>
 
-                    <!-- Action Buttons -->
-                    <div class="flex items-center gap-2.5 fade-in" id="actionButtons" x-show="showActionButtons"
-                        x-cloak>
-                        <button @click="approveRFQ()"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors no-underline cursor-pointer shadow-sm">
-                            <i class="bi bi-check-lg"></i> <span class="btn-text">Submit For Quote Comparison</span>
-                        </button>
-                        <button @click="rejectRFQ()"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors no-underline cursor-pointer shadow-sm">
-                            <i class="bi bi-x-lg"></i> Reject
-                        </button>
                         <button @click="cancelRFQ()"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors no-underline cursor-pointer shadow-sm">
                             <i class="bi bi-slash-circle"></i> Cancel
@@ -366,6 +374,9 @@
                 </div>
             </div>
         </div>
+
+
+
     </div>
 
     <script>
@@ -439,10 +450,17 @@
                     return this.rec.RFQ_Ref_Number || (this.rec.RFQ_Number ? 'RFQ-' + this.rec.RFQ_Number : '–');
                 },
 
+                get prRefDisplay() {
+                    // PR_Ref_Number is often empty, fall back to nested PR_Ref.PR_Number
+                    if (this.rec.PR_Ref_Number) return this.rec.PR_Ref_Number;
+                    if (this.rec.PR_Ref && typeof this.rec.PR_Ref === 'object' && this.rec.PR_Ref.PR_Number) return this.rec.PR_Ref.PR_Number;
+                    return 'N/A';
+                },
+
                 get detailFields() {
                     return [
                         { label: 'RFQ Number', value: this.rfqNumber },
-                        { label: 'PR Reference', value: this.rec.PR_Ref_Number },
+                        { label: 'PR Reference', value: this.prRefDisplay },
                         { label: 'Requester', value: this.rec.Added_User },
                         { label: 'Request Date', value: this.formatDate(this.rec.Request_Date) },
                         { label: 'Due Date', value: this.formatDate(this.rec.Due_Date) },
@@ -509,7 +527,7 @@
                     try {
                         let prId = Array.isArray(this.rec.PR_Ref) ? (this.rec.PR_Ref[0]) : undefined;
                         const config = {
-                            form_name: "PR_Action", // Note: Change this to 'RFQ_Action' if your system uses specific action forms per module.
+                            form_name: "PR_Action",
                             payload: {
                                 "data": {
                                     "PR_Number": prId,
@@ -524,7 +542,7 @@
                         this.isSubmitting = false;
                         this.closeModal()
                         if (response.code === 3000) {
-                            this.fetchData(); // Refresh the details & UI
+                            this.fetchData();
                         } else {
                             throw new Error(response.message || 'Action processing failed');
                         }
@@ -544,10 +562,99 @@
                     });
                 },
 
+                escapeHtml(str) {
+                    if (!str) return '–';
+                    const d = document.createElement('div');
+                    d.textContent = str;
+                    return d.innerHTML;
+                },
+
+                async downloadPDF() {
+                    // Build item rows as plain HTML
+                    let itemRows = '';
+                    this.items.forEach((item, i) => {
+                        const name = this.escapeHtml(this.getItemName(item));
+                        const vendors = this.escapeHtml(this.getVendorName(item));
+                        const uom = this.escapeHtml(this.getUOM(item));
+                        const qty = item.Quantity || 0;
+                        const comment = item.Comment ? `<div style="font-size:11px;color:#9ca3af;margin-top:4px;">${this.escapeHtml(item.Comment)}</div>` : '';
+                        itemRows += `
+                            <tr style="border-bottom:1px solid #e5e7eb;">
+                                <td style="padding:10px 14px;color:#6b7280;">${i + 1}</td>
+                                <td style="padding:10px 14px;"><div style="font-weight:700;color:#111827;">${name}</div>${comment}</td>
+                                <td style="padding:10px 14px;color:#4b5563;">${vendors}</td>
+                                <td style="padding:10px 14px;color:#374151;">${uom}</td>
+                                <td style="padding:10px 14px;text-align:right;font-weight:600;color:#111827;">${qty}</td>
+                            </tr>`;
+                    });
+
+                    // Build the full PDF HTML with all data already baked in
+                    const html = `
+                        <div style="width:700px;background:#fff;padding:40px;color:#111827;font-family:Lato,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;">
+                            <div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #1B5CA8;padding-bottom:24px;margin-bottom:32px;">
+                                <div>
+                                    <h1 style="font-size:24px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:#111827;margin:0;">Request for Quotation</h1>
+                                    <p style="color:#6b7280;font-size:13px;margin:6px 0 0 0;">${this.escapeHtml(this.rec.Purpose) || 'Please provide your best quote for the items below.'}</p>
+                                </div>
+                                <div style="text-align:right;">
+                                    <h2 style="font-size:17px;font-weight:700;color:#1B5CA8;margin:0;">APCO Building Solutions</h2>
+                                </div>
+                            </div>
+
+                            <div style="display:flex;justify-content:space-between;margin-bottom:32px;background:#f9fafb;padding:14px 18px;border-radius:8px;border:1px solid #f3f4f6;font-size:13px;">
+                                <div style="line-height:2.2;">
+                                    <p style="margin:0;"><strong style="color:#6b7280;">RFQ Number:</strong> <span style="font-weight:600;">${this.escapeHtml(this.rfqNumber)}</span></p>
+                                    <p style="margin:0;"><strong style="color:#6b7280;">PR Reference:</strong> <span style="font-weight:600;">${this.escapeHtml(this.prRefDisplay)}</span></p>
+                                    <p style="margin:0;"><strong style="color:#6b7280;">Requested By:</strong> <span style="font-weight:600;">${this.escapeHtml(this.rec.Added_User)}</span></p>
+                                </div>
+                                <div style="text-align:right;line-height:2.2;">
+                                    <p style="margin:0;"><strong style="color:#6b7280;">Request Date:</strong> <span style="font-weight:600;">${this.formatDate(this.rec.Request_Date)}</span></p>
+                                    <p style="margin:0;"><strong style="color:#6b7280;">Due Date:</strong> <span style="font-weight:600;">${this.formatDate(this.rec.Due_Date)}</span></p>
+                                    <p style="margin:0;"><strong style="color:#6b7280;">Status:</strong> <span style="font-weight:600;">${this.escapeHtml(this.rec.Status)}</span></p>
+                                </div>
+                            </div>
+
+                            <table style="width:100%;font-size:13px;border-collapse:collapse;margin-bottom:32px;">
+                                <thead>
+                                    <tr style="background:#f3f4f6;border-bottom:2px solid #d1d5db;text-align:left;">
+                                        <th style="padding:10px 14px;font-weight:700;color:#374151;width:36px;">#</th>
+                                        <th style="padding:10px 14px;font-weight:700;color:#374151;">Item Description</th>
+                                        <th style="padding:10px 14px;font-weight:700;color:#374151;width:160px;">Vendors</th>
+                                        <th style="padding:10px 14px;font-weight:700;color:#374151;width:70px;">UOM</th>
+                                        <th style="padding:10px 14px;font-weight:700;color:#374151;text-align:right;width:80px;">Qty</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${itemRows}</tbody>
+                            </table>
+
+                            <div style="padding-top:20px;border-top:1px solid #e5e7eb;font-size:11px;color:#9ca3af;display:flex;justify-content:space-between;">
+                                <p style="margin:0;">This is a system-generated document.</p>
+                                <p style="margin:0;">Printed on: ${new Date().toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                    `;
+
+                    // Create a temporary container, render it, capture, remove
+                    const container = document.createElement('div');
+                    container.innerHTML = html;
+                    document.body.appendChild(container);
+
+                    const opt = {
+                        margin: 0.3,
+                        filename: `${this.rfqNumber}_Details.pdf`,
+                        image: { type: 'jpeg', quality: 1.0 },
+                        html2canvas: { scale: 2, useCORS: true },
+                        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+                    };
+
+                    await html2pdf().set(opt).from(container.firstElementChild).save();
+                    document.body.removeChild(container);
+                },
+
                 get progressData() {
                     let completed = {};
                     let rejectedStepKey = null;
-                    let currentStageKey = 'request_for_quotation'; // Based on context
+                    let currentStageKey = 'request_for_quotation';
 
                     this.actions.forEach(a => {
                         let key = this.stageToStepKey(a.Moved_To);
@@ -643,6 +750,33 @@
                         return itemObj.Item.display_value || itemObj.Item.item_name || '–';
                     }
                     return itemObj.Item ? `Item #${itemObj.Item}` : '–';
+                },
+
+                getUOM(itemObj) {
+                    // UOM is inside the nested Item object
+                    if (itemObj.Item && typeof itemObj.Item === 'object' && itemObj.Item.unit_of_measure) {
+                        return itemObj.Item.unit_of_measure;
+                    }
+                    return itemObj.Unit || '–';
+                },
+
+                getVendorName(itemObj) {
+                    // API returns vendors as 'vendors' (lowercase, plural array)
+                    const vendorList = itemObj.vendors || itemObj.Vendor;
+                    if (!vendorList) return '–';
+
+                    // If it's an array of vendor objects
+                    if (Array.isArray(vendorList)) {
+                        const names = vendorList.map(v => v.display_value || v.Display_Name || v).filter(Boolean);
+                        return names.length > 0 ? names.join(', ') : '–';
+                    }
+
+                    // If it's a single lookup (Object)
+                    if (typeof vendorList === 'object') {
+                        return vendorList.display_value || vendorList.Display_Name || '–';
+                    }
+
+                    return vendorList;
                 },
 
                 formatDate(dateStr, includeTime = false) {

@@ -284,6 +284,9 @@
                                                 class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[10%]">
                                                 Basic Rate</th>
                                             <th
+                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[10%]">
+                                                Negotiated Rate</th>
+                                            <th
                                                 class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[9%]">
                                                 Disc %</th>
                                             <th
@@ -318,6 +321,11 @@
                                                 </td>
                                                 <td class="px-2 py-2">
                                                     <input x-model.number="vendor.Basic_Rate"
+                                                        @input="calculateVendor(vendor)" type="number" step="any"
+                                                        class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <input x-model.number="vendor.Negotiated_Rate"
                                                         @input="calculateVendor(vendor)" type="number" step="any"
                                                         class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
                                                 </td>
@@ -553,6 +561,9 @@
                                             Basic Rate</th>
                                         <th
                                             class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
+                                            Negotiated Rate</th>
+                                        <th
+                                            class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
                                             Disc %</th>
                                         <th
                                             class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
@@ -582,6 +593,8 @@
                                             <td class="px-4 py-2.5 text-gray-700 text-right tabular-nums"
                                                 x-text="formatINR(vendor.Basic_Rate)"></td>
                                             <td class="px-4 py-2.5 text-gray-700 text-right tabular-nums"
+                                                x-text="formatINR(vendor.Negotiated_Rate)"></td>
+                                            <td class="px-4 py-2.5 text-gray-700 text-right tabular-nums"
                                                 x-text="vendor.Disc ? vendor.Disc + '%' : '–'"></td>
                                             <td class="px-4 py-2.5 text-gray-700 text-right tabular-nums"
                                                 x-text="vendor.GST ? vendor.GST + '%' : '–'"></td>
@@ -604,6 +617,10 @@
                         <button @click="approveVC()"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors no-underline cursor-pointer shadow-sm">
                             <i class="bi bi-check-lg"></i> <span class="btn-text">Finalize & Create Vendor</span>
+                        </button>
+                        <button @click="requestReNegotiation()"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-amber-500 text-white border border-amber-500 hover:bg-amber-600 transition-colors no-underline cursor-pointer shadow-sm">
+                            <i class="bi bi-arrow-repeat"></i> Request For Re Negotiation
                         </button>
                         <button @click="rejectVC()"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors no-underline cursor-pointer shadow-sm">
@@ -760,16 +777,25 @@
                 // ── Computed Properties ── //
 
                 get vcNumber() {
-                    return this.rec.VC_No ? 'VC-' + this.rec.VC_No : '–';
+                    return this.rec.QC_Number ? 'QC-' + this.rec.QC_Number : '–';
                 },
 
                 get detailFields() {
+                    // Find the finalized vendor's negotiated price
+                    let negotiatedPrice = '–';
+                    if (this.rec.Finalized_Vendor && this.vendors.length > 0) {
+                        const finalizedV = this.vendors.find(v => v.Vendor_Name && v.Vendor_Name.toLowerCase() === this.rec.Finalized_Vendor.toLowerCase());
+                        if (finalizedV && finalizedV.Negotiated_Rate) {
+                            negotiatedPrice = this.formatINR(finalizedV.Negotiated_Rate);
+                        }
+                    }
                     return [
                         { label: 'Comparison No.', value: this.vcNumber },
                         { label: 'Item Required', value: this.rec.Item_Name },
                         { label: 'Required Qty', value: (this.rec.Required_Quantity || 0) + ' ' + (this.rec.Unit || '') },
                         { label: 'Deliver To', value: this.rec.Deliver_to_Plant },
                         { label: 'Finalized Vendor', value: this.rec.Finalized_Vendor, isHtml: true, value: `<span class="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-bold">${this.rec.Finalized_Vendor || '–'}</span>` },
+                        { label: 'Negotiated Price', value: negotiatedPrice, bold: true },
                         { label: 'Total Landed Rate', value: this.formatINR(this.rec.Total_Landed_Rate), bold: true },
                     ];
                 },
@@ -828,46 +854,55 @@
                     );
                 },
 
+                requestReNegotiation() {
+                    this.openModal(
+                        "Request Re Negotiation",
+                        "Requested For Re Negotiation",
+                        "Quote Comparison",
+                        "bg-amber-500",
+                        "hover:bg-amber-600"
+                    );
+                },
+
                 async submitAction() {
                     this.isSubmitting = true;
                     try {
                         let prId = this.rec.PR_Ref && this.rec.PR_Ref.ID ? this.rec.PR_Ref.ID : undefined;
 
-                        // 1. Update the record status natively first (per requirements)
+                        // 1. Update the record status
                         const response = await ZOHO.CREATOR.DATA.updateRecordById({
                             report_name: "Quote_Comparison_Report",
                             id: this.recordId,
                             payload: {
-
                                 data: {
                                     "Status": this.pendingStatus
                                 }
                             }
                         });
 
-                        this.isSubmitting = false;
-                        this.closeModal();
-
-                        if (response.code === 3000) {
-                            this.fetchData(); // Refresh UI State post submission
-                        } else {
+                        if (response.code !== 3000) {
                             throw new Error(response.message || 'Action processing failed');
                         }
 
-                        // // 2. Add Audit Trail Action
-                        // const config = {
-                        //     form_name: "PR_Action",
-                        //     payload: {
-                        //         "data": {
-                        //             "PR_Number": prId,
-                        //             "Vendor_Comparison": this.recordId,
-                        //             "Status": this.pendingStatus,
-                        //             "Moved_To": this.pendingStage,
-                        //             "Comment": this.modalComment.trim()
-                        //         }
-                        //     }
-                        // };
-                        // const response2 = await ZOHO.CREATOR.DATA.addRecords(config);
+                        // 2. If Re-Negotiation request, create PR Action record
+                        if (this.pendingStatus === 'Requested For Re Negotiation') {
+                            await ZOHO.CREATOR.DATA.addRecords({
+                                form_name: "PR_Action",
+                                payload: {
+                                    "data": {
+                                        "PR_Number": prId,
+                                        "Vendor_Comparison": this.recordId,
+                                        "Status": "Submitted",
+                                        "Moved_To": "Quote Comparison",
+                                        "Comment": this.modalComment.trim()
+                                    }
+                                }
+                            });
+                        }
+
+                        this.isSubmitting = false;
+                        this.closeModal();
+                        this.fetchData(); // Refresh UI State post submission
 
                     } catch (err) {
                         console.error("API Error: ", err);
@@ -914,6 +949,7 @@
                             GST: v.GST || '',
                             Landed_Rate: v.Landed_Rate || '',
                             Payment_Terms: v.Payment_Terms || '',
+                            Negotiated_Rate: v.Negotiated_Rate || '',
                             Rank: (v.Rank && v.Rank.includes('Yes')) ? 'Yes' : 'No'
                         }));
                     } else {
@@ -953,6 +989,7 @@
                         let row = {
                             "Vendor_Name": v.Vendor_Name,
                             "Basic_Rate": parseFloat(v.Basic_Rate) || 0,
+                            "Negotiated_Rate": parseFloat(v.Negotiated_Rate) || 0,
                             "Disc": parseFloat(v.Disc) || 0,
                             "Freight": parseFloat(v.Freight) || 0,
                             "GST": parseFloat(v.GST) || 0,
@@ -988,15 +1025,16 @@
                         });
 
                         if (res.code === 3000) {
+                            this.isEditSubmitting = false;
                             this.closeEditModal();
                             this.fetchData(); // Reload details
                         } else {
                             alert('Update failed: ' + (res.message || 'Error occurred'));
+                            this.isEditSubmitting = false;
                         }
                     } catch (err) {
                         console.error("Update Error:", err);
                         alert("An error occurred during update.");
-                    } finally {
                         this.isEditSubmitting = false;
                     }
                 },
@@ -1013,13 +1051,16 @@
 
                 calculateVendor(vendor) {
                     let basic = parseFloat(vendor.Basic_Rate) || 0;
+                    let negotiated = parseFloat(vendor.Negotiated_Rate) || 0;
+                    // Use Negotiated Rate as the base when available, otherwise fall back to Basic Rate
+                    let baseRate = negotiated > 0 ? negotiated : basic;
                     let discPct = parseFloat(vendor.Disc) || 0;
                     let freight = parseFloat(vendor.Freight) || 0;
                     let gstPct = parseFloat(vendor.GST) || 0;
 
-                    let discountAmount = basic * (discPct / 100);
-                    let basicAfterDisc = basic - discountAmount;
-                    let amountWithFreight = basicAfterDisc + freight;
+                    let discountAmount = baseRate * (discPct / 100);
+                    let rateAfterDisc = baseRate - discountAmount;
+                    let amountWithFreight = rateAfterDisc + freight;
                     let gstAmount = amountWithFreight * (gstPct / 100);
 
                     vendor.Landed_Rate = parseFloat((amountWithFreight + gstAmount).toFixed(2));

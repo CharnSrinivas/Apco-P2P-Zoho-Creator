@@ -312,6 +312,12 @@
                     <span class="w-[5px] h-[5px] rounded-full bg-red-500 shrink-0"></span>Rejected
                   </span>
                 </template>
+                <template x-if="rec.Status === 'Requested For Re Negotiation'">
+                  <span
+                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border border-amber-300 bg-amber-50 text-amber-700">
+                    <span class="w-[5px] h-[5px] rounded-full bg-amber-500 shrink-0"></span>Re Negotiation
+                  </span>
+                </template>
               </td>
               <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap max-w-[140px]">
                 <span class="text-[12px] font-medium text-gray-800" x-text="rec.Finalized_Vendor || '–'"></span>
