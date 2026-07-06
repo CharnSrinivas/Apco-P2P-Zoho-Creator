@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vendor Comparison Detail</title>
+    <title>Quote Comparison Detail</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet"
@@ -201,7 +201,7 @@
 
                 <div
                     class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50 shrink-0 rounded-t-[11px]">
-                    <h3 class="text-[15px] font-bold text-gray-800">Edit Vendor Comparison</h3>
+                    <h3 class="text-[15px] font-bold text-gray-800">Edit Quote Comparison</h3>
                     <button @click="closeEditModal()" type="button"
                         class="text-gray-400 hover:text-gray-700 transition-colors"><i
                             class="bi bi-x-lg text-lg"></i></button>
@@ -417,7 +417,7 @@
 
         <div x-show="isLoading" class="flex flex-col items-center justify-center py-24 gap-3">
             <div class="vc-spinner"></div>
-            <div class="text-sm text-gray-400 font-medium">Loading Vendor Comparison…</div>
+            <div class="text-sm text-gray-400 font-medium">Loading Quote Comparison…</div>
         </div>
 
         <div x-show="hasError" class="text-center py-24">
@@ -435,7 +435,7 @@
                         <button
                             onclick="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',window:'same',url:'#Page:Quote_Comparison'})"
                             class="text-[#1B5CA8] hover:text-[#14457e] font-medium transition-colors no-underline cursor-pointer">
-                            Vendor Comparisons
+                            Quote Comparisons
                         </button>
                         <i class="bi bi-chevron-right text-[11px] text-gray-400"></i>
                         <span class="text-gray-500 font-medium" x-text="vcNumber"></span>
@@ -716,7 +716,7 @@
                 processSteps: [
                     { key: 'purchase_requisition', label: 'Purchase Requisition', icon: 'bi-receipt' },
                     { key: 'request_for_quotation', label: 'Request For Quotation', icon: 'bi-bucket' },
-                    { key: 'vendor_comparison', label: 'Vendor Comparison', icon: 'bi-shop-window' },
+                    { key: 'quote_comparison', label: 'Quote Comparison', icon: 'bi-shop-window' },
                     { key: 'purchase_order', label: 'Purchase Order', icon: 'bi-cart-check' },
                     { key: 'grn', label: 'GRN', icon: 'bi-box-seam' },
                     { key: 'bill', label: 'Bill', icon: 'bi-coin' },
@@ -810,7 +810,7 @@
 
                 approveVC() {
                     this.openModal(
-                        "Approve Vendor Comparison",
+                        "Approve Quote Comparison",
                         "Finalized",
                         "Purchase Order",
                         "bg-emerald-600",
@@ -820,9 +820,9 @@
 
                 rejectVC() {
                     this.openModal(
-                        "Reject Vendor Comparison",
+                        "Reject Quote Comparison",
                         "Rejected",
-                        "Vendor Comparison",
+                        "Quote Comparison",
                         "bg-red-600",
                         "hover:bg-red-700"
                     );
@@ -1116,7 +1116,7 @@
                 get progressData() {
                     let completed = {};
                     let rejectedStepKey = null;
-                    let currentStageKey = 'vendor_comparison';
+                    let currentStageKey = 'quote_comparison';
 
                     this.actions.forEach(a => {
                         let key = this.stageToStepKey(a.Moved_To);
@@ -1129,10 +1129,10 @@
                         }
                     });
 
-                    // Force early steps to true since we are at Vendor Comparison
+                    // Force early steps to true since we are at Quote Comparison
                     completed['purchase_requisition'] = true;
                     completed['request_for_quotation'] = true;
-                    completed['vendor_comparison'] = true;
+                    completed['quote_comparison'] = true;
 
                     let rejectedIdx = this.processSteps.findIndex(s => s.key === rejectedStepKey);
                     let currentIdx = this.processSteps.findIndex(s => s.key === currentStageKey);
@@ -1253,7 +1253,7 @@
                     const s = stage.toLowerCase().trim();
                     if (s === 'purchase requisition') return 'purchase_requisition';
                     if (s === 'request for quotation') return 'request_for_quotation';
-                    if (s === 'vendor comparison') return 'vendor_comparison';
+                    if (s === 'quote comparison') return 'quote_comparison';
                     if (s === 'purchase order') return 'purchase_order';
                     if (s === 'grn') return 'grn';
                     if (s === 'bill') return 'bill';

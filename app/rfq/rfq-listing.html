@@ -20,8 +20,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.default.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -420,14 +420,16 @@
                 Add Item</button>
             </div>
             <div class="overflow-x-auto" style="overflow:visible;">
-              <table class="w-full border-collapse min-w-[600px]">
+              <table class="w-full border-collapse min-w-[700px]">
                 <thead class="bg-white border-b border-gray-200">
                   <tr>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[35%]">Item
+                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[26%]">Item
                     </th>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[15%]">Unit
+                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[26%]">Vendor(s)
                     </th>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[12%]">Qty</th>
+                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[10%]">Unit
+                    </th>
+                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[10%]">Qty</th>
                     <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left">Comment</th>
                     <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-center w-10"></th>
                   </tr>
@@ -437,6 +439,9 @@
                     <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors bg-white">
                       <td class="px-3 py-2 relative">
                         <select x-init="initItemSelect($el, item)" class="w-full text-xs" required></select>
+                      </td>
+                      <td class="px-3 py-2 relative">
+                        <select x-init="initVendorRowSelect($el, item)" class="w-full text-xs" multiple></select>
                       </td>
                       <td class="px-3 py-2"><input type="text" x-model="item.unit"
                           class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]"
@@ -492,10 +497,12 @@
         ITEMS_REPORT_NAME: 'Items_Report',
         UNIT_REPORT_NAME: 'Unit_Report',
         PR_REPORT_NAME: 'Purchase_Requisition_Report',
+        VENDOR_REPORT_NAME: 'Vendor_Report',
 
         allRecords: [],
         itemMasters: [],
         unitMasters: [],
+        vendorMasters: [],
 
         filter: 'all',
         search: '',
@@ -514,12 +521,13 @@
         rfqForm: { dept: '', reqDate: '', dueDate: '', prRef: '', purpose: '', items: [] },
 
         // TS instances manager
-        tsInstances: { dept: null, pr: null, items: [] },
+        tsInstances: { dept: null, pr: null, items: [], vendorItems: [] },
 
         init() {
           this.fetchRecords();
           this.fetchItemMasters();
           this.fetchUnitMasters();
+          this.fetchVendorMasters();
 
           this.$watch('search', Alpine.debounce(() => {
             this.page = 1;
@@ -645,6 +653,28 @@
           } catch (err) { console.error('Failed to load units', err); }
         },
 
+        // Preload the full Vendor Master list once, so each item row's Vendor dropdown
+        // is instantly searchable without a network round-trip per keystroke. Any vendor
+        // added in Vendor Master shows up here the next time this modal opens.
+        async fetchVendorMasters() {
+          try {
+            let accumulated = [];
+            let cursor = null;
+            do {
+              let config = { report_name: this.VENDOR_REPORT_NAME, max_records: 200 };
+              if (cursor) config.record_cursor = cursor;
+              let res = await ZOHO.CREATOR.DATA.getRecords(config);
+              if (res.code === 3000 && res.data) {
+                accumulated = accumulated.concat(res.data);
+                cursor = res.data.length >= 200 ? res.record_cursor : null;
+              } else {
+                cursor = null;
+              }
+            } while (cursor);
+            this.vendorMasters = accumulated;
+          } catch (err) { console.error('Failed to load vendors', err); }
+        },
+
         // --- Action: Update Record Status ---
         async updateRecordStatus(recordId, newStatus) {
           try {
@@ -752,6 +782,8 @@
           };
           this.isModalOpen = true;
 
+          this.fetchVendorMasters();
+
           this.$nextTick(() => {
             this.initDeptSelect();
             this.initPrSelect();
@@ -765,10 +797,13 @@
           if (this.tsInstances.pr) this.tsInstances.pr.destroy();
           this.tsInstances.items.forEach(ts => ts && ts.destroy());
           this.tsInstances.items = [];
+          this.tsInstances.vendorItems.forEach(ts => ts && ts.destroy());
+          this.tsInstances.vendorItems = [];
         },
 
         addItemRow() {
-          this.rfqForm.items.push({ uid: Date.now() + Math.random(), id: '', unit: '', quantity: 1, comment: '' });
+          // vendorIds is now an ARRAY to support multiple vendors per item row
+          this.rfqForm.items.push({ uid: Date.now() + Math.random(), id: '', vendorIds: [], unit: '', quantity: 1, comment: '' });
         },
 
         removeItemRow(index) {
@@ -776,6 +811,10 @@
           if (this.tsInstances.items[index]) {
             this.tsInstances.items[index].destroy();
             this.tsInstances.items.splice(index, 1);
+          }
+          if (this.tsInstances.vendorItems[index]) {
+            this.tsInstances.vendorItems[index].destroy();
+            this.tsInstances.vendorItems.splice(index, 1);
           }
         },
 
@@ -836,11 +875,58 @@
           this.tsInstances.items.push(ts);
         },
 
+        initVendorRowSelect(el, itemRef) {
+          let ts = new TomSelect(el, {
+            valueField: 'ID',
+            labelField: 'Display_Name',
+            searchField: ['Display_Name', 'Company_Name'],
+            options: this.vendorMasters,
+            maxItems: null,           // <-- unlimited selections (was: 1)
+            plugins: ['remove_button'],
+            placeholder: 'Search & select vendor(s)...',
+            onChange: (val) => {
+              // TomSelect returns an array of selected values when maxItems !== 1
+              itemRef.vendorIds = Array.isArray(val) ? val : (val ? [val] : []);
+            },
+            render: {
+              option: (d, e) => `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>`,
+              item: (d, e) => `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>`
+            },
+            load: (query, callback) => {
+              if (!query.length) return callback();
+              var q = query.replace(/'/g, "\\'");
+              ZOHO.CREATOR.DATA.getRecords({
+                report_name: this.VENDOR_REPORT_NAME,
+                criteria: `(Display_Name.contains("${q}") || Company_Name.contains("${q}"))`
+              }).then(res => {
+                const data = res.code === 3000 ? res.data : [];
+                // keep the shared vendorMasters cache warm with anything found live
+                data.forEach(v => {
+                  if (!this.vendorMasters.some(existing => existing.ID === v.ID)) this.vendorMasters.push(v);
+                });
+                callback(data);
+              }).catch(() => callback());
+            }
+          });
+
+          // Restore previously selected vendors (e.g. when items are pulled in from a PR)
+          if (itemRef.vendorIds && itemRef.vendorIds.length) {
+            itemRef.vendorIds.forEach((vId, i) => {
+              if (!ts.options[vId]) {
+                const fallbackName = (itemRef.tempVendorNames && itemRef.tempVendorNames[i]) || ('Vendor #' + vId);
+                ts.addOption({ ID: String(vId), Display_Name: fallbackName });
+              }
+            });
+            ts.setValue(itemRef.vendorIds);
+          }
+          this.tsInstances.vendorItems.push(ts);
+        },
+
         async fetchPRDetailsForRFQ(prId) {
           Toast.fire({ icon: 'info', title: 'Fetching PR details...' });
           try {
             let res = await ZOHO.CREATOR.DATA.invokeCustomApi({
-              api_name: "Fetch_PR_Details", http_method: "GET", query_params: 'recId=' + prId,
+              api_name: "Fetch_PR_Details", http_method: "GET", query_params: 'recId=' + prId
             });
 
             if (res && res.result && res.result.length > 0) {
@@ -849,6 +935,8 @@
               // Clear TS instances
               this.tsInstances.items.forEach(ts => ts && ts.destroy());
               this.tsInstances.items = [];
+              this.tsInstances.vendorItems.forEach(ts => ts && ts.destroy());
+              this.tsInstances.vendorItems = [];
               this.rfqForm.items = [];
 
               if (items.length === 0) {
@@ -858,10 +946,23 @@
               }
 
               items.forEach(prItem => {
+                let vendorIds = [];
+                let tempVendorNames = [];
+                if (Array.isArray(prItem.Vendor)) {
+                  prItem.Vendor.forEach(v => {
+                    if (v && v.ID) { vendorIds.push(v.ID); tempVendorNames.push(v.zc_display_value || v.Display_Name || ''); }
+                  });
+                } else if (prItem.Vendor && prItem.Vendor.ID) {
+                  vendorIds.push(prItem.Vendor.ID);
+                  tempVendorNames.push(prItem.Vendor.zc_display_value || prItem.Vendor.Display_Name || '');
+                }
+
                 this.rfqForm.items.push({
                   uid: Date.now() + Math.random(),
                   id: prItem.Item.ID,
                   tempName: prItem.Item.item_name, // fallback for TomSelect render
+                  vendorIds: vendorIds,
+                  tempVendorNames: tempVendorNames,
                   unit: prItem.Unit || '',
                   quantity: prItem.Quantity || 1,
                   comment: ''
@@ -879,6 +980,10 @@
             Toast.fire({ icon: 'error', title: 'Please complete all item selections.' });
             return;
           }
+          if (this.rfqForm.items.some(i => !i.vendorIds || i.vendorIds.length === 0)) {
+            Toast.fire({ icon: 'error', title: 'Please select at least one vendor for every item.' });
+            return;
+          }
 
           this.isSubmitting = true;
           try {
@@ -891,12 +996,14 @@
                 Purpose: this.rfqForm.purpose,
                 Status: "Submitted",
                 Items: this.rfqForm.items.map(i => ({
-                  Item: i.id, Unit: i.unit, Quantity: i.quantity, Comment: i.comment
+                  Item: i.id, Vendor: [...i.vendorIds], Unit: i.unit, Quantity: i.quantity, Comment: i.comment
                 }))
               }
             };
 
-            let res = await ZOHO.CREATOR.DATA.addRecords({ form_name: "Request_For_Quotation", payload });
+            const plainPayload = JSON.parse(JSON.stringify(payload));
+
+            let res = await ZOHO.CREATOR.DATA.addRecords({ form_name: "Request_For_Quotation", payload: plainPayload });
             if (res.code === 3000) {
               Toast.fire({ icon: 'success', title: 'RFQ created successfully!' });
               this.closeModal();

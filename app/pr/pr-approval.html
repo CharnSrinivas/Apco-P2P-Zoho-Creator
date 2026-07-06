@@ -20,8 +20,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.default.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
   <style>
     /* ── Modal overlay ── */
@@ -369,7 +369,7 @@
         if (rec.Status && rec.Status.toLowerCase() === 'rejected') return 'rejected';
         var stage = rec.Current_Stage;
         if (!stage || stage === 'Purchase Requisition') return 'pending';
-        if (['Request For Quotation', "Vendor Comparison", 'Purchase Order', "Bill", "Payment"].includes(stage))
+        if (['Request For Quotation', "Quote Comparison", 'Purchase Order', "Bill", "Payment"].includes(stage))
           return 'approved';
         return 'pending';
       }
@@ -803,7 +803,7 @@
         const counts = [
           { el: $statTotal, tabEl: $tabAll, crit: combineCriteria('') },
           { el: $statPending, tabEl: $tabPending, crit: combineCriteria('(Current_Stage == "Purchase Requisition" && Status != "Rejected")') },
-          { el: $statApproved, tabEl: $tabApproved, crit: combineCriteria('(( Current_Stage == "Request For Quotation" || Current_Stage == "Vendor Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill" || Current_Stage == "Payment") && Status != "Rejected")') },
+          { el: $statApproved, tabEl: $tabApproved, crit: combineCriteria('(( Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill" || Current_Stage == "Payment") && Status != "Rejected")') },
           { el: $statRejected, tabEl: $tabRejected, crit: combineCriteria('(Status == "Rejected")') }
         ];
 
@@ -824,7 +824,7 @@
       function buildStatusCriteria(filter) {
         if (!filter || filter === 'all') return '';
         if (filter === 'pending') return '(Current_Stage == "Purchase Requisition" && Status != "Rejected")';
-        if (filter === 'approved') return '(( Current_Stage == "Request For Quotation" || Current_Stage == "Vendor Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill" || Current_Stage == "Payment") && Status != "Rejected")';
+        if (filter === 'approved') return '(( Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill" || Current_Stage == "Payment") && Status != "Rejected")';
         if (filter === 'rejected') return '(Status == "Rejected")';
         return '';
       }

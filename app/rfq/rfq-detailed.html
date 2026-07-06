@@ -288,8 +288,7 @@
                         x-cloak>
                         <button @click="approveRFQ()"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors no-underline cursor-pointer shadow-sm">
-                            <i class="bi bi-check-lg"></i> <span class="btn-text">Approve & Submit For Vendor
-                                Comparison</span>
+                            <i class="bi bi-check-lg"></i> <span class="btn-text">Submit For Quote Comparison</span>
                         </button>
                         <button @click="rejectRFQ()"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors no-underline cursor-pointer shadow-sm">
@@ -394,7 +393,7 @@
                 processSteps: [
                     { key: 'purchase_requisition', label: 'Purchase Requisition', icon: 'bi-receipt' },
                     { key: 'request_for_quotation', label: 'Request For Quotation', icon: 'bi-bucket' },
-                    { key: 'vendor_comparison', label: 'Vendor Comparison', icon: 'bi-shop-window' },
+                    { key: 'quote_comparison', label: 'Quote Comparison', icon: 'bi-shop-window' },
                     { key: 'purchase_order', label: 'Purchase Order', icon: 'bi-cart-check' },
                     { key: 'grn', label: 'GRN', icon: 'bi-box-seam' },
                     { key: 'bill', label: 'Bill', icon: 'bi-coin' },
@@ -487,9 +486,9 @@
 
                 approveRFQ() {
                     this.openModal(
-                        "Approve RFQ",
+                        "Approve RFQ & Submit For Quote Comparison",
                         "Approved",
-                        "Vendor Comparison",
+                        "Quote Comparison",
                         "bg-emerald-600",
                         "hover:bg-emerald-700"
                     );
@@ -499,7 +498,7 @@
                     this.openModal(
                         "Reject RFQ",
                         "Rejected",
-                        "Vendor Comparison",
+                        "Quote Comparison",
                         "bg-red-600",
                         "hover:bg-red-700"
                     );
@@ -511,24 +510,24 @@
                         let prId = Array.isArray(this.rec.PR_Ref) ? (this.rec.PR_Ref[0]) : undefined;
                         const config = {
                             form_name: "PR_Action", // Note: Change this to 'RFQ_Action' if your system uses specific action forms per module.
-                                payload: {
-                                    "data": {
-                                        "PR_Number": prId,
-                                        "Request_For_Quotation": this.recordId,
-                                        "Status": this.pendingStatus,
-                                        "Moved_To": this.pendingStage,
+                            payload: {
+                                "data": {
+                                    "PR_Number": prId,
+                                    "Request_For_Quotation": this.recordId,
+                                    "Status": this.pendingStatus,
+                                    "Moved_To": this.pendingStage,
                                     "Comment": this.modalComment.trim()
                                 }
                             }
                         };
                         const response = await ZOHO.CREATOR.DATA.addRecords(config);
-                            this.isSubmitting = false;
+                        this.isSubmitting = false;
                         this.closeModal()
                         if (response.code === 3000) {
                             this.fetchData(); // Refresh the details & UI
                         } else {
-                                throw new Error(response.message || 'Action processing failed');
-                            }
+                            throw new Error(response.message || 'Action processing failed');
+                        }
                     } catch (err) {
                         console.error("API Error: ", err);
                         alert("An error occurred while submitting. Please try again.");
@@ -672,7 +671,7 @@
                     const s = stage.toLowerCase().trim();
                     if (s === 'purchase requisition') return 'purchase_requisition';
                     if (s === 'request for quotation') return 'request_for_quotation';
-                    if (s === 'vendor comparison') return 'vendor_comparison';
+                    if (s === 'quote comparison') return 'quote_comparison';
                     if (s === 'purchase order') return 'purchase_order';
                     if (s === 'grn') return 'grn';
                     if (s === 'bill') return 'bill';

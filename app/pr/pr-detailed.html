@@ -265,7 +265,7 @@
             const PROCESS_STEPS = [
                 { key: 'purchase_requisition', label: 'Purchase Requisition', icon: 'bi-receipt' },
                 { key: 'request_for_quotation', label: 'Request For Quotation', icon: 'bi-bucket' },
-                { key: 'vendor_comparison', label: 'Vendor Comparison', icon: 'bi-shop-window' },
+                { key: 'quote_comparison', label: 'Quote Comparison', icon: 'bi-shop-window' },
                 { key: 'purchase_order', label: 'Purchase Order', icon: 'bi-cart-check' },
                 { key: 'grn', label: 'GRN', icon: 'bi-box-seam' },
                 { key: 'bill', label: 'Bill', icon: 'bi-coin' },
@@ -346,7 +346,7 @@
                 const s = stage.toLowerCase().trim();
                 if (s === 'purchase requisition') return 'purchase_requisition';
                 if (s === 'request for quotation') return 'request_for_quotation';
-                if (s === 'vendor comparison') return 'vendor_comparison';
+                if (s === 'quote comparison') return 'quote_comparison';
                 if (s === 'purchase order') return 'purchase_order';
                 if (s === 'grn') return 'grn';
                 if (s === 'bill') return 'bill';

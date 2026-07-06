@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vendor Comparison Listing & Creation</title>
+  <title>Quote Comparison Listing & Creation</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
@@ -164,7 +164,7 @@
     </div>
 
     <div class="flex items-center justify-between mt-[18px] mb-2">
-      <span class="text-[13.5px] font-medium text-gray-900">Vendor Comparisons</span>
+      <span class="text-[13.5px] font-medium text-gray-900">Quote Comparisons</span>
     </div>
 
     <div class="flex items-center justify-between gap-2.5 mb-2 flex-wrap">
@@ -192,12 +192,12 @@
           <i
             class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px] pointer-events-none"></i>
           <input x-model="searchQuery" @input.debounce.400ms="fetchRecords()" type="text"
-            placeholder="Search by VC #, Subject, PR..."
+            placeholder="Search by ID#, Subject, PR..."
             class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[230px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10">
         </div>
         <button @click="openModal()"
           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-all shadow-sm">
-          <i class="bi bi-plus-lg"></i> Create VC
+          <i class="bi bi-plus-lg"></i> Create Quote Comparison
         </button>
       </div>
     </div>
@@ -218,9 +218,9 @@
         </colgroup>
         <thead>
           <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
-            <th @click="handleSort('vc_no')" :class="{'sort-active': sortCol === 'vc_no'}" data-sort
+            <th @click="handleSort('qc_no')" :class="{'sort-active': sortCol === 'qc_no'}" data-sort
               class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
-              VC #<span class="sort-indicator" x-text="getSortIcon('vc_no')"></span></th>
+              ID #<span class="sort-indicator" x-text="getSortIcon('qc_no')"></span></th>
             <th @click="handleSort('subject')" :class="{'sort-active': sortCol === 'subject'}" data-sort
               class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
               Subject<span class="sort-indicator" x-text="getSortIcon('subject')"></span></th>
@@ -255,7 +255,7 @@
             <td colspan="10" class="px-3 py-12 text-center">
               <div class="flex flex-col items-center gap-3">
                 <div class="vc-spinner"></div>
-                <div class="text-sm text-gray-400 font-medium">Loading Vendor Comparisons…</div>
+                <div class="text-sm text-gray-400 font-medium">Loading Quote Comparisons…</div>
               </div>
             </td>
           </tr>
@@ -271,7 +271,8 @@
           <template x-for="rec in paginatedRecords" :key="rec.ID">
             <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors duration-150 group">
               <td class="px-3 py-[9px] align-middle whitespace-nowrap"><span
-                  class="font-semibold text-[#1B5CA8] font-mono text-[11px]" x-text="rec.VC_No || '–'"></span></td>
+                  class="font-semibold text-[#1B5CA8] font-mono text-[11px]" x-text="rec.QC_Ref_Number || '–'"></span>
+              </td>
               <td
                 class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900 max-w-[160px]"
                 x-text="rec.Quote_Comparison_Subject || '–'"></td>
@@ -287,7 +288,7 @@
               </td>
               <td
                 class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-gray-600 max-w-[140px]"
-                x-text="rec.Item_Name || '–'"></td>
+                x-text="rec.Item_Master.item_name || '–'"></td>
               <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[12px]"
                 x-text="(rec.Required_Quantity || '0') + ' ' + (rec.Unit || '')"></td>
               <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[11px] text-gray-500"
@@ -375,7 +376,7 @@
 
         <div
           class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50 shrink-0 rounded-t-[11px]">
-          <h3 class="text-[15px] font-bold text-gray-800">New Vendor Comparison</h3>
+          <h3 class="text-[15px] font-bold text-gray-800">New Quote Comparison</h3>
           <button @click="closeModal()" type="button" class="text-gray-400 hover:text-gray-700 transition-colors"><i
               class="bi bi-x-lg text-lg"></i></button>
         </div>
@@ -592,7 +593,7 @@
       Alpine.data('vcApp', () => ({
         // Constants
         REPORT_NAME: 'Quote_Comparison_Report',
-        FORM_NAME: 'Quote_Comparison',
+        FORM_NAME: 'Quote_Comparison1',
         PR_REPORT_NAME: 'Purchase_Requisition_Report',
         FETCH_BATCH_SIZE: 200,
 
@@ -672,7 +673,7 @@
 
         computeStats() {
           let q = this.searchQuery.replace(/'/g, "\\'");
-          let searchCrit = this.searchQuery ? `(VC_No.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))` : '';
+          let searchCrit = this.searchQuery ? `(QC_Ref_Number.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))` : '';
 
           let combine = (statusCrit) => [searchCrit, statusCrit].filter(Boolean).join(' && ');
 
@@ -686,7 +687,7 @@
           map.forEach(item => {
             let config = { report_name: this.REPORT_NAME };
             if (item.crit) config.criteria = item.crit;
-            ZOHO.ATOR.DATA.getRecordCount(config)
+            ZOHO.CREATOR.DATA.getRecordCount(config)
               .then(res => this.stats[item.key] = res.result ? res.result.records_count : 0)
               .catch(() => this.stats[item.key] = 0);
           });
@@ -695,7 +696,7 @@
         fetchRecords() {
           this.isLoading = true;
           let q = this.searchQuery.replace(/'/g, "\\'");
-          let searchCrit = this.searchQuery ? `(VC_No.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))` : '';
+          let searchCrit = this.searchQuery ? `(QC_Ref_Number.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))` : '';
 
           let statusCrit = '';
           if (this.filter === 'submitted') statusCrit = '(Status == "Submitted" || (Status == "" && Finalized_Vendor == ""))';
@@ -733,7 +734,7 @@
         applySort() {
           let getVal = (rec, col) => {
             switch (col) {
-              case 'vc_no': return (rec.VC_No || '').toString().toLowerCase();
+              case 'qc_no': return (rec.QC_Ref_Number || '').toString().toLowerCase();
               case 'subject': return (rec.Quote_Comparison_Subject || '').toString().toLowerCase();
               case 'pr_ref': return (rec.PR_Ref && rec.PR_Ref.zc_display_value) ? rec.PR_Ref.zc_display_value.toLowerCase() : '';
               case 'qty': return parseFloat(rec.Required_Quantity) || 0;
@@ -860,9 +861,9 @@
               self.form.PR_Ref = value;
               if (value) {
                 const selectedPr = this.options[value];
-                if (selectedPr && selectedPr.Request_For_Quotation_RFQ_Ref_Number && selectedPr.Request_For_Quotation_RFQ_Ref_Number.ID && self.rfqTsInstance) {
-                  const rfqId = selectedPr.Request_For_Quotation_RFQ_Ref_Number.ID;
-                  const rfqDisplay = selectedPr.Request_For_Quotation_RFQ_Ref_Number.zc_display_value || selectedPr.Request_For_Quotation_RFQ_Ref_Number.RFQ_Ref_Number;
+                if (selectedPr && selectedPr.Request_For_Quotation_RFQ_Ref_Number && selectedPr.Request_For_Quotation_RFQ_Ref_Number[0].ID && self.rfqTsInstance) {
+                  const rfqId = selectedPr.Request_For_Quotation_RFQ_Ref_Number[0].ID;
+                  const rfqDisplay = selectedPr.Request_For_Quotation_RFQ_Ref_Number[0].zc_display_value || selectedPr.Request_For_Quotation_RFQ_Ref_Number[0].RFQ_Ref_Number;
                   self.rfqTsInstance.addOption({ ID: rfqId, RFQ_Ref_Number: rfqDisplay });
                   self.rfqTsInstance.setValue(rfqId);
                   self.form.RFQ_Ref = rfqId;
@@ -876,7 +877,7 @@
             load: function (query, callback) {
               if (!query.length) return callback();
               var q = query.replace(/'/g, "\\'");
-              ZOHO.CREATOR.DATA.getRecords({ report_name: self.PR_REPORT_NAME, criteria: `(Current_Stage == "Request For Quotation") && (PR_Number.contains("${q}")))` })
+              ZOHO.CREATOR.DATA.getRecords({ report_name: self.PR_REPORT_NAME, criteria: `(Current_Stage == "Quote Comparison") && (PR_Number.contains("${q}")))` })
                 .then(res => { callback((res.code === 3000 && res.data) ? res.data : []); })
                 .catch(() => callback());
             },
@@ -1059,7 +1060,7 @@
               }
             } else {
               this.isSubmitting = false;
-              this.toast('Failed to create VC: ' + (res.message || 'Error'), 'error');
+              this.toast('Failed to create quote comparison: ' + (res.message || 'Error'), 'error');
             }
           }).catch(err => {
             this.isSubmitting = false;
@@ -1069,7 +1070,7 @@
 
         completeSubmission() {
           this.closeModal();
-          this.toast('Vendor Comparison created successfully!', 'success');
+          this.toast('Quote Comparison created successfully!', 'success');
           this.searchQuery = '';
           this.isSubmitting = false;
           this.fetchRecords();

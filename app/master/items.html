@@ -9,11 +9,11 @@
   <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.default.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
   <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
   <style>
@@ -55,31 +55,34 @@
 <body class="bg-gray-50 p-6 font-[Lato] text-[13px] text-gray-700 antialiased">
   <div x-data="itemMaster()" x-init="initApp()" class="max-w-6xl mx-auto" x-cloak>
 
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="text-[16px] font-bold text-gray-900">Items Master</h2>
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h2 class="text-[19px] font-bold text-gray-900 tracking-tight">Items Master</h2>
+        <p class="text-[12px] text-gray-400 mt-0.5">Manage your product & material catalog</p>
+      </div>
       <div class="flex gap-2 items-center">
         <div class="relative">
           <i class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px]"></i>
           <input x-model="searchQuery" @input.debounce.400ms="page = 1; fetchRecords()" type="text"
             placeholder="Search items..."
-            class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[230px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10">
+            class="py-2 pl-7 pr-2.5 border border-gray-200 rounded-lg text-xs text-gray-700 bg-white w-[230px] shadow-sm focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10">
         </div>
         <button @click="openModal()"
-          class="px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] shadow-sm"><i
+          class="px-3.5 py-2 bg-[#1B5CA8] text-white rounded-lg text-xs font-semibold hover:bg-[#12427b] shadow-sm shadow-[#1B5CA8]/20 transition-colors"><i
             class="bi bi-plus-lg"></i> Add Item</button>
       </div>
     </div>
 
-    <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
+    <div class="bg-white border border-gray-200 rounded-xl overflow-x-auto shadow-sm">
       <table class="w-full border-collapse">
         <thead>
-          <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
-            <th class="px-4 py-2.5 text-[11px] font-semibold text-gray-500 text-left">Item Name</th>
-            <th class="px-4 py-2.5 text-[11px] font-semibold text-gray-500 text-left">Category</th>
-            <th class="px-4 py-2.5 text-[11px] font-semibold text-gray-500 text-left">Price</th>
-            <th class="px-4 py-2.5 text-[11px] font-semibold text-gray-500 text-left">Status</th>
+          <tr class="bg-gray-50/80 border-b border-gray-200">
+            <th class="px-4 py-3 text-[11px] font-bold text-gray-400 uppercase tracking-wide text-left">Item Name</th>
+            <th class="px-4 py-3 text-[11px] font-bold text-gray-400 uppercase tracking-wide text-left">Category</th>
+            <th class="px-4 py-3 text-[11px] font-bold text-gray-400 uppercase tracking-wide text-left">Price</th>
+            <th class="px-4 py-3 text-[11px] font-bold text-gray-400 uppercase tracking-wide text-left">Status</th>
             <th
-              class="px-4 py-2.5 text-[11px] font-semibold text-gray-500 text-left bg-gray-50 sticky-action-cell w-[100px]">
+              class="px-4 py-3 text-[11px] font-bold text-gray-400 uppercase tracking-wide text-left bg-gray-50/80 sticky-action-cell w-[100px]">
               Actions</th>
           </tr>
         </thead>
@@ -97,16 +100,31 @@
               items found</td>
           </tr>
           <template x-for="rec in paginatedRecords" :key="rec.ID">
-            <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors">
-              <td class="px-4 py-3 font-semibold text-[#1B5CA8]" x-text="rec.item_name"></td>
-              <td class="px-4 py-3" x-text="rec.category || '–'"></td>
-              <td class="px-4 py-3" x-text="rec.unit_price ? '₹ ' + rec.unit_price : '–'"></td>
-              <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold"
-                  :class="rec.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'"
-                  x-text="rec.status"></span></td>
-              <td class="px-4 py-3 bg-white sticky-action-cell">
+            <tr class="border-b border-gray-100 hover:bg-[#F7FAFD] transition-colors">
+              <td class="px-4 py-3.5 font-semibold text-[#1B5CA8]" x-text="rec.item_name"></td>
+              <td class="px-4 py-3.5">
+                <span
+                  class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200"
+                  x-text="categoryDisplay(rec)"></span>
+              </td>
+              <td class="px-4 py-3.5 font-medium text-gray-700" x-text="rec.unit_price ? '₹ ' + rec.unit_price : '–'">
+              </td>
+              <td class="px-4 py-3.5">
+                <template x-if="rec.status">
+                  <span
+                    class="inline-flex items-center gap-1.5 pl-2 pr-2.5 py-1 rounded-full text-[11px] font-bold border"
+                    :class="statusClass(rec.status)">
+                    <span class="w-[6px] h-[6px] rounded-full" :class="statusDotClass(rec.status)"></span>
+                    <span x-text="rec.status"></span>
+                  </span>
+                </template>
+                <template x-if="!rec.status">
+                  <span class="text-gray-400">–</span>
+                </template>
+              </td>
+              <td class="px-4 py-3.5 bg-white sticky-action-cell">
                 <button @click="editRecord(rec)"
-                  class="px-2 py-1 rounded bg-white text-[#1B5CA8] border border-gray-300 hover:bg-gray-50 text-[11px] font-medium"><i
+                  class="px-2.5 py-1.5 rounded-md bg-white text-[#1B5CA8] border border-gray-200 hover:bg-[#EBF3FC] hover:border-[#1B5CA8]/30 text-[11px] font-medium transition-colors"><i
                     class="bi bi-pencil"></i> Edit</button>
               </td>
             </tr>
@@ -115,7 +133,7 @@
       </table>
 
       <div x-show="records.length > 0"
-        class="flex items-center justify-between px-[13px] py-[9px] border-t border-gray-200 bg-gray-50 text-xs text-gray-500"
+        class="flex items-center justify-between px-4 py-2.5 border-t border-gray-100 bg-gray-50/60 text-xs text-gray-400"
         x-cloak>
         <span
           x-text="`Showing ${(page - 1) * perPage + 1}–${Math.min(page * perPage, records.length)} of ${records.length} records`"></span>
@@ -187,17 +205,15 @@
               </select>
             </div>
             <div>
-              <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Category</label>
-              <select x-model="form.category"
-                class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none bg-white">
-                <option value="">Select...</option>
-                <option value="Raw Material">Raw Material</option>
-                <option value="Finished Goods">Finished Goods</option>
-                <option value="Office Supplies">Office Supplies</option>
-                <option value="Tools">Tools</option>
-                <option value="Consumables">Consumables</option>
-                <option value="Other">Other</option>
-              </select>
+              <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Category <span
+                  class="text-red-500">*</span></label>
+              <div class="flex gap-1.5">
+                <select x-ref="categorySelect" class="w-full text-xs" placeholder="Search Category..."></select>
+                <button type="button" @click="openCategoryManager()" title="Manage categories"
+                  class="shrink-0 w-8 h-8 flex items-center justify-center border border-gray-300 rounded-lg text-[#1B5CA8] hover:bg-[#EBF3FC]">
+                  <i class="bi bi-gear"></i>
+                </button>
+              </div>
             </div>
             <div>
               <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Vendor Link</label>
@@ -218,9 +234,9 @@
                   class="text-red-500">*</span></label>
               <select x-model="form.status" required
                 class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none bg-white">
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-                <option value="Discontinued">Discontinued</option>
+                <option value="Active">🟢 Active</option>
+                <option value="Inactive">🔴 Inactive</option>
+                <option value="Discontinued">🟠 Discontinued</option>
               </select>
             </div>
           </div>
@@ -235,15 +251,139 @@
         </form>
       </div>
     </div>
+
+    <!-- CATEGORY MANAGER: mirrors the Items list/add experience, opened from the Category field -->
+    <div x-show="isCategoryManagerOpen" x-cloak
+      class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-gray-900/50">
+      <div @click.away="closeCategoryManager()"
+        class="bg-white rounded-[11px] w-full max-w-lg shadow-2xl flex flex-col overflow-hidden max-h-[85vh]">
+        <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
+          <h3 class="text-[15px] font-bold text-gray-800">Manage Categories</h3>
+          <button @click="closeCategoryManager()" class="text-gray-400 hover:text-gray-700"><i
+              class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="p-4 flex gap-2 items-center border-b border-gray-100">
+          <div class="relative flex-1">
+            <i class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px]"></i>
+            <input x-model="categorySearchQuery" @input.debounce.300ms="fetchCategories()" type="text"
+              placeholder="Search categories..."
+              class="w-full py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10">
+          </div>
+          <button @click="openCategoryForm()"
+            class="px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] shadow-sm whitespace-nowrap"><i
+              class="bi bi-plus-lg"></i> Add Category</button>
+        </div>
+
+        <div class="overflow-y-auto flex-1">
+          <table class="w-full border-collapse">
+            <thead class="sticky top-0 bg-gray-50">
+              <tr class="border-b-[1.5px] border-gray-200">
+                <th class="px-4 py-2 text-[11px] font-semibold text-gray-500 text-left">Name</th>
+                <th class="px-4 py-2 text-[11px] font-semibold text-gray-500 text-left">Code</th>
+                <th class="px-4 py-2 text-[11px] font-semibold text-gray-500 text-left">Status</th>
+                <th class="px-4 py-2 text-[11px] font-semibold text-gray-500 text-left w-[70px]">Edit</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr x-show="isCategoryListLoading">
+                <td colspan="4" class="py-8 text-center">
+                  <div class="flex flex-col items-center gap-2">
+                    <div class="spinner"></div>
+                    <div class="text-gray-400 text-xs">Loading...</div>
+                  </div>
+                </td>
+              </tr>
+              <tr x-show="!isCategoryListLoading && categoryRecords.length === 0">
+                <td colspan="4" class="py-8 text-center text-gray-400 text-xs">No categories found</td>
+              </tr>
+              <template x-for="cat in categoryRecords" :key="cat.ID">
+                <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors">
+                  <td class="px-4 py-2.5 font-semibold text-[#1B5CA8]" x-text="cat.Category_Name"></td>
+                  <td class="px-4 py-2.5" x-text="cat.Category_Code || '–'"></td>
+                  <td class="px-4 py-2.5">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                      :class="cat.Status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'"
+                      x-text="cat.Status"></span>
+                  </td>
+                  <td class="px-4 py-2.5">
+                    <button @click="openCategoryForm(cat)"
+                      class="px-2 py-1 rounded bg-white text-[#1B5CA8] border border-gray-300 hover:bg-gray-50 text-[11px] font-medium"><i
+                        class="bi bi-pencil"></i></button>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CATEGORY ADD/EDIT FORM: opens on top of the Category Manager -->
+    <div x-show="isCategoryFormOpen" x-cloak
+      class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-gray-900/50">
+      <div @click.away="closeCategoryForm()"
+        class="bg-white rounded-[11px] w-full max-w-sm shadow-2xl flex flex-col overflow-hidden">
+        <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
+          <h3 class="text-[14px] font-bold text-gray-800" x-text="isCategoryEdit ? 'Edit Category' : 'New Category'">
+          </h3>
+          <button @click="closeCategoryForm()" class="text-gray-400 hover:text-gray-700"><i
+              class="bi bi-x-lg"></i></button>
+        </div>
+        <form @submit.prevent="saveCategory" class="p-5">
+          <div class="mb-3">
+            <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Category Name <span
+                class="text-red-500">*</span></label>
+            <input x-model="categoryForm.Category_Name" type="text" required autofocus
+              class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none">
+          </div>
+          <div class="mb-3">
+            <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Category Code</label>
+            <input x-model="categoryForm.Category_Code" type="text"
+              class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none">
+          </div>
+          <div class="mb-3">
+            <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Description</label>
+            <textarea x-model="categoryForm.Description" rows="2"
+              class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none"></textarea>
+          </div>
+          <div class="mb-4">
+            <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Status</label>
+            <select x-model="categoryForm.Status"
+              class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none bg-white">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="flex justify-end gap-2 border-t border-gray-100 pt-4">
+            <button type="button" @click="closeCategoryForm()"
+              class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold">Cancel</button>
+            <button type="submit" :disabled="isCategorySubmitting"
+              class="px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold disabled:opacity-70">
+              <span x-text="isCategorySubmitting ? 'Saving...' : 'Save Category'"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 
   <script>
     document.addEventListener('alpine:init', () => {
       const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
       Alpine.data('itemMaster', () => ({
-        records: [], isLoading: true, searchQuery: '', isModalOpen: false, isSubmitting: false, isEdit: false, editId: null, tsInstance: null,
+        records: [], isLoading: true, searchQuery: '', isModalOpen: false, isSubmitting: false, isEdit: false, editId: null,
+        tsVendor: null, tsCategory: null,
+        isCategoryManagerOpen: false, isCategoryFormOpen: false, isCategorySubmitting: false,
+        isCategoryEdit: false, categoryEditId: null,
+        categoryRecords: [], isCategoryListLoading: false, categorySearchQuery: '',
+        categoryForm: { Category_Name: '', Category_Code: '', Description: '', Status: 'Active' },
+        // NEW: local ID -> Category_Name map. This is the single source of truth for displaying
+        // a category name, so we never depend on the exact shape of the nested lookup object
+        // that ZOHO.CREATOR.DATA.getRecords() returns for the Item_Category field.
+        categoryMap: {},
         page: 1, perPage: 10,
-        form: { item_name: '', description: '', unit_price: '', unit_of_measure: '', Vendor: '', category: '', GST_Rate: '', HSN_SAC: '', status: 'Active' },
+        form: { item_name: '', description: '', unit_price: '', unit_of_measure: '', Vendor: '', Item_Category: '', GST_Rate: '', HSN_SAC: '', status: 'Active' },
 
         get totalPages() { return Math.max(1, Math.ceil(this.records.length / this.perPage)); },
         get paginatedRecords() {
@@ -264,7 +404,79 @@
           return result;
         },
 
-        initApp() { this.fetchRecords(); },
+        // NEW: robustly pull an ID out of a lookup field, whether Zoho gives us
+        // a nested object ({ID: "..."}) or a plain string/number ID.
+        extractLookupId(val) {
+          if (!val) return '';
+          if (typeof val === 'object') return val.ID || val.id || '';
+          return String(val);
+        },
+
+        // FIXED: resolve category name via the local categoryMap first (always reliable),
+        // and only fall back to whatever fields happen to be present on the nested object.
+        categoryDisplay(rec) {
+          const catId = this.extractLookupId(rec.Item_Category);
+          if (!catId) return '–';
+          if (this.categoryMap[catId]) return this.categoryMap[catId];
+          if (rec.Item_Category && typeof rec.Item_Category === 'object') {
+            if (rec.Item_Category.Category_Name) return rec.Item_Category.Category_Name;
+            if (rec.Item_Category.zc_display_value) return rec.Item_Category.zc_display_value;
+            if (rec.Item_Category.display_value) return rec.Item_Category.display_value;
+          }
+          return '–';
+        },
+
+        // Maps each status value to its own pill color (background/text/border).
+        // Active = green, Inactive = red, Discontinued = amber, anything else = gray fallback.
+        statusClass(status) {
+          switch (status) {
+            case 'Active': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+            case 'Inactive': return 'bg-rose-50 text-rose-700 border-rose-200';
+            case 'Discontinued': return 'bg-amber-50 text-amber-700 border-amber-200';
+            default: return 'bg-gray-100 text-gray-500 border-gray-200';
+          }
+        },
+        // Matching solid dot color shown inside the status pill.
+        statusDotClass(status) {
+          switch (status) {
+            case 'Active': return 'bg-emerald-500';
+            case 'Inactive': return 'bg-rose-500';
+            case 'Discontinued': return 'bg-amber-500';
+            default: return 'bg-gray-400';
+          }
+        },
+
+        initApp() {
+          this.fetchCategoryMap();
+          this.fetchRecords();
+        },
+
+        // NEW: fetches ALL categories (not just Active ones, so items pointing to an
+        // Inactive/older category still display correctly) and builds the ID -> Name map.
+        async fetchCategoryMap() {
+          try {
+            let accumulated = [];
+            let cursor = null;
+            do {
+              let config = { report_name: 'Item_Category_Report', max_records: 200 };
+              if (cursor) config.record_cursor = cursor;
+              let res = await ZOHO.CREATOR.DATA.getRecords(config);
+              if (res.code === 3000 && res.data) {
+                accumulated = accumulated.concat(res.data);
+                cursor = res.data.length >= 200 ? res.record_cursor : null;
+              } else {
+                cursor = null;
+              }
+            } while (cursor);
+
+            const map = {};
+            accumulated.forEach(cat => { map[cat.ID] = cat.Category_Name; });
+            this.categoryMap = map;
+          } catch (err) {
+            console.error('fetchCategoryMap error:', err);
+          }
+        },
+
         async fetchRecords() {
           this.isLoading = true;
           try {
@@ -301,21 +513,66 @@
 
         openModal() {
           this.isEdit = false; this.editId = null;
-          this.form = { item_name: '', description: '', unit_price: '', unit_of_measure: '', Vendor: '', category: '', GST_Rate: '', HSN_SAC: '', status: 'Active' };
+          this.form = { item_name: '', description: '', unit_price: '', unit_of_measure: '', Vendor: '', Item_Category: '', GST_Rate: '', HSN_SAC: '', status: 'Active' };
           this.isModalOpen = true;
-          setTimeout(() => this.initVendorSelect(), 50);
+          setTimeout(() => {
+            this.initVendorSelect();
+            this.initCategorySelect();
+          }, 50);
         },
         editRecord(rec) {
           this.isEdit = true; this.editId = rec.ID;
-          this.form = { ...rec, Vendor: rec.Vendor?.ID || '' };
+          // FIXED: use extractLookupId so this works whether Item_Category comes back
+          // as a nested object or a plain ID string.
+          const vendorId = this.extractLookupId(rec.Vendor);
+          const categoryId = this.extractLookupId(rec.Item_Category);
+          // FIXED: build the form from ONLY the actual editable fields.
+          // Previously this used {...rec, ...} which also spread Zoho's
+          // system/reserved fields (ID, Added_Time, Added_By, Modified_Time, etc.)
+          // into the update payload — that can cause updateRecords to silently
+          // fail or partially ignore the update, which is why Status (and other
+          // fields) sometimes wouldn't actually persist even after Save.
+          this.form = {
+            item_name: rec.item_name || '',
+            description: rec.description || '',
+            unit_price: rec.unit_price || '',
+            unit_of_measure: rec.unit_of_measure || '',
+            Vendor: vendorId,
+            Item_Category: categoryId,
+            GST_Rate: rec.GST_Rate || '',
+            HSN_SAC: rec.HSN_SAC || '',
+            status: rec.status || 'Active'
+          };
           this.isModalOpen = true;
-          setTimeout(() => this.initVendorSelect(rec.Vendor), 50);
+          setTimeout(() => {
+            this.initVendorSelect(rec.Vendor);
+            // FIXED: build the preselect object ourselves from categoryMap so the label
+            // always shows correctly, instead of trusting rec.Item_Category to contain
+            // a usable Category_Name field.
+            if (categoryId) {
+              const preselectCategory = {
+                ID: categoryId,
+                Category_Name: this.categoryMap[categoryId]
+                  || (rec.Item_Category && rec.Item_Category.Category_Name)
+                  || (rec.Item_Category && rec.Item_Category.zc_display_value)
+                  || (rec.Item_Category && rec.Item_Category.display_value)
+                  || '(Unknown category)'
+              };
+              this.initCategorySelect(preselectCategory);
+            } else {
+              this.initCategorySelect();
+            }
+          }, 50);
         },
-        closeModal() { this.isModalOpen = false; if (this.tsInstance) this.tsInstance.destroy(); },
+        closeModal() {
+          this.isModalOpen = false;
+          if (this.tsVendor) this.tsVendor.destroy();
+          if (this.tsCategory) this.tsCategory.destroy();
+        },
         initVendorSelect(preselectedObj = null) {
-          if (this.tsInstance) this.tsInstance.destroy();
+          if (this.tsVendor) this.tsVendor.destroy();
           const self = this;
-          this.tsInstance = new TomSelect(this.$refs.vendorSelect, {
+          this.tsVendor = new TomSelect(this.$refs.vendorSelect, {
             valueField: 'ID', labelField: 'Display_Name', searchField: ['Display_Name', 'Company_Name'], maxItems: 1,
             onChange: function (val) { self.form.Vendor = val; },
             load: function (query, callback) {
@@ -325,21 +582,140 @@
             }
           });
           if (preselectedObj && preselectedObj.ID) {
-            this.tsInstance.addOption(preselectedObj);
-            this.tsInstance.setValue(preselectedObj.ID);
+            this.tsVendor.addOption(preselectedObj);
+            this.tsVendor.setValue(preselectedObj.ID);
           }
+        },
+        initCategorySelect(preselectedObj = null) {
+          if (this.tsCategory) this.tsCategory.destroy();
+          const self = this;
+          this.tsCategory = new TomSelect(this.$refs.categorySelect, {
+            valueField: 'ID', labelField: 'Category_Name', searchField: ['Category_Name', 'Category_Code'], maxItems: 1,
+            preload: true,               // fetch the default list once, before the user types anything
+            shouldLoad: function () { return true; }, // let load() fire even with an empty query
+            openOnFocus: true,           // show the (preloaded) list as soon as the field is focused
+            onChange: function (val) {
+              self.form.Item_Category = val;
+              // keep the local map fresh with whatever is currently selected
+              const opt = self.tsCategory.options[val];
+              if (opt && opt.Category_Name) self.categoryMap[val] = opt.Category_Name;
+            },
+            load: function (query, callback) {
+              ZOHO.CREATOR.DATA.getRecords({
+                report_name: 'Item_Category_Report',
+                criteria: query.length ? `(Category_Name.contains("${query}") || Category_Code.contains("${query}"))` : `Status == "Active"`,
+                max_records: 200
+              }).then(res => {
+                const data = res.code === 3000 ? res.data : [];
+                // keep categoryMap in sync with whatever loads into the dropdown
+                data.forEach(cat => { self.categoryMap[cat.ID] = cat.Category_Name; });
+                callback(data);
+              }).catch(() => callback());
+            }
+          });
+          if (preselectedObj && preselectedObj.ID) {
+            this.tsCategory.addOption(preselectedObj);
+            this.tsCategory.setValue(preselectedObj.ID);
+          }
+        },
+        openCategoryManager() {
+          this.isCategoryManagerOpen = true;
+          this.categorySearchQuery = '';
+          this.fetchCategories();
+        },
+        closeCategoryManager() {
+          this.isCategoryManagerOpen = false;
+          // Refresh the item form's category dropdown so any add/edit made here shows up immediately
+          if (this.tsCategory) {
+            this.tsCategory.clearOptions();
+            this.tsCategory.load('');
+          }
+          // Also refresh the global map + already-loaded table rows so the Category column
+          // in the table updates without needing a full page reload.
+          this.fetchCategoryMap();
+        },
+        async fetchCategories() {
+          this.isCategoryListLoading = true;
+          try {
+            let config = { report_name: 'Item_Category_Report', max_records: 200 };
+            if (this.categorySearchQuery) {
+              config.criteria = `(Category_Name.contains("${this.categorySearchQuery.replace(/'/g, "\\'")}") || Category_Code.contains("${this.categorySearchQuery.replace(/'/g, "\\'")}"))`;
+            }
+            let res = await ZOHO.CREATOR.DATA.getRecords(config);
+            this.categoryRecords = (res.code === 3000 && res.data) ? res.data : [];
+          } catch (err) {
+            console.error(err);
+            this.categoryRecords = [];
+          } finally {
+            this.isCategoryListLoading = false;
+          }
+        },
+        openCategoryForm(cat = null) {
+          if (cat) {
+            this.isCategoryEdit = true; this.categoryEditId = cat.ID;
+            this.categoryForm = { Category_Name: cat.Category_Name || '', Category_Code: cat.Category_Code || '', Description: cat.Description || '', Status: cat.Status || 'Active' };
+          } else {
+            this.isCategoryEdit = false; this.categoryEditId = null;
+            this.categoryForm = { Category_Name: '', Category_Code: '', Description: '', Status: 'Active' };
+          }
+          this.isCategoryFormOpen = true;
+        },
+        closeCategoryForm() { this.isCategoryFormOpen = false; },
+        saveCategory() {
+          this.isCategorySubmitting = true;
+          const cleanCategoryForm = JSON.parse(JSON.stringify(this.categoryForm));
+          const request = this.isCategoryEdit
+            ? ZOHO.CREATOR.DATA.updateRecords({ report_name: 'Item_Category_Report', payload: { criteria: `ID=${this.categoryEditId}`, data: cleanCategoryForm } })
+            : ZOHO.CREATOR.DATA.addRecords({ form_name: 'Item_Category', payload: { data: cleanCategoryForm } });
+
+          request.then(res => {
+            if (res.code === 3000) {
+              Toast.fire({ icon: 'success', title: this.isCategoryEdit ? 'Category updated!' : 'Category added!' });
+              this.closeCategoryForm();
+              this.fetchCategories();
+              // FIXED: refresh the global categoryMap immediately (covers rename-via-edit too,
+              // and makes sure the Items table's Category column updates right away).
+              this.fetchCategoryMap();
+
+              // If this was a fresh add while the item form's dropdown is open, select it right away
+              if (!this.isCategoryEdit && this.tsCategory) {
+                const newId = res.data.ID;
+                const newCategory = { ID: newId, Category_Name: this.categoryForm.Category_Name, Category_Code: this.categoryForm.Category_Code };
+                this.categoryMap[newId] = this.categoryForm.Category_Name;
+                this.tsCategory.addOption(newCategory);
+                this.tsCategory.setValue(newId);
+                this.form.Item_Category = newId;
+              } else if (this.isCategoryEdit) {
+                // renamed an existing category: keep the map correct straight away
+                this.categoryMap[this.categoryEditId] = this.categoryForm.Category_Name;
+              }
+            } else {
+              throw new Error(res.message);
+            }
+          }).catch(err => Toast.fire({ icon: 'error', title: err.message || 'Error saving category' }))
+            .finally(() => this.isCategorySubmitting = false);
         },
         saveRecord() {
           this.isSubmitting = true;
           const cleanForm = JSON.parse(JSON.stringify(this.form));
           const payload = { data: cleanForm };
           const request = this.isEdit
-            ? ZOHO.CREATOR.DATA.updateRecords({ report_name: 'Items_Report', payload: { criteria: `ID=${this.editId}`, data: this.form } })
+            ? ZOHO.CREATOR.DATA.updateRecords({ report_name: 'Items_Report', payload: { criteria: `ID=${this.editId}`, data: cleanForm } })
             : ZOHO.CREATOR.DATA.addRecords({ form_name: 'Items_Master', payload });
 
           request.then(res => {
-            if (res.code === 3000) { Toast.fire({ icon: 'success', title: 'Item saved!' }); this.closeModal(); this.fetchRecords(); }
-            else throw new Error(res.message);
+            if (res.code === 3000) {
+              Toast.fire({ icon: 'success', title: 'Item saved!' });
+              this.closeModal();
+              // FIXED: re-fetch the category map alongside the records so any brand-new
+              // category selected in this save is immediately resolvable in the table.
+              this.fetchCategoryMap();
+              this.fetchRecords();
+            }
+            else {
+              console.error('saveRecord failed, full response:', res);
+              throw new Error(res.message || JSON.stringify(res));
+            }
           }).catch(err => Toast.fire({ icon: 'error', title: err.message || 'Error saving data' })).finally(() => this.isSubmitting = false);
         }
       }));
