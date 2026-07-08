@@ -665,7 +665,11 @@
           this.isCategorySubmitting = true;
           const cleanCategoryForm = JSON.parse(JSON.stringify(this.categoryForm));
           const request = this.isCategoryEdit
-            ? ZOHO.CREATOR.DATA.updateRecords({ report_name: 'Item_Category_Report', payload: { criteria: `ID=${this.categoryEditId}`, data: cleanCategoryForm } })
+            ? ZOHO.CREATOR.DATA.updateRecordById({
+              report_name: 'Item_Category_Report',
+              id: this.categoryEditId,
+              payload: { data: cleanCategoryForm }
+            })
             : ZOHO.CREATOR.DATA.addRecords({ form_name: 'Item_Category', payload: { data: cleanCategoryForm } });
 
           request.then(res => {
@@ -700,7 +704,12 @@
           const cleanForm = JSON.parse(JSON.stringify(this.form));
           const payload = { data: cleanForm };
           const request = this.isEdit
-            ? ZOHO.CREATOR.DATA.updateRecords({ report_name: 'Items_Report', payload: { criteria: `ID=${this.editId}`, data: cleanForm } })
+            ? ZOHO.CREATOR.DATA.updateRecordById({
+              id: this.editId,
+              report_name: 'Items_Report', payload: {
+                data: cleanForm
+              }
+            })
             : ZOHO.CREATOR.DATA.addRecords({ form_name: 'Items_Master', payload });
 
           request.then(res => {
@@ -716,7 +725,12 @@
               console.error('saveRecord failed, full response:', res);
               throw new Error(res.message || JSON.stringify(res));
             }
-          }).catch(err => Toast.fire({ icon: 'error', title: err.message || 'Error saving data' })).finally(() => this.isSubmitting = false);
+          }).catch(err => {
+            console.log(err)
+            Toast.fire({ icon: 'error', title: err.message || 'Error saving data' })
+
+          }
+          ).finally(() => this.isSubmitting = false);
         }
       }));
     });

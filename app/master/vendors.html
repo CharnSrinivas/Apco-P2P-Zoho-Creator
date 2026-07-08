@@ -372,8 +372,9 @@
           this.isSubmitting = true;
           const cleanForm = JSON.parse(JSON.stringify(this.form));
           const payload = { data: cleanForm };
+          console.log(payload)
           const request = this.isEdit
-            ? ZOHO.CREATOR.DATA.updateRecords({ report_name: 'Vendor_Report', payload: { criteria: `ID=${this.editId}`, data: this.form } })
+            ? ZOHO.CREATOR.DATA.updateRecordById({ report_name: 'Vendor_Report', id: this.editId, payload })
             : ZOHO.CREATOR.DATA.addRecords({ form_name: 'Vendor', payload });
 
           request.then(res => {
