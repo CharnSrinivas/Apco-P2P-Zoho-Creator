@@ -87,7 +87,9 @@
           </tr>
           <template x-for="rec in paginatedRecords" :key="rec.ID">
             <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors">
-              <td class="px-4 py-3 font-mono text-[#1B5CA8]" x-text="rec.Vendor_Number || '–'"></td>
+              <td class="px-4 py-3 font-mono text-[#1B5CA8]"
+                x-text="rec.Vendor_Number ? ('V-'+ rec.Vendor_Number) : '–'">
+              </td>
               <td class="px-4 py-3 font-semibold text-gray-900" x-text="rec.Display_Name"></td>
               <td class="px-4 py-3 text-gray-500">
                 <div x-text="rec.email || 'No email'"></div>

@@ -17,11 +17,11 @@
     rel="stylesheet">
 
   <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
-
   <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.default.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+  <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -30,7 +30,32 @@
       display: none !important;
     }
 
-    /* ── Pill active state ── */
+    .vc-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .vc-modal-bg {
+      position: absolute;
+      inset: 0;
+      background: rgba(17, 24, 39, 0.4);
+    }
+
+    .vc-modal-box {
+      position: relative;
+      z-index: 1;
+      background: #fff;
+      border-radius: 11px;
+      width: 100%;
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+    }
+
     .pill-active {
       color: #1B5CA8 !important;
       background: #fff !important;
@@ -38,7 +63,6 @@
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
     }
 
-    /* ── Sticky Actions column ── */
     .sticky-action-cell {
       position: sticky;
       right: 0;
@@ -50,7 +74,6 @@
       z-index: 3;
     }
 
-    /* ── Sortable headers ── */
     th[data-sort] {
       cursor: pointer;
       user-select: none;
@@ -75,7 +98,6 @@
       color: #1B5CA8;
     }
 
-    /* ── Spinner ── */
     .vc-spinner {
       border: 2.5px solid #e5e7eb;
       border-top-color: #1B5CA8;
@@ -91,7 +113,6 @@
       }
     }
 
-    /* ── Tom Select overrides ── */
     .ts-control {
       border: 1px solid #e5e7eb !important;
       border-radius: 0.5rem !important;
@@ -129,36 +150,65 @@
       background-color: #f3f4f6 !important;
       color: #111827 !important;
     }
+
+    .ts-dropdown .option:hover {
+      background-color: #e5e7eb !important;
+    }
+
+    .grid-select .ts-control {
+      padding: 0.35rem 0.5rem !important;
+      font-size: 0.75rem !important;
+      min-height: 32px !important;
+    }
+
+    .grid-input {
+      width: 100%;
+      padding: 0.375rem 0.5rem;
+      background-color: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      outline: none;
+      transition: all 0.2s;
+      height: 32px;
+    }
+
+    .grid-input:focus {
+      background-color: #ffffff;
+      border-color: #1B5CA8;
+      focus: ring-[3px];
+      focus: ring-[#1B5CA8]/15;
+    }
   </style>
 </head>
 
 <body class="bg-gray-50 p-6">
-  <div x-data="vcApp()" x-init="initApp()"
-    class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-6xl mx-auto">
+  <div id="app" x-data="vcApp()" x-init="initApp()"
+    class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-[1400px] mx-auto" x-cloak>
 
     <div class="grid grid-cols-4 gap-2.5 mb-4">
       <div
         class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-[#1B5CA8]">
-        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Total Comparisons</div>
+        <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Total Comparisons</div>
         <div class="text-[25px] font-bold leading-none text-[#1B5CA8]" x-text="stats.total"></div>
         <div class="text-[11px] text-gray-400 mt-1.5">All created records</div>
       </div>
       <div
         class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-amber-500">
-        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Submitted</div>
-        <div class="text-[25px] font-bold leading-none text-amber-500" x-text="stats.submitted"></div>
-        <div class="text-[11px] text-gray-400 mt-1.5">Awaiting Action</div>
+        <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Pending</div>
+        <div class="text-[25px] font-bold leading-none text-amber-500" x-text="stats.pending"></div>
+        <div class="text-[11px] text-gray-400 mt-1.5">Submitted / Re-negotiating</div>
       </div>
       <div
         class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-emerald-600">
-        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Finalized</div>
+        <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Finalized</div>
         <div class="text-[25px] font-bold leading-none text-emerald-600" x-text="stats.finalized"></div>
         <div class="text-[11px] text-gray-400 mt-1.5">Vendor Selected</div>
       </div>
       <div
-        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-red-500">
-        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Rejected</div>
-        <div class="text-[25px] font-bold leading-none text-red-500" x-text="stats.rejected"></div>
+        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-red-600">
+        <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Rejected</div>
+        <div class="text-[25px] font-bold leading-none text-red-600" x-text="stats.rejected"></div>
         <div class="text-[11px] text-gray-400 mt-1.5">Declined VC</div>
       </div>
     </div>
@@ -166,33 +216,30 @@
     <div class="flex items-center justify-between mt-[18px] mb-2">
       <span class="text-[13.5px] font-medium text-gray-900">Quote Comparisons</span>
     </div>
-
     <div class="flex items-center justify-between gap-2.5 mb-2 flex-wrap">
       <div class="flex bg-gray-100 rounded-full p-[3px] gap-[2px]">
         <button @click="setFilter('all')"
-          :class="{'pill-active': filter === 'all', 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]': filter !== 'all'}"
+          :class="filter === 'all' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
           class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">All (<span
             x-text="stats.total"></span>)</button>
-        <button @click="setFilter('submitted')"
-          :class="{'pill-active': filter === 'submitted', 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]': filter !== 'submitted'}"
-          class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Submitted (<span
-            x-text="stats.submitted"></span>)</button>
+        <button @click="setFilter('pending')"
+          :class="filter === 'pending' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
+          class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Pending (<span
+            x-text="stats.pending"></span>)</button>
         <button @click="setFilter('finalized')"
-          :class="{'pill-active': filter === 'finalized', 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]': filter !== 'finalized'}"
+          :class="filter === 'finalized' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
           class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Finalized (<span
             x-text="stats.finalized"></span>)</button>
         <button @click="setFilter('rejected')"
-          :class="{'pill-active': filter === 'rejected', 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]': filter !== 'rejected'}"
+          :class="filter === 'rejected' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
           class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Rejected (<span
             x-text="stats.rejected"></span>)</button>
       </div>
-
       <div class="flex gap-2 items-center">
         <div class="relative">
           <i
             class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px] pointer-events-none"></i>
-          <input x-model="searchQuery" @input.debounce.400ms="fetchRecords()" type="text"
-            placeholder="Search by ID#, Subject, PR..."
+          <input x-model="searchQuery" type="text" placeholder="Search by ID#, Subject, PR..."
             class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[230px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10">
         </div>
         <button @click="openModal()"
@@ -205,69 +252,50 @@
     <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
       <table class="w-full border-collapse" style="min-width:1150px">
         <colgroup>
-          <col style="width:100px">
+          <col style="width:110px">
           <col style="width:160px">
           <col style="width:110px">
-          <col style="width:140px">
-          <col style="width:90px">
+          <col style="width:110px">
           <col style="width:100px">
-          <col style="width:100px">
+          <col style="width:110px">
           <col style="width:140px">
           <col style="width:110px">
           <col style="width:90px">
         </colgroup>
         <thead>
           <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
-            <th @click="handleSort('qc_no')" :class="{'sort-active': sortCol === 'qc_no'}" data-sort
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
-              ID #<span class="sort-indicator" x-text="getSortIcon('qc_no')"></span></th>
-            <th @click="handleSort('subject')" :class="{'sort-active': sortCol === 'subject'}" data-sort
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
-              Subject<span class="sort-indicator" x-text="getSortIcon('subject')"></span></th>
-            <th @click="handleSort('pr_ref')" :class="{'sort-active': sortCol === 'pr_ref'}" data-sort
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
-              PR Ref<span class="sort-indicator" x-text="getSortIcon('pr_ref')"></span></th>
-            <th @click="handleSort('item')" :class="{'sort-active': sortCol === 'item'}" data-sort
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
-              Item Name<span class="sort-indicator" x-text="getSortIcon('item')"></span></th>
-            <th @click="handleSort('qty')" :class="{'sort-active': sortCol === 'qty'}" data-sort
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
-              Req. Qty<span class="sort-indicator" x-text="getSortIcon('qty')"></span></th>
-            <th @click="handleSort('date')" :class="{'sort-active': sortCol === 'date'}" data-sort
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
-              Created<span class="sort-indicator" x-text="getSortIcon('date')"></span></th>
-            <th @click="handleSort('status')" :class="{'sort-active': sortCol === 'status'}" data-sort
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
-              Status<span class="sort-indicator" x-text="getSortIcon('status')"></span></th>
-            <th @click="handleSort('final_vendor')" :class="{'sort-active': sortCol === 'final_vendor'}" data-sort
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
-              Final Vendor<span class="sort-indicator" x-text="getSortIcon('final_vendor')"></span></th>
-            <th @click="handleSort('total_rate')" :class="{'sort-active': sortCol === 'total_rate'}" data-sort
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap">
-              Total Rate<span class="sort-indicator" x-text="getSortIcon('total_rate')"></span></th>
+            <template
+              x-for="col in ['qc_no', 'subject', 'pr_ref', 'rfq_ref', 'date', 'status', 'final_vendor', 'total_rate']"
+              :key="col">
+              <th @click="toggleSort(col)" data-sort
+                class="px-3 py-2 text-[11px] font-semibold text-gray-500 tracking-wide text-left whitespace-nowrap"
+                :class="sortCol === col ? 'sort-active' : ''">
+                <span
+                  x-text="{qc_no: 'ID #', subject: 'Subject', pr_ref: 'PR Ref', rfq_ref: 'RFQ Ref', date: 'Created Date', status: 'Status', final_vendor: 'Final Vendor', total_rate: 'Total Rate'}[col]"></span>
+                <span class="sort-indicator" x-text="sortCol === col ? (sortDir === 'asc' ? '▲' : '▼') : ''"></span>
+              </th>
+            </template>
             <th
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap bg-gray-50 sticky-action-cell">
+              class="px-3 py-2 text-[11px] font-semibold text-gray-500 tracking-wide text-left whitespace-nowrap bg-gray-50 sticky-action-cell">
               Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr x-show="isLoading" x-cloak>
-            <td colspan="10" class="px-3 py-12 text-center">
+            <td colspan="9" class="px-3 py-12 text-center">
               <div class="flex flex-col items-center gap-3">
                 <div class="vc-spinner"></div>
                 <div class="text-sm text-gray-400 font-medium">Loading Quote Comparisons…</div>
               </div>
             </td>
           </tr>
-
           <tr x-show="!isLoading && paginatedRecords.length === 0" x-cloak>
-            <td colspan="10" class="px-3 py-12 text-center">
+            <td colspan="9" class="px-3 py-12 text-center">
               <div class="text-gray-400"><i class="bi bi-clipboard-x text-3xl mb-2 block"></i>
                 <div class="text-sm font-medium text-gray-500">No records found</div>
               </div>
             </td>
           </tr>
-
           <template x-for="rec in paginatedRecords" :key="rec.ID">
             <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors duration-150 group">
               <td class="px-3 py-[9px] align-middle whitespace-nowrap"><span
@@ -276,57 +304,28 @@
               <td
                 class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900 max-w-[160px]"
                 x-text="rec.Quote_Comparison_Subject || '–'"></td>
-              <td class="px-3 py-[9px] align-middle whitespace-nowrap">
-                <template x-if="rec.PR_Ref && rec.PR_Ref.ID">
-                  <a href="#" @click.prevent="openRecord('PR_Detailed', rec.PR_Ref.ID)"
-                    class="text-[#1B5CA8] hover:underline font-mono text-[11px] font-semibold"
-                    x-text="rec.PR_Ref.zc_display_value || rec.PR_Ref.PR_Number"></a>
-                </template>
-                <template x-if="!rec.PR_Ref || !rec.PR_Ref.ID">
-                  <span class="text-gray-400">–</span>
-                </template>
-              </td>
-              <td
-                class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-gray-600 max-w-[140px]"
-                x-text="rec.Item_Master.item_name || '–'"></td>
-              <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[12px]"
-                x-text="(rec.Required_Quantity || '0') + ' ' + (rec.Unit || '')"></td>
+              <td class="px-3 py-[9px] align-middle whitespace-nowrap font-mono text-[11px] font-semibold"
+                x-text="rec.PR_Ref?.zc_display_value || rec.PR_Ref?.PR_Number || '–'"></td>
+              <td class="px-3 py-[9px] align-middle whitespace-nowrap font-mono text-[11px] font-semibold"
+                x-text="rec.RFQ_Ref?.zc_display_value || rec.RFQ_Ref?.RFQ_Ref_Number || '–'"></td>
               <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[11px] text-gray-500"
                 x-text="formatDate(rec.Added_Time)"></td>
               <td class="px-3 py-[9px] align-middle whitespace-nowrap">
-                <template x-if="rec.Status === 'Submitted' || (!rec.Status && !rec.Finalized_Vendor)">
-                  <span
-                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border border-amber-200 bg-amber-50 text-amber-800">
-                    <span class="w-[5px] h-[5px] rounded-full bg-amber-500 shrink-0"></span>Submitted
-                  </span>
-                </template>
-                <template x-if="rec.Status === 'Finalized' || (!rec.Status && rec.Finalized_Vendor)">
-                  <span
-                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border border-emerald-200 bg-emerald-50 text-emerald-800">
-                    <span class="w-[5px] h-[5px] rounded-full bg-emerald-500 shrink-0"></span>Finalized
-                  </span>
-                </template>
-                <template x-if="rec.Status === 'Rejected'">
-                  <span
-                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border border-red-200 bg-red-50 text-red-800">
-                    <span class="w-[5px] h-[5px] rounded-full bg-red-500 shrink-0"></span>Rejected
-                  </span>
-                </template>
-                <template x-if="rec.Status === 'Requested For Re Negotiation'">
-                  <span
-                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border border-amber-300 bg-amber-50 text-amber-700">
-                    <span class="w-[5px] h-[5px] rounded-full bg-amber-500 shrink-0"></span>Re Negotiation
-                  </span>
-                </template>
+                <span
+                  class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap border"
+                  :class="getStatusStyle(rec).classes">
+                  <span class="w-[5px] h-[5px] rounded-full shrink-0" :class="getStatusStyle(rec).dot"></span>
+                  <span x-text="rec.Status || 'Submitted'"></span>
+                </span>
               </td>
-              <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap max-w-[140px]">
-                <span class="text-[12px] font-medium text-gray-800" x-text="rec.Finalized_Vendor || '–'"></span>
-              </td>
+              <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap max-w-[140px]"><span
+                  class="text-[12px] font-medium text-gray-800" x-text="rec.Finalized_Vendor || '–'"></span></td>
               <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[12px] font-medium text-gray-700"
                 x-text="formatINR(rec.Total_Landed_Rate)"></td>
               <td
                 class="px-3 py-[9px] align-middle whitespace-nowrap bg-white group-hover:bg-[#EBF3FC] sticky-action-cell">
-                <button @click="openRecord('Vendor_Comparison_Detailed', rec.ID)"
+                <button
+                  @click="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:Quote_Comparison_Detailed?recordId='+rec.ID,window:'same'})"
                   class="inline-flex items-center gap-[3px] px-2 py-[3px] rounded bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 text-[11px] font-medium transition-colors"><i
                     class="bi bi-box-arrow-up-right"></i> View</button>
               </td>
@@ -335,208 +334,107 @@
         </tbody>
       </table>
 
-      <div x-show="filteredRecords.length > 0"
+      <div x-show="!isLoading && totalPages > 0"
         class="flex items-center justify-between px-[13px] py-[9px] border-t border-gray-200 bg-gray-50 text-xs text-gray-500"
         x-cloak>
-        <span
-          x-text="`Showing ${(page - 1) * perPage + 1}–${Math.min(page * perPage, filteredRecords.length)} of ${filteredRecords.length} records`"></span>
+        <span>Showing <span x-text="(page - 1) * perPage + 1"></span>–<span
+            x-text="Math.min(page * perPage, filteredRecords.length)"></span> of <span
+            x-text="filteredRecords.length"></span> records</span>
         <div class="flex gap-1">
-          <button @click="page > 1 && page--" :disabled="page <= 1"
-            :class="{'opacity-40 cursor-not-allowed': page <= 1, 'hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]': page > 1}"
-            class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors"><i
-              class="bi bi-chevron-left"></i></button>
-
-          <template x-for="p in paginationArray" :key="p">
-            <template x-if="p === '...'">
-              <span class="flex items-center px-1 text-gray-400 text-xs">…</span>
-            </template>
-            <template x-if="p !== '...'">
-              <button @click="page = p"
-                :class="page === p ? 'border-[#1B5CA8] bg-[#1B5CA8] text-white font-semibold' : 'border-gray-300 bg-white text-gray-600 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]'"
-                class="min-w-[27px] h-[27px] px-1 border rounded inline-flex items-center justify-center transition-colors"
-                x-text="p"></button>
-            </template>
+          <button @click="page > 1 ? page-- : null" :disabled="page <= 1"
+            class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <template x-for="p in getPagesArray()" :key="p">
+            <button @click="typeof p === 'number' ? page = p : null"
+              :class="page === p ? 'border-[#1B5CA8] bg-[#1B5CA8] text-white font-semibold' : (typeof p === 'number' ? 'border-gray-300 bg-white text-gray-600 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]' : 'border-transparent bg-transparent text-gray-400 cursor-default')"
+              class="min-w-[27px] h-[27px] px-1 border rounded inline-flex items-center justify-center transition-colors">
+              <span x-text="p"></span>
+            </button>
           </template>
-
-          <button @click="page < totalPages && page++" :disabled="page >= totalPages"
-            :class="{'opacity-40 cursor-not-allowed': page >= totalPages, 'hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]': page < totalPages}"
-            class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors"><i
-              class="bi bi-chevron-right"></i></button>
+          <button @click="page < totalPages ? page++ : null" :disabled="page >= totalPages"
+            class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]">
+            <i class="bi bi-chevron-right"></i>
+          </button>
         </div>
       </div>
     </div>
 
-    <div x-show="isModalOpen" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-
-      <div x-show="isModalOpen" @click="closeModal()" x-transition:enter="transition ease-out duration-150"
-        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0" class="absolute inset-0 bg-gray-900/40"></div>
-
-      <div x-show="isModalOpen" x-transition:enter="transition ease-out duration-200"
-        x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
-        x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0"
-        x-transition:leave-end="opacity-0 translate-y-4"
-        class="relative z-10 bg-white rounded-[11px] w-full max-w-5xl shadow-[0_16px_48px_rgba(0,0,0,0.18)] flex flex-col"
-        style="max-height: 90vh;">
+    <div x-show="isModalOpen" style="display: none;" class="vc-modal-overlay active">
+      <div class="vc-modal-bg" x-show="isModalOpen" x-transition.opacity @click="closeModal()"></div>
+      <div class="vc-modal-box max-w-6xl overflow-scroll" style="max-height: 94vh;" x-show="isModalOpen" x-transition>
 
         <div
-          class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50 shrink-0 rounded-t-[11px]">
+          class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50 sticky top-0 z-20">
           <h3 class="text-[15px] font-bold text-gray-800">New Quote Comparison</h3>
           <button @click="closeModal()" type="button" class="text-gray-400 hover:text-gray-700 transition-colors"><i
               class="bi bi-x-lg text-lg"></i></button>
         </div>
 
-        <div class="overflow-y-auto p-5">
+        <div class="p-5 w-fit">
           <form @submit.prevent="submitForm">
 
-            <h4 class="text-xs font-bold text-[#1B5CA8]  tracking-wide mb-3 border-b border-gray-100 pb-1">
-              Purchase Requirement</h4>
-
-            <div class="grid grid-cols-3 gap-4 mb-4">
+            <h4 class="text-xs font-bold text-[#1B5CA8] tracking-wide mb-3 border-b border-gray-100 pb-1">Comparison
+              Details</h4>
+            <div class="grid grid-cols-3 gap-4 mb-6">
               <div>
-                <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Subject
-                  <span class="text-red-500">*</span></label>
+                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Subject <span
+                    class="text-red-500">*</span></label>
                 <input x-model="form.Quote_Comparison_Subject" type="text" required
-                  class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all shadow-sm"
-                  placeholder="e.g. Server Rack Equipment Comparison">
+                  class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"
+                  placeholder="e.g. Bulk Material Comparison">
               </div>
               <div>
-                <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">PR Reference
-                  <span class="text-gray-400 font-normal normal-case ml-0.5">(Optional)</span></label>
+                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PR Reference</label>
                 <select x-ref="prSelect" class="w-full text-xs" placeholder="Search PR Number..."></select>
-                <p class="text-[10.5px] text-gray-400 mt-1 italic">Selecting a PR will auto-populate the item details
-                  below.</p>
               </div>
               <div>
-                <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">RFQ
-                  Reference
-                  <span class="text-gray-400 font-normal normal-case ml-0.5">(Optional)</span></label>
+                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">RFQ Reference <span
+                    class="text-gray-400 font-normal normal-case ml-0.5">(Select to Auto-fill)</span></label>
                 <select x-ref="rfqSelect" class="w-full text-xs" placeholder="Search RFQ Number..."></select>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-5 gap-4 mb-6">
-              <div class="col-span-1">
-                <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Item Master
-                  <span class="text-red-500">*</span></label>
-                <select x-ref="itemSelect" class="w-full text-xs" placeholder="Search Item..."></select>
-              </div>
-              <!-- <div class="col-span-1">
-                <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Item Name
-                  <span class="text-red-500">*</span></label>
-                <input x-model="form.Item_Name" type="text" required
-                  class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all">
-              </div> -->
-              <div class="col-span-1">
-                <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Unit</label>
-                <input x-model="form.Unit" type="text"
-                  class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all"
-                  placeholder="e.g. Nos, Kg">
-              </div>
-              <div class="col-span-1">
-                <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Req.
-                  Quantity <span class="text-red-500">*</span></label>
-                <input x-model.number="form.Required_Quantity" @input="updateFinalQuantity()" type="number" required
-                  min="1" step="any"
-                  class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all">
-              </div>
-              <div class="col-span-1">
-                <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Deliver To /
-                  Plant</label>
-                <input x-model="form.Deliver_to_Plant" type="text"
-                  class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all">
               </div>
             </div>
 
             <div class="mb-6 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
               <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                <span class="text-xs font-semibold text-gray-700  tracking-wide">Quotation Comparison Statement
-                  <span class="text-red-500">*</span></span>
-                <button type="button" @click="addVendorRow()"
+                <span class="text-xs font-semibold text-gray-700 tracking-wide">Items Requirement <span
+                    class="text-red-500">*</span></span>
+                <button type="button" @click="addItemRow()"
                   class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+
-                  Add Vendor</button>
+                  Add Item</button>
               </div>
               <div class="overflow-x-auto" style="overflow:visible;">
-                <table class="w-full border-collapse min-w-[850px]">
+                <table class="w-full border-collapse">
                   <thead class="bg-white border-b border-gray-200">
                     <tr>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[18%]">Vendor
-                        Name</th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[10%]">Basic
-                        Rate</th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[10%]">Negotiated
-                        Rate</th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[9%]">Disc %
-                      </th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[10%]">
-                        Freight</th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[9%]">GST %
-                      </th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[12%]">Landed
-                        Rate</th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[16%]">
-                        Payment Terms</th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500  text-center w-[10%]">Lowest
-                      </th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500  text-center w-8"></th>
+                      <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[40%]">Item Lookup</th>
+                      <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[15%]">Unit</th>
+                      <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[15%]">Req. Qty</th>
+                      <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[25%]">Deliver To /
+                        Plant</th>
+                      <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-8"></th>
                     </tr>
                   </thead>
                   <tbody>
-                    <template x-for="(vendor, index) in form.Quotation_Comparison_Statement" :key="index">
-                      <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
-                        <td class="px-2 py-2">
-                          <input x-model="vendor.Vendor_Name" @input="if(vendor.Rank === 'Yes') updateFinalized(vendor)"
-                            type="text" required
-                            class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
+                    <tr x-show="form.Items.length === 0">
+                      <td colspan="5" class="px-3 py-4 text-center text-xs text-gray-400 italic">No items added. Select
+                        an RFQ or add manually.</td>
+                    </tr>
+                    <template x-for="(item, index) in form.Items" :key="item.uid">
+                      <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors bg-white">
+                        <td class="px-2 py-2 grid-select relative">
+                          <select class="w-full text-xs"
+                            x-init="() => { const ts = initDynamicItem($el, item, 'Items', 'Item_Name'); return () => ts.destroy(); }"></select>
                         </td>
-                        <td class="px-2 py-2">
-                          <input x-model.number="vendor.Basic_Rate" @input="calculateVendor(vendor)" type="number"
-                            step="any"
-                            class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
-                        </td>
-                        <td class="px-2 py-2">
-                          <input x-model.number="vendor.Negotiated_Rate" @input="calculateVendor(vendor)" type="number"
-                            step="any"
-                            class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
-                        </td>
-                        <td class="px-2 py-2">
-                          <input x-model.number="vendor.Disc" @input="calculateVendor(vendor)" type="number" step="any"
-                            class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
-                        </td>
-                        <td class="px-2 py-2">
-                          <input x-model.number="vendor.Freight" @input="calculateVendor(vendor)" type="number"
-                            step="any"
-                            class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
-                        </td>
-                        <td class="px-2 py-2">
-                          <input x-model.number="vendor.GST" @input="calculateVendor(vendor)" type="number" step="any"
-                            class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
-                        </td>
-                        <td class="px-2 py-2">
-                          <input x-model.number="vendor.Landed_Rate" type="number" step="any" disabled
-                            class="w-full py-1.5 px-2 bg-gray-100 border border-gray-200 rounded text-[12px] font-semibold text-[#1B5CA8] cursor-not-allowed outline-none">
-                        </td>
-                        <td class="px-2 py-2">
-                          <select x-model="vendor.Payment_Terms"
-                            class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
-                            <option value="">Select...</option>
-                            <option value="Advance">Advance</option>
-                            <option value="15 Days Credit">15 Days Credit</option>
-                            <option value="30 Days Credit">30 Days Credit</option>
-                            <option value="45 Days Credit">45 Days Credit</option>
-                          </select>
-                        </td>
-                        <td class="px-2 py-2">
-                          <select x-model="vendor.Rank" @change="handleRankChange(vendor, index)"
-                            class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[12px] focus:bg-white focus:border-[#1B5CA8] outline-none">
-                            <option value="No">No</option>
-                            <option value="Yes">Yes</option>
-                          </select>
+                        <td class="px-2 py-2"><input x-model="item.Unit" type="text" class="grid-input bg-gray-100 text-gray-500 cursor-not-allowed"
+                            placeholder="e.g. Kg, Nos" readonly></td>
+                        <td class="px-2 py-2"><input x-model.number="item.Quantity" @input="recalculateTotals()"
+                            type="number" min="1" step="any" class="grid-input"></td>
+                        <td class="px-2 py-2"><input x-model="item.Deliver_to_Plant" type="text" class="grid-input">
                         </td>
                         <td class="px-2 py-2 text-center">
-                          <button type="button" @click="removeVendorRow(index)"
-                            class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50"><i
+                          <button type="button" @click="removeItemRow(index)"
+                            class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50"><i
                               class="bi bi-trash"></i></button>
                         </td>
                       </tr>
@@ -546,34 +444,124 @@
               </div>
             </div>
 
-            <h4 class="text-xs font-bold text-emerald-600  tracking-wide mb-3 border-b border-gray-100 pb-1">
-              Final Decision</h4>
+            <div class="mb-6 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
+              <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                <span class="text-xs font-semibold text-gray-700 tracking-wide">Quotation Comparison Statement <span
+                    class="text-red-500">*</span></span>
+                <button type="button" @click="addVendorRow()"
+                  class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+
+                  Add Quote Line</button>
+              </div>
+              <div class="overflow-x-auto" style="overflow:visible;">
+                <table class="w-full border-collapse min-w-[1100px]">
+                  <thead class="bg-white border-b border-gray-200">
+                    <tr>
+                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[14%]">Vendor
+                      </th>
+                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[14%]">Item</th>
+                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[8%]">Basic Rate</th>
+                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[7%]">Disc %</th>
+                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[8%]">Neg. Rate</th>
+                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[8%]">Freight</th>
+                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[7%]">GST %</th>
+                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[9%]">Unit Landed Rate
+                      </th>
+                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[12%]">Terms</th>
+                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-[7%]">Rank</th>
+                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-8"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr x-show="form.Quotation_Comparison_Statement.length === 0">
+                      <td colspan="11" class="px-3 py-4 text-center text-xs text-gray-400 italic">No vendor quotes
+                        generated yet.</td>
+                    </tr>
+                    <template x-for="(vendor, index) in form.Quotation_Comparison_Statement" :key="vendor.uid">
+                      <tr class="border-b border-gray-100 transition-colors bg-white hover:bg-gray-50/50"
+                        :class="{'bg-emerald-50/30 hover:bg-emerald-50/50': vendor.Rank === 'Yes'}">
+
+                        <td class="px-2 py-2 grid-select relative">
+                          <select
+                            x-init="() => { const ts = initDynamicVendor($el, vendor); return () => ts.destroy(); }"
+                            class="w-full text-xs"></select>
+                        </td>
+
+                        <td class="px-2 py-2 grid-select relative">
+                          <select
+                            x-init="() => { const ts = initDynamicItem($el, vendor, 'Items_Master', 'Item_Name'); return () => ts.destroy(); }"
+                            class="w-full text-xs"></select>
+                        </td>
+
+                        <td class="px-2 py-2"><input x-model.number="vendor.Basic_Rate"
+                            @input="syncRates(vendor, 'basic')" type="number" step="any" class="grid-input"></td>
+                        <td class="px-2 py-2"><input x-model.number="vendor.Disc" @input="syncRates(vendor, 'disc')"
+                            type="number" step="any" class="grid-input"></td>
+                        <td class="px-2 py-2"><input x-model.number="vendor.Negotiated_Rate"
+                            @input="syncRates(vendor, 'neg')" type="number" step="any" class="grid-input"></td>
+
+                        <td class="px-2 py-2"><input x-model.number="vendor.Freight"
+                            @input="syncRates(vendor, 'freight')" type="number" step="any" class="grid-input"></td>
+                        <td class="px-2 py-2"><input x-model.number="vendor.GST" @input="syncRates(vendor, 'gst')"
+                            type="number" step="any" class="grid-input"></td>
+                        <td class="px-2 py-2"><input x-model.number="vendor.Landed_Rate" type="number" disabled
+                            class="grid-input font-bold text-gray-800 bg-gray-100 cursor-not-allowed"></td>
+                        <td class="px-2 py-2">
+                          <select x-model="vendor.Payment_Terms" class="grid-input">
+                            <option value="">Select...</option>
+                            <option value="Advance">Advance</option>
+                            <option value="15 Days Credit">15 Days</option>
+                            <option value="30 Days Credit">30 Days</option>
+                            <option value="45 Days Credit">45 Days</option>
+                          </select>
+                        </td>
+                        <td class="px-2 py-2">
+                          <select x-model="vendor.Rank" @change="handleRankChange(vendor, index)"
+                            class="grid-input font-semibold"
+                            :class="vendor.Rank === 'Yes' ? 'text-emerald-700 border-emerald-500 bg-emerald-50 focus:border-emerald-600 focus:ring-emerald-500/20' : ''">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                          </select>
+                        </td>
+                        <td class="px-2 py-2 text-center">
+                          <button type="button" @click="removeVendorRow(index)"
+                            class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50"><i
+                              class="bi bi-trash"></i></button>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <h4 class="text-xs font-bold text-emerald-600 tracking-wide mb-3 border-b border-gray-100 pb-1">Final
+              Decision</h4>
             <div class="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Finalized
+                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Finalized
                   Vendor</label>
                 <input x-model="form.Finalized_Vendor" type="text" readonly
-                  class="w-full py-2 px-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] text-gray-700 cursor-not-allowed outline-none transition-all">
+                  class="w-full py-2 px-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] font-semibold text-emerald-700 cursor-not-allowed outline-none">
               </div>
               <div>
-                <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Total Landed
-                  Rate</label>
+                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Grand Total Landed
+                  Rate (Qty × Unit Landed Rate)</label>
                 <div class="relative">
                   <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₹</span>
                   <input x-model.number="form.Total_Landed_Rate" type="number" step="any" readonly
-                    class="w-full py-2 pl-7 pr-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] font-bold text-[#1B5CA8] cursor-not-allowed outline-none transition-all">
+                    class="w-full py-2 pl-7 pr-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] font-bold text-[#1B5CA8] cursor-not-allowed outline-none">
                 </div>
               </div>
             </div>
 
             <div class="mb-4">
-              <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Justification</label>
+              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Justification</label>
               <textarea x-model="form.Justification" rows="3"
-                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all shadow-sm"></textarea>
+                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></textarea>
             </div>
 
             <div class="mb-5">
-              <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Attachments</label>
+              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Attachments</label>
               <input x-ref="fileInput" type="file" multiple
                 class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-[#EBF3FC] file:text-[#1B5CA8] hover:file:bg-[#d8e8fa] transition-colors cursor-pointer border border-gray-200 rounded-lg bg-gray-50 py-1.5 px-2">
             </div>
@@ -596,16 +584,17 @@
 
   <script>
     document.addEventListener('alpine:init', () => {
-      Alpine.data('vcApp', () => ({
-        // Constants
-        REPORT_NAME: 'Quote_Comparison_Report',
-        FORM_NAME: 'Quote_Comparison1',
-        PR_REPORT_NAME: 'Purchase_Requisition_Report',
-        FETCH_BATCH_SIZE: 200,
 
-        // Listing State
-        records: [],
-        filteredRecords: [],
+      const Toast = Swal.mixin({
+        toast: true, position: 'top-end', showConfirmButton: false, timer: 3500, timerProgressBar: true,
+        customClass: { popup: 'font-[Lato] text-sm' }
+      });
+
+      Alpine.data('vcApp', () => ({
+        REPORT_NAME: 'Quote_Comparison_Report',
+        FORM_NAME: 'Quote_Comparison',
+
+        allRecords: [],
         isLoading: true,
         searchQuery: '',
         filter: 'all',
@@ -613,473 +602,452 @@
         sortDir: 'desc',
         page: 1,
         perPage: 10,
-        stats: { total: '–', submitted: '–', finalized: '–', rejected: '–' },
 
-        // Creation / Modal State
+        stats: { total: '–', pending: '–', finalized: '–', rejected: '–' },
+
         isModalOpen: false,
         isSubmitting: false,
         tsInstance: null,
         rfqTsInstance: null,
-        itemTsInstance: null,
-        form: {
-          Quote_Comparison_Subject: '', PR_Ref: '', RFQ_Ref: '', Items_Master: '', Unit: '', Required_Quantity: '', Deliver_to_Plant: '',
-          Finalized_Vendor: '', Total_Landed_Rate: '', Justification: '',
-          Quotation_Comparison_Statement: []
-        },
 
-        // Init
+        form: { Quote_Comparison_Subject: '', PR_Ref: '', RFQ_Ref: '', Finalized_Vendor: '', Total_Landed_Rate: '', Justification: '', Items: [], Quotation_Comparison_Statement: [] },
+
         initApp() {
           this.fetchRecords();
+          this.$watch('searchQuery', Alpine.debounce(() => { this.page = 1; this.fetchRecords(); }, 400));
+          this.$watch('filter', () => { this.page = 1; this.fetchRecords(); });
         },
 
-        // Getters
-        get totalPages() { return Math.max(1, Math.ceil(this.filteredRecords.length / this.perPage)); },
-        get paginatedRecords() {
-          const start = (this.page - 1) * this.perPage;
-          return this.filteredRecords.slice(start, start + this.perPage);
-        },
-        get paginationArray() {
-          let pages = [];
-          for (let i = 1; i <= this.totalPages; i++) {
-            if (i <= 2 || i === this.totalPages || (i >= this.page - 1 && i <= this.page + 1)) pages.push(i);
-          }
-          let uniquePages = [...new Set(pages)].sort((a, b) => a - b);
-          let result = [];
-          for (let i = 0; i < uniquePages.length; i++) {
-            if (i > 0 && uniquePages[i] - uniquePages[i - 1] > 1) result.push('...');
-            result.push(uniquePages[i]);
-          }
-          return result;
-        },
-
-        // Methods
-        toast(message, type) {
-          Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3500, timerProgressBar: true, customClass: { popup: 'font-[Lato] text-sm' } }).fire({ icon: type, title: message });
-        },
-
-        formatDate(dateStr) { return dateStr ? (dayjs(dateStr).isValid() ? dayjs(dateStr).format('DD MMM YYYY') : dateStr) : '–'; },
-        formatINR(amt) { return (amt == null || isNaN(amt)) ? '–' : new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(amt); },
-
-        getSortIcon(col) { return this.sortCol === col ? (this.sortDir === 'asc' ? '▲' : '▼') : ''; },
-
-        handleSort(col) {
-          if (this.sortCol === col) { this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc'; }
-          else { this.sortCol = col; this.sortDir = (col === 'date' || col === 'total_rate') ? 'desc' : 'asc'; }
-          this.page = 1;
-          this.applySort();
-        },
-
-        setFilter(f) {
-          this.filter = f;
-          this.page = 1;
-          this.fetchRecords();
-        },
-
-        openRecord(page, id) { ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', url: `#Page:${page}?recordId=${id}`, window: 'same' }); },
-
-        computeStats() {
-          let q = this.searchQuery.replace(/'/g, "\\'");
-          let searchCrit = this.searchQuery ? `(QC_Ref_Number.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))` : '';
-
-          let combine = (statusCrit) => [searchCrit, statusCrit].filter(Boolean).join(' && ');
-
-          const map = [
-            { key: 'total', crit: combine('') },
-            { key: 'submitted', crit: combine('(Status == "Submitted" || (Status == "" && Finalized_Vendor == ""))') },
-            { key: 'finalized', crit: combine('(Status == "Finalized" || (Status == "" && Finalized_Vendor != ""))') },
-            { key: 'rejected', crit: combine('(Status == "Rejected")') }
-          ];
-
-          map.forEach(item => {
-            let config = { report_name: this.REPORT_NAME };
-            if (item.crit) config.criteria = item.crit;
-            ZOHO.CREATOR.DATA.getRecordCount(config)
-              .then(res => this.stats[item.key] = res.result ? res.result.records_count : 0)
-              .catch(() => this.stats[item.key] = 0);
-          });
-        },
-
-        fetchRecords() {
-          this.isLoading = true;
-          let q = this.searchQuery.replace(/'/g, "\\'");
-          let searchCrit = this.searchQuery ? `(QC_Ref_Number.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))` : '';
-
-          let statusCrit = '';
-          if (this.filter === 'submitted') statusCrit = '(Status == "Submitted" || (Status == "" && Finalized_Vendor == ""))';
-          if (this.filter === 'finalized') statusCrit = '(Status == "Finalized" || (Status == "" && Finalized_Vendor != ""))';
-          if (this.filter === 'rejected') statusCrit = '(Status == "Rejected")';
-
-          let criteria = [searchCrit, statusCrit].filter(Boolean).join(' && ');
-
-          this.fetchAllRecordsBatch(criteria, null, [])
-            .then(data => {
-              this.records = data;
-              this.applySort();
-              this.computeStats();
-            })
-            .catch(err => {
-              console.error(err); this.records = []; this.filteredRecords = [];
-            })
-            .finally(() => this.isLoading = false);
-        },
-
-        fetchAllRecordsBatch(criteria, cursor, accumulated) {
-          let config = { report_name: this.REPORT_NAME, max_records: this.FETCH_BATCH_SIZE };
-          if (criteria) config.criteria = criteria;
-          if (cursor) config.record_cursor = cursor;
-
-          return ZOHO.CREATOR.DATA.getRecords(config).then(res => {
-            if (res.code === 3000 && res.data && res.data.length > 0) {
-              accumulated = accumulated.concat(res.data);
-              if (res.data.length >= this.FETCH_BATCH_SIZE && res.record_cursor) return this.fetchAllRecordsBatch(criteria, res.record_cursor, accumulated);
-            }
-            return accumulated;
-          });
-        },
-
-        applySort() {
-          let getVal = (rec, col) => {
-            switch (col) {
-              case 'qc_no': return (rec.QC_Ref_Number || '').toString().toLowerCase();
-              case 'subject': return (rec.Quote_Comparison_Subject || '').toString().toLowerCase();
-              case 'pr_ref': return (rec.PR_Ref && rec.PR_Ref.zc_display_value) ? rec.PR_Ref.zc_display_value.toLowerCase() : '';
-              case 'qty': return parseFloat(rec.Required_Quantity) || 0;
-              case 'date': return rec.Added_Time ? dayjs(rec.Added_Time).valueOf() : 0;
-              case 'status': return (rec.Status || '').toString().toLowerCase();
-              case 'final_vendor': return (rec.Finalized_Vendor || '').toString().toLowerCase();
-              case 'total_rate': return parseFloat(rec.Total_Landed_Rate) || 0;
-              default: return '';
-            }
-          };
-
-          this.filteredRecords = [...this.records].sort((a, b) => {
-            let va = getVal(a, this.sortCol), vb = getVal(b, this.sortCol), cmp = 0;
+        // --- Computed Properties ---
+        get filteredRecords() {
+          let recs = [...this.allRecords];
+          return recs.sort((a, b) => {
+            let va = this.getSortValue(a, this.sortCol);
+            let vb = this.getSortValue(b, this.sortCol);
+            let cmp = 0;
             if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
-            else { va = String(va); vb = String(vb); cmp = va < vb ? -1 : va > vb ? 1 : 0; }
+            else {
+              va = String(va).toLowerCase();
+              vb = String(vb).toLowerCase();
+              cmp = va < vb ? -1 : va > vb ? 1 : 0;
+            }
             return this.sortDir === 'asc' ? cmp : -cmp;
           });
         },
 
-        // --- Creation Modal Logic --- //
-        openModal() {
-          this.form = {
-            Quote_Comparison_Subject: '', PR_Ref: '', RFQ_Ref: '', Items_Master: '', Item_Name: '', Unit: '', Required_Quantity: '', Deliver_to_Plant: '',
-            Finalized_Vendor: '', Total_Landed_Rate: '', Justification: '', Quotation_Comparison_Statement: []
+        get paginatedRecords() {
+          const start = (this.page - 1) * this.perPage;
+          return this.filteredRecords.slice(start, start + this.perPage);
+        },
+
+        get totalPages() {
+          return Math.max(1, Math.ceil(this.filteredRecords.length / this.perPage));
+        },
+
+        // --- Data Fetching ---
+        buildCriteria() {
+          let criteria = [];
+          if (this.searchQuery.trim()) {
+            let q = this.searchQuery.trim().replace(/'/g, "\\'");
+            criteria.push(`(QC_Ref_Number.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))`);
+          }
+          if (this.filter === 'pending') criteria.push('(Status == "Submitted" || Status == "Requested For Re Negotiation" || (Status == "" && Finalized_Vendor == ""))');
+          else if (this.filter === 'finalized') criteria.push('(Status == "Finalized" || Status == "Freezed" || (Status == "" && Finalized_Vendor != ""))');
+          else if (this.filter === 'rejected') criteria.push('(Status == "Rejected")');
+          return criteria.join(' && ');
+        },
+
+        async fetchRecords() {
+          this.isLoading = true;
+          try {
+            let accumulated = [];
+            let cursor = null;
+            let crit = this.buildCriteria();
+
+            do {
+              let config = { report_name: this.REPORT_NAME, max_records: 200, field_config: 'all' };
+              if (crit) config.criteria = crit;
+              if (cursor) config.record_cursor = cursor;
+
+              let res = await ZOHO.CREATOR.DATA.getRecords(config);
+              if (res.code === 3000 && res.data) {
+                accumulated = accumulated.concat(res.data);
+                cursor = res.data.length >= 200 ? res.record_cursor : null;
+              } else {
+                cursor = null;
+              }
+            } while (cursor);
+
+            this.allRecords = accumulated;
+            this.computeStats();
+          } catch (err) {
+            console.error('Fetch error', err);
+            this.allRecords = [];
+          } finally {
+            this.isLoading = false;
+          }
+        },
+
+        async computeStats() {
+          let q = this.searchQuery.trim().replace(/'/g, "\\'");
+          let searchCrit = q ? `(QC_Ref_Number.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))` : '';
+          const build = (statusCrit) => [searchCrit, statusCrit].filter(Boolean).join(' && ');
+
+          const map = [
+            { key: 'total', crit: build('') },
+            { key: 'pending', crit: build('(Status == "Submitted" || Status == "Requested For Re Negotiation" || (Status == "" && Finalized_Vendor == ""))') },
+            { key: 'finalized', crit: build('(Status == "Finalized" || Status == "Freezed" || (Status == "" && Finalized_Vendor != ""))') },
+            { key: 'rejected', crit: build('(Status == "Rejected")') }
+          ];
+
+          for (let m of map) {
+            let config = { report_name: this.REPORT_NAME };
+            if (m.crit) config.criteria = m.crit;
+            try {
+              let res = await ZOHO.CREATOR.DATA.getRecordCount(config);
+              this.stats[m.key] = res.result ? res.result.records_count : 0;
+            } catch (e) {
+              this.stats[m.key] = 0;
+            }
+          }
+        },
+
+        // --- UI Helpers ---
+        setFilter(f) { this.filter = f; },
+
+        toggleSort(col) {
+          if (this.sortCol === col) {
+            this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+          } else {
+            this.sortCol = col;
+            this.sortDir = (col === 'date' || col === 'total_rate') ? 'desc' : 'asc';
+          }
+          this.page = 1;
+        },
+
+        getSortValue(rec, col) {
+          switch (col) {
+            case 'qc_no': return (rec.QC_Ref_Number || '').toString().toLowerCase();
+            case 'subject': return (rec.Quote_Comparison_Subject || '').toString().toLowerCase();
+            case 'pr_ref': return (rec.PR_Ref?.zc_display_value || '').toLowerCase();
+            case 'rfq_ref': return (rec.RFQ_Ref?.zc_display_value || '').toLowerCase();
+            case 'date': return rec.Added_Time ? dayjs(rec.Added_Time).valueOf() : 0;
+            case 'status': return this.normalizeStatusGroup(rec);
+            case 'final_vendor': return (rec.Finalized_Vendor || '').toString().toLowerCase();
+            case 'total_rate': return parseFloat(rec.Total_Landed_Rate) || 0;
+            default: return '';
+          }
+        },
+
+        normalizeStatusGroup(rec) {
+          if (!rec || (!rec.Status && !rec.Finalized_Vendor)) return 'pending';
+          const st = (rec.Status || '').toLowerCase();
+          if (st === 'rejected') return 'rejected';
+          if (st === 'finalized' || st === 'freezed' || (!rec.Status && rec.Finalized_Vendor)) return 'finalized';
+          return 'pending';
+        },
+
+        getStatusStyle(rec) {
+          const group = this.normalizeStatusGroup(rec);
+          const map = {
+            pending: { classes: 'border-amber-200 bg-amber-50 text-amber-800', dot: 'bg-amber-500' },
+            finalized: { classes: 'border-emerald-200 bg-emerald-50 text-emerald-800', dot: 'bg-emerald-600' },
+            rejected: { classes: 'border-red-200 bg-red-50 text-red-800', dot: 'bg-red-600' }
           };
-          this.addVendorRow();
+          return map[group] || map.pending;
+        },
+
+        formatDate(dateStr) { return dateStr ? (dayjs(dateStr).isValid() ? dayjs(dateStr).format('DD MMM YYYY') : dateStr) : '–'; },
+        formatINR(amt) { return (amt == null || isNaN(amt) || amt === '') ? '–' : new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(amt); },
+
+        getPagesArray() {
+          let pages = [];
+          for (let p = 1; p <= this.totalPages; p++) {
+            if (p <= 2 || p === this.totalPages || (p >= this.page - 1 && p <= this.page + 1)) pages.push(p);
+          }
+          pages = [...new Set(pages)].sort((a, b) => a - b);
+          let finalPages = [];
+          for (let i = 0; i < pages.length; i++) {
+            if (i > 0 && pages[i] - pages[i - 1] > 1) finalPages.push('…');
+            finalPages.push(pages[i]);
+          }
+          return finalPages;
+        },
+
+        // --- Form / Modal Methods ---
+        openModal() {
+          this.form = { Quote_Comparison_Subject: '', PR_Ref: '', RFQ_Ref: '', Finalized_Vendor: '', Total_Landed_Rate: '', Justification: '', Items: [], Quotation_Comparison_Statement: [] };
           if (this.$refs.fileInput) this.$refs.fileInput.value = '';
           this.isModalOpen = true;
-
-          setTimeout(() => {
-            this.initPrTomSelect();
-            this.initRfqTomSelect();
-            this.initItemTomSelect();
-          }, 50);
+          setTimeout(() => { this.initPrTomSelect(); this.initRfqTomSelect(); }, 50);
         },
 
         closeModal() {
           this.isModalOpen = false;
           if (this.tsInstance) { this.tsInstance.destroy(); this.tsInstance = null; }
           if (this.rfqTsInstance) { this.rfqTsInstance.destroy(); this.rfqTsInstance = null; }
-          if (this.itemTsInstance) { this.itemTsInstance.destroy(); this.itemTsInstance = null; }
           if (this.$refs.fileInput) this.$refs.fileInput.value = '';
         },
 
-        addVendorRow() {
-          // Initialize Rank to 'No' by default
-          this.form.Quotation_Comparison_Statement.push({ Vendor_Name: '', Basic_Rate: '', Negotiated_Rate: 0, Disc: '', Freight: '', GST: '', Landed_Rate: '', Payment_Terms: '', Rank: 'No' });
+        // ADDED: uid to ensure specific item row deletes properly without confusing DOM framework
+        addItemRow() { this.form.Items.push({ uid: Date.now() + Math.random(), Items: '', Item_Name: '', Unit: '', Quantity: '', Deliver_to_Plant: '' }); },
+
+        removeItemRow(index) {
+          const removedItem = this.form.Items[index];
+          this.form.Items.splice(index, 1);
+
+          // Bug Fix: Auto-cleanup corresponding vendor rows if you delete an item
+          if (removedItem && removedItem.Items) {
+            this.form.Quotation_Comparison_Statement = this.form.Quotation_Comparison_Statement.filter(v => v.Items_Master !== removedItem.Items);
+          }
+          this.recalculateTotals();
         },
 
-        removeVendorRow(index) {
-          this.form.Quotation_Comparison_Statement.splice(index, 1);
-          this.updateFinalQuantity(); // Re-calculate in case the removed vendor was Ranked "Yes"
-        },
+        // ADDED: uid for vendor row tracking
+        addVendorRow() { this.form.Quotation_Comparison_Statement.push({ uid: Date.now() + Math.random(), Vendor_Name: '', Vendor_Display: '', Items_Master: '', Item_Name: '', Basic_Rate: '', Negotiated_Rate: 0, Disc: '', Freight: '', GST: '', Landed_Rate: '', Payment_Terms: '', Rank: 'No' }); },
+        removeVendorRow(index) { this.form.Quotation_Comparison_Statement.splice(index, 1); this.recalculateTotals(); },
 
-        // Calculation Logic for Auto-Populating Landed Rate
-        calculateVendor(vendor) {
-          let basic = parseFloat(vendor.Negotiated_Rate) || parseFloat(vendor.Basic_Rate) || 0;
-          let discPct = parseFloat(vendor.Disc) || 0;
+        syncRates(vendor, source) {
+          let basic = parseFloat(vendor.Basic_Rate) || 0;
+          if (source === 'basic' || source === 'disc') {
+            let disc = parseFloat(vendor.Disc) || 0;
+            vendor.Negotiated_Rate = parseFloat((basic - (basic * disc / 100)).toFixed(2));
+          } else if (source === 'neg') {
+            let neg = parseFloat(vendor.Negotiated_Rate) || 0;
+            vendor.Disc = basic > 0 ? parseFloat((((basic - neg) / basic) * 100).toFixed(2)) : 0;
+          }
+          let negRate = parseFloat(vendor.Negotiated_Rate) || parseFloat(vendor.Basic_Rate) || 0;
           let freight = parseFloat(vendor.Freight) || 0;
-          let gstPct = parseFloat(vendor.GST) || 0;
-
-          // Landed Rate = Basic rate - discount % + fright + gst %
-          let discountAmount = basic * (discPct / 100);
-          let basicAfterDisc = basic - discountAmount;
-          let amountWithFreight = basicAfterDisc + freight;
-          let gstAmount = amountWithFreight * (gstPct / 100);
-
-          vendor.Landed_Rate = parseFloat((amountWithFreight + gstAmount).toFixed(2));
-
-          // If this vendor is currently finalized, dynamically update the total rate
-          if (vendor.Rank === 'Yes') {
-            this.updateFinalized(vendor);
-          }
+          let gst = parseFloat(vendor.GST) || 0;
+          let subtotal = negRate + freight;
+          vendor.Landed_Rate = parseFloat((subtotal + (subtotal * gst / 100)).toFixed(2));
+          if (vendor.Rank === 'Yes') this.recalculateTotals();
         },
 
-        // Rank Handling Logic
         handleRankChange(vendor, index) {
+          const chosenVendorId = vendor.Vendor_Name;
           if (vendor.Rank === 'Yes') {
-            // Deselect all others
-            this.form.Quotation_Comparison_Statement.forEach((v, i) => {
-              if (i !== index) v.Rank = 'No';
+            this.form.Quotation_Comparison_Statement.forEach(v => { v.Rank = (v.Vendor_Name === chosenVendorId) ? 'Yes' : 'No'; });
+          } else {
+            this.form.Quotation_Comparison_Statement.forEach(v => { if (v.Vendor_Name === chosenVendorId) v.Rank = 'No'; });
+          }
+          this.recalculateTotals();
+        },
+
+        recalculateTotals() {
+          let finalizedRow = this.form.Quotation_Comparison_Statement.find(v => v.Rank === 'Yes');
+          if (finalizedRow && finalizedRow.Vendor_Name) {
+            let finalizedVendorId = finalizedRow.Vendor_Name;
+            this.form.Finalized_Vendor = finalizedRow.Vendor_Display || finalizedVendorId;
+
+            let total = 0;
+            this.form.Quotation_Comparison_Statement.forEach(v => {
+              if (v.Vendor_Name === finalizedVendorId && v.Rank === 'Yes') {
+                // Because rows are per-item, we calculate (Qty * Landed Rate)
+                let reqItem = this.form.Items.find(i => i.Items === v.Items_Master);
+                let qty = reqItem ? (parseFloat(reqItem.Quantity) || 0) : 0;
+                let unitLandedRate = parseFloat(v.Landed_Rate) || 0;
+                total += (qty * unitLandedRate);
+              }
             });
-            this.updateFinalized(vendor);
+            this.form.Total_Landed_Rate = total > 0 ? parseFloat(total.toFixed(2)) : '';
           } else {
-            // If they changed the finalized one back to 'No', reset the final fields
-            if (this.form.Finalized_Vendor === vendor.Vendor_Name) {
-              this.form.Finalized_Vendor = '';
-              this.form.Total_Landed_Rate = '';
-            }
+            this.form.Finalized_Vendor = ''; this.form.Total_Landed_Rate = '';
           }
         },
 
-        // Update Finalized Information based on selected vendor & requirement quantity
-        updateFinalized(vendor) {
-          this.form.Finalized_Vendor = vendor.Vendor_Name;
-          let qty = parseFloat(this.form.Required_Quantity) || 0;
-          let landedRate = parseFloat(vendor.Landed_Rate) || 0;
-
-          this.form.Total_Landed_Rate = parseFloat((qty * landedRate).toFixed(2));
-        },
-
-        // Recalculates final total if Required Quantity is changed after selecting a vendor
-        updateFinalQuantity() {
-          let selectedVendor = this.form.Quotation_Comparison_Statement.find(v => v.Rank === 'Yes');
-          if (selectedVendor) {
-            this.updateFinalized(selectedVendor);
-          } else {
-            this.form.Total_Landed_Rate = '';
-            this.form.Finalized_Vendor = '';
-          }
-        },
-
+        // --- TomSelect Configurations ---
         initPrTomSelect() {
-          const self = this;
           this.tsInstance = new TomSelect(this.$refs.prSelect, {
-            valueField: 'ID',
-            labelField: 'PR_Number',
-            searchField: ['PR_Number', 'Requisition_Number'],
-            create: false,
-            maxItems: 1,
-            placeholder: 'Search PR...',
-            loadThrottle: 350,
-            onChange: function (value) {
-              self.form.PR_Ref = value;
-              if (value) {
-                const selectedPr = this.options[value];
-                if (selectedPr && selectedPr.Request_For_Quotation_RFQ_Ref_Number && selectedPr.Request_For_Quotation_RFQ_Ref_Number[0].ID && self.rfqTsInstance) {
-                  const rfqId = selectedPr.Request_For_Quotation_RFQ_Ref_Number[0].ID;
-                  const rfqDisplay = selectedPr.Request_For_Quotation_RFQ_Ref_Number[0].zc_display_value || selectedPr.Request_For_Quotation_RFQ_Ref_Number[0].RFQ_Ref_Number;
-                  self.rfqTsInstance.addOption({ ID: rfqId, RFQ_Ref_Number: rfqDisplay });
-                  self.rfqTsInstance.setValue(rfqId);
-                  self.form.RFQ_Ref = rfqId;
+            valueField: 'ID', labelField: 'PR_Number', searchField: ['PR_Number'],
+            create: false, maxItems: 1, placeholder: 'Search PR...', loadThrottle: 350,
+            onChange: (value) => {
+              this.form.PR_Ref = value;
+              if (this.rfqTsInstance) {
+                this.rfqTsInstance.clear(); this.rfqTsInstance.clearOptions();
+                if (value) {
+                  Toast.fire({ icon: 'info', title: 'Fetching available RFQs...' });
+                  ZOHO.CREATOR.DATA.getRecords({ report_name: 'Request_For_Quotation_Report', criteria: `(PR_Refs.contains(${value}))` })
+                    .then(res => {
+                      if (res.code === 3000 && res.data) {
+                        res.data.forEach(rfq => this.rfqTsInstance.addOption(rfq));
+                        this.rfqTsInstance.refreshOptions(false);
+                      }
+                    });
                 }
-                self.fetchPRDetailsForVC(value);
-              } else if (self.rfqTsInstance) {
-                self.rfqTsInstance.clear();
-                self.form.RFQ_Ref = '';
               }
             },
-            load: function (query, callback) {
-              if (!query.length) return callback();
+            load: (query, callback) => {
               var q = query.replace(/'/g, "\\'");
-              ZOHO.CREATOR.DATA.getRecords({ report_name: self.PR_REPORT_NAME, criteria: `(Current_Stage == "Quote Comparison") && (PR_Number.contains("${q}")))` })
-                .then(res => { callback((res.code === 3000 && res.data) ? res.data : []); })
-                .catch(() => callback());
+              ZOHO.CREATOR.DATA.getRecords({ report_name: 'Purchase_Requisition_Report', criteria: `(PR_Number.contains("${q}"))` })
+                .then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(() => callback());
             },
-            render: {
-              option: function (data, escape) { return '<div class="font-mono">' + escape(data.PR_Number || data.Requisition_Number || 'Unknown') + '</div>'; },
-              item: function (data, escape) { return '<div class="font-mono">' + escape(data.PR_Number || data.Requisition_Number || 'Unknown') + '</div>'; },
-              loading: function () { return '<div class="text-gray-400">Searching ...</div>'; },
-              no_results: function () { return '<div class="text-gray-400">No PRs found.</div>'; }
-            }
+            render: { option: (data, escape) => '<div class="font-mono font-medium">' + escape(data.PR_Number) + '</div>', item: (data, escape) => '<div class="font-mono">' + escape(data.PR_Number) + '</div>' }
           });
         },
 
         initRfqTomSelect() {
-          const self = this;
           this.rfqTsInstance = new TomSelect(this.$refs.rfqSelect, {
-            valueField: 'ID',
-            labelField: 'RFQ_Ref_Number',
-            searchField: ['RFQ_Ref_Number', 'RFQ_Number'],
-            create: false,
-            maxItems: 1,
-            placeholder: 'Search RFQ...',
-            loadThrottle: 350,
-            onChange: function (value) {
-              self.form.RFQ_Ref = value;
+            valueField: 'ID', labelField: 'RFQ_Ref_Number', searchField: ['RFQ_Ref_Number', 'RFQ_Number'],
+            create: false, maxItems: 1, placeholder: 'Search RFQ...', loadThrottle: 350,
+            onChange: (value) => {
+              this.form.RFQ_Ref = value;
+              if (value) this.fetchRFQDetails(value);
             },
-            load: function (query, callback) {
-              if (!query.length) return callback();
+            load: (query, callback) => {
               var q = query.replace(/'/g, "\\'");
-              ZOHO.CREATOR.DATA.getRecords({ report_name: 'Request_For_Quotation_Report', criteria: `(RFQ_Ref_Number.contains("${q}") || RFQ_Number.contains("${q}"))` })
-                .then(res => { callback((res.code === 3000 && res.data) ? res.data : []); })
-                .catch(() => callback());
+              let crit = `(RFQ_Ref_Number.contains("${q}") || RFQ_Number.contains("${q}"))`;
+              if (this.form.PR_Ref) crit += ` && (PR_Refs.contains(${this.form.PR_Ref}))`;
+              ZOHO.CREATOR.DATA.getRecords({ report_name: 'Request_For_Quotation_Report', criteria: crit })
+                .then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(() => callback());
             },
-            render: {
-              option: function (data, escape) { return '<div class="font-mono">' + escape(data.RFQ_Ref_Number || data.RFQ_Number || 'Unknown') + '</div>'; },
-              item: function (data, escape) { return '<div class="font-mono">' + escape(data.RFQ_Ref_Number || data.RFQ_Number || 'Unknown') + '</div>'; },
-              loading: function () { return '<div class="text-gray-400">Searching ...</div>'; },
-              no_results: function () { return '<div class="text-gray-400">No RFQs found.</div>'; }
-            }
+            render: { option: (data, escape) => '<div class="font-mono font-medium">' + escape(data.RFQ_Ref_Number || data.RFQ_Number) + '</div>', item: (data, escape) => '<div class="font-mono">' + escape(data.RFQ_Ref_Number || data.RFQ_Number) + '</div>' }
           });
         },
 
-        initItemTomSelect() {
-          const self = this;
-          this.itemTsInstance = new TomSelect(this.$refs.itemSelect, {
-            valueField: 'ID',
-            labelField: 'item_name',
-            searchField: 'item_name',
-            create: false,
-            maxItems: 1,
-            placeholder: 'Search Item...',
-            loadThrottle: 350,
-            onChange: function (value) {
-              self.form.Items_Master = value;
-              if (value && self.itemTsInstance && self.itemTsInstance.options[value]) {
-                const item = self.itemTsInstance.options[value];
-                if (item) {
-                  self.form.Item_Name = item.item_name || '';
-                  self.form.Unit = item.unit_of_measure || item.Unit || '';
-                }
-              }
+        initDynamicItem(el, targetObj, idKey, nameKey) {
+          let ts = new TomSelect(el, {
+            valueField: 'ID', labelField: 'item_name', searchField: ['item_name'],
+            create: false, maxItems: 1, placeholder: 'Select Item...', loadThrottle: 350,
+            onChange: (val) => {
+              targetObj[idKey] = val;
+              let opt = ts.options[val];
+              if (opt) { targetObj[nameKey] = opt.item_name; if (opt.unit_of_measure && targetObj.Unit !== undefined) targetObj.Unit = opt.unit_of_measure; }
             },
-            load: function (query, callback) {
-              if (!query.length) return callback();
-              var q = query.replace(/'/g, "\\'");
+            load: (query, callback) => {
+              let q = query.replace(/'/g, "\\'");
               ZOHO.CREATOR.DATA.getRecords({ report_name: 'Items_Report', criteria: `(item_name.contains("${q}"))` })
-                .then(res => { callback((res.code === 3000 && res.data) ? res.data : []); })
-                .catch(() => callback());
+                .then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(() => callback());
             },
-            render: {
-              option: function (data, escape) { return '<div class="font-medium">' + escape(data.item_name || 'Unknown') + '</div>'; },
-              item: function (data, escape) { return '<div class="font-medium">' + escape(data.item_name || 'Unknown') + '</div>'; },
-              loading: function () { return '<div class="text-gray-400">Searching ...</div>'; },
-              no_results: function () { return '<div class="text-gray-400">No items found.</div>'; }
-            }
+            render: { option: (data, escape) => `<div class="font-medium text-xs py-1 px-2">${escape(data.item_name)}</div>`, item: (data, escape) => `<div class="text-xs">${escape(data.item_name)}</div>` }
           });
-        },
-
-        fetchPRDetailsForVC(prId) {
-          this.toast('Fetching PR details...', 'info');
-          ZOHO.CREATOR.DATA.invokeCustomApi({ api_name: "Fetch_PR_Details", http_method: "GET", content_type: "application/json", query_params: 'recId=' + prId })
-            .then(res => {
-              if (res && res.result && res.result.length > 0) {
-                const pr = res.result[0];
-                if (pr.Items && pr.Items.length > 0) {
-                  const item = pr.Items[0];
-
-                  this.form.Required_Quantity = item.Quantity || '';
-
-                  if (item.Item && item.Item.ID && this.itemTsInstance) {
-                    const itemId = item.Item.ID;
-                    const itemName = item.Item.display_value || item.Item.item_name || item.Item.zc_display_value || '';
-
-                    this.itemTsInstance.addOption({ ID: itemId, item_name: itemName, unit_of_measure: item.unit_of_measure || '' });
-                    this.itemTsInstance.setValue(itemId);
-
-                    // Fetch full item details to get unit_of_measure
-                    ZOHO.CREATOR.DATA.getRecords({ report_name: 'Items_Report', criteria: `ID == ${itemId}` })
-                      .then(itemRes => {
-                        if (itemRes.code === 3000 && itemRes.data && itemRes.data.length > 0) {
-                          const itemMaster = itemRes.data[0];
-                          this.itemTsInstance.updateOption(itemId, itemMaster);
-                          this.form.Unit = itemMaster.unit_of_measure || itemMaster.Unit || '';
-                          this.form.Item_Name = itemMaster.item_name || itemName;
-                        }
-                      })
-                      .catch(err => console.log('Error fetching item details:', err));
-                  } else {
-                    this.form.Item_Name = item.Item?.item_name || item.Item?.display_value || '';
-                    this.form.Unit = item.unit_of_measure || '';
-                  }
-
-                  this.updateFinalQuantity();
-                  this.toast('Item details pre-filled from PR', 'success');
-                } else {
-                  this.toast('PR has no items to pre-fill.', 'warning');
-                }
-
-                if (pr.Request_For_Quotation_RFQ_Ref_Number && pr.Request_For_Quotation_RFQ_Ref_Number.ID && this.rfqTsInstance) {
-                  const rfqId = pr.Request_For_Quotation_RFQ_Ref_Number.ID;
-                  const rfqDisplay = pr.Request_For_Quotation_RFQ_Ref_Number.zc_display_value;
-                  this.rfqTsInstance.addOption({ ID: rfqId, RFQ_Ref_Number: rfqDisplay });
-                  this.rfqTsInstance.setValue(rfqId);
-                  this.form.RFQ_Ref = rfqId;
-                }
-              } else {
-                this.toast('Failed to fetch PR details', 'error');
-              }
-            })
-            .catch(err => { console.error(err); this.toast('Error fetching PR details', 'error'); });
-        },
-
-        submitForm() {
-          if (this.form.Quotation_Comparison_Statement.length === 0) {
-            this.toast('Please add at least one vendor to the statement.', 'error');
-            return;
+          if (targetObj[idKey] && targetObj[nameKey]) {
+            ts.addOption({ ID: targetObj[idKey], item_name: targetObj[nameKey] });
+            ts.setValue(targetObj[idKey], true);
           }
+          return ts;
+        },
+
+        initDynamicVendor(el, targetObj) {
+          let ts = new TomSelect(el, {
+            valueField: 'ID', labelField: 'Display_Name', searchField: ['Display_Name'],
+            create: false, maxItems: 1, placeholder: 'Select Vendor...', loadThrottle: 350,
+            onChange: (val) => {
+              targetObj.Vendor_Name = val;
+              let opt = ts.options[val];
+              if (opt) targetObj.Vendor_Display = opt.Display_Name;
+            },
+            load: (query, callback) => {
+              let q = query.replace(/'/g, "\\'");
+              ZOHO.CREATOR.DATA.getRecords({ report_name: 'Vendor_Report', criteria: `(Display_Name.contains("${q}"))` })
+                .then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(() => callback());
+            },
+            render: { option: (data, escape) => `<div class="font-medium text-xs py-1 px-2">${escape(data.Display_Name)}</div>`, item: (data, escape) => `<div class="text-xs">${escape(data.Display_Name)}</div>` }
+          });
+          if (targetObj.Vendor_Name && targetObj.Vendor_Display) {
+            ts.addOption({ ID: targetObj.Vendor_Name, Display_Name: targetObj.Vendor_Display });
+            ts.setValue(targetObj.Vendor_Name, true);
+          }
+          return ts;
+        },
+
+        // --- Custom API Logic ---
+        async fetchRFQDetails(rfqId) {
+          Toast.fire({ icon: 'info', title: 'Fetching RFQ details...' });
+          try {
+            let res = await ZOHO.CREATOR.DATA.invokeCustomApi({ api_name: "Get_RFQ_Details", http_method: "GET", content_type: "application/json", query_params: `recId=${rfqId}` });
+            if (res.code === 3000 && res.result && res.result.length > 0) {
+              const rfq = res.result[0];
+
+              // Wipe slate clean and assign new arrays
+              this.form.Items = [];
+              this.form.Quotation_Comparison_Statement = [];
+
+              if (rfq.Items && rfq.Items.length > 0) {
+                rfq.Items.forEach(itemRow => {
+                  if (itemRow.Item && itemRow.Item.ID) {
+
+                    const reqItem = {
+                      uid: Date.now() + Math.random(), // Unique mapping ID
+                      Items: itemRow.Item.ID,
+                      Item_Name: itemRow.Item.display_value || itemRow.Item.item_name,
+                      Unit: itemRow.Unit || itemRow.Item.unit_of_measure || 'Nos',
+                      Quantity: itemRow.Quantity || 0,
+                      Deliver_to_Plant: ''
+                    };
+
+                    this.form.Items.push(reqItem);
+
+                    // Reverted Logic: 1 Row per Vendor per Item (Unique combinations)
+                    if (itemRow.vendors && Array.isArray(itemRow.vendors)) {
+                      itemRow.vendors.forEach(v => {
+                        this.form.Quotation_Comparison_Statement.push({
+                          uid: Date.now() + Math.random(),
+                          Vendor_Name: v.ID,
+                          Vendor_Display: v.Display_Name || v.Vendor_Name,
+                          Items_Master: reqItem.Items,
+                          Item_Name: reqItem.Item_Name,
+                          Basic_Rate: '', Negotiated_Rate: 0, Disc: '', Freight: '', GST: '', Landed_Rate: '', Payment_Terms: '', Rank: 'No'
+                        });
+                      });
+                    }
+                  }
+                });
+              }
+
+              this.recalculateTotals();
+              Toast.fire({ icon: 'success', title: 'Items and Vendor lines loaded!' });
+            } else {
+              Toast.fire({ icon: 'warning', title: 'No items found in RFQ.' });
+            }
+          } catch (err) { Toast.fire({ icon: 'error', title: 'Failed to load RFQ Details' }); }
+        },
+
+        async submitForm() {
+          if (this.form.Items.length === 0) { Toast.fire({ icon: 'error', title: 'Please add at least one item requirement.' }); return; }
+          if (this.form.Quotation_Comparison_Statement.length === 0) { Toast.fire({ icon: 'error', title: 'Please add at least one vendor quote line.' }); return; }
 
           this.isSubmitting = true;
 
-          // Mapping natively directly using the unified field names.
-          let itemsCollection = this.form.Quotation_Comparison_Statement.map(v => ({
-            "Vendor_Name": v.Vendor_Name,
-            "Basic_Rate": parseFloat(v.Basic_Rate) || 0,
-            "Negotiated_Rate": parseFloat(v.Negotiated_Rate) || 0,
-            "Disc": parseFloat(v.Disc) || 0,
-            "Freight": parseFloat(v.Freight) || 0,
-            "GST": parseFloat(v.GST) || 0,
-            "Landed_Rate": parseFloat(v.Landed_Rate) || 0,
-            "Payment_Terms": v.Payment_Terms || "",
-            "Rank": v.Rank ? [v.Rank] : ["No"]
-          }));
+          try {
+            const payload = {
+              data: {
+                Quote_Comparison_Subject: this.form.Quote_Comparison_Subject,
+                PR_Ref: this.form.PR_Ref,
+                RFQ_Ref: this.form.RFQ_Ref,
+                Finalized_Vendor: this.form.Finalized_Vendor,
+                Total_Landed_Rate: parseFloat(this.form.Total_Landed_Rate) || 0,
+                Justification: this.form.Justification,
+                Status: "Submitted",
+                Items: this.form.Items.map(i => ({ "Item": i.Items, "Unit": i.Unit, "Quantity": parseFloat(i.Quantity) || 0, "Deliver_to_Plant": i.Deliver_to_Plant || "" })),
+                Quotation_Comparison_Statement: this.form.Quotation_Comparison_Statement.map(v => ({
+                  "Vendor_Name": v.Vendor_Display || v.Vendor_Name, "Items": [v.Items_Master], "Basic_Rate": parseFloat(v.Basic_Rate) || 0,
+                  "Negotiated_Rate": parseFloat(v.Negotiated_Rate) || 0, "Disc": parseFloat(v.Disc) || 0, "Freight": parseFloat(v.Freight) || 0,
+                  "GST": parseFloat(v.GST) || 0, "Landed_Rate": parseFloat(v.Landed_Rate) || 0, "Payment_Terms": v.Payment_Terms || "", "Rank": v.Rank || "No"
+                }))
+              }
+            };
 
-          const payload = {
-            "data": {
-              "Quote_Comparison_Subject": this.form.Quote_Comparison_Subject,
-              "PR_Ref": this.form.PR_Ref,
-              "RFQ_Ref": this.form.RFQ_Ref,
-              "Items_Master": this.form.Items_Master,
-              "Unit": this.form.Unit,
-              "Required_Quantity": parseFloat(this.form.Required_Quantity) || 0,
-              "Deliver_to_Plant": this.form.Deliver_to_Plant,
-              "Quotation_Comparison_Statement": itemsCollection,
-              "Finalized_Vendor": this.form.Finalized_Vendor,
-              "Total_Landed_Rate": parseFloat(this.form.Total_Landed_Rate) || 0,
-              "Justification": this.form.Justification,
-              "Status": "Submitted"
-            }
-          };
-
-          ZOHO.CREATOR.DATA.addRecords({ form_name: this.FORM_NAME, payload }).then(res => {
+            let res = await ZOHO.CREATOR.DATA.addRecords({ form_name: this.FORM_NAME, payload });
             if (res.code === 3000 && res.data) {
               const newId = res.data.ID;
               const files = this.$refs.fileInput.files;
-
               if (files.length > 0) {
                 const uploadPromises = Array.from(files).map(f => ZOHO.CREATOR.FILE.uploadFile({ report_name: this.REPORT_NAME, field_name: "Attachments", file: f, id: newId }));
-                Promise.all(uploadPromises).then(() => this.completeSubmission()).catch(err => { console.error(err); this.completeSubmission(); });
-              } else {
-                this.completeSubmission();
+                await Promise.all(uploadPromises);
               }
+              Toast.fire({ icon: 'success', title: 'Quote Comparison created successfully!' });
+              this.closeModal();
+              this.searchQuery = '';
+              this.fetchRecords();
             } else {
-              this.isSubmitting = false;
-              this.toast('Failed to create quote comparison: ' + (res.message || 'Error'), 'error');
+              throw new Error(res.message || 'Error occurred during creation.');
             }
-          }).catch(err => {
+          } catch (err) {
+            Toast.fire({ icon: 'error', title: err.message || 'Submission failed.' });
+          } finally {
             this.isSubmitting = false;
-            this.toast('Submission error. Check console.', 'error'); console.error(err);
-          });
-        },
-
-        completeSubmission() {
-          this.closeModal();
-          this.toast('Quote Comparison created successfully!', 'success');
-          this.searchQuery = '';
-          this.isSubmitting = false;
-          this.fetchRecords();
+          }
         }
       }));
     });

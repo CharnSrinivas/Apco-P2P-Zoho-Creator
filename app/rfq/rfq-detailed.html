@@ -93,6 +93,47 @@
         .fade-in {
             animation: fadeInUp 0.35s ease-out both;
         }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(-12px) scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-12px) scale(0.96);
+            }
+        }
+
+        .toast-enter {
+            animation: toastIn 0.3s ease-out both;
+        }
+
+        .toast-leave {
+            animation: toastOut 0.25s ease-in both;
+        }
+
+        .email-btn-spinner {
+            border: 2px solid rgba(37, 99, 235, 0.2);
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            width: 13px;
+            height: 13px;
+            animation: spin 0.7s linear infinite;
+        }
     </style>
 </head>
 
@@ -100,6 +141,21 @@
 
     <div id="app" x-data="rfqWidget()" x-init="initWidget()" x-cloak
         class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-5xl mx-auto">
+
+        <!-- Toast Notification -->
+        <div x-show="toast.show" x-cloak
+            class="fixed top-5 right-5 z-[100] flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-[13px] font-medium max-w-sm"
+            :class="{
+                'bg-emerald-50 border-emerald-200 text-emerald-800': toast.type === 'success',
+                'bg-red-50 border-red-200 text-red-800': toast.type === 'error'
+            }" x-transition:enter="toast-enter" x-transition:leave="toast-leave">
+            <i class="bi text-[15px]"
+                :class="toast.type === 'success' ? 'bi-check-circle-fill text-emerald-600' : 'bi-exclamation-circle-fill text-red-600'"></i>
+            <span x-text="toast.message"></span>
+            <button @click="hideToast()" class="ml-auto text-gray-400 hover:text-gray-600 cursor-pointer">
+                <i class="bi bi-x text-[15px]"></i>
+            </button>
+        </div>
 
         <div x-show="showModal" style="display: none;"
             class="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm transition-opacity">
@@ -330,7 +386,7 @@
                                     class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-purple-50 text-purple-600">
                                     <i class="bi bi-person-lines-fill"></i>
                                 </div>
-                                Vendor Quotations & Actions
+                                Vendor Quotations Received
                             </div>
                         </div>
                         <div x-show="vendorQuotesList.length === 0"
@@ -346,9 +402,9 @@
                                     <th
                                         class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">
                                         Vendor</th>
-                                    <th
+                                    <!-- <th
                                         class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">
-                                        Recorded Quote</th>
+                                        Price </th> -->
                                     <th
                                         class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
                                         Actions</th>
@@ -366,7 +422,7 @@
                                                         x-text="vq.recordedQuote.Emails_Sent"></span>x</div>
                                             </template>
                                         </td>
-                                        <td class="px-4 py-2.5 text-gray-600">
+                                        <!-- <td class="px-4 py-2.5 text-gray-600">
                                             <span x-show="vq.recordedQuote && vq.recordedQuote.Quote_Received"
                                                 class="inline-flex items-center gap-1 text-emerald-600 font-semibold">
                                                 ₹<span
@@ -374,7 +430,7 @@
                                             </span>
                                             <span x-show="!vq.recordedQuote || !vq.recordedQuote.Quote_Received"
                                                 class="text-gray-400 italic">Pending</span>
-                                        </td>
+                                        </td> -->
                                         <td class="px-4 py-2.5 text-right space-x-1.5 whitespace-nowrap">
                                             <button @click="downloadVendorPDF(vq.vendor)"
                                                 title="Download PDF for this Vendor"
@@ -382,13 +438,19 @@
                                                 <i class="bi bi-file-earmark-pdf"></i>
                                             </button>
                                             <button @click="sendEmail(vq)" title="Send Email"
-                                                class="inline-flex items-center justify-center w-7 h-7 rounded bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors">
-                                                <i class="bi bi-envelope"></i>
+                                                :disabled="sendingEmailVendorId === vq.vendorId"
+                                                class="inline-flex items-center justify-center w-7 h-7 rounded bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+                                                <template x-if="sendingEmailVendorId === vq.vendorId">
+                                                    <div class="email-btn-spinner"></div>
+                                                </template>
+                                                <template x-if="sendingEmailVendorId !== vq.vendorId">
+                                                    <i class="bi bi-envelope"></i>
+                                                </template>
                                             </button>
-                                            <button @click="openQuoteModal(vq)" title="Record Quote"
-                                                class="inline-flex items-center px-2 py-1 rounded bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 font-medium transition-colors">
-                                                <i class="bi bi-currency-rupee mr-1"></i> Record
-                                            </button>
+                                            <!-- <button @click="openQuoteModal(vq)" title="Update Quote"
+                                                class="inline-flex items-center px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-medium transition-colors">
+                                                <i class="bi bi-currency-rupee mr-1"></i> Update
+                                            </button> -->
                                         </td>
                                     </tr>
                                 </template>
@@ -401,7 +463,7 @@
                             x-cloak>
                             <button @click="approveRFQ()"
                                 class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors no-underline cursor-pointer shadow-sm">
-                                <i class="bi bi-check-lg"></i> <span class="btn-text">Submit For Quote Comparison</span>
+                                <i class="bi bi-check-lg"></i> <span class="btn-text">Submit For QC</span>
                             </button>
                             <button @click="rejectRFQ()"
                                 class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors no-underline cursor-pointer shadow-sm">
@@ -508,6 +570,13 @@
                 activeQuoteItem: null,
                 quoteAmount: '',
                 isSubmittingQuote: false,
+
+                // Email Sending State
+                sendingEmailVendorId: null,
+
+                // Toast State
+                toast: { show: false, message: '', type: 'success' },
+                toastTimer: null,
 
                 processSteps: [
                     { key: 'purchase_requisition', label: 'Purchase Requisition', icon: 'bi-receipt' },
@@ -678,7 +747,7 @@
                         let subformPayload = existingQuotations.map(q => {
                             let obj = {
                                 "Vendor": q.Vendor?.ID || q.Vendor,
-                                // "item_master": q.item_master?.ID || q.item_master,
+                                "item_master": q.item_master?.ID || q.item_master,
                                 "Quantity": q.Quantity,
                                 "Quote_Received": q.Quote_Received,
                                 "Emails_Sent": q.Emails_Sent || 0
@@ -710,80 +779,38 @@
                     }
                 },
 
-                sendEmail(vq) {
-                    const vendor = vq.vendor;
-                    const email = vendor.email || vendor.Email;
-                    if (!email) {
-                        alert("No email address configured for this vendor.");
-                        return;
+                async sendEmail(vq) {
+                    this.sendingEmailVendorId = vq.vendorId;
+                    try {
+                        const response = await ZOHO.CREATOR.DATA.invokeCustomApi({
+                            api_name: "Send_RFQ_Email_To_Vendor",
+                            http_method: "POST",
+                            content_type: "application/json",
+                            payload: {
+                                rfqId: this.recordId,
+                                vendorId: vq.vendorId
+                            }
+                        });
+                        console.log("Email API response:", response);
+                        this.showToast(`Email sent successfully to ${vq.vendorName}`, 'success');
+                        this.fetchData();
+                    } catch (err) {
+                        console.error("Failed to send email:", err);
+                        this.showToast('Failed to send email. Please try again.', 'error');
+                    } finally {
+                        this.sendingEmailVendorId = null;
                     }
-
-                    const subject = encodeURIComponent(`Request for Quotation: ${this.rfqNumber}`);
-                    const body = encodeURIComponent(`Hello ${vendor.Display_Name || vendor.Company_Name || ''},\n\nPlease find the request for quotation (${this.rfqNumber}) attached/below.\n\nThank you.`);
-                    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-
-                    this.incrementEmailCount(vq);
                 },
 
-                async incrementEmailCount(vq) {
-                    try {
-                        let existingQuotations = [...(this.rec.Quotations || [])];
-                        let matchedIndex = existingQuotations.findIndex(q => {
-                            let qVid = q.Vendor?.ID || q.Vendor;
-                            let qIid = q.item_master?.ID || q.item_master;
-                            if (!qIid) return qVid == vq.vendorId;
-                            return qVid == vq.vendorId && qIid == vq.itemId;
-                        });
+                showToast(message, type = 'success') {
+                    if (this.toastTimer) clearTimeout(this.toastTimer);
+                    this.toast = { show: true, message, type };
+                    this.toastTimer = setTimeout(() => this.hideToast(), 4000);
+                },
 
-                        let currentCount = 0;
-                        let idToUpdate = null;
-
-                        if (matchedIndex >= 0) {
-                            currentCount = existingQuotations[matchedIndex].Emails_Sent || 0;
-                            idToUpdate = existingQuotations[matchedIndex].ID;
-                        }
-
-                        let newRow = {
-                            "Vendor": vq.vendorId,
-                            "item_master": vq.itemId,
-                            "Quantity": vq.qty,
-                            "Emails_Sent": currentCount + 1
-                        };
-
-                        if (idToUpdate) {
-                            newRow.ID = idToUpdate;
-                        } else {
-                            existingQuotations.push(newRow);
-                        }
-
-                        let subformPayload = existingQuotations.map(q => {
-                            let obj = {
-                                "Vendor": q.Vendor?.ID || q.Vendor,
-                                "item_master": q.item_master?.ID || q.item_master,
-                                "Quantity": q.Quantity,
-                                "Quote_Received": q.Quote_Received,
-                                "Emails_Sent": q.Emails_Sent || 0
-                            };
-                            if ((q.Vendor?.ID == vq.vendorId || q.Vendor == vq.vendorId) &&
-                                (q.item_master?.ID == vq.itemId || q.item_master == vq.itemId)) {
-                                obj.Emails_Sent = currentCount + 1;
-                            }
-                            if (q.ID) obj.ID = q.ID;
-                            return obj;
-                        });
-
-                        await ZOHO.CREATOR.DATA.updateRecordById({
-                            report_name: "Request_For_Quotation_Report",
-                            id: this.recordId,
-                            payload: {
-                                data: { "Quotations": subformPayload }
-                            }
-                        });
-
-                        this.fetchData();
-                    } catch (e) {
-                        console.error("Failed to increment email count", e);
-                    }
+                hideToast() {
+                    this.toast.show = false;
+                    if (this.toastTimer) { clearTimeout(this.toastTimer); this.toastTimer = null; }
                 },
 
                 downloadCompletePDF() {
@@ -818,12 +845,61 @@
                         `;
                     });
 
-                    const vName = vendorData ? (vendorData.Company_Name || vendorData.Display_Name || 'Vendor') : '[Multiple Vendors]';
-                    const vContact = vendorData ? (vendorData.Display_Name || '') : 'See line items for assignments.';
-                    const vAddress1 = (vendorData && vendorData.Billing_Address) ? (vendorData.Billing_Address.address_line_1 || '') : '';
-                    const vAddress2 = (vendorData && vendorData.Billing_Address) ? (vendorData.Billing_Address.address_line_2 || '') : '';
-                    const vEmail = vendorData ? (vendorData.email || '') : '';
-                    const vPhone = vendorData ? (vendorData.mobile || '') : '';
+                    // Build vendor details section
+                    let vendorDetailsHtml = '';
+                    if (vendorData) {
+                        // Single vendor PDF
+                        const vName = vendorData.Company_Name || vendorData.Display_Name || 'Vendor';
+                        const vContact = vendorData.Display_Name || '';
+                        const vAddress1 = (vendorData.Billing_Address) ? (vendorData.Billing_Address.address_line_1 || '') : '';
+                        const vAddress2 = (vendorData.Billing_Address) ? (vendorData.Billing_Address.address_line_2 || '') : '';
+                        const vEmail = vendorData.email || '';
+                        const vPhone = vendorData.mobile || '';
+                        vendorDetailsHtml = `
+                            <strong>${this.escapeHtml(vName)}</strong><br>
+                            ${this.escapeHtml(vContact)}<br>
+                            ${vAddress1 ? this.escapeHtml(vAddress1) + '<br>' : ''}
+                            ${vAddress2 ? this.escapeHtml(vAddress2) + '<br>' : ''}
+                            ${vEmail ? 'Email: ' + this.escapeHtml(vEmail) + '<br>' : ''}
+                            ${vPhone ? 'Phone: ' + this.escapeHtml(vPhone) : ''}
+                        `;
+                    } else {
+                        // Complete RFQ PDF — collect all unique vendors from items
+                        const uniqueVendors = new Map();
+                        itemsToPrint.forEach(item => {
+                            let vendors = item.vendors || item.Vendor;
+                            if (!vendors) return;
+                            if (!Array.isArray(vendors)) vendors = [vendors];
+                            vendors.forEach(v => {
+                                const vId = v.ID || v;
+                                if (!uniqueVendors.has(vId)) {
+                                    uniqueVendors.set(vId, v);
+                                }
+                            });
+                        });
+
+                        if (uniqueVendors.size === 0) {
+                            vendorDetailsHtml = '<em>No vendors assigned</em>';
+                        } else {
+                            const vendorEntries = Array.from(uniqueVendors.values());
+                            vendorEntries.forEach((v, idx) => {
+                                const name = v.Company_Name || v.Display_Name || v.display_value || 'Unknown Vendor';
+                                const contact = v.Display_Name || v.display_value || '';
+                                const addr1 = (v.Billing_Address) ? (v.Billing_Address.address_line_1 || '') : '';
+                                const addr2 = (v.Billing_Address) ? (v.Billing_Address.address_line_2 || '') : '';
+                                const email = v.email || v.Email || '';
+                                const phone = v.mobile || v.Mobile || v.Phone || '';
+
+                                vendorDetailsHtml += `<strong>${this.escapeHtml(name)}</strong>`;
+                                if (contact && contact !== name) vendorDetailsHtml += `<br>${this.escapeHtml(contact)}`;
+                                if (addr1) vendorDetailsHtml += `<br>${this.escapeHtml(addr1)}`;
+                                if (addr2) vendorDetailsHtml += `<br>${this.escapeHtml(addr2)}`;
+                                if (email) vendorDetailsHtml += `<br>Email: ${this.escapeHtml(email)}`;
+                                if (phone) vendorDetailsHtml += `<br>Phone: ${this.escapeHtml(phone)}`;
+                                if (idx < vendorEntries.length - 1) vendorDetailsHtml += `<hr style="border:none;border-top:1px dashed #bdc3c7;margin:10px 0;">`;
+                            });
+                        }
+                    }
 
                     const printHTML = `
                         <!DOCTYPE html>
@@ -885,12 +961,7 @@
                                 <div class="address-section">
                                     <div class="address-box">
                                         <h3>Vendor Details</h3>
-                                        <strong>${this.escapeHtml(vName)}</strong><br>
-                                        ${this.escapeHtml(vContact)}<br>
-                                        ${this.escapeHtml(vAddress1)}<br>
-                                        ${this.escapeHtml(vAddress2)}<br>
-                                        Email: ${this.escapeHtml(vEmail)}<br>
-                                        Phone: ${this.escapeHtml(vPhone)}
+                                        ${vendorDetailsHtml}
                                     </div>
                                     <div class="address-box">
                                         <h3>Ship To / Deliver To</h3>
@@ -1033,6 +1104,7 @@
                 getStepIcon(step, i) {
                     const { isRejected, rejectedIdx, currentIdx } = this.progressData;
                     if (i === rejectedIdx) return 'bi-x-lg text-[13px]';
+                    if ((isRejected ? (i < rejectedIdx) : (i <= currentIdx)) && !(i === currentIdx && !isRejected)) return 'bi-check-lg text-[13px]';
                     if ((isRejected ? (i < rejectedIdx) : (i <= currentIdx)) && !(i === currentIdx && !isRejected)) return 'bi-check-lg text-[13px]';
                     return `${step.icon} text-[13px]`;
                 },

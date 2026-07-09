@@ -295,14 +295,22 @@
               <td
                 class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900"
                 x-text="rec['Department_Unit.Name'] || '–'"></td>
-              <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap">
-                <template x-if="rec.PR_Ref && rec.PR_Ref.ID">
-                  <a href="javascript:void(0)"
-                    @click="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:PR_Detailed?recordId='+rec.PR_Ref.ID,window:'same'})"
-                    class="text-[#1B5CA8] hover:underline font-mono text-[11px] font-semibold"
-                    x-text="rec.PR_Ref.zc_display_value || rec.PR_Ref.PR_Number || 'PR'"></a>
+              <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap"
+                :title="Array.isArray(rec.PR_Refs) && rec.PR_Refs.length > 0 ? rec.PR_Refs.map(pr => pr.zc_display_value || pr.PR_Number || 'PR').join(', ') : ''">
+                <template x-if="Array.isArray(rec.PR_Refs) && rec.PR_Refs.length > 0">
+                  <span>
+                    <template x-for="(pr, index) in rec.PR_Refs" :key="pr.ID || index">
+                      <span>
+                        <a href="javascript:void(0)"
+                          @click="pr.ID ? ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:PR_Detailed?recordId='+pr.ID,window:'same'}) : null"
+                          class="text-[#1B5CA8] hover:underline font-mono text-[11px] font-semibold"
+                          x-text="pr.zc_display_value || pr.PR_Number || 'PR'"></a><span
+                          x-show="index < rec.PR_Refs.length - 1" class="text-gray-500 mr-1">,</span>
+                      </span>
+                    </template>
+                  </span>
                 </template>
-                <template x-if="!(rec.PR_Ref && rec.PR_Ref.ID)">
+                <template x-if="!Array.isArray(rec.PR_Refs) || rec.PR_Refs.length === 0">
                   <span class="text-gray-400">–</span>
                 </template>
               </td>
@@ -443,8 +451,8 @@
                       <td class="px-3 py-2 relative">
                         <select x-init="initVendorRowSelect($el, item)" class="w-full text-xs" multiple></select>
                       </td>
-                      <td class="px-3 py-2"><input type="text" x-model="item.unit"
-                          class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]"
+                      <td class="px-3 py-2"><input type="text" x-model="item.unit" readonly
+                          class="w-full py-1.5 px-2.5 bg-gray-100 border border-gray-200 rounded-md text-[13px] text-gray-500 cursor-not-allowed focus:outline-none"
                           placeholder="e.g. Kg, Pcs"></td>
                       <td class="px-3 py-2"><input type="number" x-model.number="item.quantity" required min="1"
                           class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
@@ -591,7 +599,7 @@
             let crit = this.buildCriteria();
 
             do {
-              let config = { report_name: this.REPORT_NAME, max_records: 200 };
+              let config = { report_name: this.REPORT_NAME, max_records: 200, field_config: 'all' };
               if (crit) config.criteria = crit;
               if (cursor) config.record_cursor = cursor;
 
@@ -752,7 +760,7 @@
               var numMatch = refVal.match(/(\d+)\s*$/);
               return numMatch ? parseInt(numMatch[1], 10) : refVal.toLowerCase();
             case 'department': return (rec['Department_Unit.Name'] || '').toString();
-            case 'pr_ref': return (rec.PR_Ref?.zc_display_value || rec.PR_Ref?.PR_Number || '').toString();
+            case 'pr_ref': return (Array.isArray(rec.PR_Refs) ? rec.PR_Refs.map(pr => pr.zc_display_value || pr.PR_Number || '').join(', ') : '').toString();
             case 'req_date': return rec.Request_Date ? dayjs(rec.Request_Date).valueOf() : 0;
             case 'due_date': return rec.Due_Date ? dayjs(rec.Due_Date).valueOf() : 0;
             case 'status': return this.normalizeStatusGroup(rec);
@@ -858,7 +866,15 @@
           let ts = new TomSelect(el, {
             valueField: 'ID', labelField: 'item_name', searchField: 'item_name',
             options: this.itemMasters, maxItems: 1, placeholder: 'Search item...',
-            onChange: (val) => { itemRef.id = val; },
+            onChange: (val) => { 
+              itemRef.id = val;
+              if (val) {
+                let masterItem = this.itemMasters.find(m => m.ID === val);
+                if (masterItem && masterItem.unit_of_measure) {
+                  itemRef.unit = masterItem.unit_of_measure;
+                }
+              }
+            },
             render: {
               option: (d, e) => `<div class="font-medium">${e(d.item_name)}</div>`,
               item: (d, e) => `<div class="font-medium">${e(d.item_name)}</div>`
@@ -957,13 +973,16 @@
                   tempVendorNames.push(prItem.Vendor.zc_display_value || prItem.Vendor.Display_Name || '');
                 }
 
+                let masterItem = this.itemMasters.find(m => m.ID === prItem.Item.ID);
+                let unit = prItem.Unit || (masterItem ? masterItem.unit_of_measure : '') || '';
+
                 this.rfqForm.items.push({
                   uid: Date.now() + Math.random(),
                   id: prItem.Item.ID,
                   tempName: prItem.Item.item_name, // fallback for TomSelect render
                   vendorIds: vendorIds,
                   tempVendorNames: tempVendorNames,
-                  unit: prItem.Unit || '',
+                  unit: unit,
                   quantity: prItem.Quantity || 1,
                   comment: ''
                 });
@@ -992,7 +1011,6 @@
                 Department_Unit: this.rfqForm.dept,
                 Request_Date: dayjs(this.rfqForm.reqDate).format('DD-MMM-YYYY'),
                 Due_Date: dayjs(this.rfqForm.dueDate).format('DD-MMM-YYYY'),
-                PR_Ref: this.rfqForm.prRef,
                 Purpose: this.rfqForm.purpose,
                 Status: "Submitted",
                 Items: this.rfqForm.items.map(i => ({
