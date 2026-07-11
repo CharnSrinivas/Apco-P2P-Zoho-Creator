@@ -532,7 +532,8 @@
             </div>
 
             <div class="bg-white border border-gray-200 rounded-lg p-5 mb-5 max-w-5xl mx-auto">
-                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">Process Progress</div>
+                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">PR Process Progress
+                </div>
                 <div class="relative flex justify-between items-start">
                     <div class="step-connector">
                         <div class="step-connector-fill"
@@ -576,9 +577,9 @@
                                     <th class="px-3 py-2.5 font-bold text-left border-r border-gray-200 align-middle"
                                         rowspan="2">Item Description</th>
                                     <th class="px-3 py-2.5 font-bold text-center border-r border-gray-200 align-middle"
-                                        rowspan="2">Qty</th>
-                                    <th class="px-3 py-2.5 font-bold text-center border-r border-gray-200 align-middle"
                                         rowspan="2">Unit</th>
+                                    <th class="px-3 py-2.5 font-bold text-center border-r border-gray-200 align-middle"
+                                        rowspan="2">Qty</th>
 
                                     <template x-for="vName in comparativeMatrix.vendorNames" :key="vName">
                                         <th class="px-3 py-2 font-black text-center border-r border-gray-200 text-[#1B5CA8] bg-blue-50/50"
@@ -594,14 +595,15 @@
                                     <template x-for="vName in comparativeMatrix.vendorNames" :key="vName + '-sub'">
                                         <th class="p-0 border-r border-gray-200 bg-blue-50/30" colspan="3">
                                             <div class="flex h-full w-full items-center">
-                                                <div
-                                                    class="flex-1 px-2 py-1.5 font-semibold text-right border-r border-gray-200">
+                                                <div class="flex-1 px-2 py-1.5 font-semibold text-right border-r border-gray-200"
+                                                    title="Basic/Negotiated Rate">
                                                     Rate</div>
-                                                <div
-                                                    class="w-[50px] px-2 py-1.5 font-semibold text-right border-r border-gray-200">
-                                                    Disc %</div>
-                                                <div class="flex-1 px-2 py-1.5 font-semibold text-right text-gray-800">
-                                                    Amount</div>
+                                                <div class="flex-1 px-2 py-1.5 font-semibold text-right border-r border-gray-200"
+                                                    title="Landed Rate (incl. Freight & GST)">
+                                                    Landed Rate</div>
+                                                <div class="flex-1 px-2 py-1.5 font-semibold text-right text-gray-800"
+                                                    title="Total Amount">
+                                                    Total Amt</div>
                                             </div>
                                         </th>
                                     </template>
@@ -623,20 +625,22 @@
                                             <div class="text-[10px] text-gray-500 truncate" x-text="row.description">
                                             </div>
                                         </td>
-                                        <td class="px-3 py-2.5 text-center font-bold text-gray-700 border-r border-gray-100"
-                                            x-text="row.quantity"></td>
+
                                         <td class="px-3 py-2.5 text-center text-gray-500 border-r border-gray-100"
                                             x-text="row.unit"></td>
+                                        <td class="px-3 py-2.5 text-center font-bold text-gray-700 border-r border-gray-100"
+                                            x-text="row.quantity"></td>
 
                                         <template x-for="vName in comparativeMatrix.vendorNames"
                                             :key="vName + '-' + row.index">
                                             <template x-if="row.quotes[vName]">
                                                 <td class="p-0 border-r border-gray-100" colspan="3">
-                                                    <div class="flex h-full w-full items-center">
+                                                    <div class="flex h-full w-full items-center cursor-help"
+                                                        :title="`Breakdown:\nBasic: ${row.quotes[vName].basicRate}\nDisc: ${row.quotes[vName].disc}%\nFreight: ${row.quotes[vName].freight}\nGST: ${row.quotes[vName].gst}%\nTerms: ${row.quotes[vName].terms || 'N/A'}\n\nItem Total:\n${row.quotes[vName].landedRate} x ${row.quantity} = ${row.quotes[vName].amount}`">
                                                         <div class="flex-1 px-2 py-2.5 text-right border-r border-gray-100 tabular-nums text-gray-700"
                                                             x-text="formatINR(row.quotes[vName].rate, false)"></div>
-                                                        <div class="w-[50px] px-2 py-2.5 text-right border-r border-gray-100 text-gray-500 tabular-nums"
-                                                            x-text="row.quotes[vName].disc ? row.quotes[vName].disc + '%' : '-'">
+                                                        <div class="flex-1 px-2 py-2.5 text-right border-r border-gray-100 text-[#1B5CA8] font-semibold tabular-nums"
+                                                            x-text="formatINR(row.quotes[vName].landedRate, false)">
                                                         </div>
                                                         <div class="flex-1 px-2 py-2.5 text-right font-bold tabular-nums"
                                                             :class="row.l1Vendor === vName ? 'text-emerald-700 bg-emerald-50/50' : 'text-gray-900'"
@@ -651,7 +655,7 @@
                                                             class="flex-1 px-2 py-2.5 text-center text-gray-400 border-r border-gray-100">
                                                             -</div>
                                                         <div
-                                                            class="w-[50px] px-2 py-2.5 text-center text-gray-400 border-r border-gray-100">
+                                                            class="flex-1 px-2 py-2.5 text-center text-gray-400 border-r border-gray-100">
                                                             -</div>
                                                         <div class="flex-1 px-2 py-2.5 text-center text-gray-400">-
                                                         </div>
@@ -677,11 +681,12 @@
                                         class="px-3 py-3 text-right font-black text-gray-800 border-r border-gray-300 text-xs uppercase tracking-wide">
                                         Total Estimated Value</td>
                                     <template x-for="vName in comparativeMatrix.vendorNames" :key="'total-' + vName">
-                                        <td colspan="3" class="p-0 border-r border-gray-300">
-                                            <div class="flex h-full w-full items-center">
-                                                <div class="flex-1 border-r border-gray-200"></div>
-                                                <div class="w-[50px] border-r border-gray-200"></div>
-                                                <div class="flex-1 px-2 py-3 text-right font-black text-[#1B5CA8] tabular-nums text-sm"
+                                        <td colspan="3" class="px-2 py-3 border-r border-gray-300">
+                                            <div class="flex h-full w-full items-center justify-end gap-2 text-right">
+                                                <div class="text-[10px] text-gray-500 font-normal leading-tight max-w-[150px] whitespace-normal"
+                                                    x-text="comparativeMatrix.vendorTotalFormulas[vName].join(' + ') + (comparativeMatrix.vendorTotalFormulas[vName].length > 0 ? ' =' : '')">
+                                                </div>
+                                                <div class="font-black text-[#1B5CA8] tabular-nums text-[13px] shrink-0"
                                                     x-text="formatINR(comparativeMatrix.vendorTotals[vName], false)">
                                                 </div>
                                             </div>
@@ -904,11 +909,12 @@
                 },
 
                 get comparativeMatrix() {
-                    if (!this.rec.Items) return { vendorNames: [], rows: [], vendorTotals: {} };
+                    if (!this.rec.Items) return { vendorNames: [], rows: [], vendorTotals: {}, vendorTotalFormulas: {} };
 
                     const vendorNames = [...new Set(this.vendors.map(v => v.Vendor_Name))].filter(Boolean);
                     const vendorTotals = {};
-                    vendorNames.forEach(v => vendorTotals[v] = 0);
+                    const vendorTotalFormulas = {};
+                    vendorNames.forEach(v => { vendorTotals[v] = 0; vendorTotalFormulas[v] = []; });
 
                     const rows = this.rec.Items.map((reqItem, index) => {
                         const itemId = reqItem.Item?.ID;
@@ -925,16 +931,24 @@
                             );
 
                             if (quote) {
-                                // Defaulting to Negotiated Rate for comparison logic as requested, fallback to Basic
-                                const negRate = parseFloat(quote.Negotiated_Rate) || parseFloat(quote.Basic_Rate) || 0;
+                                const basicRate = parseFloat(quote.Basic_Rate) || 0;
+                                const negRate = parseFloat(quote.Negotiated_Rate) || basicRate;
                                 const disc = parseFloat(quote.Disc) || 0;
-                                const amount = negRate * qty;
+                                const freight = parseFloat(quote.Freight) || parseFloat(quote.Fright) || 0;
+                                const gst = parseFloat(quote.GST) || 0;
+                                const landedRate = parseFloat(quote.Landed_Rate) || 0;
+                                const terms = quote.Payment_Terms || '';
 
-                                itemQuotes[vName] = { rate: negRate, disc: disc, amount: amount, isFinalized: quote.Rank === 'Yes' };
+                                const amount = landedRate * qty;
+
+                                itemQuotes[vName] = {
+                                    basicRate, rate: negRate, disc, freight, gst, landedRate, amount, isFinalized: quote.Rank === 'Yes', terms
+                                };
                                 vendorTotals[vName] += amount;
+                                vendorTotalFormulas[vName].push(`${this.formatINR(landedRate, false)} x ${qty}`);
 
-                                if (negRate > 0 && negRate < minRate) {
-                                    minRate = negRate;
+                                if (landedRate > 0 && landedRate < minRate) {
+                                    minRate = landedRate;
                                     l1Vendor = vName;
                                 }
                             } else {
@@ -956,7 +970,7 @@
                         };
                     });
 
-                    return { vendorNames, rows, vendorTotals };
+                    return { vendorNames, rows, vendorTotals, vendorTotalFormulas };
                 },
 
                 get maxComparisonPrice() {
@@ -1128,7 +1142,7 @@
                     let vSubHeadersHtml = '';
                     matrix.vendorNames.forEach(vName => {
                         vHeadersHtml += `<th colspan="3" class="text-center">${this.escapeHtml(vName)}</th>`;
-                        vSubHeadersHtml += `<th class="text-right sub-hdr">Rate</th><th class="text-right sub-hdr">Disc %</th><th class="text-right sub-hdr">Amount</th>`;
+                        vSubHeadersHtml += `<th class="text-right sub-hdr" title="Negotiated Rate">Rate</th><th class="text-right sub-hdr">Landed Rate</th><th class="text-right sub-hdr">Amount</th>`;
                     });
 
                     let rowHtml = '';
@@ -1138,7 +1152,7 @@
                             matrix.vendorNames.forEach(vName => {
                                 const q = row.quotes[vName];
                                 if (q) {
-                                    vCellsHtml += `<td class="text-right">${this.formatINR(q.rate, false)}</td><td class="text-right">${q.disc ? q.disc + '%' : '-'}</td><td class="text-right"><strong>${this.formatINR(q.amount, false)}</strong></td>`;
+                                    vCellsHtml += `<td class="text-right">${this.formatINR(q.rate, false)}</td><td class="text-right">${this.formatINR(q.landedRate, false)}</td><td class="text-right"><strong>${this.formatINR(q.amount, false)}</strong></td>`;
                                 } else {
                                     vCellsHtml += `<td class="text-center">-</td><td class="text-center">-</td><td class="text-center">-</td>`;
                                 }
@@ -1148,8 +1162,8 @@
                                 <tr>
                                     <td class="text-center">${row.index}</td>
                                     <td><strong>${this.escapeHtml(row.itemName)}</strong></td>
-                                    <td class="text-center">${row.quantity}</td>
                                     <td class="text-center">${this.escapeHtml(row.unit)}</td>
+                                    <td class="text-center">${row.quantity}</td>
                                     ${vCellsHtml}
                                     <td>${this.escapeHtml(row.prevVendor)}</td>
                                     <td class="text-right">${row.prevPrice !== '–' ? this.formatINR(row.prevPrice, false) : '-'}</td>
@@ -1160,7 +1174,10 @@
 
                         let tfootCells = '';
                         matrix.vendorNames.forEach(vName => {
-                            tfootCells += `<th colspan="3" class="text-right" style="font-size: 11pt; color: #1B5CA8;">${this.formatINR(matrix.vendorTotals[vName], false)}</th>`;
+                            tfootCells += `<th colspan="3" class="text-right" style="font-size: 11pt; color: #1B5CA8;">
+                                <span style="font-size: 8pt; font-weight: normal; color: #666; margin-right: 5px;">${matrix.vendorTotalFormulas[vName].join(' + ')} =</span>
+                                ${this.formatINR(matrix.vendorTotals[vName], false)}
+                            </th>`;
                         });
 
                         rowHtml += `<tr style="background-color: #f3f4f6; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
@@ -1221,8 +1238,8 @@
                                         <tr>
                                             <th rowspan="2" class="text-center">Sl. No</th>
                                             <th rowspan="2">Item Description</th>
-                                            <th rowspan="2" class="text-center">Quantity</th>
                                             <th rowspan="2" class="text-center">Unit</th>
+                                            <th rowspan="2" class="text-center">Quantity</th>
                                             ${vHeadersHtml}
                                             <th colspan="2" class="text-center">Previous Procurement details</th>
                                             <th rowspan="2" class="text-center">L1 Vendor</th>

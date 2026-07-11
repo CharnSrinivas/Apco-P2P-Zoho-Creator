@@ -385,7 +385,7 @@
 
     <div x-show="isModalOpen" style="display: none;" class="rfq-modal-overlay active">
       <div class="rfq-modal-bg" x-show="isModalOpen" x-transition.opacity @click="closeModal()"></div>
-      <div class="rfq-modal-box max-w-3xl" style="max-height: 90vh; overflow-y: auto;" x-show="isModalOpen"
+      <div class="rfq-modal-box max-w-5xl" style="max-height: 90vh; overflow-y: auto;" x-show="isModalOpen"
         x-transition>
         <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
           <h3 class="text-[15px] font-bold text-gray-800">New Request For Quotation</h3>
@@ -866,7 +866,7 @@
           let ts = new TomSelect(el, {
             valueField: 'ID', labelField: 'item_name', searchField: 'item_name',
             options: this.itemMasters, maxItems: 1, placeholder: 'Search item...',
-            onChange: (val) => { 
+            onChange: (val) => {
               itemRef.id = val;
               if (val) {
                 let masterItem = this.itemMasters.find(m => m.ID === val);
@@ -1012,6 +1012,7 @@
                 Request_Date: dayjs(this.rfqForm.reqDate).format('DD-MMM-YYYY'),
                 Due_Date: dayjs(this.rfqForm.dueDate).format('DD-MMM-YYYY'),
                 Purpose: this.rfqForm.purpose,
+                PR_Refs: this.rfqForm.prRef ? [this.rfqForm.prRef] : [],
                 Status: "Submitted",
                 Items: this.rfqForm.items.map(i => ({
                   Item: i.id, Vendor: [...i.vendorIds], Unit: i.unit, Quantity: i.quantity, Comment: i.comment

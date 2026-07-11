@@ -172,7 +172,8 @@
             </div>
 
             <div class="bg-white border border-gray-200 rounded-lg p-5 mb-4 fade-in">
-                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">Process Progress</div>
+                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">PR Process Progress
+                </div>
                 <div class="relative flex justify-between items-start" id="progressContainer">
                     <div class="step-connector">
                         <div class="step-connector-fill" id="progressFill" style="width: 0%"></div>
@@ -195,7 +196,6 @@
                         <div class="px-[18px] py-[15px]" id="prDetailsBody"></div>
                     </div>
 
-                    <!-- Requested Items Table -->
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden fade-in">
                         <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
                             <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
@@ -209,7 +209,6 @@
                         <div id="requestedItemsTableBody"></div>
                     </div>
 
-                    <!-- Approved Items Table (Conditionally Displayed) -->
                     <div id="approvedItemsCard"
                         class="hidden bg-white border border-gray-200 rounded-lg overflow-hidden fade-in">
                         <div class="px-[18px] py-[13px] border-b border-gray-200 bg-emerald-50/60">
@@ -240,7 +239,23 @@
                     </div>
                 </div>
 
-                <div class="col-span-2">
+                <div class="col-span-2 space-y-4">
+
+                    <div id="attachmentsCard"
+                        class="hidden bg-white border border-gray-200 rounded-lg overflow-hidden fade-in">
+                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-indigo-50 text-indigo-600">
+                                    <i class="bi bi-paperclip"></i>
+                                </div>
+                                Attachments
+                            </div>
+                        </div>
+                        <div class="px-[18px] py-[15px]" id="attachmentsBody">
+                        </div>
+                    </div>
+
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden fade-in">
                         <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
                             <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
@@ -286,6 +301,8 @@
             const $approvedItemsTableBody = document.getElementById('approvedItemsTableBody');
             const $actionButtons = document.getElementById('actionButtons');
             const $auditTrail = document.getElementById('auditTrailBody');
+            const $attachmentsCard = document.getElementById('attachmentsCard');
+            const $attachmentsBody = document.getElementById('attachmentsBody');
             const $breadcrumbPrNum = document.getElementById('breadcrumbPrNum');
             const $approveBtn = document.getElementById('approveBtn');
             const $rejectBtn = document.getElementById('rejectBtn');
@@ -505,8 +522,9 @@
 
             function renderActionButtons(rec) {
                 var isRejected = rec.Status && rec.Status.toLowerCase() === 'rejected';
+                var isApproved = rec.Status && rec.Status.toLowerCase() === 'approved';
                 var isPRStage = rec.Current_Stage === 'Purchase Requisition';
-                $actionButtons.style.display = (isPRStage && !isRejected) ? 'flex' : 'none';
+                $actionButtons.style.display = (isPRStage && !isRejected && !isApproved) ? 'flex' : 'none';
             }
 
             function renderAuditTrail(actions, prRec) {
@@ -553,6 +571,160 @@
                 $auditTrail.innerHTML = html;
             }
 
+            // Function to render the Attachment UI
+            function renderAttachments(attachmentData, recordId) {
+                // Ensure there is attachment data before rendering
+                if (!attachmentData) return;
+
+                // Normalize to an array
+                let attachments = Array.isArray(attachmentData) ? attachmentData : [attachmentData];
+
+                let html = '<div class="space-y-3">';
+
+                attachments.forEach(function (att) {
+                    let fullPath = (typeof att === 'object' && att !== null) ? (att.display_value || att.ID || att) : att;
+                    let filePath = fullPath;
+                    if (typeof fullPath === 'string' && fullPath.includes('filepath=')) {
+                        filePath = fullPath.split('filepath=')[1].split('&')[0];
+                    }
+
+                    let displayName = filePath;
+                    let parts = filePath.split('_');
+                    if (parts.length > 1 && !isNaN(parts[0])) {
+                        displayName = parts.slice(1).join('_');
+                    }
+
+                    html += `
+                        <div class="flex items-center justify-between p-3 border border-gray-100 rounded-lg bg-white shadow-sm hover:shadow transition-shadow">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                    <i class="bi bi-file-earmark-text text-[15px]"></i>
+                                </div>
+                                <div>
+                                    <div class="text-xs font-semibold text-gray-800 truncate max-w-[150px]" title="${esc(displayName)}">${esc(displayName)}</div>
+                                </div>
+                            </div>
+                            <button onclick="downloadAttachment('${filePath}', '${recordId}')" class="px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 rounded text-[11px] font-semibold transition-colors flex items-center gap-1.5 cursor-pointer">
+                                <i class="bi bi-download"></i> Download
+                            </button>
+                        </div>
+                    `;
+                });
+
+                html += '</div>';
+
+                $attachmentsBody.innerHTML = html;
+            }
+            window.downloadAttachment = function (filePath, recordId) {
+                var config = {
+                    report_name: "Purchase_Requisition_Report",
+                    id: recordId,
+                    field_name: "Attachments",
+                    file_path: filePath
+                };
+
+                // window.open("https://creatorapp.zoho.in/creator/v2.1/data/zohoone_apcobuildingsolut/npk-p2p-software/report/Purchase_Requisition_Report/422709000000101106/Attachments/download?filepath=1783688716841568_kali-maa-img-1.png")
+                //            https://creatorapp.zoho.in/creator/v2.1/data/npk-p2p-software/report/Purchase_Requisition_Report/422709000000101106/Attachments/download?filepath=1783687190687882_logo.jpg
+                ZOHO.CREATOR.UTIL.getInitParams().then(function (response) {
+                    console.log(response)
+                    var appOwner = response.scope;
+                    var appLinkName = response.appLinkName || "npk-p2p-software";
+                    var url = `https://creatorapp.zoho.in/creator/v2.1/data/${appOwner}/${appLinkName}/report/Purchase_Requisition_Report/${recordId}/Attachments/download?filepath=${filePath}`;
+                    window.open(url);
+                });
+                // ZOHO.CREATOR.FILE.readFile(config).then(function (response) {
+                //     try {
+                //         // Resolve the display filename first
+                //         var filename = filePath;
+                //         var parts = filePath.split('_');
+                //         if (parts.length > 1 && !isNaN(parts[0])) {
+                //             filename = parts.slice(1).join('_');
+                //         }
+
+                //         // Figure out MIME type from the extension
+                //         var mimeType = getMimeType(filename);
+                //         var blob;
+
+                //         if (response instanceof Blob) {
+                //             // Already a Blob — just re-wrap with the correct type
+                //             blob = response.type ? response : new Blob([response], { type: mimeType });
+                //         }
+                //         else if (typeof response === 'string') {
+
+                //             // 1. Strip Data URI prefix if Zoho included it (e.g., "data:image/png;base64,")
+                //             var base64Data = response;
+                //             if (base64Data.includes('base64,')) {
+                //                 base64Data = base64Data.split('base64,')[1];
+                //             }
+
+                //             try {
+                //                 // 2. Decode the Base64 string back into binary characters
+                //                 var byteCharacters = window.atob(base64Data);
+                //                 var byteArray = new Uint8Array(byteCharacters.length);
+
+                //                 for (var i = 0; i < byteCharacters.length; i++) {
+                //                     byteArray[i] = byteCharacters.charCodeAt(i);
+                //                 }
+                //                 blob = new Blob([byteArray], { type: mimeType });
+
+                //             } catch (b64Error) {
+                //                 // Fallback: If atob() fails, it wasn't Base64. Fall back to raw string parsing.
+                //                 console.warn("Response is not valid Base64, falling back to raw byte parsing.");
+                //                 var fallbackArray = new Uint8Array(response.length);
+                //                 for (var j = 0; j < response.length; j++) {
+                //                     fallbackArray[j] = response.charCodeAt(j) & 0xff;
+                //                 }
+                //                 blob = new Blob([fallbackArray], { type: mimeType });
+                //             }
+                //         }
+                //         else {
+                //             // Catch-all for ArrayBuffers
+                //             blob = new Blob([response], { type: mimeType });
+                //         }
+
+                //         // Trigger the download natively in the browser
+                //         var downloadUrl = window.URL.createObjectURL(blob);
+                //         var a = document.createElement('a');
+                //         a.style.display = 'none';
+                //         a.href = downloadUrl;
+                //         a.download = filename;
+                //         document.body.appendChild(a);
+                //         a.click();
+
+                //         // Clean up the URL object after the download starts
+                //         setTimeout(function () {
+                //             window.URL.revokeObjectURL(downloadUrl);
+                //             document.body.removeChild(a);
+                //         }, 150);
+
+                //     } catch (e) {
+                //         console.error("Failed to process file download: ", e);
+                //         alert("Could not process the file for download. Please check console for errors.");
+                //     }
+                // }).catch(function (err) {
+                //     console.error("Error fetching file from Zoho API: ", err);
+                //     alert("Failed to fetch attachment from server.");
+                // });
+            };
+            function getMimeType(filename) {
+                var ext = filename.split('.').pop().toLowerCase();
+                var map = {
+                    pdf: 'application/pdf',
+                    png: 'image/png',
+                    jpg: 'image/jpeg',
+                    jpeg: 'image/jpeg',
+                    gif: 'image/gif',
+                    doc: 'application/msword',
+                    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    xls: 'application/vnd.ms-excel',
+                    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    txt: 'text/plain',
+                    csv: 'text/csv',
+                    zip: 'application/zip'
+                };
+                return map[ext] || 'application/octet-stream';
+            }
+
             var pendingAction = { recordId: null, status: '', movedTo: '', requestedItemsData: [] };
 
             function fetchPRDetail(recordId) {
@@ -560,24 +732,42 @@
                 $error.classList.add('hidden');
                 $main.classList.add('hidden');
 
-                ZOHO.CREATOR.DATA.invokeCustomApi({
-                    api_name: "Fetch_PR_Details",
-                    http_method: "GET",
-                    content_type: "application/json",
-                    query_params: 'recId=' + recordId
-                }).then(function (response) {
-                    if (!response || !response.result || response.result.length === 0) {
+                Promise.all([
+                    ZOHO.CREATOR.DATA.getRecordById({
+                        report_name: "Purchase_Requisition_Report",
+                        id: recordId
+                    }).catch(function () { return { data: {} }; }),
+                    ZOHO.CREATOR.DATA.invokeCustomApi({
+                        api_name: "Fetch_PR_Details",
+                        http_method: "GET",
+                        content_type: "application/json",
+                        query_params: 'recId=' + recordId
+                    })
+                ]).then(function (responses) {
+                    var recordRes = responses[0];
+                    var apiRes = responses[1];
+
+                    if (!apiRes || !apiRes.result || apiRes.result.length === 0) {
                         $loading.classList.add('hidden');
                         $error.classList.remove('hidden');
                         return;
                     }
 
-                    var rec = response.result[0];
+                    var rec = apiRes.result[0];
                     pendingAction.recordId = recordId;
                     pendingAction.requestedItemsData = rec.Requested_Items || [];
 
                     renderPRDetails(rec);
                     renderActionButtons(rec);
+
+                    // Render Attachments conditionally based on getRecordById response
+                    var attachments = recordRes.data && recordRes.data.Attachments;
+                    if (attachments && attachments.length > 0) {
+                        $attachmentsCard.classList.remove('hidden');
+                        renderAttachments(attachments, pendingAction.recordId);
+                    } else {
+                        $attachmentsCard.classList.add('hidden');
+                    }
 
                     // Always render Requested Items
                     renderTable(pendingAction.requestedItemsData, $requestedItemsTableBody);
@@ -598,7 +788,7 @@
                     $main.classList.remove('hidden');
 
                     let rfqRequested = rec.Request_For_Quotation === "Yes" || false;
-                    $approveBtn.querySelector('span').textContent = rfqRequested ? "Approve & Submit For RFQ" : "Approve & Submit For PO";
+                    $approveBtn.querySelector('span').textContent = rfqRequested ? "Approve & Submit For RFQ" : "Approve & Submit";
 
                     $approveBtn.onclick = function () {
                         openActionModal("Approve PR", "Approved", rfqRequested ? "Request For Quotation" : "Purchase Order", "bg-emerald-600", "hover:bg-emerald-700");

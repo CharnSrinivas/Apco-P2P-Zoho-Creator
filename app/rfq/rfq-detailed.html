@@ -9,6 +9,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
     <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
 
@@ -83,7 +88,6 @@
                 opacity: 0;
                 transform: translateY(12px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -99,7 +103,6 @@
                 opacity: 0;
                 transform: translateY(-12px) scale(0.96);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
@@ -111,7 +114,6 @@
                 opacity: 1;
                 transform: translateY(0) scale(1);
             }
-
             to {
                 opacity: 0;
                 transform: translateY(-12px) scale(0.96);
@@ -134,6 +136,65 @@
             height: 13px;
             animation: spin 0.7s linear infinite;
         }
+
+        /* Edit Modal / TomSelect Styles from Listing */
+        .rfq-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 80; /* Higher than existing modals */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .rfq-modal-bg {
+            position: absolute;
+            inset: 0;
+            background: rgba(17, 24, 39, 0.4);
+            backdrop-filter: blur(2px);
+        }
+        .rfq-modal-box {
+            position: relative;
+            z-index: 1;
+            background: #fff;
+            border-radius: 11px;
+            width: 100%;
+            overflow: hidden;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+        }
+        .ts-control {
+            border: 1px solid #e5e7eb !important;
+            border-radius: 0.5rem !important;
+            font-size: 0.8125rem !important;
+            padding: 0.5rem 0.75rem !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+            font-family: inherit;
+            background-color: #f9fafb !important;
+            transition: all 0.2s ease-in-out;
+        }
+        .ts-control.focus {
+            border-color: #1B5CA8 !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(27, 92, 168, 0.15) !important;
+        }
+        .ts-dropdown {
+            border-radius: 0.5rem !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+            border: 1px solid #f3f4f6 !important;
+            padding: 0.35rem !important;
+            margin-top: 4px !important;
+            font-size: 0.8125rem !important;
+        }
+        .ts-dropdown .option {
+            border-radius: 0.375rem !important;
+            padding: 0.5rem 0.75rem !important;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .ts-dropdown .active {
+            background-color: #f3f4f6 !important;
+            color: #111827 !important;
+        }
     </style>
 </head>
 
@@ -142,7 +203,6 @@
     <div id="app" x-data="rfqWidget()" x-init="initWidget()" x-cloak
         class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-5xl mx-auto">
 
-        <!-- Toast Notification -->
         <div x-show="toast.show" x-cloak
             class="fixed top-5 right-5 z-[100] flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-[13px] font-medium max-w-sm"
             :class="{
@@ -193,52 +253,103 @@
             </div>
         </div>
 
-        <div x-show="showQuoteModal" style="display: none;"
-            class="fixed inset-0 z-[70] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm transition-opacity">
-            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden fade-in mx-4 border border-gray-200 flex flex-col"
-                @click.away="closeQuoteModal()">
-                <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
-                    <h3 class="text-[14px] font-bold text-gray-800">Record Quotation</h3>
-                    <button @click="closeQuoteModal()" class="text-gray-400 hover:text-gray-700 cursor-pointer">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
+        <div x-show="isEditModalOpen" style="display: none;" class="rfq-modal-overlay">
+            <div class="rfq-modal-bg" x-show="isEditModalOpen" x-transition.opacity @click="closeEditModal()"></div>
+            <div class="rfq-modal-box max-w-3xl fade-in" style="max-height: 90vh; overflow-y: auto;" x-show="isEditModalOpen">
+                <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
+                    <h3 class="text-[15px] font-bold text-gray-800">Edit Request For Quotation</h3>
+                    <button @click="closeEditModal()" class="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer"><i
+                            class="bi bi-x-lg text-lg"></i></button>
                 </div>
-                <div class="p-5 bg-gray-50/50 space-y-4">
 
-                    <div class="bg-blue-50/50 border border-blue-100 rounded p-3 text-xs text-blue-800">
-                        <div class="font-semibold mb-1" x-text="activeQuoteItem ? activeQuoteItem.itemName : ''"></div>
-                        <div class="text-[11px] text-blue-600">Vendor: <span
-                                x-text="activeQuoteItem ? activeQuoteItem.vendorName : ''"></span></div>
+                <form @submit.prevent="submitEditRFQ" class="p-5">
+                    <div class="grid grid-cols-2 gap-4 mb-5">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Department / Unit</label>
+                            <select id="rfqDept" class="w-full text-xs"></select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Request Date <span class="text-red-500">*</span></label>
+                            <input type="date" x-model="rfqForm.reqDate" required
+                                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Due Date <span class="text-red-500">*</span></label>
+                            <input type="date" x-model="rfqForm.dueDate" required
+                                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PR Ref <span class="text-gray-400 font-normal ml-0.5">(Optional)</span></label>
+                            <select id="rfqPrRef" class="w-full text-xs"></select>
+                        </div>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 mb-1.5">Quote Received Amount
-                            (₹)</label>
-                        <input type="number" step="0.01" x-model="quoteAmount"
-                            class="w-full border border-gray-300 rounded-lg p-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1B5CA8]/20 focus:border-[#1B5CA8] transition-all shadow-sm"
-                            placeholder="Enter amount...">
+                    <div class="mb-5 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
+                        <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                            <span class="text-xs font-semibold text-gray-700 tracking-wide">Items <span class="text-red-500">*</span></span>
+                            <button type="button" @click="addItemRow()"
+                                class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors cursor-pointer">+
+                                Add Item</button>
+                        </div>
+                        <div class="overflow-x-auto" style="overflow:visible;">
+                            <table class="w-full border-collapse min-w-[700px]">
+                                <thead class="bg-white border-b border-gray-200">
+                                    <tr>
+                                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[26%]">Item</th>
+                                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[26%]">Vendor(s)</th>
+                                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[10%]">Unit</th>
+                                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[10%]">Qty</th>
+                                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left">Comment</th>
+                                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-10"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="(item, index) in rfqForm.items" :key="item.uid">
+                                        <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors bg-white">
+                                            <td class="px-3 py-2 relative">
+                                                <select x-init="initItemSelect($el, item)" class="w-full text-xs" required></select>
+                                            </td>
+                                            <td class="px-3 py-2 relative">
+                                                <select x-init="initVendorRowSelect($el, item)" class="w-full text-xs" multiple></select>
+                                            </td>
+                                            <td class="px-3 py-2"><input type="text" x-model="item.unit" readonly
+                                                class="w-full py-1.5 px-2.5 bg-gray-100 border border-gray-200 rounded-md text-[13px] text-gray-500 cursor-not-allowed focus:outline-none"
+                                                placeholder="e.g. Kg, Pcs"></td>
+                                            <td class="px-3 py-2"><input type="number" x-model.number="item.quantity" required min="1"
+                                                class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
+                                            </td>
+                                            <td class="px-3 py-2"><input type="text" x-model="item.comment" placeholder="Optional"
+                                                class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
+                                            </td>
+                                            <td class="px-3 py-2 text-center">
+                                                <button type="button" @click="removeItemRow(index)"
+                                                    class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50 cursor-pointer"><i
+                                                        class="bi bi-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 mb-1.5">Attachment (Optional)</label>
-                        <input type="file" x-ref="quoteFile"
-                            class="block w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#EBF3FC] file:text-[#1B5CA8] hover:file:bg-blue-100 transition-colors">
-                        <div class="text-[10px] text-gray-400 mt-1">* Requires separate File API integration to process
-                            completely</div>
+
+                    <div class="mb-5">
+                        <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Purpose</label>
+                        <textarea x-model="rfqForm.purpose" rows="2"
+                            class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></textarea>
                     </div>
-                </div>
-                <div class="px-5 py-3.5 bg-white flex justify-end gap-2.5 border-t border-gray-100 shrink-0">
-                    <button @click="closeQuoteModal()" :disabled="isSubmittingQuote"
-                        class="px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors cursor-pointer shadow-sm disabled:opacity-50">
-                        Cancel
-                    </button>
-                    <button @click="submitQuote()" :disabled="isSubmittingQuote"
-                        class="px-4 py-2 rounded-lg text-xs font-semibold bg-[#1B5CA8] hover:bg-[#14457e] text-white transition-colors cursor-pointer shadow-sm flex items-center gap-1.5 disabled:opacity-70">
-                        <template x-if="isSubmittingQuote">
-                            <div class="btn-spinner mr-1"></div>
-                        </template>
-                        <span x-text="isSubmittingQuote ? 'Saving...' : 'Save Quote'"></span>
-                    </button>
-                </div>
+
+                    <div class="flex justify-end gap-2 border-t border-gray-100 pt-4">
+                        <button type="button" @click="closeEditModal()"
+                            class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors cursor-pointer">Cancel</button>
+                        <button type="submit" :disabled="isSubmittingEdit"
+                            class="inline-flex items-center justify-center min-w-[100px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70 cursor-pointer">
+                            <span x-show="!isSubmittingEdit">Save Changes</span>
+                            <div x-show="isSubmittingEdit" class="btn-spinner"
+                                style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -265,9 +376,11 @@
                     <i class="bi bi-chevron-right text-[11px] text-gray-400"></i>
                     <span class="text-gray-500 font-medium" x-text="rfqNumber"></span>
                 </nav>
-                <div class="flex items-center gap-2.5">
-                    <h1 class="text-[17px] font-bold text-gray-900 leading-none" x-text="rfqNumber"></h1>
-                    <span x-html="getStatusBadge(rec.Status)"></span>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <h1 class="text-[17px] font-bold text-gray-900 leading-none" x-text="rfqNumber"></h1>
+                        <span x-html="getStatusBadge(rec.Status)"></span>
+                    </div>
                 </div>
                 <div class="text-xs text-gray-400 mt-1">
                     <span x-text="prRefDisplay !== 'N/A' ? `Ref: ${prRefDisplay} · ` : ''"></span>
@@ -276,7 +389,8 @@
             </div>
 
             <div class="bg-white border border-gray-200 rounded-lg p-5 mb-4">
-                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">Process Progress</div>
+                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">PR Process Progress
+                </div>
                 <div class="relative flex justify-between items-start">
                     <div class="step-connector">
                         <div class="step-connector-fill"
@@ -396,18 +510,9 @@
                         <table x-show="vendorQuotesList.length > 0" class="w-full border-collapse text-xs">
                             <thead>
                                 <tr class="bg-gray-50 border-b border-gray-200">
-                                    <th
-                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">
-                                        Line Item</th>
-                                    <th
-                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">
-                                        Vendor</th>
-                                    <!-- <th
-                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">
-                                        Price </th> -->
-                                    <th
-                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
-                                        Actions</th>
+                                    <th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">Line Item</th>
+                                    <th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">Vendor</th>
+                                    <th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -422,24 +527,14 @@
                                                         x-text="vq.recordedQuote.Emails_Sent"></span>x</div>
                                             </template>
                                         </td>
-                                        <!-- <td class="px-4 py-2.5 text-gray-600">
-                                            <span x-show="vq.recordedQuote && vq.recordedQuote.Quote_Received"
-                                                class="inline-flex items-center gap-1 text-emerald-600 font-semibold">
-                                                ₹<span
-                                                    x-text="vq.recordedQuote ? vq.recordedQuote.Quote_Received : ''"></span>
-                                            </span>
-                                            <span x-show="!vq.recordedQuote || !vq.recordedQuote.Quote_Received"
-                                                class="text-gray-400 italic">Pending</span>
-                                        </td> -->
                                         <td class="px-4 py-2.5 text-right space-x-1.5 whitespace-nowrap">
-                                            <button @click="downloadVendorPDF(vq.vendor)"
-                                                title="Download PDF for this Vendor"
-                                                class="inline-flex items-center justify-center w-7 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors">
+                                            <button @click="downloadVendorPDF(vq.vendor)" title="Download PDF for this Vendor"
+                                                class="inline-flex items-center justify-center w-7 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors cursor-pointer">
                                                 <i class="bi bi-file-earmark-pdf"></i>
                                             </button>
                                             <button @click="sendEmail(vq)" title="Send Email"
                                                 :disabled="sendingEmailVendorId === vq.vendorId"
-                                                class="inline-flex items-center justify-center w-7 h-7 rounded bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+                                                class="inline-flex items-center justify-center w-7 h-7 rounded bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer">
                                                 <template x-if="sendingEmailVendorId === vq.vendorId">
                                                     <div class="email-btn-spinner"></div>
                                                 </template>
@@ -447,10 +542,6 @@
                                                     <i class="bi bi-envelope"></i>
                                                 </template>
                                             </button>
-                                            <!-- <button @click="openQuoteModal(vq)" title="Update Quote"
-                                                class="inline-flex items-center px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-medium transition-colors">
-                                                <i class="bi bi-currency-rupee mr-1"></i> Update
-                                            </button> -->
                                         </td>
                                     </tr>
                                 </template>
@@ -459,8 +550,7 @@
                     </div>
 
                     <div class="flex items-center gap-1.5">
-                        <div class="flex items-center gap-2.5 fade-in" id="actionButtons" x-show="showActionButtons"
-                            x-cloak>
+                        <div class="flex items-center gap-2.5 fade-in" id="actionButtons" x-show="showActionButtons" x-cloak>
                             <button @click="approveRFQ()"
                                 class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors no-underline cursor-pointer shadow-sm">
                                 <i class="bi bi-check-lg"></i> <span class="btn-text">Submit For QC</span>
@@ -470,11 +560,16 @@
                                 <i class="bi bi-x-lg"></i> Reject
                             </button>
                         </div>
+                        
+                        <button x-show="(rec.Status || '').toLowerCase() === 'submitted' || (rec.Status || '').toLowerCase() === 'draft'" 
+                            @click="openEditModal()"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-[#1B5CA8] border border-[#1B5CA8] hover:bg-[#EBF3FC] transition-colors cursor-pointer shadow-sm">
+                            <i class="bi bi-pencil"></i> Edit
+                        </button>
 
                         <button @click="downloadCompletePDF()"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#1B5CA8] text-white hover:bg-[#14457e] transition-colors cursor-pointer shadow-sm">
-                            <i class="bi bi-download"></i>
-                            <!-- Download Complete RFQ -->
+                            <i class="bi bi-download"></i> Download Full PDF
                         </button>
                         <button @click="cancelRFQ()"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors no-underline cursor-pointer shadow-sm">
@@ -555,6 +650,22 @@
                 items: [],
                 actions: [],
 
+                // Edit Modal Form State
+                isEditModalOpen: false,
+                isSubmittingEdit: false,
+                rfqForm: { dept: '', reqDate: '', dueDate: '', prRef: '', purpose: '', items: [] },
+                
+                // Master Data for Edit Dropdowns
+                unitMasters: [],
+                itemMasters: [],
+                vendorMasters: [],
+                tsInstances: { dept: null, pr: null, items: [], vendorItems: [] },
+                
+                ITEMS_REPORT_NAME: 'Items_Report',
+                UNIT_REPORT_NAME: 'Unit_Report',
+                PR_REPORT_NAME: 'Purchase_Requisition_Report',
+                VENDOR_REPORT_NAME: 'Vendor_Report',
+
                 // Approval Modal State
                 showModal: false,
                 modalTitle: '',
@@ -564,12 +675,6 @@
                 modalBtnClass: '',
                 modalBtnHoverClass: '',
                 isSubmitting: false,
-
-                // Quote Modal State
-                showQuoteModal: false,
-                activeQuoteItem: null,
-                quoteAmount: '',
-                isSubmittingQuote: false,
 
                 // Email Sending State
                 sendingEmailVendorId: null,
@@ -598,10 +703,16 @@
                             return;
                         }
                         this.fetchData();
+                        
+                        // Prefetch Masters for Edit Form instantly
+                        this.fetchItemMasters();
+                        this.fetchUnitMasters();
+                        this.fetchVendorMasters();
                     });
                 },
 
                 fetchData() {
+                    this.isLoading = true;
                     ZOHO.CREATOR.DATA.invokeCustomApi({
                         api_name: "Get_RFQ_Details",
                         http_method: "GET",
@@ -622,7 +733,265 @@
                     });
                 },
 
-                // Merge Items + Vendors + Recorded Quotations subform
+                // ---- MASTERS FETCHING (For Edit UI) ----
+                async fetchItemMasters() {
+                    try {
+                        let res = await ZOHO.CREATOR.DATA.getRecords({ report_name: this.ITEMS_REPORT_NAME, criteria: 'status == "Active"', max_records: 200 });
+                        if (res.code === 3000) this.itemMasters = res.data;
+                    } catch (err) { console.error('Failed to load items', err); }
+                },
+
+                async fetchUnitMasters() {
+                    try {
+                        let res = await ZOHO.CREATOR.DATA.getRecords({ report_name: this.UNIT_REPORT_NAME, max_records: 200 });
+                        if (res.code === 3000) this.unitMasters = res.data;
+                    } catch (err) { console.error('Failed to load units', err); }
+                },
+
+                async fetchVendorMasters() {
+                    try {
+                        let accumulated = [];
+                        let cursor = null;
+                        do {
+                            let config = { report_name: this.VENDOR_REPORT_NAME, max_records: 200 };
+                            if (cursor) config.record_cursor = cursor;
+                            let res = await ZOHO.CREATOR.DATA.getRecords(config);
+                            if (res.code === 3000 && res.data) {
+                                accumulated = accumulated.concat(res.data);
+                                cursor = res.data.length >= 200 ? res.record_cursor : null;
+                            } else {
+                                cursor = null;
+                            }
+                        } while (cursor);
+                        this.vendorMasters = accumulated;
+                    } catch (err) { console.error('Failed to load vendors', err); }
+                },
+
+                // ---- EDIT MODAL LOGIC ----
+                openEditModal() {
+                    // Reset Instances
+                    if (this.tsInstances.dept) this.tsInstances.dept.destroy();
+                    if (this.tsInstances.pr) this.tsInstances.pr.destroy();
+                    this.tsInstances.items.forEach(ts => ts && ts.destroy());
+                    this.tsInstances.items = [];
+                    this.tsInstances.vendorItems.forEach(ts => ts && ts.destroy());
+                    this.tsInstances.vendorItems = [];
+
+                    // Map existing data to form
+                    this.rfqForm = {
+                        dept: this.rec.Department_Unit?.ID || this.rec.Department_Unit || '',
+                        reqDate: this.rec.Request_Date ? dayjs(this.rec.Request_Date).format('YYYY-MM-DD') : '',
+                        dueDate: this.rec.Due_Date ? dayjs(this.rec.Due_Date).format('YYYY-MM-DD') : '',
+                        prRef: (this.rec.PR_Refs && this.rec.PR_Refs.length > 0) ? this.rec.PR_Refs[0].ID : '',
+                        purpose: this.rec.Purpose || '',
+                        items: []
+                    };
+
+                    // Map Items Subform and preserve their IDs so ZOHO updates them cleanly instead of appending
+                    if (this.items.length > 0) {
+                        this.items.forEach(itemRow => {
+                            let vIds = [];
+                            let vNames = [];
+                            let vendors = itemRow.vendors || itemRow.Vendor;
+                            if (vendors) {
+                                if (!Array.isArray(vendors)) vendors = [vendors];
+                                vendors.forEach(v => {
+                                    vIds.push(v.ID || v);
+                                    vNames.push(v.Display_Name || v.Company_Name || v.display_value || '');
+                                });
+                            }
+                            this.rfqForm.items.push({
+                                uid: Date.now() + Math.random(),
+                                recId: itemRow.ID, 
+                                id: itemRow.Item?.ID || itemRow.Item,
+                                tempName: itemRow.Item?.display_value || itemRow.Item?.item_name || '',
+                                vendorIds: vIds,
+                                tempVendorNames: vNames,
+                                unit: itemRow.Unit || '',
+                                quantity: itemRow.Quantity || 1,
+                                comment: itemRow.Comment || ''
+                            });
+                        });
+                    } else {
+                        this.addItemRow(); // fallback if empty
+                    }
+
+                    this.isEditModalOpen = true;
+
+                    this.$nextTick(() => {
+                        this.initDeptSelect();
+                        this.initPrSelect();
+                        // Items & Vendors initialize automatically via x-init directives
+                    });
+                },
+
+                closeEditModal() {
+                    this.isEditModalOpen = false;
+                    if (this.tsInstances.dept) this.tsInstances.dept.destroy();
+                    if (this.tsInstances.pr) this.tsInstances.pr.destroy();
+                    this.tsInstances.items.forEach(ts => ts && ts.destroy());
+                    this.tsInstances.items = [];
+                    this.tsInstances.vendorItems.forEach(ts => ts && ts.destroy());
+                    this.tsInstances.vendorItems = [];
+                },
+
+                addItemRow() {
+                    this.rfqForm.items.push({ uid: Date.now() + Math.random(), recId: null, id: '', vendorIds: [], unit: '', quantity: 1, comment: '' });
+                },
+
+                removeItemRow(index) {
+                    this.rfqForm.items.splice(index, 1);
+                    if (this.tsInstances.items[index]) {
+                        this.tsInstances.items[index].destroy();
+                        this.tsInstances.items.splice(index, 1);
+                    }
+                    if (this.tsInstances.vendorItems[index]) {
+                        this.tsInstances.vendorItems[index].destroy();
+                        this.tsInstances.vendorItems.splice(index, 1);
+                    }
+                },
+
+                initDeptSelect() {
+                    this.tsInstances.dept = new TomSelect(document.getElementById('rfqDept'), {
+                        valueField: 'ID', labelField: 'Name', searchField: 'Name',
+                        options: this.unitMasters, maxItems: 1, placeholder: 'Select Department...',
+                        onChange: (val) => { this.rfqForm.dept = val; },
+                        render: { option: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`, item: (d, e) => `<div class="font-medium">${e(d.Name)}</div>` }
+                    });
+                    if(this.rfqForm.dept) {
+                        if (!this.tsInstances.dept.options[this.rfqForm.dept] && this.rec.Department_Unit) {
+                            this.tsInstances.dept.addOption({ ID: String(this.rfqForm.dept), Name: this.rec.Department_Unit.display_value || 'Dept' });
+                        }
+                        this.tsInstances.dept.setValue(this.rfqForm.dept);
+                    }
+                },
+
+                initPrSelect() {
+                    this.tsInstances.pr = new TomSelect(document.getElementById('rfqPrRef'), {
+                        valueField: 'ID', labelField: 'PR_Number', searchField: ['PR_Number', 'Requisition_Number'],
+                        maxItems: 1, placeholder: 'Search PR...', loadThrottle: 350,
+                        onChange: (val) => { this.rfqForm.prRef = val; },
+                        load: (query, callback) => {
+                            if (!query.length) return callback();
+                            var q = query.replace(/'/g, "\\'");
+                            ZOHO.CREATOR.DATA.getRecords({
+                                report_name: this.PR_REPORT_NAME,
+                                criteria: `(PR_Number.contains("${q}") || Requisition_Number.contains("${q}"))`
+                            }).then(res => callback(res.code === 3000 ? res.data : [])).catch(() => callback());
+                        },
+                        render: { option: (d, e) => `<div class="font-mono">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>`, item: (d, e) => `<div class="font-mono">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>` }
+                    });
+                    if (this.rfqForm.prRef) {
+                        let prDisp = this.rec.PR_Refs[0].PR_Number || this.rec.PR_Refs[0].display_value || 'PR';
+                        this.tsInstances.pr.addOption({ ID: String(this.rfqForm.prRef), PR_Number: prDisp });
+                        this.tsInstances.pr.setValue(this.rfqForm.prRef);
+                    }
+                },
+
+                initItemSelect(el, itemRef) {
+                    let ts = new TomSelect(el, {
+                        valueField: 'ID', labelField: 'item_name', searchField: 'item_name',
+                        options: this.itemMasters, maxItems: 1, placeholder: 'Search item...',
+                        onChange: (val) => { 
+                            itemRef.id = val;
+                            if (val) {
+                                let masterItem = this.itemMasters.find(m => m.ID === val);
+                                if (masterItem && masterItem.unit_of_measure) itemRef.unit = masterItem.unit_of_measure;
+                            }
+                        },
+                        render: { option: (d, e) => `<div class="font-medium">${e(d.item_name)}</div>`, item: (d, e) => `<div class="font-medium">${e(d.item_name)}</div>` }
+                    });
+
+                    if (itemRef.id) {
+                        if (!ts.options[itemRef.id]) ts.addOption({ ID: String(itemRef.id), item_name: itemRef.tempName || 'Item #' + itemRef.id });
+                        ts.setValue(itemRef.id);
+                    }
+                    this.tsInstances.items.push(ts);
+                },
+
+                initVendorRowSelect(el, itemRef) {
+                    let ts = new TomSelect(el, {
+                        valueField: 'ID', labelField: 'Display_Name', searchField: ['Display_Name', 'Company_Name'],
+                        options: this.vendorMasters, maxItems: null, plugins: ['remove_button'],
+                        placeholder: 'Search & select vendor(s)...',
+                        onChange: (val) => { itemRef.vendorIds = Array.isArray(val) ? val : (val ? [val] : []); },
+                        render: { option: (d, e) => `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>`, item: (d, e) => `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>` },
+                        load: (query, callback) => {
+                            if (!query.length) return callback();
+                            var q = query.replace(/'/g, "\\'");
+                            ZOHO.CREATOR.DATA.getRecords({
+                                report_name: this.VENDOR_REPORT_NAME,
+                                criteria: `(Display_Name.contains("${q}") || Company_Name.contains("${q}"))`
+                            }).then(res => {
+                                const data = res.code === 3000 ? res.data : [];
+                                data.forEach(v => { if (!this.vendorMasters.some(existing => existing.ID === v.ID)) this.vendorMasters.push(v); });
+                                callback(data);
+                            }).catch(() => callback());
+                        }
+                    });
+                    if (itemRef.vendorIds && itemRef.vendorIds.length) {
+                        itemRef.vendorIds.forEach((vId, i) => {
+                            if (!ts.options[vId]) {
+                                const fallbackName = (itemRef.tempVendorNames && itemRef.tempVendorNames[i]) || ('Vendor #' + vId);
+                                ts.addOption({ ID: String(vId), Display_Name: fallbackName });
+                            }
+                        });
+                        ts.setValue(itemRef.vendorIds);
+                    }
+                    this.tsInstances.vendorItems.push(ts);
+                },
+
+                async submitEditRFQ() {
+                    if (this.rfqForm.items.length === 0 || this.rfqForm.items.some(i => !i.id)) {
+                        this.showToast('Please complete all item selections.', 'error');
+                        return;
+                    }
+                    if (this.rfqForm.items.some(i => !i.vendorIds || i.vendorIds.length === 0)) {
+                        this.showToast('Please select at least one vendor for every item.', 'error');
+                        return;
+                    }
+
+                    this.isSubmittingEdit = true;
+                    try {
+                        const payload = {
+                            data: {
+                                Department_Unit: this.rfqForm.dept,
+                                Request_Date: dayjs(this.rfqForm.reqDate).format('DD-MMM-YYYY'),
+                                Due_Date: dayjs(this.rfqForm.dueDate).format('DD-MMM-YYYY'),
+                                Purpose: this.rfqForm.purpose,
+                                PR_Refs: this.rfqForm.prRef ? [this.rfqForm.prRef] : [],
+                                Items: this.rfqForm.items.map(i => {
+                                    let obj = {
+                                        Item: i.id, Vendor: [...i.vendorIds], Unit: i.unit, Quantity: i.quantity, Comment: i.comment
+                                    };
+                                    if(i.recId) obj.ID = i.recId; // Preserve existing row IDs during update
+                                    return obj;
+                                })
+                            }
+                        };
+
+                        let res = await ZOHO.CREATOR.DATA.updateRecordById({
+                            report_name: "Request_For_Quotation_Report",
+                            id: this.recordId,
+                            payload: payload
+                        });
+
+                        if (res.code === 3000) {
+                            this.showToast('RFQ updated successfully!', 'success');
+                            this.closeEditModal();
+                            this.fetchData(); // Refresh UI
+                        } else {
+                            throw new Error(res.message || "Failed to update record.");
+                        }
+                    } catch (err) {
+                        this.showToast(err.message || 'Update failed.', 'error');
+                        console.error(err);
+                    } finally {
+                        this.isSubmittingEdit = false;
+                    }
+                },
+
+                // --- Shared View Logic ---
                 get vendorQuotesList() {
                     let list = [];
                     let recordedQuotes = this.rec.Quotations || [];
@@ -631,17 +1000,13 @@
                         let vendors = itemRow.vendors || itemRow.Vendor;
                         if (!vendors) return;
                         if (!Array.isArray(vendors)) vendors = [vendors];
-
                         let itemId = itemRow.Item?.ID || itemRow.Item;
 
                         vendors.forEach(v => {
                             let vId = v.ID || v;
-
-                            // Match existing row in the Quotations subform
                             let recordedQuote = recordedQuotes.find(q => {
                                 let qVid = q.Vendor?.ID || q.Vendor;
                                 let qIid = q.item_master?.ID || q.item_master;
-                                // If item_master is empty/missing, match by vendor only
                                 if (!qIid) return qVid == vId;
                                 return qVid == vId && qIid == itemId;
                             });
@@ -665,7 +1030,6 @@
                     return this.rec.RFQ_Ref_Number || (this.rec.RFQ_Number ? 'RFQ-' + this.rec.RFQ_Number : '–');
                 },
 
-                // NEW: Dynamic Multi-PR Ref Display
                 get prRefDisplay() {
                     if (this.rec.PR_Refs && Array.isArray(this.rec.PR_Refs) && this.rec.PR_Refs.length > 0) {
                         return this.rec.PR_Refs.map(pr => pr.PR_Number).join(', ');
@@ -685,7 +1049,6 @@
                     ];
                 },
 
-                // Modal Control logic
                 openModal(title, status, movedTo, btnBgClass, btnHoverClass) {
                     this.modalTitle = title;
                     this.pendingStatus = status;
@@ -701,84 +1064,6 @@
                     this.showModal = false;
                 },
 
-                openQuoteModal(vq) {
-                    this.activeQuoteItem = vq;
-                    this.quoteAmount = (vq.recordedQuote && vq.recordedQuote.Quote_Received) ? vq.recordedQuote.Quote_Received : '';
-                    if (this.$refs.quoteFile) this.$refs.quoteFile.value = '';
-                    this.showQuoteModal = true;
-                },
-
-                closeQuoteModal() {
-                    if (this.isSubmittingQuote) return;
-                    this.showQuoteModal = false;
-                    this.activeQuoteItem = null;
-                },
-
-                async submitQuote() {
-                    if (!this.quoteAmount) {
-                        alert("Please enter a quote amount.");
-                        return;
-                    }
-                    this.isSubmittingQuote = true;
-                    try {
-                        let existingQuotations = [...(this.rec.Quotations || [])];
-
-                        let matchedIndex = existingQuotations.findIndex(q => {
-                            let qVid = q.Vendor?.ID || q.Vendor;
-                            let qIid = q.item_master?.ID || q.item_master;
-                            if (!qIid) return qVid == this.activeQuoteItem.vendorId;
-                            return qVid == this.activeQuoteItem.vendorId && qIid == this.activeQuoteItem.itemId;
-                        });
-
-                        let newRow = {
-                            "Vendor": this.activeQuoteItem.vendorId,
-                            "item_master": this.activeQuoteItem.itemId,
-                            "Quantity": this.activeQuoteItem.qty,
-                            "Quote_Received": parseFloat(this.quoteAmount)
-                        };
-
-                        if (matchedIndex >= 0) {
-                            newRow.ID = existingQuotations[matchedIndex].ID;
-                            existingQuotations[matchedIndex] = newRow;
-                        } else {
-                            existingQuotations.push(newRow);
-                        }
-
-                        let subformPayload = existingQuotations.map(q => {
-                            let obj = {
-                                "Vendor": q.Vendor?.ID || q.Vendor,
-                                "item_master": q.item_master?.ID || q.item_master,
-                                "Quantity": q.Quantity,
-                                "Quote_Received": q.Quote_Received,
-                                "Emails_Sent": q.Emails_Sent || 0
-                            };
-                            if (q.ID) obj.ID = q.ID;
-                            return obj;
-                        });
-
-                        const payload = {
-                            "data": {
-                                "Quotations": subformPayload
-                            }
-                        };
-
-                        await ZOHO.CREATOR.DATA.updateRecordById({
-                            report_name: "Request_For_Quotation_Report",
-                            id: this.recordId,
-                            payload
-                        });
-
-                        this.closeQuoteModal();
-                        this.fetchData();
-
-                    } catch (err) {
-                        console.error("API Error: ", err);
-                        alert("Failed to record quote. Please check console.");
-                    } finally {
-                        this.isSubmittingQuote = false;
-                    }
-                },
-
                 async sendEmail(vq) {
                     this.sendingEmailVendorId = vq.vendorId;
                     try {
@@ -786,12 +1071,8 @@
                             api_name: "Send_RFQ_Email_To_Vendor",
                             http_method: "POST",
                             content_type: "application/json",
-                            payload: {
-                                rfqId: this.recordId,
-                                vendorId: vq.vendorId
-                            }
+                            payload: { rfqId: this.recordId, vendorId: vq.vendorId }
                         });
-                        console.log("Email API response:", response);
                         this.showToast(`Email sent successfully to ${vq.vendorName}`, 'success');
                         this.fetchData();
                     } catch (err) {
@@ -813,21 +1094,19 @@
                     if (this.toastTimer) { clearTimeout(this.toastTimer); this.toastTimer = null; }
                 },
 
-                downloadCompletePDF() {
-                    this.generateAndPrintPDF(this.items, null);
-                },
-
+                downloadCompletePDF() { this.generateAndPrintPDF(this.items, null); },
                 downloadVendorPDF(targetVendor) {
                     const vendorItems = this.items.filter(item => {
                         let vendors = item.vendors || item.Vendor;
                         if (!vendors) return false;
                         if (!Array.isArray(vendors)) vendors = [vendors];
-                        return vendors.some(v => v.ID === targetVendor.ID);
+                        return vendors.some(v => (v.ID || v) === (targetVendor.ID || targetVendor));
                     });
                     this.generateAndPrintPDF(vendorItems, targetVendor);
                 },
 
                 generateAndPrintPDF(itemsToPrint, vendorData) {
+                    // PDF Generation Code preserved as original
                     let itemRows = '';
                     itemsToPrint.forEach((item, i) => {
                         itemRows += `
@@ -845,10 +1124,8 @@
                         `;
                     });
 
-                    // Build vendor details section
                     let vendorDetailsHtml = '';
                     if (vendorData) {
-                        // Single vendor PDF
                         const vName = vendorData.Company_Name || vendorData.Display_Name || 'Vendor';
                         const vContact = vendorData.Display_Name || '';
                         const vAddress1 = (vendorData.Billing_Address) ? (vendorData.Billing_Address.address_line_1 || '') : '';
@@ -864,7 +1141,6 @@
                             ${vPhone ? 'Phone: ' + this.escapeHtml(vPhone) : ''}
                         `;
                     } else {
-                        // Complete RFQ PDF — collect all unique vendors from items
                         const uniqueVendors = new Map();
                         itemsToPrint.forEach(item => {
                             let vendors = item.vendors || item.Vendor;
@@ -872,12 +1148,9 @@
                             if (!Array.isArray(vendors)) vendors = [vendors];
                             vendors.forEach(v => {
                                 const vId = v.ID || v;
-                                if (!uniqueVendors.has(vId)) {
-                                    uniqueVendors.set(vId, v);
-                                }
+                                if (!uniqueVendors.has(vId)) { uniqueVendors.set(vId, v); }
                             });
                         });
-
                         if (uniqueVendors.size === 0) {
                             vendorDetailsHtml = '<em>No vendors assigned</em>';
                         } else {
@@ -889,7 +1162,6 @@
                                 const addr2 = (v.Billing_Address) ? (v.Billing_Address.address_line_2 || '') : '';
                                 const email = v.email || v.Email || '';
                                 const phone = v.mobile || v.Mobile || v.Phone || '';
-
                                 vendorDetailsHtml += `<strong>${this.escapeHtml(name)}</strong>`;
                                 if (contact && contact !== name) vendorDetailsHtml += `<br>${this.escapeHtml(contact)}`;
                                 if (addr1) vendorDetailsHtml += `<br>${this.escapeHtml(addr1)}`;
@@ -957,21 +1229,12 @@
                                         </div>
                                     </div>
                                 </header>
-
                                 <div class="address-section">
                                     <div class="address-box">
                                         <h3>Vendor Details</h3>
                                         ${vendorDetailsHtml}
                                     </div>
-                                    <div class="address-box">
-                                        <h3>Ship To / Deliver To</h3>
-                                        <strong>CommKraft Operations</strong><br>
-                                        Attn: Receiving Dept.<br>
-                                        Electronics City<br>
-                                        Bengaluru, Karnataka, India<br>
-                                    </div>
                                 </div>
-
                                 <table>
                                     <thead>
                                         <tr>
@@ -983,11 +1246,8 @@
                                             <th width="15%" class="text-right">Unit Price (₹)</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        ${itemRows}
-                                    </tbody>
+                                    <tbody>${itemRows}</tbody>
                                 </table>
-
                                 <div class="terms-box">
                                     <h4>Instructions to Vendor & Terms:</h4>
                                     <ul style="margin: 0; padding-left: 20px; font-size: 10pt;">
@@ -997,7 +1257,6 @@
                                         <li>This document is a request for quote, not a purchase order or a binding contract.</li>
                                     </ul>
                                 </div>
-
                                 <div class="signature-section">
                                     <div class="signature-box">Authorized Buyer Signature</div>
                                     <div class="signature-box">Vendor Acceptance Signature</div>
@@ -1015,7 +1274,6 @@
                     iframe.style.height = '0';
                     iframe.style.border = '0';
                     document.body.appendChild(iframe);
-
                     const frameDoc = iframe.contentWindow.document;
                     frameDoc.open();
                     frameDoc.write(printHTML);
@@ -1172,5 +1430,4 @@
         });
     </script>
 </body>
-
 </html>
