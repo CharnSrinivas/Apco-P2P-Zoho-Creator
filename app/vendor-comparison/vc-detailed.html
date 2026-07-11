@@ -192,6 +192,106 @@
             background-color: #ffffff;
             border-color: #1B5CA8;
         }
+
+        /* Vendor card styles */
+        .vendor-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            transition: all 0.2s;
+            background: #fff;
+        }
+
+        .vendor-card:hover {
+            border-color: #cbd5e1;
+        }
+
+        .vendor-card.finalized {
+            border-color: #10b981;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+        }
+
+        .vendor-card-header {
+            background: #f8fafc;
+            padding: 0.65rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .vendor-card-header.finalized {
+            background: #ecfdf5;
+            border-bottom-color: #10b981;
+        }
+
+        .vendor-quote-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+        }
+
+        .vendor-quote-table th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: #475569;
+            padding: 0.4rem 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+        }
+
+        .vendor-quote-table td {
+            padding: 0.3rem 0.4rem;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .vendor-quote-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .vendor-quote-table .grid-select .ts-control {
+            font-size: 0.7rem !important;
+            padding: 0.2rem 0.4rem !important;
+            min-height: 28px !important;
+        }
+
+        .vendor-quote-table .grid-input {
+            font-size: 0.7rem !important;
+            padding: 0.2rem 0.4rem !important;
+            height: 28px !important;
+        }
+
+        .fade-slide-in {
+            animation: fadeInUp 0.3s ease-out both;
+        }
+
+        .modal-scroll {
+            max-height: 75vh;
+            overflow-y: auto;
+            padding: 1.25rem;
+        }
+
+        .modal-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+        .modal-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .modal-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .modal-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
     </style>
 </head>
 
@@ -200,6 +300,7 @@
     <div id="app" x-data="vcWidget()" x-init="initWidget()" x-cloak
         class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-7xl mx-auto w-full">
 
+        <!-- Action Modal (Freeze, Reject, etc.) -->
         <div x-show="showModal" style="display: none;"
             class="fixed inset-0 z-[70] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm transition-opacity">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden fade-in mx-4 border border-gray-200"
@@ -232,10 +333,10 @@
             </div>
         </div>
 
+        <!-- Edit Modal (Vendor-Centric) -->
         <div x-show="isEditModalOpen" style="display: none;" class="vc-modal-overlay">
             <div class="vc-modal-bg" x-show="isEditModalOpen" x-transition.opacity @click="closeEditModal()"></div>
-            <div class="vc-modal-box max-w-6xl overflow-scroll" style="max-height: 94vh;" x-show="isEditModalOpen"
-                x-transition>
+            <div class="vc-modal-box max-w-7xl" style="max-height: 94vh;" x-show="isEditModalOpen" x-transition>
                 <div
                     class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50 sticky top-0 z-20">
                     <h3 class="text-[15px] font-bold text-gray-800">Edit Quote Comparison</h3>
@@ -244,7 +345,7 @@
                             class="bi bi-x-lg text-lg"></i></button>
                 </div>
 
-                <div class="p-5 w-fit">
+                <div class="modal-scroll">
                     <form @submit.prevent="submitEdit">
                         <h4 class="text-xs font-bold text-[#1B5CA8] tracking-wide mb-3 border-b border-gray-100 pb-1">
                             Comparison Details</h4>
@@ -258,12 +359,13 @@
                             </div>
                         </div>
 
+                        <!-- Items Requirement -->
                         <div class="mb-6 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
                             <div
                                 class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
                                 <span class="text-xs font-semibold text-gray-700 tracking-wide">Items Requirement <span
                                         class="text-red-500">*</span></span>
-                                <button type="button" @click="addItemRow()"
+                                <button type="button" @click="addItemRowEdit()"
                                     class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+
                                     Add Item</button>
                             </div>
@@ -298,18 +400,18 @@
                                                 class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors bg-white">
                                                 <td class="px-2 py-2 grid-select relative">
                                                     <select class="w-full text-xs"
-                                                        x-init="() => { const ts = initDynamicItem($el, item, 'Items', 'Item_Name'); return () => ts.destroy(); }"></select>
+                                                        x-init="() => { const ts = initDynamicItemEdit($el, item, 'Items', 'Item_Name'); return () => ts.destroy(); }"></select>
                                                 </td>
                                                 <td class="px-2 py-2"><input x-model="item.Unit" type="text"
                                                         class="grid-input bg-gray-100 text-gray-500 cursor-not-allowed"
                                                         readonly></td>
                                                 <td class="px-2 py-2"><input x-model.number="item.Quantity"
-                                                        @input="recalculateTotals()" type="number" min="1" step="any"
-                                                        class="grid-input"></td>
+                                                        @input="recalculateAllTotalsEdit()" type="number" min="1"
+                                                        step="any" class="grid-input"></td>
                                                 <td class="px-2 py-2"><input x-model="item.Deliver_to_Plant" type="text"
                                                         class="grid-input"></td>
                                                 <td class="px-2 py-2 text-center">
-                                                    <button type="button" @click="removeItemRow(index)"
+                                                    <button type="button" @click="removeItemRowEdit(index)"
                                                         class="text-gray-400 hover:text-red-500 p-1.5 rounded-md hover:bg-red-50"><i
                                                             class="bi bi-trash"></i></button>
                                                 </td>
@@ -320,122 +422,155 @@
                             </div>
                         </div>
 
-                        <div class="mb-6 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
-                            <div
-                                class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                                <span class="text-xs font-semibold text-gray-700 tracking-wide">Quotation Comparison
-                                    Statement <span class="text-red-500">*</span></span>
-                                <button type="button" @click="addVendorRow()"
-                                    class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+
-                                    Add Quote Line</button>
+                        <!-- Vendor Cards (Edit) -->
+                        <div class="mb-6">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-semibold text-gray-700 tracking-wide">Vendor Quotes <span
+                                        class="text-red-500">*</span></span>
+                                <button type="button" @click="addVendorEdit()"
+                                    class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-3 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">
+                                    <i class="bi bi-plus-lg mr-1"></i> Add Vendor
+                                </button>
                             </div>
-                            <div class="overflow-x-auto" style="overflow:visible;">
-                                <table class="w-full border-collapse min-w-[1100px]">
-                                    <thead class="bg-white border-b border-gray-200">
-                                        <tr>
-                                            <th
-                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[14%]">
-                                                Vendor</th>
-                                            <th
-                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[14%]">
-                                                Item</th>
-                                            <th
-                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[8%]">
-                                                Basic Rate</th>
-                                            <th
-                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[7%]">
-                                                Disc %</th>
-                                            <th
-                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[8%]">
-                                                Neg. Rate</th>
-                                            <th
-                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[8%]">
-                                                Freight</th>
-                                            <th
-                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[7%]">
-                                                GST %</th>
-                                            <th
-                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[9%]">
-                                                Landed Rate</th>
-                                            <th
-                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[12%]">
-                                                Terms</th>
-                                            <th
-                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-[7%]">
-                                                Rank</th>
-                                            <th
-                                                class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-8">
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr x-show="editForm.Quotation_Comparison_Statement.length === 0">
-                                            <td colspan="11" class="px-3 py-4 text-center text-xs text-gray-400 italic">
-                                                No vendor quotes added.</td>
-                                        </tr>
-                                        <template x-for="(vendor, index) in editForm.Quotation_Comparison_Statement"
-                                            :key="vendor.uid">
-                                            <tr class="border-b border-gray-100 transition-colors bg-white hover:bg-gray-50/50"
-                                                :class="{'bg-emerald-50/30': vendor.Rank === 'Yes'}">
-                                                <td class="px-2 py-2 grid-select relative">
-                                                    <select
-                                                        x-init="() => { const ts = initDynamicVendor($el, vendor); return () => ts.destroy(); }"
-                                                        class="w-full text-xs"></select>
-                                                </td>
-                                                <td class="px-2 py-2 grid-select relative">
-                                                    <select
-                                                        x-init="() => { const ts = initDynamicItem($el, vendor, 'Items_Master', 'Item_Name'); return () => ts.destroy(); }"
-                                                        class="w-full text-xs"></select>
-                                                </td>
-                                                <td class="px-2 py-2"><input x-model.number="vendor.Basic_Rate"
-                                                        @input="syncRates(vendor, 'basic')" type="number" step="any"
-                                                        class="grid-input"></td>
-                                                <td class="px-2 py-2"><input x-model.number="vendor.Disc"
-                                                        @input="syncRates(vendor, 'disc')" type="number" step="any"
-                                                        class="grid-input"></td>
-                                                <td class="px-2 py-2"><input x-model.number="vendor.Negotiated_Rate"
-                                                        @input="syncRates(vendor, 'neg')" type="number" step="any"
-                                                        class="grid-input"></td>
-                                                <td class="px-2 py-2"><input x-model.number="vendor.Freight"
-                                                        @input="syncRates(vendor, 'freight')" type="number" step="any"
-                                                        class="grid-input"></td>
-                                                <td class="px-2 py-2"><input x-model.number="vendor.GST"
-                                                        @input="syncRates(vendor, 'gst')" type="number" step="any"
-                                                        class="grid-input"></td>
-                                                <td class="px-2 py-2"><input x-model.number="vendor.Landed_Rate"
-                                                        type="number" disabled
-                                                        class="grid-input font-bold text-gray-800 bg-gray-100 cursor-not-allowed">
-                                                </td>
-                                                <td class="px-2 py-2">
-                                                    <select x-model="vendor.Payment_Terms" class="grid-input">
-                                                        <option value="">Select...</option>
-                                                        <option value="Advance">Advance</option>
-                                                        <option value="15 Days Credit">15 Days</option>
-                                                        <option value="30 Days Credit">30 Days</option>
-                                                        <option value="45 Days Credit">45 Days</option>
-                                                    </select>
-                                                </td>
-                                                <td class="px-2 py-2">
-                                                    <select x-model="vendor.Rank"
-                                                        @change="handleRankChange(vendor, index)"
-                                                        class="grid-input font-semibold"
-                                                        :class="vendor.Rank === 'Yes' ? 'text-emerald-700 bg-emerald-50' : ''">
-                                                        <option value="No">No</option>
-                                                        <option value="Yes">Yes</option>
-                                                    </select>
-                                                </td>
-                                                <td class="px-2 py-2 text-center">
-                                                    <button type="button" @click="removeVendorRow(index)"
-                                                        class="text-gray-400 hover:text-red-500 p-1.5 rounded-md hover:bg-red-50"><i
-                                                            class="bi bi-trash"></i></button>
-                                                </td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
+
+                            <div x-show="editForm.Vendors.length === 0"
+                                class="border border-gray-200 rounded-lg p-6 text-center text-xs text-gray-400 italic bg-gray-50">
+                                No vendors added. Click "Add Vendor" to start.
                             </div>
+
+                            <template x-for="(vendor, vIdx) in editForm.Vendors" :key="vendor.uid">
+                                <div class="vendor-card mb-4 fade-slide-in"
+                                    :class="vendor.finalized ? 'finalized' : ''">
+                                    <div class="vendor-card-header" :class="vendor.finalized ? 'finalized' : ''">
+                                        <div class="flex items-center gap-3 flex-1 min-w-0 flex-wrap">
+                                            <span class="text-xs font-semibold text-gray-600 shrink-0">Vendor</span>
+                                            <div class="grid-select relative flex-1 min-w-[160px] max-w-[280px]">
+                                                <select class="w-full text-xs"
+                                                    :x-ref="'vendorSelectEdit_'+vIdx"
+                                                    x-init="() => { const ts = initDynamicVendorEdit($el, vendor); window['vendorTsEdit_'+vIdx] = ts; return () => { if(window['vendorTsEdit_'+vIdx]) window['vendorTsEdit_'+vIdx].destroy(); }; }"></select>
+                                            </div>
+                                            <span x-show="vendor.finalized"
+                                                class="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full text-[10px] font-bold border border-emerald-200 shrink-0">
+                                                <i class="bi bi-check-circle-fill text-emerald-500 text-[11px]"></i>
+                                                Finalized
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center gap-1.5 shrink-0">
+                                            <button type="button" @click="finalizeVendorEdit(vIdx)"
+                                                class="text-[10px] font-semibold px-2.5 py-1 rounded-md transition-colors"
+                                                :class="vendor.finalized ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+                                                <i class="bi" :class="vendor.finalized ? 'bi-check2-all' : 'bi-check2'"></i>
+                                                <span x-text="vendor.finalized ? 'Finalized' : 'Finalize'"></span>
+                                            </button>
+                                            <button type="button" @click="removeVendorEdit(vIdx)"
+                                                class="text-gray-400 hover:text-red-500 p-1 rounded-md hover:bg-red-50 transition-colors"
+                                                title="Remove Vendor">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="overflow-x-auto p-0">
+                                        <table class="vendor-quote-table">
+                                            <thead>
+                                                <tr>
+                                                    <th style="min-width:140px;">Item</th>
+                                                    <th style="min-width:80px;">Basic Rate</th>
+                                                    <th style="min-width:65px;">Disc %</th>
+                                                    <th style="min-width:85px;">Neg. Rate</th>
+                                                    <th style="min-width:70px;">Freight</th>
+                                                    <th style="min-width:60px;">GST %</th>
+                                                    <th style="min-width:90px;">Landed Rate</th>
+                                                    <th style="min-width:90px;">Payment Terms</th>
+                                                    <th style="min-width:65px; text-align:center;">Rank</th>
+                                                    <th style="min-width:36px; text-align:center;"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr x-show="vendor.QuoteLines.length === 0">
+                                                    <td colspan="10"
+                                                        class="text-center text-gray-400 italic py-3 text-[11px]">
+                                                        No item quotes for this vendor.</td>
+                                                </tr>
+                                                <template x-for="(line, lIdx) in vendor.QuoteLines"
+                                                    :key="line.uid">
+                                                    <tr :class="line.Rank === 'Yes' ? 'bg-emerald-50/40' : ''">
+                                                        <td class="grid-select relative" style="min-width:140px;">
+                                                            <select class="w-full text-xs"
+                                                                :x-ref="'itemSelectEdit_'+vIdx+'_'+lIdx"
+                                                                x-init="() => { const ts = initDynamicItemEdit($el, line, 'Items_Master', 'Item_Name'); return () => ts.destroy(); }"></select>
+                                                        </td>
+                                                        <td><input x-model.number="line.Basic_Rate"
+                                                                @input="syncVendorLineRatesEdit(vIdx, lIdx, 'basic')"
+                                                                type="number" step="any" class="grid-input"
+                                                                style="min-width:70px;"></td>
+                                                        <td><input x-model.number="line.Disc"
+                                                                @input="syncVendorLineRatesEdit(vIdx, lIdx, 'disc')"
+                                                                type="number" step="any" class="grid-input"
+                                                                style="min-width:55px;"></td>
+                                                        <td><input x-model.number="line.Negotiated_Rate"
+                                                                @input="syncVendorLineRatesEdit(vIdx, lIdx, 'neg')"
+                                                                type="number" step="any" class="grid-input"
+                                                                style="min-width:75px;"></td>
+                                                        <td><input x-model.number="line.Freight"
+                                                                @input="syncVendorLineRatesEdit(vIdx, lIdx, 'freight')"
+                                                                type="number" step="any" class="grid-input"
+                                                                style="min-width:60px;"></td>
+                                                        <td><input x-model.number="line.GST"
+                                                                @input="syncVendorLineRatesEdit(vIdx, lIdx, 'gst')"
+                                                                type="number" step="any" class="grid-input"
+                                                                style="min-width:50px;"></td>
+                                                        <td><input x-model.number="line.Landed_Rate" type="number"
+                                                                disabled
+                                                                class="grid-input font-bold text-[#1B5CA8] bg-gray-100 cursor-not-allowed"
+                                                                style="min-width:80px;"></td>
+                                                        <td style="min-width:90px;">
+                                                            <select x-model="line.Payment_Terms" class="grid-input"
+                                                                style="min-width:80px;">
+                                                                <option value="">Select…</option>
+                                                                <option value="Advance">Advance</option>
+                                                                <option value="15 Days Credit">15 Days</option>
+                                                                <option value="30 Days Credit">30 Days</option>
+                                                                <option value="45 Days Credit">45 Days</option>
+                                                            </select>
+                                                        </td>
+                                                        <td style="text-align:center; min-width:65px;">
+                                                            <select x-model="line.Rank"
+                                                                @change="handleVendorLineRankEdit(vIdx, lIdx)"
+                                                                class="grid-input font-semibold text-center"
+                                                                :class="line.Rank === 'Yes' ? 'text-emerald-700 border-emerald-500 bg-emerald-50' : ''"
+                                                                style="min-width:55px;">
+                                                                <option value="No">No</option>
+                                                                <option value="Yes">Yes</option>
+                                                            </select>
+                                                        </td>
+                                                        <td style="text-align:center; min-width:36px;">
+                                                            <button type="button"
+                                                                @click="removeVendorLineEdit(vIdx, lIdx)"
+                                                                class="text-gray-400 hover:text-red-500 p-1 rounded-md hover:bg-red-50 transition-colors"><i
+                                                                    class="bi bi-x"></i></button>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="px-3 py-2 border-t border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                                        <button type="button" @click="addVendorLineEdit(vIdx)"
+                                            class="text-[10px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">
+                                            <i class="bi bi-plus-lg mr-0.5"></i> Add Item Quote
+                                        </button>
+                                        <span x-show="vendor.QuoteLines.length > 0" class="text-[10px] text-gray-400">
+                                            <span x-text="vendor.QuoteLines.filter(l => l.Rank === 'Yes').length"></span>
+                                            ranked Yes
+                                        </span>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
 
+                        <!-- Final Decision -->
                         <h4 class="text-xs font-bold text-emerald-600 tracking-wide mb-3 border-b border-gray-100 pb-1">
                             Final Decision</h4>
                         <div class="grid grid-cols-2 gap-4 mb-4">
@@ -480,7 +615,7 @@
             </div>
         </div>
 
-
+        <!-- Main Content -->
         <div x-show="isLoading" class="flex flex-col items-center justify-center py-24 gap-3">
             <div class="vc-spinner"></div>
             <div class="text-sm text-gray-400 font-medium">Loading Quote Comparison…</div>
@@ -531,6 +666,7 @@
                 </div>
             </div>
 
+            <!-- Progress stepper -->
             <div class="bg-white border border-gray-200 rounded-lg p-5 mb-5 max-w-5xl mx-auto">
                 <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">PR Process Progress
                 </div>
@@ -554,6 +690,7 @@
                 </div>
             </div>
 
+            <!-- Comparative Statement Table (unchanged) -->
             <div class="w-full mb-6 relative">
                 <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                     <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
@@ -700,6 +837,7 @@
                 </div>
             </div>
 
+            <!-- Detail panels -->
             <div class="grid grid-cols-5 gap-5 w-full">
                 <div class="col-span-5 md:col-span-3 space-y-4">
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
@@ -750,7 +888,7 @@
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors cursor-pointer shadow-sm">
                             <i class="bi bi-check-lg"></i> <span>Approve & Finalize</span>
                         </button>
-                        <button x-show="!isFreezed" @click="requestReNegotiation()"
+                        <button @click="requestReNegotiation()"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-amber-500 text-white border border-amber-500 hover:bg-amber-600 transition-colors cursor-pointer shadow-sm">
                             <i class="bi bi-arrow-repeat"></i> Request For Re Negotiation
                         </button>
@@ -862,7 +1000,14 @@
                 // Edit Modal States
                 isEditModalOpen: false,
                 isUpdatingRecord: false,
-                editForm: { Quote_Comparison_Subject: '', Justification: '', Finalized_Vendor: '', Total_Landed_Rate: 0, Items: [], Quotation_Comparison_Statement: [] },
+                editForm: {
+                    Quote_Comparison_Subject: '',
+                    Justification: '',
+                    Finalized_Vendor: '',
+                    Total_Landed_Rate: 0,
+                    Items: [],
+                    Vendors: [] // vendor-centric
+                },
 
                 // Action Modal States
                 showModal: false,
@@ -908,6 +1053,7 @@
                     });
                 },
 
+                // ---- Comparative Matrix (unchanged) ----
                 get comparativeMatrix() {
                     if (!this.rec.Items) return { vendorNames: [], rows: [], vendorTotals: {}, vendorTotalFormulas: {} };
 
@@ -964,7 +1110,6 @@
                             unit: reqItem.Unit || reqItem.Item?.unit_of_measure || '–',
                             quotes: itemQuotes,
                             l1Vendor: minRate !== Infinity ? l1Vendor : '–',
-                            // Pulling previous procurement details directly from Item object if available
                             prevVendor: reqItem.Item?.Vendor?.Legal_Name || reqItem.Item?.Vendor?.Display_Name || '–',
                             prevPrice: reqItem.Item?.unit_price || '–'
                         };
@@ -981,13 +1126,112 @@
 
                 getBarWidth(total) { if (!total) return 0; return ((total / this.maxComparisonPrice) * 100).toFixed(2); },
 
-                // --- EDIT MODAL LOGIC --- //
+                // ---- UI Helpers ----
+                get vcNumber() { return this.rec.QC_Number ? 'QC-' + this.rec.QC_Number : '–'; },
+                get canEdit() { const s = (this.rec.Status || '').toLowerCase(); return !['freezed', 'finalized'].includes(s); },
+                get isFreezed() { return (this.rec.Status || '').toLowerCase() === 'freezed'; },
+                get showActionButtons() { const s = (this.rec.Status || '').toLowerCase(); return !['finalized', 'rejected', 'cancelled'].includes(s); },
+                get modalBtnText() { return this.modalTitle ? this.modalTitle.split(' ')[0] : 'Submit'; },
+
+                get detailFields() {
+                    let finalPrice = this.rec.Total_Landed_Rate ? this.formatINR(this.rec.Total_Landed_Rate) : '–';
+                    return [
+                        { label: 'Comparison Subject', value: this.rec.Quote_Comparison_Subject },
+                        { label: 'Finalized Vendor', isHtml: true, value: this.rec.Finalized_Vendor ? `<span class="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-bold">${this.rec.Finalized_Vendor}</span>` : '–' },
+                        { label: 'Grand Total Rate', value: finalPrice, bold: true },
+                        { label: 'Status', value: this.rec.Status, bold: true },
+                    ];
+                },
+
+                get sortedActions() { return [...this.actions].sort((a, b) => (a.Added_Time || "").localeCompare(b.Added_Time || "")); },
+
+                formatINR(amount, includeSymbol = true) {
+                    if (amount == null || isNaN(amount)) return includeSymbol ? '₹ 0' : '0';
+                    const val = parseFloat(amount).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+                    return includeSymbol ? '₹ ' + val : val;
+                },
+
+                formatDate(dateStr, includeTime = false) {
+                    if (!dateStr) return '–';
+                    try {
+                        const d = new Date(dateStr);
+                        if (isNaN(d.getTime())) return dateStr;
+                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        let res = String(d.getDate()).padStart(2, '0') + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + d.getFullYear();
+                        if (includeTime) res += ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        return res;
+                    } catch (e) { return dateStr; }
+                },
+
+                getStatusBadge(status) {
+                    const s = (status || 'pending').toLowerCase();
+                    let border = 'border-amber-200', bg = 'bg-amber-50', text = 'text-amber-800', dot = 'bg-amber-500', label = status || 'Pending';
+                    if (s === 'approved' || s === 'finalized') { border = 'border-emerald-200'; bg = 'bg-emerald-50'; text = 'text-emerald-800'; dot = 'bg-emerald-600'; label = status; }
+                    if (s === 'rejected') { border = 'border-red-200'; bg = 'bg-red-50'; text = 'text-red-800'; dot = 'bg-red-600'; label = 'Rejected'; }
+                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border ${border} ${bg} ${text}"><span class="w-[5px] h-[5px] rounded-full ${dot} shrink-0"></span>${label}</span>`;
+                },
+
+                getAuditIconClass(status) {
+                    if (status === 'Approved' || status === 'Finalized') return { bg: 'bg-emerald-50', text: 'text-emerald-600', icon: 'bi-check-lg text-emerald-600' };
+                    if (status === 'Rejected') return { bg: 'bg-red-50', text: 'text-red-600', icon: 'bi-x-lg text-red-600' };
+                    return { bg: 'bg-blue-50', text: 'text-blue-600', icon: 'bi-arrow-right text-blue-600' };
+                },
+
+                get progressData() {
+                    const s = (this.rec.Status || '').toLowerCase(); let idx = 2, isRejected = false;
+                    if (s === 'rejected') isRejected = true; if (s === 'finalized') idx = 3;
+                    return { fillPct: (idx / (this.processSteps.length - 1)) * 100, isRejected, rejectedIdx: isRejected ? idx : -1, currentIdx: idx };
+                },
+
+                getStepCircleClass(i) {
+                    const pd = this.progressData;
+                    if (pd.isRejected && i === pd.rejectedIdx) return 'bg-red-600 text-white border-red-600';
+                    return (i <= pd.currentIdx) ? 'bg-[#1B5CA8] text-white border-[#1B5CA8]' : 'bg-white text-gray-400 border-gray-300';
+                },
+
+                getStepIcon(step, i) {
+                    const pd = this.progressData;
+                    if (pd.isRejected && i === pd.rejectedIdx) return 'bi-x-lg text-[13px]';
+                    return (i < pd.currentIdx) ? 'bi-check-lg text-[13px]' : `${step.icon} text-[13px]`;
+                },
+
+                getStepLabelClass(i) {
+                    const pd = this.progressData;
+                    if (pd.isRejected && i === pd.rejectedIdx) return 'text-red-600 font-semibold';
+                    return (i <= pd.currentIdx) ? 'text-[#1B5CA8] font-semibold' : 'text-gray-400';
+                },
+
+                // ---- Action Modal ----
+                openModal(title, status, movedTo, btnBgClass, btnHoverClass) {
+                    this.modalTitle = title; this.pendingStatus = status; this.pendingStage = movedTo;
+                    this.modalBtnClass = btnBgClass; this.modalBtnHoverClass = btnHoverClass;
+                    this.modalComment = ''; this.showModal = true;
+                },
+                closeModal() { if (!this.isSubmitting) this.showModal = false; },
+                freezeVC() { this.openModal("Freeze Quote Comparison", "Freezed", "Quote Comparison", "bg-blue-600", "hover:bg-blue-700"); },
+                finalizeVC() { this.openModal("Approve & Finalize", "Finalized", "Purchase Order", "bg-emerald-600", "hover:bg-emerald-700"); },
+                rejectVC() { this.openModal("Reject", "Rejected", "Quote Comparison", "bg-red-600", "hover:bg-red-700"); },
+                requestReNegotiation() { this.openModal("Request Re Negotiation", "Requested For Re Negotiation", "Quote Comparison", "bg-amber-500", "hover:bg-amber-600"); },
+
+                async submitAction() {
+                    this.isSubmitting = true;
+                    try {
+                        const response = await ZOHO.CREATOR.DATA.updateRecordById({ report_name: "Quote_Comparison_Report", id: this.recordId, payload: { data: { "Status": this.pendingStatus } } });
+                        if (response.code !== 3000) throw new Error('Failed');
+                        this.closeModal(); this.fetchData();
+                    } catch (err) { Toast.fire({ icon: 'error', title: 'Action failed. Please try again.' }); }
+                    finally { this.isSubmitting = false; }
+                },
+
+                // ---- EDIT MODAL ----
                 openEditModal() {
+                    // Populate basic fields
                     this.editForm.Quote_Comparison_Subject = this.rec.Quote_Comparison_Subject || '';
                     this.editForm.Justification = this.rec.Justification || '';
                     this.editForm.Finalized_Vendor = this.rec.Finalized_Vendor || '';
                     this.editForm.Total_Landed_Rate = this.rec.Total_Landed_Rate || 0;
 
+                    // Populate Items
                     this.editForm.Items = (this.rec.Items || []).map(i => ({
                         rowId: i.ID,
                         uid: Date.now() + Math.random(),
@@ -998,142 +1242,329 @@
                         Deliver_to_Plant: i.Deliver_to_Plant || ''
                     }));
 
-                    this.editForm.Quotation_Comparison_Statement = (this.vendors || []).map(v => {
-                        let fetchedItemId = '';
-                        let fetchedItemName = '';
-                        if (v.Items && v.Items.length > 0) {
-                            fetchedItemName = v.Items[0].item_name || v.Items[0].display_value || '';
-                            fetchedItemId = v.Items[0].ID || '';
-                            if (!fetchedItemId && fetchedItemName) {
-                                const matchedBOM = (this.rec.Items || []).find(req => req.Item && (req.Item.item_name === fetchedItemName || req.Item.display_value === fetchedItemName));
-                                if (matchedBOM && matchedBOM.Item) fetchedItemId = matchedBOM.Item.ID;
-                            }
+                    // Populate Vendors from Quotation_Comparison_Statement
+                    const vendorMap = {};
+                    (this.rec.Quotation_Comparison_Statement || []).forEach(q => {
+                        const vName = q.Vendor_Name || '';
+                        if (!vName) return;
+                        if (!vendorMap[vName]) {
+                            vendorMap[vName] = {
+                                uid: Date.now() + Math.random(),
+                                Vendor_Name: vName,
+                                Vendor_Display: vName,
+                                finalized: false,
+                                QuoteLines: []
+                            };
                         }
-
-                        return {
-                            rowId: v.ID, uid: Date.now() + Math.random(), Vendor_Name: v.Vendor_Name || '', Vendor_Display: v.Vendor_Name || '',
-                            Items_Master: fetchedItemId, Item_Name: fetchedItemName, Basic_Rate: v.Basic_Rate || 0, Negotiated_Rate: v.Negotiated_Rate || 0,
-                            Disc: v.Disc || 0, Freight: v.Freight || v.Fright || 0, GST: v.GST || 0, Landed_Rate: v.Landed_Rate || 0,
-                            Payment_Terms: v.Payment_Terms || '', Rank: v.Rank || 'No'
-                        };
+                        // Get the first item from q.Items
+                        let itemId = '';
+                        let itemName = '';
+                        if (q.Items && q.Items.length > 0) {
+                            const firstItem = q.Items[0];
+                            itemId = firstItem.ID || '';
+                            itemName = firstItem.item_name || firstItem.display_value || '';
+                        }
+                        vendorMap[vName].QuoteLines.push({
+                            uid: Date.now() + Math.random(),
+                            Items_Master: itemId,
+                            Item_Name: itemName,
+                            Basic_Rate: q.Basic_Rate || 0,
+                            Negotiated_Rate: q.Negotiated_Rate || 0,
+                            Disc: q.Disc || 0,
+                            Freight: q.Freight || q.Fright || 0,
+                            GST: q.GST || 0,
+                            Landed_Rate: q.Landed_Rate || 0,
+                            Payment_Terms: q.Payment_Terms || '',
+                            Rank: q.Rank || 'No'
+                        });
                     });
 
+                    // Mark finalized vendor
+                    const finalizedVendor = this.rec.Finalized_Vendor;
+                    if (finalizedVendor && vendorMap[finalizedVendor]) {
+                        vendorMap[finalizedVendor].finalized = true;
+                        vendorMap[finalizedVendor].QuoteLines.forEach(l => l.Rank = 'Yes');
+                    }
+
+                    this.editForm.Vendors = Object.values(vendorMap);
                     this.isEditModalOpen = true;
                 },
 
                 closeEditModal() { if (!this.isUpdatingRecord) this.isEditModalOpen = false; },
-                addItemRow() { this.editForm.Items.push({ uid: Date.now() + Math.random(), Items: '', Item_Name: '', Unit: '', Quantity: '', Deliver_to_Plant: '' }); },
-                removeItemRow(index) {
-                    const removedItem = this.editForm.Items[index];
+
+                // ---- Edit: Items ----
+                addItemRowEdit() {
+                    this.editForm.Items.push({ uid: Date.now() + Math.random(), Items: '', Item_Name: '', Unit: '', Quantity: '', Deliver_to_Plant: '' });
+                },
+                removeItemRowEdit(index) {
+                    const removed = this.editForm.Items[index];
                     this.editForm.Items.splice(index, 1);
-                    if (removedItem && removedItem.Items) this.editForm.Quotation_Comparison_Statement = this.editForm.Quotation_Comparison_Statement.filter(v => v.Items_Master !== removedItem.Items);
-                    this.recalculateTotals();
-                },
-                addVendorRow() { this.editForm.Quotation_Comparison_Statement.push({ uid: Date.now() + Math.random(), Vendor_Name: '', Vendor_Display: '', Items_Master: '', Item_Name: '', Basic_Rate: '', Negotiated_Rate: 0, Disc: '', Freight: '', GST: '', Landed_Rate: '', Payment_Terms: '', Rank: 'No' }); },
-                removeVendorRow(index) { this.editForm.Quotation_Comparison_Statement.splice(index, 1); this.recalculateTotals(); },
-
-                syncRates(vendor, source) {
-                    let basic = parseFloat(vendor.Basic_Rate) || 0;
-                    if (source === 'basic' || source === 'disc') {
-                        let disc = parseFloat(vendor.Disc) || 0;
-                        vendor.Negotiated_Rate = parseFloat((basic - (basic * disc / 100)).toFixed(2));
-                    } else if (source === 'neg') {
-                        let neg = parseFloat(vendor.Negotiated_Rate) || 0;
-                        vendor.Disc = basic > 0 ? parseFloat((((basic - neg) / basic) * 100).toFixed(2)) : 0;
+                    // Remove orphaned vendor lines
+                    if (removed && removed.Items) {
+                        this.editForm.Vendors.forEach(v => {
+                            v.QuoteLines = v.QuoteLines.filter(l => l.Items_Master !== removed.Items);
+                        });
                     }
-                    let negRate = parseFloat(vendor.Negotiated_Rate) || parseFloat(vendor.Basic_Rate) || 0;
-                    let freight = parseFloat(vendor.Freight) || 0;
-                    let gst = parseFloat(vendor.GST) || 0;
+                    this.recalculateAllTotalsEdit();
+                },
+
+                // ---- Edit: Vendors ----
+                addVendorEdit() {
+                    this.editForm.Vendors.push({
+                        uid: Date.now() + Math.random(),
+                        Vendor_Name: '',
+                        Vendor_Display: '',
+                        finalized: false,
+                        QuoteLines: []
+                    });
+                },
+                removeVendorEdit(vIdx) {
+                    this.editForm.Vendors.splice(vIdx, 1);
+                    this.recalculateAllTotalsEdit();
+                },
+
+                addVendorLineEdit(vIdx) {
+                    const vendor = this.editForm.Vendors[vIdx];
+                    if (!vendor) return;
+                    let defaultItem = '';
+                    let defaultItemName = '';
+                    if (this.editForm.Items.length > 0) {
+                        const first = this.editForm.Items[0];
+                        defaultItem = first.Items || '';
+                        defaultItemName = first.Item_Name || '';
+                    }
+                    vendor.QuoteLines.push({
+                        uid: Date.now() + Math.random(),
+                        Items_Master: defaultItem,
+                        Item_Name: defaultItemName,
+                        Basic_Rate: '',
+                        Disc: '',
+                        Negotiated_Rate: 0,
+                        Freight: '',
+                        GST: '',
+                        Landed_Rate: '',
+                        Payment_Terms: '',
+                        Rank: 'No'
+                    });
+                    this.recalculateAllTotalsEdit();
+                },
+                removeVendorLineEdit(vIdx, lIdx) {
+                    const vendor = this.editForm.Vendors[vIdx];
+                    if (!vendor) return;
+                    vendor.QuoteLines.splice(lIdx, 1);
+                    if (vendor.QuoteLines.length === 0) vendor.finalized = false;
+                    this.recalculateAllTotalsEdit();
+                },
+
+                syncVendorLineRatesEdit(vIdx, lIdx, source) {
+                    const vendor = this.editForm.Vendors[vIdx];
+                    if (!vendor) return;
+                    const line = vendor.QuoteLines[lIdx];
+                    if (!line) return;
+                    let basic = parseFloat(line.Basic_Rate) || 0;
+                    if (source === 'basic' || source === 'disc') {
+                        let disc = parseFloat(line.Disc) || 0;
+                        line.Negotiated_Rate = parseFloat((basic - (basic * disc / 100)).toFixed(2));
+                    } else if (source === 'neg') {
+                        let neg = parseFloat(line.Negotiated_Rate) || 0;
+                        line.Disc = basic > 0 ? parseFloat((((basic - neg) / basic) * 100).toFixed(2)) : 0;
+                    }
+                    let negRate = parseFloat(line.Negotiated_Rate) || parseFloat(line.Basic_Rate) || 0;
+                    let freight = parseFloat(line.Freight) || 0;
+                    let gst = parseFloat(line.GST) || 0;
                     let subtotal = negRate + freight;
-                    vendor.Landed_Rate = parseFloat((subtotal + (subtotal * gst / 100)).toFixed(2));
-                    if (vendor.Rank === 'Yes') this.recalculateTotals();
+                    line.Landed_Rate = parseFloat((subtotal + (subtotal * gst / 100)).toFixed(2));
+                    if (line.Rank === 'Yes') this.recalculateAllTotalsEdit();
                 },
 
-                handleRankChange(vendor, index) {
-                    const chosenVendorId = vendor.Vendor_Name;
-                    if (vendor.Rank === 'Yes') { this.editForm.Quotation_Comparison_Statement.forEach(v => { v.Rank = (v.Vendor_Name === chosenVendorId) ? 'Yes' : 'No'; }); }
-                    else { this.editForm.Quotation_Comparison_Statement.forEach(v => { if (v.Vendor_Name === chosenVendorId) v.Rank = 'No'; }); }
-                    this.recalculateTotals();
-                },
-
-                recalculateTotals() {
-                    let finalizedRow = this.editForm.Quotation_Comparison_Statement.find(v => v.Rank === 'Yes');
-                    if (finalizedRow && finalizedRow.Vendor_Name) {
-                        let finalizedVendorId = finalizedRow.Vendor_Name;
-                        this.editForm.Finalized_Vendor = finalizedRow.Vendor_Display || finalizedVendorId;
-                        let total = 0;
-                        this.editForm.Quotation_Comparison_Statement.forEach(v => {
-                            if (v.Vendor_Name === finalizedVendorId && v.Rank === 'Yes') {
-                                let reqItem = this.editForm.Items.find(i => i.Items === v.Items_Master);
-                                let qty = reqItem ? (parseFloat(reqItem.Quantity) || 0) : 0;
-                                let unitLandedRate = parseFloat(v.Landed_Rate) || 0;
-                                total += (qty * unitLandedRate);
+                handleVendorLineRankEdit(vIdx, lIdx) {
+                    const vendor = this.editForm.Vendors[vIdx];
+                    if (!vendor) return;
+                    const line = vendor.QuoteLines[lIdx];
+                    if (!line) return;
+                    if (line.Rank === 'Yes') {
+                        // Clear all other vendors' finalized
+                        this.editForm.Vendors.forEach((v, i) => {
+                            if (i !== vIdx) {
+                                v.finalized = false;
+                                v.QuoteLines.forEach(l => l.Rank = 'No');
                             }
                         });
-                        this.editForm.Total_Landed_Rate = total > 0 ? parseFloat(total.toFixed(2)) : '';
-                    } else { this.editForm.Finalized_Vendor = ''; this.editForm.Total_Landed_Rate = ''; }
+                        vendor.finalized = true;
+                        vendor.QuoteLines.forEach(l => l.Rank = 'Yes');
+                        this.editForm.Finalized_Vendor = vendor.Vendor_Display || vendor.Vendor_Name || 'Selected Vendor';
+                    } else {
+                        const hasYes = vendor.QuoteLines.some(l => l.Rank === 'Yes');
+                        if (!hasYes) {
+                            vendor.finalized = false;
+                            const anyVendorFinalized = this.editForm.Vendors.some(v => v.finalized);
+                            if (!anyVendorFinalized) this.editForm.Finalized_Vendor = '';
+                        }
+                    }
+                    this.recalculateAllTotalsEdit();
                 },
 
-                initDynamicItem(el, targetObj, idKey, nameKey) {
+                finalizeVendorEdit(vIdx) {
+                    const vendor = this.editForm.Vendors[vIdx];
+                    if (!vendor) return;
+                    if (vendor.QuoteLines.length === 0) {
+                        Toast.fire({ icon: 'warning', title: 'Add at least one item quote for this vendor.' });
+                        return;
+                    }
+                    if (vendor.finalized) {
+                        vendor.finalized = false;
+                        vendor.QuoteLines.forEach(l => l.Rank = 'No');
+                        const anyFinalized = this.editForm.Vendors.some(v => v.finalized);
+                        if (!anyFinalized) this.editForm.Finalized_Vendor = '';
+                        this.recalculateAllTotalsEdit();
+                        return;
+                    }
+                    this.editForm.Vendors.forEach((v, i) => {
+                        if (i !== vIdx) {
+                            v.finalized = false;
+                            v.QuoteLines.forEach(l => l.Rank = 'No');
+                        }
+                    });
+                    vendor.finalized = true;
+                    vendor.QuoteLines.forEach(l => l.Rank = 'Yes');
+                    this.editForm.Finalized_Vendor = vendor.Vendor_Display || vendor.Vendor_Name || 'Selected Vendor';
+                    this.recalculateAllTotalsEdit();
+                    Toast.fire({ icon: 'success', title: `Vendor "${this.editForm.Finalized_Vendor}" finalized.` });
+                },
+
+                recalculateAllTotalsEdit() {
+                    let total = 0;
+                    let finalizedVendor = null;
+                    this.editForm.Vendors.forEach(v => {
+                        if (v.finalized) {
+                            finalizedVendor = v;
+                            v.QuoteLines.forEach(line => {
+                                if (line.Rank === 'Yes') {
+                                    const item = this.editForm.Items.find(i => i.Items === line.Items_Master);
+                                    const qty = item ? (parseFloat(item.Quantity) || 0) : 0;
+                                    const landed = parseFloat(line.Landed_Rate) || 0;
+                                    total += (qty * landed);
+                                }
+                            });
+                        }
+                    });
+                    if (finalizedVendor) {
+                        this.editForm.Finalized_Vendor = finalizedVendor.Vendor_Display || finalizedVendor.Vendor_Name || 'Selected Vendor';
+                        this.editForm.Total_Landed_Rate = total > 0 ? parseFloat(total.toFixed(2)) : '';
+                    } else {
+                        this.editForm.Finalized_Vendor = '';
+                        this.editForm.Total_Landed_Rate = '';
+                    }
+                },
+
+                // ---- TomSelect for Edit (reuse logic from listing) ----
+                initDynamicItemEdit(el, targetObj, idKey, nameKey) {
                     let ts = new TomSelect(el, {
-                        valueField: 'ID', labelField: 'item_name', searchField: ['item_name'], create: false, maxItems: 1, placeholder: 'Select Item...', loadThrottle: 350,
+                        valueField: 'ID', labelField: 'item_name', searchField: ['item_name'],
+                        create: false, maxItems: 1, placeholder: 'Select Item...', loadThrottle: 350,
                         onChange: (val) => {
-                            targetObj[idKey] = val; let opt = ts.options[val];
+                            targetObj[idKey] = val;
+                            let opt = ts.options[val];
                             if (opt) { targetObj[nameKey] = opt.item_name; if (opt.unit_of_measure && targetObj.Unit !== undefined) targetObj.Unit = opt.unit_of_measure; }
+                            if (targetObj.Items_Master !== undefined) this.recalculateAllTotalsEdit();
                         },
                         load: (query, callback) => {
-                            let q = query.replace(/'/g, "\\'"); ZOHO.CREATOR.DATA.getRecords({ report_name: 'Items_Report', criteria: `(item_name.contains("${q}"))` })
+                            let q = query.replace(/'/g, "\\'");
+                            ZOHO.CREATOR.DATA.getRecords({ report_name: 'Items_Report', criteria: `(item_name.contains("${q}"))` })
                                 .then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(() => callback());
                         },
                         render: { option: (data, escape) => `<div class="font-medium text-xs py-1 px-2">${escape(data.item_name)}</div>`, item: (data, escape) => `<div class="text-xs">${escape(data.item_name)}</div>` }
                     });
-                    if (targetObj[idKey] && targetObj[nameKey]) { ts.addOption({ ID: targetObj[idKey], item_name: targetObj[nameKey] }); ts.setValue(targetObj[idKey], true); }
+                    if (targetObj[idKey] && targetObj[nameKey]) {
+                        ts.addOption({ ID: targetObj[idKey], item_name: targetObj[nameKey] });
+                        ts.setValue(targetObj[idKey], true);
+                    }
                     return ts;
                 },
 
-                initDynamicVendor(el, targetObj) {
+                initDynamicVendorEdit(el, vendorObj) {
                     let ts = new TomSelect(el, {
-                        valueField: 'ID', labelField: 'Display_Name', searchField: ['Display_Name'], create: false, maxItems: 1, placeholder: 'Select Vendor...', loadThrottle: 350,
-                        onChange: (val) => { targetObj.Vendor_Name = val; let opt = ts.options[val]; if (opt) targetObj.Vendor_Display = opt.Display_Name; },
+                        valueField: 'ID', labelField: 'Display_Name', searchField: ['Display_Name'],
+                        create: false, maxItems: 1, placeholder: 'Select Vendor...', loadThrottle: 350,
+                        onChange: (val) => {
+                            vendorObj.Vendor_Name = val;
+                            let opt = ts.options[val];
+                            if (opt) {
+                                vendorObj.Vendor_Display = opt.Display_Name;
+                                if (vendorObj.finalized) this.editForm.Finalized_Vendor = vendorObj.Vendor_Display || vendorObj.Vendor_Name || 'Selected Vendor';
+                            }
+                            this.recalculateAllTotalsEdit();
+                        },
                         load: (query, callback) => {
-                            let q = query.replace(/'/g, "\\'"); ZOHO.CREATOR.DATA.getRecords({ report_name: 'Vendor_Report', criteria: `(Display_Name.contains("${q}"))` })
+                            let q = query.replace(/'/g, "\\'");
+                            ZOHO.CREATOR.DATA.getRecords({ report_name: 'Vendor_Report', criteria: `(Display_Name.contains("${q}"))` })
                                 .then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(() => callback());
                         },
                         render: { option: (data, escape) => `<div class="font-medium text-xs py-1 px-2">${escape(data.Display_Name)}</div>`, item: (data, escape) => `<div class="text-xs">${escape(data.Display_Name)}</div>` }
                     });
-                    if (targetObj.Vendor_Name && targetObj.Vendor_Display) { ts.addOption({ ID: targetObj.Vendor_Name, Display_Name: targetObj.Vendor_Display }); ts.setValue(targetObj.Vendor_Name, true); }
+                    if (vendorObj.Vendor_Name && vendorObj.Vendor_Display) {
+                        ts.addOption({ ID: vendorObj.Vendor_Name, Display_Name: vendorObj.Vendor_Display });
+                        ts.setValue(vendorObj.Vendor_Name, true);
+                    }
                     return ts;
                 },
 
+                // ---- SUBMIT EDIT ----
                 async submitEdit() {
                     if (this.editForm.Items.length === 0) { Toast.fire({ icon: 'error', title: 'Please add at least one item.' }); return; }
-                    if (this.editForm.Quotation_Comparison_Statement.length === 0) { Toast.fire({ icon: 'error', title: 'Please add at least one vendor quote line.' }); return; }
+                    if (this.editForm.Vendors.length === 0) { Toast.fire({ icon: 'error', title: 'Please add at least one vendor.' }); return; }
 
                     this.isUpdatingRecord = true;
                     try {
+                        // Flatten Vendors into Quotation_Comparison_Statement
+                        const qcsRows = [];
+                        this.editForm.Vendors.forEach(v => {
+                            v.QuoteLines.forEach(line => {
+                                qcsRows.push({
+                                    "Vendor_Name": v.Vendor_Display || v.Vendor_Name || '',
+                                    "Items": line.Items_Master ? [line.Items_Master] : [],
+                                    "Basic_Rate": parseFloat(line.Basic_Rate) || 0,
+                                    "Negotiated_Rate": parseFloat(line.Negotiated_Rate) || 0,
+                                    "Disc": parseFloat(line.Disc) || 0,
+                                    "Freight": parseFloat(line.Freight) || 0,
+                                    "GST": parseFloat(line.GST) || 0,
+                                    "Landed_Rate": parseFloat(line.Landed_Rate) || 0,
+                                    "Payment_Terms": line.Payment_Terms || '',
+                                    "Rank": line.Rank || 'No'
+                                });
+                            });
+                        });
+
                         const payload = {
                             data: {
-                                Quote_Comparison_Subject: this.editForm.Quote_Comparison_Subject, Finalized_Vendor: this.editForm.Finalized_Vendor, Total_Landed_Rate: parseFloat(this.editForm.Total_Landed_Rate) || 0,
+                                Quote_Comparison_Subject: this.editForm.Quote_Comparison_Subject,
+                                Finalized_Vendor: this.editForm.Finalized_Vendor,
+                                Total_Landed_Rate: parseFloat(this.editForm.Total_Landed_Rate) || 0,
                                 Justification: this.editForm.Justification,
                                 Items: this.editForm.Items.map(i => {
                                     let row = { "Item": i.Items, "Unit": i.Unit, "Quantity": parseFloat(i.Quantity) || 0, "Deliver_to_Plant": i.Deliver_to_Plant || "" };
-                                    if (i.rowId) row.ID = i.rowId; return row;
+                                    if (i.rowId) row.ID = i.rowId;
+                                    return row;
                                 }),
-                                Quotation_Comparison_Statement: this.editForm.Quotation_Comparison_Statement.map(v => {
-                                    let row = { "Vendor_Name": v.Vendor_Display || v.Vendor_Name, "Items": v.Items_Master ? [v.Items_Master] : [], "Basic_Rate": parseFloat(v.Basic_Rate) || 0, "Negotiated_Rate": parseFloat(v.Negotiated_Rate) || 0, "Disc": parseFloat(v.Disc) || 0, "Freight": parseFloat(v.Freight) || 0, "GST": parseFloat(v.GST) || 0, "Landed_Rate": parseFloat(v.Landed_Rate) || 0, "Payment_Terms": v.Payment_Terms || "", "Rank": v.Rank || "No" };
-                                    if (v.rowId) row.ID = v.rowId; return row;
-                                })
+                                Quotation_Comparison_Statement: qcsRows
                             }
                         };
                         let res = await ZOHO.CREATOR.DATA.updateRecordById({ report_name: 'Quote_Comparison_Report', id: this.recordId, payload });
-                        if (res.code === 3000) { Toast.fire({ icon: 'success', title: 'Comparison updated successfully!' }); this.closeEditModal(); this.fetchData(); }
-                        else { throw new Error(res.message || 'Update failed'); }
-                    } catch (err) { Toast.fire({ icon: 'error', title: err.message || 'Submission failed.' }); }
-                    finally { this.isUpdatingRecord = false; }
+                        if (res.code === 3000) {
+                            Toast.fire({ icon: 'success', title: 'Comparison updated successfully!' });
+                            this.closeEditModal();
+                            this.fetchData();
+                        } else {
+                            throw new Error(res.message || 'Update failed');
+                        }
+                    } catch (err) {
+                        Toast.fire({ icon: 'error', title: err.message || 'Submission failed.' });
+                    } finally {
+                        this.isUpdatingRecord = false;
+                    }
                 },
 
-                // --- PRINT LOGIC --- //
-
+                // ---- PRINT (unchanged) ----
                 printQCS() {
                     this.isExporting = true;
                     const matrix = this.comparativeMatrix;
@@ -1301,102 +1732,6 @@
                 },
 
                 escapeHtml(str) { if (!str) return ''; const d = document.createElement('div'); d.textContent = str; return d.innerHTML; },
-
-                // --- UI HELPERS --- //
-                get vcNumber() { return this.rec.QC_Number ? 'QC-' + this.rec.QC_Number : '–'; },
-                get canEdit() { const s = (this.rec.Status || '').toLowerCase(); return !['freezed', 'finalized'].includes(s); },
-                get isFreezed() { return (this.rec.Status || '').toLowerCase() === 'freezed'; },
-                get showActionButtons() { const s = (this.rec.Status || '').toLowerCase(); return !['finalized', 'rejected', 'cancelled'].includes(s); },
-                get modalBtnText() { return this.modalTitle ? this.modalTitle.split(' ')[0] : 'Submit'; },
-
-                get detailFields() {
-                    let finalPrice = this.rec.Total_Landed_Rate ? this.formatINR(this.rec.Total_Landed_Rate) : '–';
-                    return [
-                        { label: 'Comparison Subject', value: this.rec.Quote_Comparison_Subject },
-                        { label: 'Finalized Vendor', value: this.rec.Finalized_Vendor, isHtml: true, value: this.rec.Finalized_Vendor ? `<span class="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-bold">${this.rec.Finalized_Vendor}</span>` : '–' },
-                        { label: 'Grand Total Rate', value: finalPrice, bold: true },
-                        { label: 'Status', value: this.rec.Status, bold: true },
-                    ];
-                },
-
-                get sortedActions() { return [...this.actions].sort((a, b) => (a.Added_Time || "").localeCompare(b.Added_Time || "")); },
-
-                formatINR(amount, includeSymbol = true) {
-                    if (amount == null || isNaN(amount)) return includeSymbol ? '₹ 0' : '0';
-                    const val = parseFloat(amount).toLocaleString('en-IN', { maximumFractionDigits: 2 });
-                    return includeSymbol ? '₹ ' + val : val;
-                },
-
-                formatDate(dateStr, includeTime = false) {
-                    if (!dateStr) return '–';
-                    try {
-                        const d = new Date(dateStr);
-                        if (isNaN(d.getTime())) return dateStr;
-                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                        let res = String(d.getDate()).padStart(2, '0') + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + d.getFullYear();
-                        if (includeTime) res += ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                        return res;
-                    } catch (e) { return dateStr; }
-                },
-
-                getStatusBadge(status) {
-                    const s = (status || 'pending').toLowerCase();
-                    let border = 'border-amber-200', bg = 'bg-amber-50', text = 'text-amber-800', dot = 'bg-amber-500', label = status || 'Pending';
-                    if (s === 'approved' || s === 'finalized') { border = 'border-emerald-200'; bg = 'bg-emerald-50'; text = 'text-emerald-800'; dot = 'bg-emerald-600'; label = status; }
-                    if (s === 'rejected') { border = 'border-red-200'; bg = 'bg-red-50'; text = 'text-red-800'; dot = 'bg-red-600'; label = 'Rejected'; }
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border ${border} ${bg} ${text}"><span class="w-[5px] h-[5px] rounded-full ${dot} shrink-0"></span>${label}</span>`;
-                },
-
-                getAuditIconClass(status) {
-                    if (status === 'Approved' || status === 'Finalized') return { bg: 'bg-emerald-50', text: 'text-emerald-600', icon: 'bi-check-lg text-emerald-600' };
-                    if (status === 'Rejected') return { bg: 'bg-red-50', text: 'text-red-600', icon: 'bi-x-lg text-red-600' };
-                    return { bg: 'bg-blue-50', text: 'text-blue-600', icon: 'bi-arrow-right text-blue-600' };
-                },
-
-                get progressData() {
-                    const s = (this.rec.Status || '').toLowerCase(); let idx = 2, isRejected = false;
-                    if (s === 'rejected') isRejected = true; if (s === 'finalized') idx = 3;
-                    return { fillPct: (idx / (this.processSteps.length - 1)) * 100, isRejected, rejectedIdx: isRejected ? idx : -1, currentIdx: idx };
-                },
-
-                getStepCircleClass(i) {
-                    const pd = this.progressData;
-                    if (pd.isRejected && i === pd.rejectedIdx) return 'bg-red-600 text-white border-red-600';
-                    return (i <= pd.currentIdx) ? 'bg-[#1B5CA8] text-white border-[#1B5CA8]' : 'bg-white text-gray-400 border-gray-300';
-                },
-
-                getStepIcon(step, i) {
-                    const pd = this.progressData;
-                    if (pd.isRejected && i === pd.rejectedIdx) return 'bi-x-lg text-[13px]';
-                    return (i < pd.currentIdx) ? 'bi-check-lg text-[13px]' : `${step.icon} text-[13px]`;
-                },
-
-                getStepLabelClass(i) {
-                    const pd = this.progressData;
-                    if (pd.isRejected && i === pd.rejectedIdx) return 'text-red-600 font-semibold';
-                    return (i <= pd.currentIdx) ? 'text-[#1B5CA8] font-semibold' : 'text-gray-400';
-                },
-
-                openModal(title, status, movedTo, btnBgClass, btnHoverClass) {
-                    this.modalTitle = title; this.pendingStatus = status; this.pendingStage = movedTo;
-                    this.modalBtnClass = btnBgClass; this.modalBtnHoverClass = btnHoverClass;
-                    this.modalComment = ''; this.showModal = true;
-                },
-                closeModal() { if (!this.isSubmitting) this.showModal = false; },
-                freezeVC() { this.openModal("Freeze Quote Comparison", "Freezed", "Quote Comparison", "bg-blue-600", "hover:bg-blue-700"); },
-                finalizeVC() { this.openModal("Approve & Finalize", "Finalized", "Purchase Order", "bg-emerald-600", "hover:bg-emerald-700"); },
-                rejectVC() { this.openModal("Reject", "Rejected", "Quote Comparison", "bg-red-600", "hover:bg-red-700"); },
-                requestReNegotiation() { this.openModal("Request Re Negotiation", "Requested For Re Negotiation", "Quote Comparison", "bg-amber-500", "hover:bg-amber-600"); },
-
-                async submitAction() {
-                    this.isSubmitting = true;
-                    try {
-                        const response = await ZOHO.CREATOR.DATA.updateRecordById({ report_name: "Quote_Comparison_Report", id: this.recordId, payload: { data: { "Status": this.pendingStatus } } });
-                        if (response.code !== 3000) throw new Error('Failed');
-                        this.closeModal(); this.fetchData();
-                    } catch (err) { Toast.fire({ icon: 'error', title: 'Action failed. Please try again.' }); }
-                    finally { this.isSubmitting = false; }
-                }
             }));
         });
     </script>

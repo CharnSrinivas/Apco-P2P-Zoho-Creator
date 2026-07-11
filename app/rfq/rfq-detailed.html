@@ -9,13 +9,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
-    
-    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
-    <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js">
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js">
+    </script>
+
+    <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js">
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js">
+    </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,6 +44,15 @@
         .btn-spinner {
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-top-color: #ffffff;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            animation: spin 0.7s linear infinite;
+        }
+
+        .btn-spinner-blue {
+            border: 2px solid rgba(27, 92, 168, 0.2);
+            border-top-color: #1B5CA8;
             border-radius: 50%;
             width: 14px;
             height: 14px;
@@ -88,6 +101,7 @@
                 opacity: 0;
                 transform: translateY(12px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -103,6 +117,7 @@
                 opacity: 0;
                 transform: translateY(-12px) scale(0.96);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
@@ -114,6 +129,7 @@
                 opacity: 1;
                 transform: translateY(0) scale(1);
             }
+
             to {
                 opacity: 0;
                 transform: translateY(-12px) scale(0.96);
@@ -141,18 +157,20 @@
         .rfq-modal-overlay {
             position: fixed;
             inset: 0;
-            z-index: 80; /* Higher than existing modals */
+            z-index: 80;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 1rem;
         }
+
         .rfq-modal-bg {
             position: absolute;
             inset: 0;
             background: rgba(17, 24, 39, 0.4);
             backdrop-filter: blur(2px);
         }
+
         .rfq-modal-box {
             position: relative;
             z-index: 1;
@@ -162,6 +180,7 @@
             overflow: hidden;
             box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
         }
+
         .ts-control {
             border: 1px solid #e5e7eb !important;
             border-radius: 0.5rem !important;
@@ -172,11 +191,13 @@
             background-color: #f9fafb !important;
             transition: all 0.2s ease-in-out;
         }
+
         .ts-control.focus {
             border-color: #1B5CA8 !important;
             background-color: #ffffff !important;
             box-shadow: 0 0 0 3px rgba(27, 92, 168, 0.15) !important;
         }
+
         .ts-dropdown {
             border-radius: 0.5rem !important;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
@@ -185,15 +206,34 @@
             margin-top: 4px !important;
             font-size: 0.8125rem !important;
         }
+
         .ts-dropdown .option {
             border-radius: 0.375rem !important;
             padding: 0.5rem 0.75rem !important;
             transition: all 0.15s ease;
             cursor: pointer;
         }
+
         .ts-dropdown .active {
             background-color: #f3f4f6 !important;
             color: #111827 !important;
+        }
+
+        /* Vendor items list in table */
+        .vendor-items-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem 0.5rem;
+        }
+
+        .vendor-items-list .item-chip {
+            background: #f3f4f6;
+            padding: 0.1rem 0.5rem;
+            border-radius: 12px;
+            font-size: 11px;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -203,6 +243,7 @@
     <div id="app" x-data="rfqWidget()" x-init="initWidget()" x-cloak
         class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-5xl mx-auto">
 
+        <!-- Toast -->
         <div x-show="toast.show" x-cloak
             class="fixed top-5 right-5 z-[100] flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-[13px] font-medium max-w-sm"
             :class="{
@@ -217,6 +258,7 @@
             </button>
         </div>
 
+        <!-- Action Modal (Approve / Reject) -->
         <div x-show="showModal" style="display: none;"
             class="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm transition-opacity">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden fade-in mx-4 border border-gray-200 flex flex-col max-h-[90vh]"
@@ -253,40 +295,48 @@
             </div>
         </div>
 
+        <!-- Edit Modal -->
         <div x-show="isEditModalOpen" style="display: none;" class="rfq-modal-overlay">
             <div class="rfq-modal-bg" x-show="isEditModalOpen" x-transition.opacity @click="closeEditModal()"></div>
-            <div class="rfq-modal-box max-w-3xl fade-in" style="max-height: 90vh; overflow-y: auto;" x-show="isEditModalOpen">
+            <div class="rfq-modal-box max-w-5xl fade-in" style="max-height: 90vh; overflow-y: auto;"
+                x-show="isEditModalOpen">
                 <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
                     <h3 class="text-[15px] font-bold text-gray-800">Edit Request For Quotation</h3>
-                    <button @click="closeEditModal()" class="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer"><i
+                    <button @click="closeEditModal()"
+                        class="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer"><i
                             class="bi bi-x-lg text-lg"></i></button>
                 </div>
 
                 <form @submit.prevent="submitEditRFQ" class="p-5">
                     <div class="grid grid-cols-2 gap-4 mb-5">
                         <div>
-                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Department / Unit</label>
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Department
+                                / Unit</label>
                             <select id="rfqDept" class="w-full text-xs"></select>
                         </div>
                         <div>
-                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Request Date <span class="text-red-500">*</span></label>
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Request
+                                Date <span class="text-red-500">*</span></label>
                             <input type="date" x-model="rfqForm.reqDate" required
                                 class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Due Date <span class="text-red-500">*</span></label>
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Due Date
+                                <span class="text-red-500">*</span></label>
                             <input type="date" x-model="rfqForm.dueDate" required
                                 class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PR Ref <span class="text-gray-400 font-normal ml-0.5">(Optional)</span></label>
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PR Ref
+                                <span class="text-gray-400 font-normal ml-0.5">(Optional)</span></label>
                             <select id="rfqPrRef" class="w-full text-xs"></select>
                         </div>
                     </div>
 
                     <div class="mb-5 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
                         <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                            <span class="text-xs font-semibold text-gray-700 tracking-wide">Items <span class="text-red-500">*</span></span>
+                            <span class="text-xs font-semibold text-gray-700 tracking-wide">Items <span
+                                    class="text-red-500">*</span></span>
                             <button type="button" @click="addItemRow()"
                                 class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors cursor-pointer">+
                                 Add Item</button>
@@ -295,31 +345,47 @@
                             <table class="w-full border-collapse min-w-[700px]">
                                 <thead class="bg-white border-b border-gray-200">
                                     <tr>
-                                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[26%]">Item</th>
-                                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[26%]">Vendor(s)</th>
-                                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[10%]">Unit</th>
-                                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[10%]">Qty</th>
-                                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left">Comment</th>
-                                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-10"></th>
+                                        <th
+                                            class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[26%]">
+                                            Item</th>
+                                        <th
+                                            class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[26%]">
+                                            Vendor(s)</th>
+                                        <th
+                                            class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[10%]">
+                                            Unit</th>
+                                        <th
+                                            class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[10%]">
+                                            Qty</th>
+                                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left">
+                                            Comment</th>
+                                        <th
+                                            class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-10">
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <template x-for="(item, index) in rfqForm.items" :key="item.uid">
-                                        <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors bg-white">
+                                        <tr
+                                            class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors bg-white">
                                             <td class="px-3 py-2 relative">
-                                                <select x-init="initItemSelect($el, item)" class="w-full text-xs" required></select>
+                                                <select x-init="initItemSelect($el, item)" class="w-full text-xs"
+                                                    required></select>
                                             </td>
                                             <td class="px-3 py-2 relative">
-                                                <select x-init="initVendorRowSelect($el, item)" class="w-full text-xs" multiple></select>
+                                                <select x-init="initVendorRowSelect($el, item)" class="w-full text-xs"
+                                                    multiple></select>
                                             </td>
                                             <td class="px-3 py-2"><input type="text" x-model="item.unit" readonly
-                                                class="w-full py-1.5 px-2.5 bg-gray-100 border border-gray-200 rounded-md text-[13px] text-gray-500 cursor-not-allowed focus:outline-none"
-                                                placeholder="e.g. Kg, Pcs"></td>
-                                            <td class="px-3 py-2"><input type="number" x-model.number="item.quantity" required min="1"
-                                                class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
+                                                    class="w-full py-1.5 px-2.5 bg-gray-100 border border-gray-200 rounded-md text-[13px] text-gray-500 cursor-not-allowed focus:outline-none"
+                                                    placeholder="e.g. Kg, Pcs"></td>
+                                            <td class="px-3 py-2"><input type="number" x-model.number="item.quantity"
+                                                    required min="1"
+                                                    class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
                                             </td>
-                                            <td class="px-3 py-2"><input type="text" x-model="item.comment" placeholder="Optional"
-                                                class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
+                                            <td class="px-3 py-2"><input type="text" x-model="item.comment"
+                                                    placeholder="Optional"
+                                                    class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
                                             </td>
                                             <td class="px-3 py-2 text-center">
                                                 <button type="button" @click="removeItemRow(index)"
@@ -334,7 +400,8 @@
                     </div>
 
                     <div class="mb-5">
-                        <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Purpose</label>
+                        <label
+                            class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Purpose</label>
                         <textarea x-model="rfqForm.purpose" rows="2"
                             class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></textarea>
                     </div>
@@ -353,6 +420,7 @@
             </div>
         </div>
 
+        <!-- Loading / Error -->
         <div x-show="isLoading" class="flex flex-col items-center justify-center py-24 gap-3">
             <div class="pr-spinner"></div>
             <div class="text-sm text-gray-400 font-medium">Loading RFQ details…</div>
@@ -365,7 +433,10 @@
                 x-text="errorMessage || 'Please check the record ID and try again.'"></div>
         </div>
 
+        <!-- Main Content -->
         <div x-show="!isLoading && !hasError" class="fade-in">
+
+            <!-- ===== HEADER with Top-Right Buttons ===== -->
             <div class="mb-5">
                 <nav class="flex items-center gap-1.5 text-xs mb-2.5">
                     <button
@@ -376,18 +447,41 @@
                     <i class="bi bi-chevron-right text-[11px] text-gray-400"></i>
                     <span class="text-gray-500 font-medium" x-text="rfqNumber"></span>
                 </nav>
-                <div class="flex items-center justify-between">
+
+                <!-- Flex row: left (RFQ # + status) / right (Edit + Download) -->
+                <div class="flex items-center justify-between flex-wrap gap-3">
                     <div class="flex items-center gap-2.5">
                         <h1 class="text-[17px] font-bold text-gray-900 leading-none" x-text="rfqNumber"></h1>
                         <span x-html="getStatusBadge(rec.Status)"></span>
                     </div>
+
+                    <!-- Top-right buttons: Edit + Download Full PDF (styled like QC page) -->
+                    <div class="flex items-center gap-2 shrink-0">
+                        <!-- Edit -->
+                        <button x-show="canEdit" @click="openEditModal()"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </button>
+
+                        <!-- Download Full PDF -->
+                        <button @click="downloadCompletePDF()" :disabled="isExportingFull"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#EBF3FC] border border-[#1B5CA8]/30 text-[#1B5CA8] hover:bg-blue-100 rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer disabled:opacity-50">
+                            <template x-if="!isExportingFull"><i class="bi bi-download"></i></template>
+                            <template x-if="isExportingFull">
+                                <div class="btn-spinner-blue" style="width:13px;height:13px;"></div>
+                            </template>
+                            <span x-text="isExportingFull ? 'Preparing...' : 'Download'"></span>
+                        </button>
+                    </div>
                 </div>
+
                 <div class="text-xs text-gray-400 mt-1">
                     <span x-text="prRefDisplay !== 'N/A' ? `Ref: ${prRefDisplay} · ` : ''"></span>
                     Requested <span x-text="formatDate(rec.Request_Date)"></span>
                 </div>
             </div>
 
+            <!-- Progress Steps -->
             <div class="bg-white border border-gray-200 rounded-lg p-5 mb-4">
                 <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">PR Process Progress
                 </div>
@@ -411,9 +505,11 @@
                 </div>
             </div>
 
+            <!-- Main Grid -->
             <div class="grid grid-cols-5 gap-4">
                 <div class="col-span-3 space-y-4">
 
+                    <!-- RFQ Details -->
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
                         <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
                             <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
@@ -443,6 +539,7 @@
                         </div>
                     </div>
 
+                    <!-- Line Items -->
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
                         <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
                             <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
@@ -493,6 +590,8 @@
                         </table>
                     </div>
 
+                    <!-- ===== VENDOR QUOTATIONS RECEIVED ===== -->
+                    <!-- Grouped by Vendor: one row per vendor, all items listed inside -->
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
                         <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
                             <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
@@ -503,42 +602,82 @@
                                 Vendor Quotations Received
                             </div>
                         </div>
-                        <div x-show="vendorQuotesList.length === 0"
+
+                        <div x-show="vendorGroups.length === 0"
                             class="px-[18px] py-8 text-center text-gray-400 text-xs">
                             No vendors assigned to line items.
                         </div>
-                        <table x-show="vendorQuotesList.length > 0" class="w-full border-collapse text-xs">
+
+                        <table x-show="vendorGroups.length > 0" class="w-full border-collapse text-xs">
                             <thead>
                                 <tr class="bg-gray-50 border-b border-gray-200">
-                                    <th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">Line Item</th>
-                                    <th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">Vendor</th>
-                                    <th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">Actions</th>
+                                    <th
+                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left w-[30%]">
+                                        Vendor</th>
+                                    <th
+                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">
+                                        Items</th>
+                                    <th
+                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right w-[16%]">
+                                        Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <template x-for="(vq, i) in vendorQuotesList" :key="i">
+                                <template x-for="group in vendorGroups" :key="group.vendorId">
                                     <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                                        <td class="px-4 py-2.5 text-gray-900 font-medium" x-text="vq.itemName"></td>
-                                        <td class="px-4 py-2.5 text-gray-700">
-                                            <div x-text="vq.vendorName"></div>
-                                            <template x-if="vq.recordedQuote && vq.recordedQuote.Emails_Sent">
-                                                <div class="text-[10px] text-gray-400 mt-0.5"><i
-                                                        class="bi bi-envelope-check text-blue-500"></i> Sent <span
-                                                        x-text="vq.recordedQuote.Emails_Sent"></span>x</div>
+                                        <!-- Vendor -->
+                                        <td class="px-4 py-2.5 align-top">
+                                            <div class="font-semibold text-gray-800" x-text="group.vendorName"></div>
+                                            <!-- Optional: show email sent count if any -->
+                                            <template x-if="group.recordedQuotes.some(q => q.Emails_Sent)">
+                                                <div class="text-[10px] text-gray-400 mt-0.5">
+                                                    <i class="bi bi-envelope-check text-blue-500"></i>
+                                                    Sent <span
+                                                        x-text="group.recordedQuotes.reduce((sum, q) => sum + (q.Emails_Sent || 0), 0)"></span>x
+                                                    total
+                                                </div>
                                             </template>
                                         </td>
-                                        <td class="px-4 py-2.5 text-right space-x-1.5 whitespace-nowrap">
-                                            <button @click="downloadVendorPDF(vq.vendor)" title="Download PDF for this Vendor"
+                                        <!-- Items -->
+                                        <td class="px-4 py-2.5 align-top">
+                                            <div class="vendor-items-list">
+                                                <template x-for="it in group.items" :key="it.itemId">
+                                                    <span class="item-chip">
+                                                        <span x-text="it.itemName"></span>
+                                                        <span class="text-gray-400">(</span><span
+                                                            x-text="it.quantity"></span><span
+                                                            x-text="it.unit ? ' ' + it.unit : ''"></span><span
+                                                            class="text-gray-400">)</span>
+                                                    </span>
+                                                </template>
+                                            </div>
+                                            <template x-if="group.items.some(it => it.comment)">
+                                                <div class="text-[10px] text-gray-400 mt-1 space-y-0.5">
+                                                    <template x-for="it in group.items.filter(it => it.comment)"
+                                                        :key="it.itemId">
+                                                        <div><span class="font-medium" x-text="it.itemName"></span>:
+                                                            <span x-text="it.comment"></span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </td>
+                                        <!-- Actions -->
+                                        <td class="px-4 py-2.5 text-right space-x-1.5 whitespace-nowrap align-top">
+                                            <!-- Download PDF for this vendor (all items) -->
+                                            <button @click="downloadVendorGroupPDF(group)"
+                                                title="Download PDF for this Vendor"
                                                 class="inline-flex items-center justify-center w-7 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors cursor-pointer">
                                                 <i class="bi bi-file-earmark-pdf"></i>
                                             </button>
-                                            <button @click="sendEmail(vq)" title="Send Email"
-                                                :disabled="sendingEmailVendorId === vq.vendorId"
+                                            <!-- Send Email -->
+                                            <button @click="sendEmailToVendor(group)" title="Send Email"
+                                                :disabled="sendingEmailVendorId === group.vendorId"
                                                 class="inline-flex items-center justify-center w-7 h-7 rounded bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer">
-                                                <template x-if="sendingEmailVendorId === vq.vendorId">
+                                                <template x-if="sendingEmailVendorId === group.vendorId">
                                                     <div class="email-btn-spinner"></div>
                                                 </template>
-                                                <template x-if="sendingEmailVendorId !== vq.vendorId">
+                                                <template x-if="sendingEmailVendorId !== group.vendorId">
                                                     <i class="bi bi-envelope"></i>
                                                 </template>
                                             </button>
@@ -549,8 +688,10 @@
                         </table>
                     </div>
 
+                    <!-- Action Buttons (Approve / Reject / Cancel) -->
                     <div class="flex items-center gap-1.5">
-                        <div class="flex items-center gap-2.5 fade-in" id="actionButtons" x-show="showActionButtons" x-cloak>
+                        <div class="flex items-center gap-2.5 fade-in" id="actionButtons" x-show="showActionButtons"
+                            x-cloak>
                             <button @click="approveRFQ()"
                                 class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors no-underline cursor-pointer shadow-sm">
                                 <i class="bi bi-check-lg"></i> <span class="btn-text">Submit For QC</span>
@@ -560,24 +701,16 @@
                                 <i class="bi bi-x-lg"></i> Reject
                             </button>
                         </div>
-                        
-                        <button x-show="(rec.Status || '').toLowerCase() === 'submitted' || (rec.Status || '').toLowerCase() === 'draft'" 
-                            @click="openEditModal()"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-[#1B5CA8] border border-[#1B5CA8] hover:bg-[#EBF3FC] transition-colors cursor-pointer shadow-sm">
-                            <i class="bi bi-pencil"></i> Edit
-                        </button>
 
-                        <button @click="downloadCompletePDF()"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#1B5CA8] text-white hover:bg-[#14457e] transition-colors cursor-pointer shadow-sm">
-                            <i class="bi bi-download"></i> Download Full PDF
-                        </button>
-                        <button @click="cancelRFQ()"
+                        <!-- Cancel (always visible if not already cancelled) -->
+                        <button x-show="(rec.Status || '').toLowerCase() !== 'cancelled'" @click="cancelRFQ()"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors no-underline cursor-pointer shadow-sm">
                             <i class="bi bi-slash-circle"></i> Cancel
                         </button>
                     </div>
                 </div>
 
+                <!-- Audit Trail (col-span-2) -->
                 <div class="col-span-2">
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
                         <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
@@ -650,23 +783,23 @@
                 items: [],
                 actions: [],
 
-                // Edit Modal Form State
+                // Edit Modal
                 isEditModalOpen: false,
                 isSubmittingEdit: false,
                 rfqForm: { dept: '', reqDate: '', dueDate: '', prRef: '', purpose: '', items: [] },
-                
-                // Master Data for Edit Dropdowns
+
+                // Masters
                 unitMasters: [],
                 itemMasters: [],
                 vendorMasters: [],
                 tsInstances: { dept: null, pr: null, items: [], vendorItems: [] },
-                
+
                 ITEMS_REPORT_NAME: 'Items_Report',
                 UNIT_REPORT_NAME: 'Unit_Report',
                 PR_REPORT_NAME: 'Purchase_Requisition_Report',
                 VENDOR_REPORT_NAME: 'Vendor_Report',
 
-                // Approval Modal State
+                // Approval Modal
                 showModal: false,
                 modalTitle: '',
                 modalComment: '',
@@ -676,10 +809,13 @@
                 modalBtnHoverClass: '',
                 isSubmitting: false,
 
-                // Email Sending State
+                // Email state
                 sendingEmailVendorId: null,
 
-                // Toast State
+                // Export state for top-right Download button
+                isExportingFull: false,
+
+                // Toast
                 toast: { show: false, message: '', type: 'success' },
                 toastTimer: null,
 
@@ -693,6 +829,7 @@
                     { key: 'payment', label: 'Payment', icon: 'bi-cash' }
                 ],
 
+                // ===== INIT =====
                 initWidget() {
                     ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
                         this.recordId = params?.recordId || null;
@@ -703,8 +840,6 @@
                             return;
                         }
                         this.fetchData();
-                        
-                        // Prefetch Masters for Edit Form instantly
                         this.fetchItemMasters();
                         this.fetchUnitMasters();
                         this.fetchVendorMasters();
@@ -733,17 +868,23 @@
                     });
                 },
 
-                // ---- MASTERS FETCHING (For Edit UI) ----
+                // ===== MASTERS =====
                 async fetchItemMasters() {
                     try {
-                        let res = await ZOHO.CREATOR.DATA.getRecords({ report_name: this.ITEMS_REPORT_NAME, criteria: 'status == "Active"', max_records: 200 });
+                        let res = await ZOHO.CREATOR.DATA.getRecords({
+                            report_name: this.ITEMS_REPORT_NAME,
+                            criteria: 'status == "Active"', max_records: 200
+                        });
                         if (res.code === 3000) this.itemMasters = res.data;
                     } catch (err) { console.error('Failed to load items', err); }
                 },
 
                 async fetchUnitMasters() {
                     try {
-                        let res = await ZOHO.CREATOR.DATA.getRecords({ report_name: this.UNIT_REPORT_NAME, max_records: 200 });
+                        let res = await ZOHO.CREATOR.DATA.getRecords({
+                            report_name: this.UNIT_REPORT_NAME,
+                            max_records: 200
+                        });
                         if (res.code === 3000) this.unitMasters = res.data;
                     } catch (err) { console.error('Failed to load units', err); }
                 },
@@ -767,9 +908,8 @@
                     } catch (err) { console.error('Failed to load vendors', err); }
                 },
 
-                // ---- EDIT MODAL LOGIC ----
+                // ===== EDIT MODAL =====
                 openEditModal() {
-                    // Reset Instances
                     if (this.tsInstances.dept) this.tsInstances.dept.destroy();
                     if (this.tsInstances.pr) this.tsInstances.pr.destroy();
                     this.tsInstances.items.forEach(ts => ts && ts.destroy());
@@ -777,7 +917,6 @@
                     this.tsInstances.vendorItems.forEach(ts => ts && ts.destroy());
                     this.tsInstances.vendorItems = [];
 
-                    // Map existing data to form
                     this.rfqForm = {
                         dept: this.rec.Department_Unit?.ID || this.rec.Department_Unit || '',
                         reqDate: this.rec.Request_Date ? dayjs(this.rec.Request_Date).format('YYYY-MM-DD') : '',
@@ -787,7 +926,6 @@
                         items: []
                     };
 
-                    // Map Items Subform and preserve their IDs so ZOHO updates them cleanly instead of appending
                     if (this.items.length > 0) {
                         this.items.forEach(itemRow => {
                             let vIds = [];
@@ -802,7 +940,7 @@
                             }
                             this.rfqForm.items.push({
                                 uid: Date.now() + Math.random(),
-                                recId: itemRow.ID, 
+                                recId: itemRow.ID,
                                 id: itemRow.Item?.ID || itemRow.Item,
                                 tempName: itemRow.Item?.display_value || itemRow.Item?.item_name || '',
                                 vendorIds: vIds,
@@ -813,15 +951,13 @@
                             });
                         });
                     } else {
-                        this.addItemRow(); // fallback if empty
+                        this.addItemRow();
                     }
 
                     this.isEditModalOpen = true;
-
                     this.$nextTick(() => {
                         this.initDeptSelect();
                         this.initPrSelect();
-                        // Items & Vendors initialize automatically via x-init directives
                     });
                 },
 
@@ -836,7 +972,10 @@
                 },
 
                 addItemRow() {
-                    this.rfqForm.items.push({ uid: Date.now() + Math.random(), recId: null, id: '', vendorIds: [], unit: '', quantity: 1, comment: '' });
+                    this.rfqForm.items.push({
+                        uid: Date.now() + Math.random(), recId: null, id: '', vendorIds: [],
+                        unit: '', quantity: 1, comment: ''
+                    });
                 },
 
                 removeItemRow(index) {
@@ -853,14 +992,24 @@
 
                 initDeptSelect() {
                     this.tsInstances.dept = new TomSelect(document.getElementById('rfqDept'), {
-                        valueField: 'ID', labelField: 'Name', searchField: 'Name',
-                        options: this.unitMasters, maxItems: 1, placeholder: 'Select Department...',
+                        valueField: 'ID',
+                        labelField: 'Name',
+                        searchField: 'Name',
+                        options: this.unitMasters,
+                        maxItems: 1,
+                        placeholder: 'Select Department...',
                         onChange: (val) => { this.rfqForm.dept = val; },
-                        render: { option: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`, item: (d, e) => `<div class="font-medium">${e(d.Name)}</div>` }
+                        render: {
+                            option: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`,
+                            item: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`
+                        }
                     });
-                    if(this.rfqForm.dept) {
+                    if (this.rfqForm.dept) {
                         if (!this.tsInstances.dept.options[this.rfqForm.dept] && this.rec.Department_Unit) {
-                            this.tsInstances.dept.addOption({ ID: String(this.rfqForm.dept), Name: this.rec.Department_Unit.display_value || 'Dept' });
+                            this.tsInstances.dept.addOption({
+                                ID: String(this.rfqForm.dept),
+                                Name: this.rec.Department_Unit.display_value || 'Dept'
+                            });
                         }
                         this.tsInstances.dept.setValue(this.rfqForm.dept);
                     }
@@ -868,8 +1017,12 @@
 
                 initPrSelect() {
                     this.tsInstances.pr = new TomSelect(document.getElementById('rfqPrRef'), {
-                        valueField: 'ID', labelField: 'PR_Number', searchField: ['PR_Number', 'Requisition_Number'],
-                        maxItems: 1, placeholder: 'Search PR...', loadThrottle: 350,
+                        valueField: 'ID',
+                        labelField: 'PR_Number',
+                        searchField: ['PR_Number', 'Requisition_Number'],
+                        maxItems: 1,
+                        placeholder: 'Search PR...',
+                        loadThrottle: 350,
                         onChange: (val) => { this.rfqForm.prRef = val; },
                         load: (query, callback) => {
                             if (!query.length) return callback();
@@ -877,9 +1030,15 @@
                             ZOHO.CREATOR.DATA.getRecords({
                                 report_name: this.PR_REPORT_NAME,
                                 criteria: `(PR_Number.contains("${q}") || Requisition_Number.contains("${q}"))`
-                            }).then(res => callback(res.code === 3000 ? res.data : [])).catch(() => callback());
+                            }).then(res => callback(res.code === 3000 ? res.data : [])).catch(() =>
+                                callback());
                         },
-                        render: { option: (d, e) => `<div class="font-mono">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>`, item: (d, e) => `<div class="font-mono">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>` }
+                        render: {
+                            option: (d, e) =>
+                                `<div class="font-mono">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>`,
+                            item: (d, e) =>
+                                `<div class="font-mono">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>`
+                        }
                     });
                     if (this.rfqForm.prRef) {
                         let prDisp = this.rec.PR_Refs[0].PR_Number || this.rec.PR_Refs[0].display_value || 'PR';
@@ -890,20 +1049,30 @@
 
                 initItemSelect(el, itemRef) {
                     let ts = new TomSelect(el, {
-                        valueField: 'ID', labelField: 'item_name', searchField: 'item_name',
-                        options: this.itemMasters, maxItems: 1, placeholder: 'Search item...',
-                        onChange: (val) => { 
+                        valueField: 'ID',
+                        labelField: 'item_name',
+                        searchField: 'item_name',
+                        options: this.itemMasters,
+                        maxItems: 1,
+                        placeholder: 'Search item...',
+                        onChange: (val) => {
                             itemRef.id = val;
                             if (val) {
                                 let masterItem = this.itemMasters.find(m => m.ID === val);
-                                if (masterItem && masterItem.unit_of_measure) itemRef.unit = masterItem.unit_of_measure;
+                                if (masterItem && masterItem.unit_of_measure) itemRef.unit = masterItem
+                                    .unit_of_measure;
                             }
                         },
-                        render: { option: (d, e) => `<div class="font-medium">${e(d.item_name)}</div>`, item: (d, e) => `<div class="font-medium">${e(d.item_name)}</div>` }
+                        render: {
+                            option: (d, e) => `<div class="font-medium">${e(d.item_name)}</div>`,
+                            item: (d, e) => `<div class="font-medium">${e(d.item_name)}</div>`
+                        }
                     });
-
                     if (itemRef.id) {
-                        if (!ts.options[itemRef.id]) ts.addOption({ ID: String(itemRef.id), item_name: itemRef.tempName || 'Item #' + itemRef.id });
+                        if (!ts.options[itemRef.id]) ts.addOption({
+                            ID: String(itemRef.id),
+                            item_name: itemRef.tempName || 'Item #' + itemRef.id
+                        });
                         ts.setValue(itemRef.id);
                     }
                     this.tsInstances.items.push(ts);
@@ -911,11 +1080,23 @@
 
                 initVendorRowSelect(el, itemRef) {
                     let ts = new TomSelect(el, {
-                        valueField: 'ID', labelField: 'Display_Name', searchField: ['Display_Name', 'Company_Name'],
-                        options: this.vendorMasters, maxItems: null, plugins: ['remove_button'],
+                        valueField: 'ID',
+                        labelField: 'Display_Name',
+                        searchField: ['Display_Name', 'Company_Name'],
+                        options: this.vendorMasters,
+                        maxItems: null,
+                        plugins: ['remove_button'],
                         placeholder: 'Search & select vendor(s)...',
-                        onChange: (val) => { itemRef.vendorIds = Array.isArray(val) ? val : (val ? [val] : []); },
-                        render: { option: (d, e) => `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>`, item: (d, e) => `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>` },
+                        onChange: (val) => {
+                            itemRef.vendorIds = Array.isArray(val) ? val : (val ? [val] :
+                                []);
+                        },
+                        render: {
+                            option: (d, e) =>
+                                `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>`,
+                            item: (d, e) =>
+                                `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>`
+                        },
                         load: (query, callback) => {
                             if (!query.length) return callback();
                             var q = query.replace(/'/g, "\\'");
@@ -924,7 +1105,10 @@
                                 criteria: `(Display_Name.contains("${q}") || Company_Name.contains("${q}"))`
                             }).then(res => {
                                 const data = res.code === 3000 ? res.data : [];
-                                data.forEach(v => { if (!this.vendorMasters.some(existing => existing.ID === v.ID)) this.vendorMasters.push(v); });
+                                data.forEach(v => {
+                                    if (!this.vendorMasters.some(existing => existing.ID === v
+                                        .ID)) this.vendorMasters.push(v);
+                                });
                                 callback(data);
                             }).catch(() => callback());
                         }
@@ -932,7 +1116,8 @@
                     if (itemRef.vendorIds && itemRef.vendorIds.length) {
                         itemRef.vendorIds.forEach((vId, i) => {
                             if (!ts.options[vId]) {
-                                const fallbackName = (itemRef.tempVendorNames && itemRef.tempVendorNames[i]) || ('Vendor #' + vId);
+                                const fallbackName = (itemRef.tempVendorNames && itemRef.tempVendorNames[
+                                    i]) || ('Vendor #' + vId);
                                 ts.addOption({ ID: String(vId), Display_Name: fallbackName });
                             }
                         });
@@ -962,9 +1147,13 @@
                                 PR_Refs: this.rfqForm.prRef ? [this.rfqForm.prRef] : [],
                                 Items: this.rfqForm.items.map(i => {
                                     let obj = {
-                                        Item: i.id, Vendor: [...i.vendorIds], Unit: i.unit, Quantity: i.quantity, Comment: i.comment
+                                        Item: i.id,
+                                        Vendor: [...i.vendorIds],
+                                        Unit: i.unit,
+                                        Quantity: i.quantity,
+                                        Comment: i.comment
                                     };
-                                    if(i.recId) obj.ID = i.recId; // Preserve existing row IDs during update
+                                    if (i.recId) obj.ID = i.recId;
                                     return obj;
                                 })
                             }
@@ -979,7 +1168,7 @@
                         if (res.code === 3000) {
                             this.showToast('RFQ updated successfully!', 'success');
                             this.closeEditModal();
-                            this.fetchData(); // Refresh UI
+                            this.fetchData();
                         } else {
                             throw new Error(res.message || "Failed to update record.");
                         }
@@ -991,39 +1180,10 @@
                     }
                 },
 
-                // --- Shared View Logic ---
-                get vendorQuotesList() {
-                    let list = [];
-                    let recordedQuotes = this.rec.Quotations || [];
-
-                    this.items.forEach(itemRow => {
-                        let vendors = itemRow.vendors || itemRow.Vendor;
-                        if (!vendors) return;
-                        if (!Array.isArray(vendors)) vendors = [vendors];
-                        let itemId = itemRow.Item?.ID || itemRow.Item;
-
-                        vendors.forEach(v => {
-                            let vId = v.ID || v;
-                            let recordedQuote = recordedQuotes.find(q => {
-                                let qVid = q.Vendor?.ID || q.Vendor;
-                                let qIid = q.item_master?.ID || q.item_master;
-                                if (!qIid) return qVid == vId;
-                                return qVid == vId && qIid == itemId;
-                            });
-
-                            list.push({
-                                itemRow: itemRow,
-                                itemName: this.getItemName(itemRow),
-                                itemId: itemId,
-                                vendor: v,
-                                vendorId: vId,
-                                vendorName: v.display_value || v.Display_Name || v.Company_Name || 'Unknown Vendor',
-                                qty: itemRow.Quantity || 0,
-                                recordedQuote: recordedQuote
-                            });
-                        });
-                    });
-                    return list;
+                // ===== COMPUTED =====
+                get canEdit() {
+                    const s = (this.rec.Status || '').toLowerCase();
+                    return s === 'submitted' || s === 'draft';
                 },
 
                 get rfqNumber() {
@@ -1049,6 +1209,252 @@
                     ];
                 },
 
+                // ===== VENDOR GROUPS =====
+                get vendorGroups() {
+                    const groups = new Map();
+                    const recordedQuotes = this.rec.Quotations || [];
+
+                    this.items.forEach(itemRow => {
+                        let vendors = itemRow.vendors || itemRow.Vendor;
+                        if (!vendors) return;
+                        if (!Array.isArray(vendors)) vendors = [vendors];
+                        let itemId = itemRow.Item?.ID || itemRow.Item;
+                        let itemName = this.getItemName(itemRow);
+                        let quantity = itemRow.Quantity || 0;
+                        let unit = itemRow.Unit || '';
+                        let comment = itemRow.Comment || '';
+
+                        vendors.forEach(v => {
+                            let vId = v.ID || v;
+                            if (!groups.has(vId)) {
+                                groups.set(vId, {
+                                    vendor: v,
+                                    vendorId: vId,
+                                    vendorName: v.display_value || v.Display_Name || v
+                                        .Company_Name || 'Unknown Vendor',
+                                    items: [],
+                                    recordedQuotes: []
+                                });
+                            }
+                            let group = groups.get(vId);
+                            // Avoid duplicate items for same vendor (if same item appears twice, we still want to show both? but they are separate rows in items)
+                            // Since items are unique per row, we push each.
+                            group.items.push({
+                                itemRow: itemRow,
+                                itemId: itemId,
+                                itemName: itemName,
+                                quantity: quantity,
+                                unit: unit,
+                                comment: comment
+                            });
+                            // Find recorded quote for this item-vendor pair
+                            let recordedQuote = recordedQuotes.find(q => {
+                                let qVid = q.Vendor?.ID || q.Vendor;
+                                let qIid = q.item_master?.ID || q.item_master;
+                                if (!qIid) return qVid == vId;
+                                return qVid == vId && qIid == itemId;
+                            });
+                            if (recordedQuote) {
+                                group.recordedQuotes.push(recordedQuote);
+                            }
+                        });
+                    });
+                    return Array.from(groups.values());
+                },
+
+                get showActionButtons() {
+                    if (!this.rec.PR_Refs || this.rec.PR_Refs.length === 0) return false;
+                    const status = (this.rec.Status || '').toLowerCase();
+                    return status !== 'approved' && status !== 'rejected' && status !== 'cancelled';
+                },
+
+                get sortedActions() {
+                    return [...this.actions].sort((a, b) => {
+                        let tA = a.Added_Time || "";
+                        let tB = b.Added_Time || "";
+                        return tA.localeCompare(tB);
+                    });
+                },
+
+                get modalBtnText() { return this.modalTitle ? this.modalTitle.split(' ')[0] : 'Submit'; },
+
+                // ===== STATUS BADGE =====
+                getStatusBadge(status) {
+                    const s = (status || 'submitted').toLowerCase();
+                    let border = 'border-amber-200',
+                        bg = 'bg-amber-50',
+                        text = 'text-amber-800',
+                        dot = 'bg-amber-500',
+                        label = status || 'Submitted';
+                    if (s === 'approved') {
+                        border = 'border-emerald-200';
+                        bg = 'bg-emerald-50';
+                        text = 'text-emerald-800';
+                        dot = 'bg-emerald-600';
+                        label = 'Approved';
+                    }
+                    if (s === 'rejected') {
+                        border = 'border-red-200';
+                        bg = 'bg-red-50';
+                        text = 'text-red-800';
+                        dot = 'bg-red-600';
+                        label = 'Rejected';
+                    }
+                    if (s === 'cancelled') {
+                        border = 'border-gray-300';
+                        bg = 'bg-gray-100';
+                        text = 'text-gray-700';
+                        dot = 'bg-gray-500';
+                        label = 'Cancelled';
+                    }
+                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border ${border} ${bg} ${text}"><span class="w-[5px] h-[5px] rounded-full ${dot} shrink-0"></span>${label}</span>`;
+                },
+
+                // ===== PROGRESS =====
+                get progressData() {
+                    let completed = {},
+                        rejectedStepKey = null,
+                        currentStageKey = 'request_for_quotation';
+                    this.actions.forEach(a => {
+                        let key = this.stageToStepKey(a.Moved_To);
+                        if (key) {
+                            if (a.Status && a.Status.toLowerCase() === 'rejected') rejectedStepKey = key;
+                            else completed[key] = true;
+                        }
+                    });
+                    completed['purchase_requisition'] = true;
+                    completed['request_for_quotation'] = true;
+                    let rejectedIdx = this.processSteps.findIndex(s => s.key === rejectedStepKey);
+                    let currentIdx = this.processSteps.findIndex(s => s.key === currentStageKey);
+                    this.processSteps.forEach((s, i) => { if (completed[s.key] && i > currentIdx) currentIdx = i; });
+                    let fillIdx = rejectedIdx !== -1 ? rejectedIdx : currentIdx;
+                    return {
+                        fillPct: (fillIdx / (this.processSteps.length - 1)) * 100, isRejected: rejectedIdx !== -1,
+                        rejectedIdx, currentIdx
+                    };
+                },
+
+                getStepCircleClass(i) {
+                    const { isRejected, rejectedIdx, currentIdx } = this.progressData;
+                    if (i === rejectedIdx) return 'bg-red-600 text-white border-red-600 shadow-md shadow-red-200';
+                    if (isRejected ? (i < rejectedIdx) : (i <= currentIdx)) return (i === currentIdx && !isRejected) ?
+                        'bg-[#1B5CA8] text-white border-[#1B5CA8] shadow-md shadow-blue-200' :
+                        'bg-emerald-600 text-white border-emerald-600';
+                    return 'bg-white text-gray-400 border-gray-300';
+                },
+
+                getStepIcon(step, i) {
+                    const { isRejected, rejectedIdx, currentIdx } = this.progressData;
+                    if (i === rejectedIdx) return 'bi-x-lg text-[13px]';
+                    if ((isRejected ? (i < rejectedIdx) : (i <= currentIdx)) && !(i === currentIdx && !isRejected))
+                        return 'bi-check-lg text-[13px]';
+                    return `${step.icon} text-[13px]`;
+                },
+
+                getStepLabelClass(i) {
+                    const { isRejected, rejectedIdx, currentIdx } = this.progressData;
+                    if (i === rejectedIdx) return 'text-red-700 font-semibold';
+                    if (i === currentIdx && !isRejected) return 'text-[#1B5CA8] font-semibold';
+                    if ((isRejected && i < rejectedIdx) || (!isRejected && i < currentIdx)) return 'text-gray-700 font-medium';
+                    return 'text-gray-400';
+                },
+
+                stageToStepKey(stage) {
+                    if (!stage) return null;
+                    const s = stage.toLowerCase().trim();
+                    if (s === 'purchase requisition') return 'purchase_requisition';
+                    if (s === 'request for quotation') return 'request_for_quotation';
+                    if (s === 'quote comparison') return 'quote_comparison';
+                    if (s === 'purchase order') return 'purchase_order';
+                    if (s === 'grn') return 'grn';
+                    if (s === 'bill') return 'bill';
+                    if (s === 'payment') return 'payment';
+                    return null;
+                },
+
+                // ===== AUDIT TRAIL =====
+                getAuditIconClass(status) {
+                    if (status === 'Approved') return {
+                        bg: 'bg-emerald-50', text: 'text-emerald-600',
+                        icon: 'bi-check-lg text-emerald-600'
+                    };
+                    if (status === 'Rejected') return {
+                        bg: 'bg-red-50', text: 'text-red-600',
+                        icon: 'bi-x-lg text-red-600'
+                    };
+                    return { bg: 'bg-blue-50', text: 'text-blue-600', icon: 'bi-arrow-right text-blue-600' };
+                },
+
+                getAuditStageClass(stage) {
+                    const key = this.stageToStepKey(stage);
+                    if (key === 'purchase_order') return 'bg-blue-50 text-blue-700 border-blue-200';
+                    if (key === 'grn') return 'bg-violet-50 text-violet-700 border-violet-200';
+                    if (key === 'bill') return 'bg-cyan-50 text-cyan-700 border-cyan-200';
+                    if (key === 'payment') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                    return 'bg-gray-100 text-gray-600 border-gray-200';
+                },
+
+                // ===== HELPERS =====
+                getItemName(itemObj) {
+                    return (itemObj.Item && typeof itemObj.Item === 'object') ?
+                        (itemObj.Item.display_value || itemObj.Item.item_name || '–') :
+                        (itemObj.Item ? `Item #${itemObj.Item}` : '–');
+                },
+
+                getUOM(itemObj) {
+                    return (itemObj.Item && typeof itemObj.Item === 'object' && itemObj.Item.unit_of_measure) ?
+                        itemObj.Item.unit_of_measure :
+                        (itemObj.Unit || '–');
+                },
+
+                getVendorName(itemObj) {
+                    const vl = itemObj.vendors || itemObj.Vendor;
+                    if (!vl) return '–';
+                    if (Array.isArray(vl)) return vl.map(v => v.display_value || v.Display_Name || v).filter(Boolean)
+                        .join(', ') || '–';
+                    return typeof vl === 'object' ? (vl.display_value || vl.Display_Name || '–') : vl;
+                },
+
+                formatDate(dateStr, incTime = false) {
+                    if (!dateStr) return '–';
+                    try {
+                        const d = new Date(dateStr);
+                        if (isNaN(d.getTime())) return dateStr;
+                        const mos = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov',
+                            'Dec'
+                        ];
+                        let res =
+                            `${String(d.getDate()).padStart(2, '0')} ${mos[d.getMonth()]} ${d.getFullYear()}`;
+                        if (incTime) res += ` · ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                        return res;
+                    } catch (e) { return dateStr; }
+                },
+
+                getInitials(name) { return (!name || name === '–') ? '?' : name.charAt(0).toUpperCase(); },
+
+                escapeHtml(str) {
+                    if (!str) return '';
+                    const d = document.createElement('div');
+                    d.textContent = str;
+                    return d.innerHTML;
+                },
+
+                // ===== TOAST =====
+                showToast(message, type = 'success') {
+                    if (this.toastTimer) clearTimeout(this.toastTimer);
+                    this.toast = { show: true, message, type };
+                    this.toastTimer = setTimeout(() => this.hideToast(), 4000);
+                },
+
+                hideToast() {
+                    this.toast.show = false;
+                    if (this.toastTimer) {
+                        clearTimeout(this.toastTimer);
+                        this.toastTimer = null;
+                    }
+                },
+
+                // ===== MODAL ACTIONS =====
                 openModal(title, status, movedTo, btnBgClass, btnHoverClass) {
                     this.modalTitle = title;
                     this.pendingStatus = status;
@@ -1064,16 +1470,61 @@
                     this.showModal = false;
                 },
 
-                async sendEmail(vq) {
-                    this.sendingEmailVendorId = vq.vendorId;
+                approveRFQ() {
+                    this.openModal("Approve RFQ & Submit", "Approved", "Quote Comparison",
+                        "bg-emerald-600", "hover:bg-emerald-700");
+                },
+
+                rejectRFQ() {
+                    this.openModal("Reject RFQ", "Rejected", "Quote Comparison", "bg-red-600",
+                        "hover:bg-red-700");
+                },
+
+                async submitAction() {
+                    this.isSubmitting = true;
+                    try {
+                        let prIds = Array.isArray(this.rec.PR_Refs) ? this.rec.PR_Refs.map(pr => pr.ID) : undefined;
+                        const config = {
+                            form_name: "PR_Action",
+                            payload: {
+                                "data": {
+                                    "PR_Number": prIds,
+                                    "Request_For_Quotation": this.recordId,
+                                    "Status": this.pendingStatus,
+                                    "Moved_To": this.pendingStage,
+                                    "Comment": this.modalComment.trim()
+                                }
+                            }
+                        };
+                        const response = await ZOHO.CREATOR.DATA.addRecords(config);
+                        this.closeModal()
+                        if (response.code === 3000) this.fetchData();
+                        else throw new Error(response.message || 'Action failed');
+                    } catch (err) {
+                        alert("An error occurred while submitting. Please try again.");
+                    } finally {
+                        this.isSubmitting = false;
+                    }
+                },
+
+                cancelRFQ() {
+                    ZOHO.CREATOR.UTIL.navigateParentURL({
+                        action: 'open', window: 'same',
+                        url: '#Page:Request_For_Quotations'
+                    });
+                },
+
+                // ===== EMAIL (per vendor) =====
+                async sendEmailToVendor(group) {
+                    this.sendingEmailVendorId = group.vendorId;
                     try {
                         const response = await ZOHO.CREATOR.DATA.invokeCustomApi({
                             api_name: "Send_RFQ_Email_To_Vendor",
                             http_method: "POST",
                             content_type: "application/json",
-                            payload: { rfqId: this.recordId, vendorId: vq.vendorId }
+                            payload: { rfqId: this.recordId, vendorId: group.vendorId }
                         });
-                        this.showToast(`Email sent successfully to ${vq.vendorName}`, 'success');
+                        this.showToast(`Email sent successfully to ${group.vendorName}`, 'success');
                         this.fetchData();
                     } catch (err) {
                         console.error("Failed to send email:", err);
@@ -1083,42 +1534,46 @@
                     }
                 },
 
-                showToast(message, type = 'success') {
-                    if (this.toastTimer) clearTimeout(this.toastTimer);
-                    this.toast = { show: true, message, type };
-                    this.toastTimer = setTimeout(() => this.hideToast(), 4000);
+                // ===== DOWNLOAD: Full PDF =====
+                async downloadCompletePDF() {
+                    this.isExportingFull = true;
+                    try {
+                        this.generateAndPrintPDF(this.items, null);
+                    } catch (err) {
+                        console.error('PDF generation failed:', err);
+                        this.showToast('Failed to generate PDF.', 'error');
+                    } finally {
+                        this.isExportingFull = false;
+                    }
                 },
 
-                hideToast() {
-                    this.toast.show = false;
-                    if (this.toastTimer) { clearTimeout(this.toastTimer); this.toastTimer = null; }
-                },
-
-                downloadCompletePDF() { this.generateAndPrintPDF(this.items, null); },
-                downloadVendorPDF(targetVendor) {
+                // ===== DOWNLOAD: Per-Vendor PDF (all items for this vendor) =====
+                downloadVendorGroupPDF(group) {
+                    // Filter items that belong to this vendor
                     const vendorItems = this.items.filter(item => {
                         let vendors = item.vendors || item.Vendor;
                         if (!vendors) return false;
                         if (!Array.isArray(vendors)) vendors = [vendors];
-                        return vendors.some(v => (v.ID || v) === (targetVendor.ID || targetVendor));
+                        return vendors.some(v => (v.ID || v) === group.vendorId);
                     });
-                    this.generateAndPrintPDF(vendorItems, targetVendor);
+                    this.generateAndPrintPDF(vendorItems, group.vendor);
                 },
 
+                // ===== PDF GENERATION (shared) =====
                 generateAndPrintPDF(itemsToPrint, vendorData) {
-                    // PDF Generation Code preserved as original
                     let itemRows = '';
                     itemsToPrint.forEach((item, i) => {
+                        const unit = this.getUOM(item);
                         itemRows += `
                             <tr>
                                 <td class="text-center">${i + 1}</td>
                                 <td>
-                                    <strong>${this.escapeHtml(this.getItemName(item))}</strong><br>
-                                    <small>${this.escapeHtml(item.Comment || '')}</small>
+                                    <strong>${this.escapeHtml(this.getItemName(item))}</strong>
+                                    ${item.Comment ? `<br><small>${this.escapeHtml(item.Comment)}</small>` : ''}
                                 </td>
                                 <td class="text-center">${this.formatDate(this.rec.Request_Date)}</td>
                                 <td class="text-center">${item.Quantity || 0}</td>
-                                <td class="text-center">${this.escapeHtml(this.getUOM(item))}</td>
+                                <td class="text-center">${this.escapeHtml(unit)}</td>
                                 <td class="text-right"></td>
                             </tr>
                         `;
@@ -1128,19 +1583,22 @@
                     if (vendorData) {
                         const vName = vendorData.Company_Name || vendorData.Display_Name || 'Vendor';
                         const vContact = vendorData.Display_Name || '';
-                        const vAddress1 = (vendorData.Billing_Address) ? (vendorData.Billing_Address.address_line_1 || '') : '';
-                        const vAddress2 = (vendorData.Billing_Address) ? (vendorData.Billing_Address.address_line_2 || '') : '';
+                        const vAddress1 = (vendorData.Billing_Address) ? (vendorData.Billing_Address
+                            .address_line_1 || '') : '';
+                        const vAddress2 = (vendorData.Billing_Address) ? (vendorData.Billing_Address
+                            .address_line_2 || '') : '';
                         const vEmail = vendorData.email || '';
                         const vPhone = vendorData.mobile || '';
                         vendorDetailsHtml = `
                             <strong>${this.escapeHtml(vName)}</strong><br>
-                            ${this.escapeHtml(vContact)}<br>
+                            ${vContact ? this.escapeHtml(vContact) + '<br>' : ''}
                             ${vAddress1 ? this.escapeHtml(vAddress1) + '<br>' : ''}
                             ${vAddress2 ? this.escapeHtml(vAddress2) + '<br>' : ''}
                             ${vEmail ? 'Email: ' + this.escapeHtml(vEmail) + '<br>' : ''}
                             ${vPhone ? 'Phone: ' + this.escapeHtml(vPhone) : ''}
                         `;
                     } else {
+                        // Full RFQ: show all vendors
                         const uniqueVendors = new Map();
                         itemsToPrint.forEach(item => {
                             let vendors = item.vendors || item.Vendor;
@@ -1156,19 +1614,24 @@
                         } else {
                             const vendorEntries = Array.from(uniqueVendors.values());
                             vendorEntries.forEach((v, idx) => {
-                                const name = v.Company_Name || v.Display_Name || v.display_value || 'Unknown Vendor';
+                                const name = v.Company_Name || v.Display_Name || v.display_value ||
+                                    'Unknown Vendor';
                                 const contact = v.Display_Name || v.display_value || '';
-                                const addr1 = (v.Billing_Address) ? (v.Billing_Address.address_line_1 || '') : '';
-                                const addr2 = (v.Billing_Address) ? (v.Billing_Address.address_line_2 || '') : '';
+                                const addr1 = (v.Billing_Address) ? (v.Billing_Address
+                                    .address_line_1 || '') : '';
+                                const addr2 = (v.Billing_Address) ? (v.Billing_Address
+                                    .address_line_2 || '') : '';
                                 const email = v.email || v.Email || '';
                                 const phone = v.mobile || v.Mobile || v.Phone || '';
                                 vendorDetailsHtml += `<strong>${this.escapeHtml(name)}</strong>`;
-                                if (contact && contact !== name) vendorDetailsHtml += `<br>${this.escapeHtml(contact)}`;
+                                if (contact && contact !== name) vendorDetailsHtml +=
+                                    `<br>${this.escapeHtml(contact)}`;
                                 if (addr1) vendorDetailsHtml += `<br>${this.escapeHtml(addr1)}`;
                                 if (addr2) vendorDetailsHtml += `<br>${this.escapeHtml(addr2)}`;
                                 if (email) vendorDetailsHtml += `<br>Email: ${this.escapeHtml(email)}`;
                                 if (phone) vendorDetailsHtml += `<br>Phone: ${this.escapeHtml(phone)}`;
-                                if (idx < vendorEntries.length - 1) vendorDetailsHtml += `<hr style="border:none;border-top:1px dashed #bdc3c7;margin:10px 0;">`;
+                                if (idx < vendorEntries.length - 1) vendorDetailsHtml +=
+                                    `<hr style="border:none;border-top:1px dashed #bdc3c7;margin:10px 0;">`;
                             });
                         }
                     }
@@ -1284,150 +1747,11 @@
                         iframe.contentWindow.print();
                         setTimeout(() => document.body.removeChild(iframe), 2000);
                     }, 500);
-                },
-
-                escapeHtml(str) {
-                    if (!str) return '';
-                    const d = document.createElement('div');
-                    d.textContent = str;
-                    return d.innerHTML;
-                },
-
-                get sortedActions() {
-                    return [...this.actions].sort((a, b) => {
-                        let tA = a.Added_Time || "";
-                        let tB = b.Added_Time || "";
-                        return tA.localeCompare(tB);
-                    });
-                },
-                get showActionButtons() {
-                    if (!this.rec.PR_Refs || this.rec.PR_Refs.length === 0) return false;
-                    const status = (this.rec.Status || '').toLowerCase();
-                    return status !== 'approved' && status !== 'rejected' && status !== 'cancelled';
-                },
-                get modalBtnText() { return this.modalTitle ? this.modalTitle.split(' ')[0] : 'Submit'; },
-
-                approveRFQ() { this.openModal("Approve RFQ & Submit", "Approved", "Quote Comparison", "bg-emerald-600", "hover:bg-emerald-700"); },
-                rejectRFQ() { this.openModal("Reject RFQ", "Rejected", "Quote Comparison", "bg-red-600", "hover:bg-red-700"); },
-
-                async submitAction() {
-                    this.isSubmitting = true;
-                    try {
-                        let prIds = Array.isArray(this.rec.PR_Refs) ? this.rec.PR_Refs.map(pr => pr.ID) : undefined;
-                        const config = {
-                            form_name: "PR_Action",
-                            payload: {
-                                "data": {
-                                    "PR_Number": prIds,
-                                    "Request_For_Quotation": this.recordId,
-                                    "Status": this.pendingStatus,
-                                    "Moved_To": this.pendingStage,
-                                    "Comment": this.modalComment.trim()
-                                }
-                            }
-                        };
-                        const response = await ZOHO.CREATOR.DATA.addRecords(config);
-                        this.closeModal()
-                        if (response.code === 3000) this.fetchData();
-                        else throw new Error(response.message || 'Action failed');
-                    } catch (err) {
-                        alert("An error occurred while submitting. Please try again.");
-                    } finally {
-                        this.isSubmitting = false;
-                    }
-                },
-                cancelRFQ() { ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', window: 'same', url: '#Page:Request_For_Quotations' }); },
-                get progressData() {
-                    let completed = {}, rejectedStepKey = null, currentStageKey = 'request_for_quotation';
-                    this.actions.forEach(a => {
-                        let key = this.stageToStepKey(a.Moved_To);
-                        if (key) {
-                            if (a.Status && a.Status.toLowerCase() === 'rejected') rejectedStepKey = key;
-                            else completed[key] = true;
-                        }
-                    });
-                    completed['purchase_requisition'] = true; completed['request_for_quotation'] = true;
-                    let rejectedIdx = this.processSteps.findIndex(s => s.key === rejectedStepKey);
-                    let currentIdx = this.processSteps.findIndex(s => s.key === currentStageKey);
-                    this.processSteps.forEach((s, i) => { if (completed[s.key] && i > currentIdx) currentIdx = i; });
-                    let fillIdx = rejectedIdx !== -1 ? rejectedIdx : currentIdx;
-                    return { fillPct: (fillIdx / (this.processSteps.length - 1)) * 100, isRejected: rejectedIdx !== -1, rejectedIdx, currentIdx };
-                },
-                getStepCircleClass(i) {
-                    const { isRejected, rejectedIdx, currentIdx } = this.progressData;
-                    if (i === rejectedIdx) return 'bg-red-600 text-white border-red-600 shadow-md shadow-red-200';
-                    if (isRejected ? (i < rejectedIdx) : (i <= currentIdx)) return (i === currentIdx && !isRejected) ? 'bg-[#1B5CA8] text-white border-[#1B5CA8] shadow-md shadow-blue-200' : 'bg-emerald-600 text-white border-emerald-600';
-                    return 'bg-white text-gray-400 border-gray-300';
-                },
-                getStepIcon(step, i) {
-                    const { isRejected, rejectedIdx, currentIdx } = this.progressData;
-                    if (i === rejectedIdx) return 'bi-x-lg text-[13px]';
-                    if ((isRejected ? (i < rejectedIdx) : (i <= currentIdx)) && !(i === currentIdx && !isRejected)) return 'bi-check-lg text-[13px]';
-                    if ((isRejected ? (i < rejectedIdx) : (i <= currentIdx)) && !(i === currentIdx && !isRejected)) return 'bi-check-lg text-[13px]';
-                    return `${step.icon} text-[13px]`;
-                },
-                getStepLabelClass(i) {
-                    const { isRejected, rejectedIdx, currentIdx } = this.progressData;
-                    if (i === rejectedIdx) return 'text-red-700 font-semibold';
-                    if (i === currentIdx && !isRejected) return 'text-[#1B5CA8] font-semibold';
-                    if ((isRejected && i < rejectedIdx) || (!isRejected && i < currentIdx)) return 'text-gray-700 font-medium';
-                    return 'text-gray-400';
-                },
-                getStatusBadge(status) {
-                    const s = (status || 'submitted').toLowerCase();
-                    let border = 'border-amber-200', bg = 'bg-amber-50', text = 'text-amber-800', dot = 'bg-amber-500', label = status || 'Submitted';
-                    if (s === 'approved') { border = 'border-emerald-200'; bg = 'bg-emerald-50'; text = 'text-emerald-800'; dot = 'bg-emerald-600'; label = 'Approved'; }
-                    if (s === 'rejected') { border = 'border-red-200'; bg = 'bg-red-50'; text = 'text-red-800'; dot = 'bg-red-600'; label = 'Rejected'; }
-                    if (s === 'cancelled') { border = 'border-gray-300'; bg = 'bg-gray-100'; text = 'text-gray-700'; dot = 'bg-gray-500'; label = 'Cancelled'; }
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border ${border} ${bg} ${text}"><span class="w-[5px] h-[5px] rounded-full ${dot} shrink-0"></span>${label}</span>`;
-                },
-                getAuditIconClass(status) {
-                    if (status === 'Approved') return { bg: 'bg-emerald-50', text: 'text-emerald-600', icon: 'bi-check-lg text-emerald-600' };
-                    if (status === 'Rejected') return { bg: 'bg-red-50', text: 'text-red-600', icon: 'bi-x-lg text-red-600' };
-                    return { bg: 'bg-blue-50', text: 'text-blue-600', icon: 'bi-arrow-right text-blue-600' };
-                },
-                getAuditStageClass(stage) {
-                    const key = this.stageToStepKey(stage);
-                    if (key === 'purchase_order') return 'bg-blue-50 text-blue-700 border-blue-200';
-                    if (key === 'grn') return 'bg-violet-50 text-violet-700 border-violet-200';
-                    if (key === 'bill') return 'bg-cyan-50 text-cyan-700 border-cyan-200';
-                    if (key === 'payment') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-                    return 'bg-gray-100 text-gray-600 border-gray-200';
-                },
-                getItemName(itemObj) { return (itemObj.Item && typeof itemObj.Item === 'object') ? (itemObj.Item.display_value || itemObj.Item.item_name || '–') : (itemObj.Item ? `Item #${itemObj.Item}` : '–'); },
-                getUOM(itemObj) { return (itemObj.Item && typeof itemObj.Item === 'object' && itemObj.Item.unit_of_measure) ? itemObj.Item.unit_of_measure : (itemObj.Unit || '–'); },
-                getVendorName(itemObj) {
-                    const vl = itemObj.vendors || itemObj.Vendor;
-                    if (!vl) return '–';
-                    if (Array.isArray(vl)) return vl.map(v => v.display_value || v.Display_Name || v).filter(Boolean).join(', ') || '–';
-                    return typeof vl === 'object' ? (vl.display_value || vl.Display_Name || '–') : vl;
-                },
-                formatDate(dateStr, incTime = false) {
-                    if (!dateStr) return '–';
-                    try {
-                        const d = new Date(dateStr);
-                        if (isNaN(d.getTime())) return dateStr;
-                        const mos = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                        let res = `${String(d.getDate()).padStart(2, '0')} ${mos[d.getMonth()]} ${d.getFullYear()}`;
-                        if (incTime) res += ` · ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-                        return res;
-                    } catch (e) { return dateStr; }
-                },
-                getInitials(name) { return (!name || name === '–') ? '?' : name.charAt(0).toUpperCase(); },
-                stageToStepKey(stage) {
-                    if (!stage) return null;
-                    const s = stage.toLowerCase().trim();
-                    if (s === 'purchase requisition') return 'purchase_requisition';
-                    if (s === 'request for quotation') return 'request_for_quotation';
-                    if (s === 'quote comparison') return 'quote_comparison';
-                    if (s === 'purchase order') return 'purchase_order';
-                    if (s === 'grn') return 'grn';
-                    if (s === 'bill') return 'bill';
-                    if (s === 'payment') return 'payment';
-                    return null;
                 }
+
             }));
         });
     </script>
 </body>
+
 </html>

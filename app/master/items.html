@@ -240,6 +240,54 @@
               </select>
             </div>
           </div>
+
+          <!-- Rates Subform -->
+          <div class="mb-5">
+            <div class="flex justify-between items-center mb-2.5">
+              <label class="block text-[13px] font-bold text-gray-700">Vendor Rates</label>
+              <button type="button" @click="addRateRow()" class="text-[11px] text-[#1B5CA8] font-semibold hover:bg-[#EBF3FC] px-2 py-1 rounded border border-[#1B5CA8]/20 transition-colors">
+                <i class="bi bi-plus-lg"></i> Add Rate
+              </button>
+            </div>
+            <div class="border border-gray-200 rounded-lg overflow-visible">
+              <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th class="px-3 py-2 text-left text-[11px] font-bold text-gray-500 w-[50%]">Vendor <span class="text-red-500">*</span></th>
+                    <th class="px-3 py-2 text-left text-[11px] font-bold text-gray-500">Unit Price <span class="text-red-500">*</span></th>
+                    <th class="px-3 py-2 text-left text-[11px] font-bold text-gray-500 w-[90px]">Selected</th>
+                    <th class="px-3 py-2 text-center text-[11px] font-bold text-gray-500 w-[40px]"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr x-show="form.Rates.length === 0">
+                    <td colspan="4" class="px-3 py-5 text-center text-gray-400 text-[12px] bg-white">No rates added yet.</td>
+                  </tr>
+                  <template x-for="(rate, index) in form.Rates" :key="rate._uid">
+                    <tr class="border-b border-gray-100 last:border-0 bg-white">
+                      <td class="px-3 py-2.5">
+                        <select x-init="initRateVendorSelect($el, rate)" required class="w-full text-xs"></select>
+                      </td>
+                      <td class="px-3 py-2.5">
+                        <input type="number" step="any" x-model.number="rate.Unit_Price" required
+                          class="w-full py-1.5 px-2 border border-gray-300 rounded text-xs focus:border-[#1B5CA8] outline-none">
+                      </td>
+                      <td class="px-3 py-2.5">
+                        <select x-model="rate.Selected" class="w-full py-1.5 px-2 border border-gray-300 rounded text-xs focus:border-[#1B5CA8] outline-none bg-white">
+                          <option value="No">No</option>
+                          <option value="Yes">Yes</option>
+                        </select>
+                      </td>
+                      <td class="px-3 py-2.5 text-center">
+                        <button type="button" @click="removeRateRow(index)" class="text-gray-400 hover:text-red-500 transition-colors p-1"><i class="bi bi-trash"></i></button>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           <div class="flex justify-end gap-2 border-t border-gray-100 pt-4">
             <button type="button" @click="closeModal()"
               class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold">Cancel</button>
@@ -383,7 +431,7 @@
         // that ZOHO.CREATOR.DATA.getRecords() returns for the Item_Category field.
         categoryMap: {},
         page: 1, perPage: 10,
-        form: { item_name: '', description: '', unit_price: '', unit_of_measure: '', Vendor: '', Item_Category: '', GST_Rate: '', HSN_SAC: '', status: 'Active' },
+        form: { item_name: '', description: '', unit_price: '', unit_of_measure: '', Vendor: '', Item_Category: '', GST_Rate: '', HSN_SAC: '', status: 'Active', Rates: [] },
 
         get totalPages() { return Math.max(1, Math.ceil(this.records.length / this.perPage)); },
         get paginatedRecords() {
@@ -513,7 +561,7 @@
 
         openModal() {
           this.isEdit = false; this.editId = null;
-          this.form = { item_name: '', description: '', unit_price: '', unit_of_measure: '', Vendor: '', Item_Category: '', GST_Rate: '', HSN_SAC: '', status: 'Active' };
+          this.form = { item_name: '', description: '', unit_price: '', unit_of_measure: '', Vendor: '', Item_Category: '', GST_Rate: '', HSN_SAC: '', status: 'Active', Rates: [] };
           this.isModalOpen = true;
           setTimeout(() => {
             this.initVendorSelect();
@@ -541,7 +589,15 @@
             Item_Category: categoryId,
             GST_Rate: rec.GST_Rate || '',
             HSN_SAC: rec.HSN_SAC || '',
-            status: rec.status || 'Active'
+            status: rec.status || 'Active',
+            Rates: (rec.Rates || []).map(r => ({
+              _uid: Date.now() + Math.random(),
+              ID: r.ID,
+              Vendor: this.extractLookupId(r.Vendor),
+              Unit_Price: r.Unit_Price || '',
+              Selected: r.Selected || 'No',
+              _preselectedVendor: r.Vendor && typeof r.Vendor === 'object' ? r.Vendor : null
+            }))
           };
           this.isModalOpen = true;
           setTimeout(() => {
@@ -568,6 +624,44 @@
           this.isModalOpen = false;
           if (this.tsVendor) this.tsVendor.destroy();
           if (this.tsCategory) this.tsCategory.destroy();
+          if (this.form.Rates) {
+            this.form.Rates.forEach(r => { if (r._ts) { r._ts.destroy(); r._ts = null; } });
+          }
+        },
+        addRateRow() {
+          this.form.Rates.push({
+            _uid: Date.now() + Math.random(),
+            Vendor: '',
+            Unit_Price: '',
+            Selected: 'No'
+          });
+        },
+        removeRateRow(index) {
+          const rate = this.form.Rates[index];
+          if (rate._ts) { rate._ts.destroy(); }
+          this.form.Rates.splice(index, 1);
+        },
+        initRateVendorSelect(el, rate) {
+          const ts = new TomSelect(el, {
+            valueField: 'ID', labelField: 'Display_Name', searchField: ['Display_Name', 'Company_Name'], maxItems: 1,
+            placeholder: 'Select Vendor...',
+            dropdownParent: 'body',
+            onChange: function (val) { rate.Vendor = val; },
+            load: function (query, callback) {
+              if (!query.length) return callback();
+              ZOHO.CREATOR.DATA.getRecords({ report_name: 'Vendor_Report', criteria: `(Display_Name.contains("${query}") || Company_Name.contains("${query}"))` })
+                .then(res => callback(res.code === 3000 ? res.data : [])).catch(() => callback());
+            }
+          });
+          rate._ts = ts;
+          if (rate.Vendor) {
+            if (rate._preselectedVendor) {
+              ts.addOption(rate._preselectedVendor);
+              ts.setValue(rate._preselectedVendor.ID);
+            } else {
+              ts.setValue(rate.Vendor);
+            }
+          }
         },
         initVendorSelect(preselectedObj = null) {
           if (this.tsVendor) this.tsVendor.destroy();
@@ -700,8 +794,21 @@
             .finally(() => this.isCategorySubmitting = false);
         },
         saveRecord() {
+          // validate Rates subform
+          const emptyVendor = this.form.Rates.find(r => !r.Vendor);
+          if (emptyVendor) {
+            Toast.fire({ icon: 'warning', title: 'Please select a vendor for all rates' });
+            return;
+          }
+
           this.isSubmitting = true;
           const cleanForm = JSON.parse(JSON.stringify(this.form));
+          // Clean up the Rates subform array before submission
+          cleanForm.Rates = cleanForm.Rates.map(r => {
+            const cleanRate = { Vendor: r.Vendor, Unit_Price: r.Unit_Price, Selected: r.Selected };
+            if (r.ID) cleanRate.ID = r.ID;
+            return cleanRate;
+          });
           const payload = { data: cleanForm };
           const request = this.isEdit
             ? ZOHO.CREATOR.DATA.updateRecordById({

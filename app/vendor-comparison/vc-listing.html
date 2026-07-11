@@ -2,1056 +2,1522 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quote Comparison Listing & Creation</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote Comparison Listing & Creation</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
-    rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
 
-  <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
+    </script>
 
-  <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js">
+    </script>
 
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js">
+    </script>
 
-  <style>
-    [x-cloak] {
-      display: none !important;
-    }
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
 
-    .vc-modal-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 50;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
+        .vc-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
 
-    .vc-modal-bg {
-      position: absolute;
-      inset: 0;
-      background: rgba(17, 24, 39, 0.4);
-    }
+        .vc-modal-bg {
+            position: absolute;
+            inset: 0;
+            background: rgba(17, 24, 39, 0.4);
+        }
 
-    .vc-modal-box {
-      position: relative;
-      z-index: 1;
-      background: #fff;
-      border-radius: 11px;
-      width: 100%;
-      overflow: hidden;
-      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
-    }
+        .vc-modal-box {
+            position: relative;
+            z-index: 1;
+            background: #fff;
+            border-radius: 11px;
+            width: 100%;
+            overflow: hidden;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+        }
 
-    .pill-active {
-      color: #1B5CA8 !important;
-      background: #fff !important;
-      font-weight: 600 !important;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-    }
+        .pill-active {
+            color: #1B5CA8 !important;
+            background: #fff !important;
+            font-weight: 600 !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+        }
 
-    .sticky-action-cell {
-      position: sticky;
-      right: 0;
-      z-index: 2;
-      box-shadow: -4px 0 8px -2px rgba(0, 0, 0, 0.06);
-    }
+        .sticky-action-cell {
+            position: sticky;
+            right: 0;
+            z-index: 2;
+            box-shadow: -4px 0 8px -2px rgba(0, 0, 0, 0.06);
+        }
 
-    thead .sticky-action-cell {
-      z-index: 3;
-    }
+        thead .sticky-action-cell {
+            z-index: 3;
+        }
 
-    th[data-sort] {
-      cursor: pointer;
-      user-select: none;
-      transition: background 0.15s;
-    }
+        th[data-sort] {
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s;
+        }
 
-    th[data-sort]:hover {
-      background: #e9ecf1;
-    }
+        th[data-sort]:hover {
+            background: #e9ecf1;
+        }
 
-    .sort-indicator {
-      display: inline-block;
-      width: 14px;
-      text-align: center;
-      font-size: 10px;
-      color: #9ca3af;
-      margin-left: 2px;
-      vertical-align: middle;
-    }
+        .sort-indicator {
+            display: inline-block;
+            width: 14px;
+            text-align: center;
+            font-size: 10px;
+            color: #9ca3af;
+            margin-left: 2px;
+            vertical-align: middle;
+        }
 
-    th[data-sort].sort-active .sort-indicator {
-      color: #1B5CA8;
-    }
+        th[data-sort].sort-active .sort-indicator {
+            color: #1B5CA8;
+        }
 
-    .vc-spinner {
-      border: 2.5px solid #e5e7eb;
-      border-top-color: #1B5CA8;
-      border-radius: 50%;
-      width: 28px;
-      height: 28px;
-      animation: spin 0.7s linear infinite;
-    }
+        .vc-spinner {
+            border: 2.5px solid #e5e7eb;
+            border-top-color: #1B5CA8;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            animation: spin 0.7s linear infinite;
+        }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
-    .ts-control {
-      border: 1px solid #e5e7eb !important;
-      border-radius: 0.5rem !important;
-      font-size: 0.8125rem !important;
-      padding: 0.5rem 0.75rem !important;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
-      font-family: inherit;
-      background-color: #f9fafb !important;
-      transition: all 0.2s ease-in-out;
-    }
+        .ts-control {
+            border: 1px solid #e5e7eb !important;
+            border-radius: 0.5rem !important;
+            font-size: 0.8125rem !important;
+            padding: 0.5rem 0.75rem !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+            font-family: inherit;
+            background-color: #f9fafb !important;
+            transition: all 0.2s ease-in-out;
+        }
 
-    .ts-control.focus {
-      border-color: #1B5CA8 !important;
-      background-color: #ffffff !important;
-      box-shadow: 0 0 0 3px rgba(27, 92, 168, 0.15) !important;
-    }
+        .ts-control.focus {
+            border-color: #1B5CA8 !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(27, 92, 168, 0.15) !important;
+        }
 
-    .ts-dropdown {
-      border-radius: 0.5rem !important;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-      border: 1px solid #f3f4f6 !important;
-      padding: 0.35rem !important;
-      margin-top: 4px !important;
-      font-size: 0.8125rem !important;
-    }
+        .ts-dropdown {
+            border-radius: 0.5rem !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+            border: 1px solid #f3f4f6 !important;
+            padding: 0.35rem !important;
+            margin-top: 4px !important;
+            font-size: 0.8125rem !important;
+        }
 
-    .ts-dropdown .option {
-      border-radius: 0.375rem !important;
-      padding: 0.5rem 0.75rem !important;
-      transition: all 0.15s ease;
-      cursor: pointer;
-    }
+        .ts-dropdown .option {
+            border-radius: 0.375rem !important;
+            padding: 0.5rem 0.75rem !important;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
 
-    .ts-dropdown .active {
-      background-color: #f3f4f6 !important;
-      color: #111827 !important;
-    }
+        .ts-dropdown .active {
+            background-color: #f3f4f6 !important;
+            color: #111827 !important;
+        }
 
-    .ts-dropdown .option:hover {
-      background-color: #e5e7eb !important;
-    }
+        .ts-dropdown .option:hover {
+            background-color: #e5e7eb !important;
+        }
 
-    .grid-select .ts-control {
-      padding: 0.35rem 0.5rem !important;
-      font-size: 0.75rem !important;
-      min-height: 32px !important;
-    }
+        .grid-select .ts-control {
+            padding: 0.35rem 0.5rem !important;
+            font-size: 0.75rem !important;
+            min-height: 32px !important;
+        }
 
-    .grid-input {
-      width: 100%;
-      padding: 0.375rem 0.5rem;
-      background-color: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.25rem;
-      font-size: 0.75rem;
-      outline: none;
-      transition: all 0.2s;
-      height: 32px;
-    }
+        .grid-input {
+            width: 100%;
+            padding: 0.375rem 0.5rem;
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            outline: none;
+            transition: all 0.2s;
+            height: 32px;
+        }
 
-    .grid-input:focus {
-      background-color: #ffffff;
-      border-color: #1B5CA8;
-      focus: ring-[3px];
-      focus: ring-[#1B5CA8]/15;
-    }
-  </style>
+        .grid-input:focus {
+            background-color: #ffffff;
+            border-color: #1B5CA8;
+            focus: ring-[3px];
+            focus: ring-[#1B5CA8]/15;
+        }
+
+        .vendor-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            transition: all 0.2s;
+            background: #fff;
+        }
+
+        .vendor-card:hover {
+            border-color: #cbd5e1;
+        }
+
+        .vendor-card.finalized {
+            border-color: #10b981;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+        }
+
+        .vendor-card-header {
+            background: #f8fafc;
+            padding: 0.65rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .vendor-card-header.finalized {
+            background: #ecfdf5;
+            border-bottom-color: #10b981;
+        }
+
+        .vendor-quote-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+        }
+
+        .vendor-quote-table th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: #475569;
+            padding: 0.4rem 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+        }
+
+        .vendor-quote-table td {
+            padding: 0.3rem 0.4rem;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .vendor-quote-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .vendor-quote-table .grid-select .ts-control {
+            font-size: 0.7rem !important;
+            padding: 0.2rem 0.4rem !important;
+            min-height: 28px !important;
+        }
+
+        .vendor-quote-table .grid-input {
+            font-size: 0.7rem !important;
+            padding: 0.2rem 0.4rem !important;
+            height: 28px !important;
+        }
+
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.1rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        .rank-badge.yes {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .rank-badge.no {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-slide-in {
+            animation: fadeSlideIn 0.3s ease-out both;
+        }
+
+        .vendor-card .add-quote-btn {
+            opacity: 0.7;
+            transition: opacity 0.15s;
+        }
+
+        .vendor-card:hover .add-quote-btn {
+            opacity: 1;
+        }
+
+        /* scrollable modal body */
+        .modal-scroll {
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 1.25rem;
+        }
+
+        .modal-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+        .modal-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .modal-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .modal-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50 p-6">
-  <div id="app" x-data="vcApp()" x-init="initApp()"
-    class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-[1400px] mx-auto" x-cloak>
+    <div id="app" x-data="vcApp()" x-init="initApp()" class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-[1400px] mx-auto" x-cloak>
 
-    <div class="grid grid-cols-4 gap-2.5 mb-4">
-      <div
-        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-[#1B5CA8]">
-        <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Total Comparisons</div>
-        <div class="text-[25px] font-bold leading-none text-[#1B5CA8]" x-text="stats.total"></div>
-        <div class="text-[11px] text-gray-400 mt-1.5">All created records</div>
-      </div>
-      <div
-        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-amber-500">
-        <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Pending</div>
-        <div class="text-[25px] font-bold leading-none text-amber-500" x-text="stats.pending"></div>
-        <div class="text-[11px] text-gray-400 mt-1.5">Submitted / Re-negotiating</div>
-      </div>
-      <div
-        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-emerald-600">
-        <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Finalized</div>
-        <div class="text-[25px] font-bold leading-none text-emerald-600" x-text="stats.finalized"></div>
-        <div class="text-[11px] text-gray-400 mt-1.5">Vendor Selected</div>
-      </div>
-      <div
-        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-red-600">
-        <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Rejected</div>
-        <div class="text-[25px] font-bold leading-none text-red-600" x-text="stats.rejected"></div>
-        <div class="text-[11px] text-gray-400 mt-1.5">Declined VC</div>
-      </div>
-    </div>
-
-    <div class="flex items-center justify-between mt-[18px] mb-2">
-      <span class="text-[13.5px] font-medium text-gray-900">Quote Comparisons</span>
-    </div>
-    <div class="flex items-center justify-between gap-2.5 mb-2 flex-wrap">
-      <div class="flex bg-gray-100 rounded-full p-[3px] gap-[2px]">
-        <button @click="setFilter('all')"
-          :class="filter === 'all' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
-          class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">All (<span
-            x-text="stats.total"></span>)</button>
-        <button @click="setFilter('pending')"
-          :class="filter === 'pending' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
-          class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Pending (<span
-            x-text="stats.pending"></span>)</button>
-        <button @click="setFilter('finalized')"
-          :class="filter === 'finalized' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
-          class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Finalized (<span
-            x-text="stats.finalized"></span>)</button>
-        <button @click="setFilter('rejected')"
-          :class="filter === 'rejected' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
-          class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Rejected (<span
-            x-text="stats.rejected"></span>)</button>
-      </div>
-      <div class="flex gap-2 items-center">
-        <div class="relative">
-          <i
-            class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px] pointer-events-none"></i>
-          <input x-model="searchQuery" type="text" placeholder="Search by ID#, Subject, PR..."
-            class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[230px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10">
-        </div>
-        <button @click="openModal()"
-          class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-all shadow-sm">
-          <i class="bi bi-plus-lg"></i> Create Quote Comparison
-        </button>
-      </div>
-    </div>
-
-    <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
-      <table class="w-full border-collapse" style="min-width:1150px">
-        <colgroup>
-          <col style="width:110px">
-          <col style="width:160px">
-          <col style="width:110px">
-          <col style="width:110px">
-          <col style="width:100px">
-          <col style="width:110px">
-          <col style="width:140px">
-          <col style="width:110px">
-          <col style="width:90px">
-        </colgroup>
-        <thead>
-          <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
-            <template
-              x-for="col in ['qc_no', 'subject', 'pr_ref', 'rfq_ref', 'date', 'status', 'final_vendor', 'total_rate']"
-              :key="col">
-              <th @click="toggleSort(col)" data-sort
-                class="px-3 py-2 text-[11px] font-semibold text-gray-500 tracking-wide text-left whitespace-nowrap"
-                :class="sortCol === col ? 'sort-active' : ''">
-                <span
-                  x-text="{qc_no: 'ID #', subject: 'Subject', pr_ref: 'PR Ref', rfq_ref: 'RFQ Ref', date: 'Created Date', status: 'Status', final_vendor: 'Final Vendor', total_rate: 'Total Rate'}[col]"></span>
-                <span class="sort-indicator" x-text="sortCol === col ? (sortDir === 'asc' ? '▲' : '▼') : ''"></span>
-              </th>
-            </template>
-            <th
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500 tracking-wide text-left whitespace-nowrap bg-gray-50 sticky-action-cell">
-              Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr x-show="isLoading" x-cloak>
-            <td colspan="9" class="px-3 py-12 text-center">
-              <div class="flex flex-col items-center gap-3">
-                <div class="vc-spinner"></div>
-                <div class="text-sm text-gray-400 font-medium">Loading Quote Comparisons…</div>
-              </div>
-            </td>
-          </tr>
-          <tr x-show="!isLoading && paginatedRecords.length === 0" x-cloak>
-            <td colspan="9" class="px-3 py-12 text-center">
-              <div class="text-gray-400"><i class="bi bi-clipboard-x text-3xl mb-2 block"></i>
-                <div class="text-sm font-medium text-gray-500">No records found</div>
-              </div>
-            </td>
-          </tr>
-          <template x-for="rec in paginatedRecords" :key="rec.ID">
-            <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors duration-150 group">
-              <td class="px-3 py-[9px] align-middle whitespace-nowrap"><span
-                  class="font-semibold text-[#1B5CA8] font-mono text-[11px]" x-text="rec.QC_Ref_Number || '–'"></span>
-              </td>
-              <td
-                class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900 max-w-[160px]"
-                x-text="rec.Quote_Comparison_Subject || '–'"></td>
-              <td class="px-3 py-[9px] align-middle whitespace-nowrap font-mono text-[11px] font-semibold"
-                x-text="rec.PR_Ref?.zc_display_value || rec.PR_Ref?.PR_Number || '–'"></td>
-              <td class="px-3 py-[9px] align-middle whitespace-nowrap font-mono text-[11px] font-semibold"
-                x-text="rec.RFQ_Ref?.zc_display_value || rec.RFQ_Ref?.RFQ_Ref_Number || '–'"></td>
-              <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[11px] text-gray-500"
-                x-text="formatDate(rec.Added_Time)"></td>
-              <td class="px-3 py-[9px] align-middle whitespace-nowrap">
-                <span
-                  class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap border"
-                  :class="getStatusStyle(rec).classes">
-                  <span class="w-[5px] h-[5px] rounded-full shrink-0" :class="getStatusStyle(rec).dot"></span>
-                  <span x-text="rec.Status || 'Submitted'"></span>
-                </span>
-              </td>
-              <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap max-w-[140px]"><span
-                  class="text-[12px] font-medium text-gray-800" x-text="rec.Finalized_Vendor || '–'"></span></td>
-              <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[12px] font-medium text-gray-700"
-                x-text="formatINR(rec.Total_Landed_Rate)"></td>
-              <td
-                class="px-3 py-[9px] align-middle whitespace-nowrap bg-white group-hover:bg-[#EBF3FC] sticky-action-cell">
-                <button
-                  @click="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:Quote_Comparison_Detailed?recordId='+rec.ID,window:'same'})"
-                  class="inline-flex items-center gap-[3px] px-2 py-[3px] rounded bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 text-[11px] font-medium transition-colors"><i
-                    class="bi bi-box-arrow-up-right"></i> View</button>
-              </td>
-            </tr>
-          </template>
-        </tbody>
-      </table>
-
-      <div x-show="!isLoading && totalPages > 0"
-        class="flex items-center justify-between px-[13px] py-[9px] border-t border-gray-200 bg-gray-50 text-xs text-gray-500"
-        x-cloak>
-        <span>Showing <span x-text="(page - 1) * perPage + 1"></span>–<span
-            x-text="Math.min(page * perPage, filteredRecords.length)"></span> of <span
-            x-text="filteredRecords.length"></span> records</span>
-        <div class="flex gap-1">
-          <button @click="page > 1 ? page-- : null" :disabled="page <= 1"
-            class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]">
-            <i class="bi bi-chevron-left"></i>
-          </button>
-          <template x-for="p in getPagesArray()" :key="p">
-            <button @click="typeof p === 'number' ? page = p : null"
-              :class="page === p ? 'border-[#1B5CA8] bg-[#1B5CA8] text-white font-semibold' : (typeof p === 'number' ? 'border-gray-300 bg-white text-gray-600 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]' : 'border-transparent bg-transparent text-gray-400 cursor-default')"
-              class="min-w-[27px] h-[27px] px-1 border rounded inline-flex items-center justify-center transition-colors">
-              <span x-text="p"></span>
-            </button>
-          </template>
-          <button @click="page < totalPages ? page++ : null" :disabled="page >= totalPages"
-            class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]">
-            <i class="bi bi-chevron-right"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div x-show="isModalOpen" style="display: none;" class="vc-modal-overlay active">
-      <div class="vc-modal-bg" x-show="isModalOpen" x-transition.opacity @click="closeModal()"></div>
-      <div class="vc-modal-box max-w-6xl overflow-scroll" style="max-height: 94vh;" x-show="isModalOpen" x-transition>
-
-        <div
-          class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50 sticky top-0 z-20">
-          <h3 class="text-[15px] font-bold text-gray-800">New Quote Comparison</h3>
-          <button @click="closeModal()" type="button" class="text-gray-400 hover:text-gray-700 transition-colors"><i
-              class="bi bi-x-lg text-lg"></i></button>
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-4 gap-2.5 mb-4">
+            <div class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-[#1B5CA8]">
+                <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Total Comparisons</div>
+                <div class="text-[25px] font-bold leading-none text-[#1B5CA8]" x-text="stats.total"></div>
+                <div class="text-[11px] text-gray-400 mt-1.5">All created records</div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-amber-500">
+                <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Pending</div>
+                <div class="text-[25px] font-bold leading-none text-amber-500" x-text="stats.pending"></div>
+                <div class="text-[11px] text-gray-400 mt-1.5">Submitted / Re-negotiating</div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-emerald-600">
+                <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Finalized</div>
+                <div class="text-[25px] font-bold leading-none text-emerald-600" x-text="stats.finalized"></div>
+                <div class="text-[11px] text-gray-400 mt-1.5">Vendor Selected</div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-red-600">
+                <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Rejected</div>
+                <div class="text-[25px] font-bold leading-none text-red-600" x-text="stats.rejected"></div>
+                <div class="text-[11px] text-gray-400 mt-1.5">Declined VC</div>
+            </div>
         </div>
 
-        <div class="p-5 w-fit">
-          <form @submit.prevent="submitForm">
-
-            <h4 class="text-xs font-bold text-[#1B5CA8] tracking-wide mb-3 border-b border-gray-100 pb-1">Comparison
-              Details</h4>
-            <div class="grid grid-cols-3 gap-4 mb-6">
-              <div>
-                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Subject <span
-                    class="text-red-500">*</span></label>
-                <input x-model="form.Quote_Comparison_Subject" type="text" required
-                  class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"
-                  placeholder="e.g. Bulk Material Comparison">
-              </div>
-              <div>
-                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PR Reference</label>
-                <select x-ref="prSelect" class="w-full text-xs" placeholder="Search PR Number..."></select>
-              </div>
-              <div>
-                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">RFQ Reference <span
-                    class="text-gray-400 font-normal normal-case ml-0.5">(Select to Auto-fill)</span></label>
-                <select x-ref="rfqSelect" class="w-full text-xs" placeholder="Search RFQ Number..."></select>
-              </div>
+        <!-- Toolbar -->
+        <div class="flex items-center justify-between mt-[18px] mb-2">
+            <span class="text-[13.5px] font-medium text-gray-900">Quote Comparisons</span>
+        </div>
+        <div class="flex items-center justify-between gap-2.5 mb-2 flex-wrap">
+            <div class="flex bg-gray-100 rounded-full p-[3px] gap-[2px]">
+                <button @click="setFilter('all')" :class="filter === 'all' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'" class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">All (<span x-text="stats.total"></span>)</button>
+                <button @click="setFilter('pending')" :class="filter === 'pending' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'" class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Pending (<span x-text="stats.pending"></span>)</button>
+                <button @click="setFilter('finalized')" :class="filter === 'finalized' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'" class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Finalized (<span x-text="stats.finalized"></span>)</button>
+                <button @click="setFilter('rejected')" :class="filter === 'rejected' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'" class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Rejected (<span x-text="stats.rejected"></span>)</button>
             </div>
-
-            <div class="mb-6 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
-              <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                <span class="text-xs font-semibold text-gray-700 tracking-wide">Items Requirement <span
-                    class="text-red-500">*</span></span>
-                <button type="button" @click="addItemRow()"
-                  class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+
-                  Add Item</button>
-              </div>
-              <div class="overflow-x-auto" style="overflow:visible;">
-                <table class="w-full border-collapse">
-                  <thead class="bg-white border-b border-gray-200">
-                    <tr>
-                      <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[40%]">Item Lookup</th>
-                      <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[15%]">Unit</th>
-                      <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[15%]">Req. Qty</th>
-                      <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[25%]">Deliver To /
-                        Plant</th>
-                      <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-8"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr x-show="form.Items.length === 0">
-                      <td colspan="5" class="px-3 py-4 text-center text-xs text-gray-400 italic">No items added. Select
-                        an RFQ or add manually.</td>
-                    </tr>
-                    <template x-for="(item, index) in form.Items" :key="item.uid">
-                      <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors bg-white">
-                        <td class="px-2 py-2 grid-select relative">
-                          <select class="w-full text-xs"
-                            x-init="() => { const ts = initDynamicItem($el, item, 'Items', 'Item_Name'); return () => ts.destroy(); }"></select>
-                        </td>
-                        <td class="px-2 py-2"><input x-model="item.Unit" type="text" class="grid-input bg-gray-100 text-gray-500 cursor-not-allowed"
-                            placeholder="e.g. Kg, Nos" readonly></td>
-                        <td class="px-2 py-2"><input x-model.number="item.Quantity" @input="recalculateTotals()"
-                            type="number" min="1" step="any" class="grid-input"></td>
-                        <td class="px-2 py-2"><input x-model="item.Deliver_to_Plant" type="text" class="grid-input">
-                        </td>
-                        <td class="px-2 py-2 text-center">
-                          <button type="button" @click="removeItemRow(index)"
-                            class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50"><i
-                              class="bi bi-trash"></i></button>
-                        </td>
-                      </tr>
-                    </template>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="mb-6 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
-              <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                <span class="text-xs font-semibold text-gray-700 tracking-wide">Quotation Comparison Statement <span
-                    class="text-red-500">*</span></span>
-                <button type="button" @click="addVendorRow()"
-                  class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+
-                  Add Quote Line</button>
-              </div>
-              <div class="overflow-x-auto" style="overflow:visible;">
-                <table class="w-full border-collapse min-w-[1100px]">
-                  <thead class="bg-white border-b border-gray-200">
-                    <tr>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[14%]">Vendor
-                      </th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[14%]">Item</th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[8%]">Basic Rate</th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[7%]">Disc %</th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[8%]">Neg. Rate</th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[8%]">Freight</th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[7%]">GST %</th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[9%]">Unit Landed Rate
-                      </th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[12%]">Terms</th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-[7%]">Rank</th>
-                      <th class="px-2 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-8"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr x-show="form.Quotation_Comparison_Statement.length === 0">
-                      <td colspan="11" class="px-3 py-4 text-center text-xs text-gray-400 italic">No vendor quotes
-                        generated yet.</td>
-                    </tr>
-                    <template x-for="(vendor, index) in form.Quotation_Comparison_Statement" :key="vendor.uid">
-                      <tr class="border-b border-gray-100 transition-colors bg-white hover:bg-gray-50/50"
-                        :class="{'bg-emerald-50/30 hover:bg-emerald-50/50': vendor.Rank === 'Yes'}">
-
-                        <td class="px-2 py-2 grid-select relative">
-                          <select
-                            x-init="() => { const ts = initDynamicVendor($el, vendor); return () => ts.destroy(); }"
-                            class="w-full text-xs"></select>
-                        </td>
-
-                        <td class="px-2 py-2 grid-select relative">
-                          <select
-                            x-init="() => { const ts = initDynamicItem($el, vendor, 'Items_Master', 'Item_Name'); return () => ts.destroy(); }"
-                            class="w-full text-xs"></select>
-                        </td>
-
-                        <td class="px-2 py-2"><input x-model.number="vendor.Basic_Rate"
-                            @input="syncRates(vendor, 'basic')" type="number" step="any" class="grid-input"></td>
-                        <td class="px-2 py-2"><input x-model.number="vendor.Disc" @input="syncRates(vendor, 'disc')"
-                            type="number" step="any" class="grid-input"></td>
-                        <td class="px-2 py-2"><input x-model.number="vendor.Negotiated_Rate"
-                            @input="syncRates(vendor, 'neg')" type="number" step="any" class="grid-input"></td>
-
-                        <td class="px-2 py-2"><input x-model.number="vendor.Freight"
-                            @input="syncRates(vendor, 'freight')" type="number" step="any" class="grid-input"></td>
-                        <td class="px-2 py-2"><input x-model.number="vendor.GST" @input="syncRates(vendor, 'gst')"
-                            type="number" step="any" class="grid-input"></td>
-                        <td class="px-2 py-2"><input x-model.number="vendor.Landed_Rate" type="number" disabled
-                            class="grid-input font-bold text-gray-800 bg-gray-100 cursor-not-allowed"></td>
-                        <td class="px-2 py-2">
-                          <select x-model="vendor.Payment_Terms" class="grid-input">
-                            <option value="">Select...</option>
-                            <option value="Advance">Advance</option>
-                            <option value="15 Days Credit">15 Days</option>
-                            <option value="30 Days Credit">30 Days</option>
-                            <option value="45 Days Credit">45 Days</option>
-                          </select>
-                        </td>
-                        <td class="px-2 py-2">
-                          <select x-model="vendor.Rank" @change="handleRankChange(vendor, index)"
-                            class="grid-input font-semibold"
-                            :class="vendor.Rank === 'Yes' ? 'text-emerald-700 border-emerald-500 bg-emerald-50 focus:border-emerald-600 focus:ring-emerald-500/20' : ''">
-                            <option value="No">No</option>
-                            <option value="Yes">Yes</option>
-                          </select>
-                        </td>
-                        <td class="px-2 py-2 text-center">
-                          <button type="button" @click="removeVendorRow(index)"
-                            class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50"><i
-                              class="bi bi-trash"></i></button>
-                        </td>
-                      </tr>
-                    </template>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <h4 class="text-xs font-bold text-emerald-600 tracking-wide mb-3 border-b border-gray-100 pb-1">Final
-              Decision</h4>
-            <div class="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Finalized
-                  Vendor</label>
-                <input x-model="form.Finalized_Vendor" type="text" readonly
-                  class="w-full py-2 px-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] font-semibold text-emerald-700 cursor-not-allowed outline-none">
-              </div>
-              <div>
-                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Grand Total Landed
-                  Rate (Qty × Unit Landed Rate)</label>
+            <div class="flex gap-2 items-center">
                 <div class="relative">
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₹</span>
-                  <input x-model.number="form.Total_Landed_Rate" type="number" step="any" readonly
-                    class="w-full py-2 pl-7 pr-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] font-bold text-[#1B5CA8] cursor-not-allowed outline-none">
+                    <i class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px] pointer-events-none"></i>
+                    <input x-model="searchQuery" type="text" placeholder="Search by ID#, Subject, PR..." class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[230px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10">
                 </div>
-              </div>
+                <button @click="openModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-all shadow-sm">
+                    <i class="bi bi-plus-lg"></i> Create Quote Comparison
+                </button>
             </div>
-
-            <div class="mb-4">
-              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Justification</label>
-              <textarea x-model="form.Justification" rows="3"
-                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></textarea>
-            </div>
-
-            <div class="mb-5">
-              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Attachments</label>
-              <input x-ref="fileInput" type="file" multiple
-                class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-[#EBF3FC] file:text-[#1B5CA8] hover:file:bg-[#d8e8fa] transition-colors cursor-pointer border border-gray-200 rounded-lg bg-gray-50 py-1.5 px-2">
-            </div>
-
-            <div class="flex justify-end gap-2 border-t border-gray-100 pt-4 mt-2">
-              <button type="button" @click="closeModal()"
-                class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
-              <button type="submit" :disabled="isSubmitting"
-                class="inline-flex items-center justify-center min-w-[100px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70">
-                <span x-show="!isSubmitting">Submit VC</span>
-                <div x-show="isSubmitting" class="vc-spinner"
-                  style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
-              </button>
-            </div>
-          </form>
         </div>
-      </div>
+
+        <!-- Table -->
+        <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
+            <table class="w-full border-collapse" style="min-width:1150px">
+                <colgroup>
+                    <col style="width:110px">
+                    <col style="width:160px">
+                    <col style="width:110px">
+                    <col style="width:110px">
+                    <col style="width:100px">
+                    <col style="width:110px">
+                    <col style="width:140px">
+                    <col style="width:110px">
+                    <col style="width:90px">
+                </colgroup>
+                <thead>
+                    <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
+                        <template x-for="col in ['qc_no', 'subject', 'pr_ref', 'rfq_ref', 'date', 'status', 'final_vendor', 'total_rate']" :key="col">
+                            <th @click="toggleSort(col)" data-sort class="px-3 py-2 text-[11px] font-semibold text-gray-500 tracking-wide text-left whitespace-nowrap" :class="sortCol === col ? 'sort-active' : ''">
+                                <span x-text="{qc_no: 'ID #', subject: 'Subject', pr_ref: 'PR Ref', rfq_ref: 'RFQ Ref', date: 'Created Date', status: 'Status', final_vendor: 'Final Vendor', total_rate: 'Total Rate'}[col]"></span>
+                                <span class="sort-indicator" x-text="sortCol === col ? (sortDir === 'asc' ? '▲' : '▼') : ''"></span>
+                            </th>
+                        </template>
+                        <th class="px-3 py-2 text-[11px] font-semibold text-gray-500 tracking-wide text-left whitespace-nowrap bg-gray-50 sticky-action-cell">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr x-show="isLoading" x-cloak>
+                        <td colspan="9" class="px-3 py-12 text-center">
+                            <div class="flex flex-col items-center gap-3">
+                                <div class="vc-spinner"></div>
+                                <div class="text-sm text-gray-400 font-medium">Loading Quote Comparisons…</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr x-show="!isLoading && paginatedRecords.length === 0" x-cloak>
+                        <td colspan="9" class="px-3 py-12 text-center">
+                            <div class="text-gray-400"><i class="bi bi-clipboard-x text-3xl mb-2 block"></i>
+                                <div class="text-sm font-medium text-gray-500">No records found</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <template x-for="rec in paginatedRecords" :key="rec.ID">
+                        <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors duration-150 group">
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap"><span class="font-semibold text-[#1B5CA8] font-mono text-[11px]" x-text="rec.QC_Ref_Number || '–'"></span></td>
+                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900 max-w-[160px]" x-text="rec.Quote_Comparison_Subject || '–'"></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap font-mono text-[11px] font-semibold" x-text="rec.PR_Ref?.zc_display_value || rec.PR_Ref?.PR_Number || '–'"></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap font-mono text-[11px] font-semibold" x-text="rec.RFQ_Ref?.zc_display_value || rec.RFQ_Ref?.RFQ_Ref_Number || '–'"></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[11px] text-gray-500" x-text="formatDate(rec.Added_Time)"></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap">
+                                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap border" :class="getStatusStyle(rec).classes">
+                                    <span class="w-[5px] h-[5px] rounded-full shrink-0" :class="getStatusStyle(rec).dot"></span>
+                                    <span x-text="rec.Status || 'Submitted'"></span>
+                                </span>
+                            </td>
+                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap max-w-[140px]"><span class="text-[12px] font-medium text-gray-800" x-text="rec.Finalized_Vendor || '–'"></span></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[12px] font-medium text-gray-700" x-text="formatINR(rec.Total_Landed_Rate)"></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap bg-white group-hover:bg-[#EBF3FC] sticky-action-cell">
+                                <button @click="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:Quote_Comparison_Detailed?recordId='+rec.ID,window:'same'})" class="inline-flex items-center gap-[3px] px-2 py-[3px] rounded bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 text-[11px] font-medium transition-colors"><i class="bi bi-box-arrow-up-right"></i> View</button>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+
+            <div x-show="!isLoading && totalPages > 0" class="flex items-center justify-between px-[13px] py-[9px] border-t border-gray-200 bg-gray-50 text-xs text-gray-500" x-cloak>
+                <span>Showing <span x-text="(page - 1) * perPage + 1"></span>–<span x-text="Math.min(page * perPage, filteredRecords.length)"></span> of <span x-text="filteredRecords.length"></span> records</span>
+                <div class="flex gap-1">
+                    <button @click="page > 1 ? page-- : null" :disabled="page <= 1" class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <template x-for="p in getPagesArray()" :key="p">
+                        <button @click="typeof p === 'number' ? page = p : null" :class="page === p ? 'border-[#1B5CA8] bg-[#1B5CA8] text-white font-semibold' : (typeof p === 'number' ? 'border-gray-300 bg-white text-gray-600 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]' : 'border-transparent bg-transparent text-gray-400 cursor-default')" class="min-w-[27px] h-[27px] px-1 border rounded inline-flex items-center justify-center transition-colors">
+                            <span x-text="p"></span>
+                        </button>
+                    </template>
+                    <button @click="page < totalPages ? page++ : null" :disabled="page >= totalPages" class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- MODAL: New Quote Comparison (Vendor-Centric)                   -->
+        <!-- ============================================================ -->
+        <div x-show="isModalOpen" style="display: none;" class="vc-modal-overlay active">
+            <div class="vc-modal-bg" x-show="isModalOpen" x-transition.opacity @click="closeModal()"></div>
+            <div class="vc-modal-box max-w-7xl" style="max-height: 94vh;" x-show="isModalOpen" x-transition>
+
+                <!-- Modal Header -->
+                <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50 sticky top-0 z-20">
+                    <h3 class="text-[15px] font-bold text-gray-800">New Quote Comparison</h3>
+                    <button @click="closeModal()" type="button" class="text-gray-400 hover:text-gray-700 transition-colors"><i class="bi bi-x-lg text-lg"></i></button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-scroll">
+
+                    <form @submit.prevent="submitForm">
+
+                        <!-- Comparison Details -->
+                        <h4 class="text-xs font-bold text-[#1B5CA8] tracking-wide mb-3 border-b border-gray-100 pb-1">Comparison Details</h4>
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Subject <span class="text-red-500">*</span></label>
+                                <input x-model="form.Quote_Comparison_Subject" type="text" required class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm" placeholder="e.g. Bulk Material Comparison">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PR Reference</label>
+                                <select x-ref="prSelect" class="w-full text-xs" placeholder="Search PR Number..."></select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">RFQ Reference <span class="text-gray-400 font-normal normal-case ml-0.5">(Select to Auto-fill)</span></label>
+                                <select x-ref="rfqSelect" class="w-full text-xs" placeholder="Search RFQ Number..."></select>
+                            </div>
+                        </div>
+
+                        <!-- Items Requirement -->
+                        <div class="mb-6 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
+                            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                                <span class="text-xs font-semibold text-gray-700 tracking-wide">Items Requirement <span class="text-red-500">*</span></span>
+                                <button type="button" @click="addItemRow()" class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+ Add Item</button>
+                            </div>
+                            <div class="overflow-x-auto" style="overflow:visible;">
+                                <table class="w-full border-collapse">
+                                    <thead class="bg-white border-b border-gray-200">
+                                        <tr>
+                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[40%]">Item Lookup</th>
+                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[15%]">Unit</th>
+                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[15%]">Req. Qty</th>
+                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[25%]">Deliver To / Plant</th>
+                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-8"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr x-show="form.Items.length === 0">
+                                            <td colspan="5" class="px-3 py-4 text-center text-xs text-gray-400 italic">No items added. Select an RFQ or add manually.</td>
+                                        </tr>
+                                        <template x-for="(item, index) in form.Items" :key="item.uid">
+                                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors bg-white">
+                                                <td class="px-2 py-2 grid-select relative">
+                                                    <select class="w-full text-xs" x-init="() => { const ts = initDynamicItem($el, item, 'Items', 'Item_Name'); return () => ts.destroy(); }"></select>
+                                                </td>
+                                                <td class="px-2 py-2"><input x-model="item.Unit" type="text" class="grid-input bg-gray-100 text-gray-500 cursor-not-allowed" placeholder="e.g. Kg, Nos" readonly></td>
+                                                <td class="px-2 py-2"><input x-model.number="item.Quantity" @input="recalculateAllTotals()" type="number" min="1" step="any" class="grid-input"></td>
+                                                <td class="px-2 py-2"><input x-model="item.Deliver_to_Plant" type="text" class="grid-input"></td>
+                                                <td class="px-2 py-2 text-center">
+                                                    <button type="button" @click="removeItemRow(index)" class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50"><i class="bi bi-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Vendor Quotes - VENDOR-CENTRIC -->
+                        <div class="mb-6">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-semibold text-gray-700 tracking-wide">Vendor Quotes <span class="text-red-500">*</span></span>
+                                <button type="button" @click="addVendor()" class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-3 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">
+                                    <i class="bi bi-plus-lg mr-1"></i> Add Vendor
+                                </button>
+                            </div>
+
+                            <!-- No vendors -->
+                            <div x-show="form.Vendors.length === 0" class="border border-gray-200 rounded-lg p-6 text-center text-xs text-gray-400 italic bg-gray-50">
+                                No vendors added. Click "Add Vendor" to start.
+                            </div>
+
+                            <!-- Vendor Cards -->
+                            <template x-for="(vendor, vIdx) in form.Vendors" :key="vendor.uid">
+                                <div class="vendor-card mb-4 fade-slide-in" :class="vendor.finalized ? 'finalized' : ''">
+
+                                    <!-- Vendor Card Header -->
+                                    <div class="vendor-card-header" :class="vendor.finalized ? 'finalized' : ''">
+                                        <div class="flex items-center gap-3 flex-1 min-w-0 flex-wrap">
+                                            <span class="text-xs font-semibold text-gray-600 shrink-0">Vendor</span>
+                                            <div class="grid-select relative flex-1 min-w-[160px] max-w-[280px]">
+                                                <select class="w-full text-xs" :x-ref="'vendorSelect_' + vIdx" x-init="() => { const ts = initDynamicVendor($el, vendor); window['vendorTs_'+vIdx] = ts; return () => { if(window['vendorTs_'+vIdx]) window['vendorTs_'+vIdx].destroy(); }; }"></select>
+                                            </div>
+                                            <span x-show="vendor.finalized" class="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full text-[10px] font-bold border border-emerald-200 shrink-0">
+                                                <i class="bi bi-check-circle-fill text-emerald-500 text-[11px]"></i> Finalized
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center gap-1.5 shrink-0">
+                                            <button type="button" @click="finalizeVendor(vIdx)" class="text-[10px] font-semibold px-2.5 py-1 rounded-md transition-colors" :class="vendor.finalized ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+                                                <i class="bi" :class="vendor.finalized ? 'bi-check2-all' : 'bi-check2'"></i>
+                                                <span x-text="vendor.finalized ? 'Finalized' : 'Finalize'"></span>
+                                            </button>
+                                            <button type="button" @click="removeVendor(vIdx)" class="text-gray-400 hover:text-red-500 p-1 rounded-md hover:bg-red-50 transition-colors" title="Remove Vendor">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Vendor Quote Table -->
+                                    <div class="overflow-x-auto p-0">
+                                        <table class="vendor-quote-table">
+                                            <thead>
+                                                <tr>
+                                                    <th style="min-width:140px;">Item</th>
+                                                    <th style="min-width:80px;">Basic Rate</th>
+                                                    <th style="min-width:65px;">Disc %</th>
+                                                    <th style="min-width:85px;">Neg. Rate</th>
+                                                    <th style="min-width:70px;">Freight</th>
+                                                    <th style="min-width:60px;">GST %</th>
+                                                    <th style="min-width:90px;">Landed Rate</th>
+                                                    <th style="min-width:90px;">Payment Terms</th>
+                                                    <th style="min-width:65px; text-align:center;">Rank</th>
+                                                    <th style="min-width:36px; text-align:center;"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr x-show="vendor.QuoteLines.length === 0">
+                                                    <td colspan="10" class="text-center text-gray-400 italic py-3 text-[11px]">No item quotes for this vendor. Click "Add Item Quote" below.</td>
+                                                </tr>
+                                                <template x-for="(line, lIdx) in vendor.QuoteLines" :key="line.uid">
+                                                    <tr :class="line.Rank === 'Yes' ? 'bg-emerald-50/40' : ''">
+                                                        <!-- Item -->
+                                                        <td class="grid-select relative" style="min-width:140px;">
+                                                            <select class="w-full text-xs" :x-ref="'itemSelect_'+vIdx+'_'+lIdx" x-init="() => { const ts = initDynamicItem($el, line, 'Items_Master', 'Item_Name'); return () => ts.destroy(); }"></select>
+                                                        </td>
+                                                        <!-- Basic Rate -->
+                                                        <td><input x-model.number="line.Basic_Rate" @input="syncVendorLineRates(vIdx, lIdx, 'basic')" type="number" step="any" class="grid-input" style="min-width:70px;"></td>
+                                                        <!-- Disc % -->
+                                                        <td><input x-model.number="line.Disc" @input="syncVendorLineRates(vIdx, lIdx, 'disc')" type="number" step="any" class="grid-input" style="min-width:55px;"></td>
+                                                        <!-- Neg. Rate -->
+                                                        <td><input x-model.number="line.Negotiated_Rate" @input="syncVendorLineRates(vIdx, lIdx, 'neg')" type="number" step="any" class="grid-input" style="min-width:75px;"></td>
+                                                        <!-- Freight -->
+                                                        <td><input x-model.number="line.Freight" @input="syncVendorLineRates(vIdx, lIdx, 'freight')" type="number" step="any" class="grid-input" style="min-width:60px;"></td>
+                                                        <!-- GST % -->
+                                                        <td><input x-model.number="line.GST" @input="syncVendorLineRates(vIdx, lIdx, 'gst')" type="number" step="any" class="grid-input" style="min-width:50px;"></td>
+                                                        <!-- Landed Rate (auto) -->
+                                                        <td><input x-model.number="line.Landed_Rate" type="number" disabled class="grid-input font-bold text-[#1B5CA8] bg-gray-100 cursor-not-allowed" style="min-width:80px;"></td>
+                                                        <!-- Payment Terms -->
+                                                        <td style="min-width:90px;">
+                                                            <select x-model="line.Payment_Terms" class="grid-input" style="min-width:80px;">
+                                                                <option value="">Select…</option>
+                                                                <option value="Advance">Advance</option>
+                                                                <option value="15 Days Credit">15 Days</option>
+                                                                <option value="30 Days Credit">30 Days</option>
+                                                                <option value="45 Days Credit">45 Days</option>
+                                                            </select>
+                                                        </td>
+                                                        <!-- Rank -->
+                                                        <td style="text-align:center; min-width:65px;">
+                                                            <select x-model="line.Rank" @change="handleVendorLineRank(vIdx, lIdx)" class="grid-input font-semibold text-center" :class="line.Rank === 'Yes' ? 'text-emerald-700 border-emerald-500 bg-emerald-50' : ''" style="min-width:55px;">
+                                                                <option value="No">No</option>
+                                                                <option value="Yes">Yes</option>
+                                                            </select>
+                                                        </td>
+                                                        <!-- Remove -->
+                                                        <td style="text-align:center; min-width:36px;">
+                                                            <button type="button" @click="removeVendorLine(vIdx, lIdx)" class="text-gray-400 hover:text-red-500 p-1 rounded-md hover:bg-red-50 transition-colors"><i class="bi bi-x"></i></button>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Add Item Quote -->
+                                    <div class="px-3 py-2 border-t border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                                        <button type="button" @click="addVendorLine(vIdx)" class="add-quote-btn text-[10px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">
+                                            <i class="bi bi-plus-lg mr-0.5"></i> Add Item Quote
+                                        </button>
+                                        <span x-show="vendor.QuoteLines.length > 0" class="text-[10px] text-gray-400">
+                                            <span x-text="vendor.QuoteLines.filter(l => l.Rank === 'Yes').length"></span> ranked Yes
+                                        </span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Final Decision -->
+                        <h4 class="text-xs font-bold text-emerald-600 tracking-wide mb-3 border-b border-gray-100 pb-1">Final Decision</h4>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Finalized Vendor</label>
+                                <input x-model="form.Finalized_Vendor" type="text" readonly class="w-full py-2 px-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] font-semibold text-emerald-700 cursor-not-allowed outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Grand Total Landed Rate <span class="text-gray-400 font-normal normal-case">(Qty × Landed Rate)</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₹</span>
+                                    <input x-model.number="form.Total_Landed_Rate" type="number" step="any" readonly class="w-full py-2 pl-7 pr-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] font-bold text-[#1B5CA8] cursor-not-allowed outline-none">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Justification -->
+                        <div class="mb-4">
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Justification</label>
+                            <textarea x-model="form.Justification" rows="3" class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></textarea>
+                        </div>
+
+                        <!-- Attachments -->
+                        <div class="mb-5">
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Attachments</label>
+                            <input x-ref="fileInput" type="file" multiple class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-[#EBF3FC] file:text-[#1B5CA8] hover:file:bg-[#d8e8fa] transition-colors cursor-pointer border border-gray-200 rounded-lg bg-gray-50 py-1.5 px-2">
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="flex justify-end gap-2 border-t border-gray-100 pt-4 mt-2">
+                            <button type="button" @click="closeModal()" class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button type="submit" :disabled="isSubmitting" class="inline-flex items-center justify-center min-w-[100px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70">
+                                <span x-show="!isSubmitting">Submit VC</span>
+                                <div x-show="isSubmitting" class="vc-spinner" style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+                <!-- end modal-scroll -->
+            </div>
+        </div>
+
     </div>
-  </div>
 
-  <script>
-    document.addEventListener('alpine:init', () => {
+    <script>
+        document.addEventListener('alpine:init', () => {
 
-      const Toast = Swal.mixin({
-        toast: true, position: 'top-end', showConfirmButton: false, timer: 3500, timerProgressBar: true,
-        customClass: { popup: 'font-[Lato] text-sm' }
-      });
-
-      Alpine.data('vcApp', () => ({
-        REPORT_NAME: 'Quote_Comparison_Report',
-        FORM_NAME: 'Quote_Comparison',
-
-        allRecords: [],
-        isLoading: true,
-        searchQuery: '',
-        filter: 'all',
-        sortCol: 'date',
-        sortDir: 'desc',
-        page: 1,
-        perPage: 10,
-
-        stats: { total: '–', pending: '–', finalized: '–', rejected: '–' },
-
-        isModalOpen: false,
-        isSubmitting: false,
-        tsInstance: null,
-        rfqTsInstance: null,
-
-        form: { Quote_Comparison_Subject: '', PR_Ref: '', RFQ_Ref: '', Finalized_Vendor: '', Total_Landed_Rate: '', Justification: '', Items: [], Quotation_Comparison_Statement: [] },
-
-        initApp() {
-          this.fetchRecords();
-          this.$watch('searchQuery', Alpine.debounce(() => { this.page = 1; this.fetchRecords(); }, 400));
-          this.$watch('filter', () => { this.page = 1; this.fetchRecords(); });
-        },
-
-        // --- Computed Properties ---
-        get filteredRecords() {
-          let recs = [...this.allRecords];
-          return recs.sort((a, b) => {
-            let va = this.getSortValue(a, this.sortCol);
-            let vb = this.getSortValue(b, this.sortCol);
-            let cmp = 0;
-            if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
-            else {
-              va = String(va).toLowerCase();
-              vb = String(vb).toLowerCase();
-              cmp = va < vb ? -1 : va > vb ? 1 : 0;
-            }
-            return this.sortDir === 'asc' ? cmp : -cmp;
-          });
-        },
-
-        get paginatedRecords() {
-          const start = (this.page - 1) * this.perPage;
-          return this.filteredRecords.slice(start, start + this.perPage);
-        },
-
-        get totalPages() {
-          return Math.max(1, Math.ceil(this.filteredRecords.length / this.perPage));
-        },
-
-        // --- Data Fetching ---
-        buildCriteria() {
-          let criteria = [];
-          if (this.searchQuery.trim()) {
-            let q = this.searchQuery.trim().replace(/'/g, "\\'");
-            criteria.push(`(QC_Ref_Number.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))`);
-          }
-          if (this.filter === 'pending') criteria.push('(Status == "Submitted" || Status == "Requested For Re Negotiation" || (Status == "" && Finalized_Vendor == ""))');
-          else if (this.filter === 'finalized') criteria.push('(Status == "Finalized" || Status == "Freezed" || (Status == "" && Finalized_Vendor != ""))');
-          else if (this.filter === 'rejected') criteria.push('(Status == "Rejected")');
-          return criteria.join(' && ');
-        },
-
-        async fetchRecords() {
-          this.isLoading = true;
-          try {
-            let accumulated = [];
-            let cursor = null;
-            let crit = this.buildCriteria();
-
-            do {
-              let config = { report_name: this.REPORT_NAME, max_records: 200, field_config: 'all' };
-              if (crit) config.criteria = crit;
-              if (cursor) config.record_cursor = cursor;
-
-              let res = await ZOHO.CREATOR.DATA.getRecords(config);
-              if (res.code === 3000 && res.data) {
-                accumulated = accumulated.concat(res.data);
-                cursor = res.data.length >= 200 ? res.record_cursor : null;
-              } else {
-                cursor = null;
-              }
-            } while (cursor);
-
-            this.allRecords = accumulated;
-            this.computeStats();
-          } catch (err) {
-            console.error('Fetch error', err);
-            this.allRecords = [];
-          } finally {
-            this.isLoading = false;
-          }
-        },
-
-        async computeStats() {
-          let q = this.searchQuery.trim().replace(/'/g, "\\'");
-          let searchCrit = q ? `(QC_Ref_Number.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))` : '';
-          const build = (statusCrit) => [searchCrit, statusCrit].filter(Boolean).join(' && ');
-
-          const map = [
-            { key: 'total', crit: build('') },
-            { key: 'pending', crit: build('(Status == "Submitted" || Status == "Requested For Re Negotiation" || (Status == "" && Finalized_Vendor == ""))') },
-            { key: 'finalized', crit: build('(Status == "Finalized" || Status == "Freezed" || (Status == "" && Finalized_Vendor != ""))') },
-            { key: 'rejected', crit: build('(Status == "Rejected")') }
-          ];
-
-          for (let m of map) {
-            let config = { report_name: this.REPORT_NAME };
-            if (m.crit) config.criteria = m.crit;
-            try {
-              let res = await ZOHO.CREATOR.DATA.getRecordCount(config);
-              this.stats[m.key] = res.result ? res.result.records_count : 0;
-            } catch (e) {
-              this.stats[m.key] = 0;
-            }
-          }
-        },
-
-        // --- UI Helpers ---
-        setFilter(f) { this.filter = f; },
-
-        toggleSort(col) {
-          if (this.sortCol === col) {
-            this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
-          } else {
-            this.sortCol = col;
-            this.sortDir = (col === 'date' || col === 'total_rate') ? 'desc' : 'asc';
-          }
-          this.page = 1;
-        },
-
-        getSortValue(rec, col) {
-          switch (col) {
-            case 'qc_no': return (rec.QC_Ref_Number || '').toString().toLowerCase();
-            case 'subject': return (rec.Quote_Comparison_Subject || '').toString().toLowerCase();
-            case 'pr_ref': return (rec.PR_Ref?.zc_display_value || '').toLowerCase();
-            case 'rfq_ref': return (rec.RFQ_Ref?.zc_display_value || '').toLowerCase();
-            case 'date': return rec.Added_Time ? dayjs(rec.Added_Time).valueOf() : 0;
-            case 'status': return this.normalizeStatusGroup(rec);
-            case 'final_vendor': return (rec.Finalized_Vendor || '').toString().toLowerCase();
-            case 'total_rate': return parseFloat(rec.Total_Landed_Rate) || 0;
-            default: return '';
-          }
-        },
-
-        normalizeStatusGroup(rec) {
-          if (!rec || (!rec.Status && !rec.Finalized_Vendor)) return 'pending';
-          const st = (rec.Status || '').toLowerCase();
-          if (st === 'rejected') return 'rejected';
-          if (st === 'finalized' || st === 'freezed' || (!rec.Status && rec.Finalized_Vendor)) return 'finalized';
-          return 'pending';
-        },
-
-        getStatusStyle(rec) {
-          const group = this.normalizeStatusGroup(rec);
-          const map = {
-            pending: { classes: 'border-amber-200 bg-amber-50 text-amber-800', dot: 'bg-amber-500' },
-            finalized: { classes: 'border-emerald-200 bg-emerald-50 text-emerald-800', dot: 'bg-emerald-600' },
-            rejected: { classes: 'border-red-200 bg-red-50 text-red-800', dot: 'bg-red-600' }
-          };
-          return map[group] || map.pending;
-        },
-
-        formatDate(dateStr) { return dateStr ? (dayjs(dateStr).isValid() ? dayjs(dateStr).format('DD MMM YYYY') : dateStr) : '–'; },
-        formatINR(amt) { return (amt == null || isNaN(amt) || amt === '') ? '–' : new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(amt); },
-
-        getPagesArray() {
-          let pages = [];
-          for (let p = 1; p <= this.totalPages; p++) {
-            if (p <= 2 || p === this.totalPages || (p >= this.page - 1 && p <= this.page + 1)) pages.push(p);
-          }
-          pages = [...new Set(pages)].sort((a, b) => a - b);
-          let finalPages = [];
-          for (let i = 0; i < pages.length; i++) {
-            if (i > 0 && pages[i] - pages[i - 1] > 1) finalPages.push('…');
-            finalPages.push(pages[i]);
-          }
-          return finalPages;
-        },
-
-        // --- Form / Modal Methods ---
-        openModal() {
-          this.form = { Quote_Comparison_Subject: '', PR_Ref: '', RFQ_Ref: '', Finalized_Vendor: '', Total_Landed_Rate: '', Justification: '', Items: [], Quotation_Comparison_Statement: [] };
-          if (this.$refs.fileInput) this.$refs.fileInput.value = '';
-          this.isModalOpen = true;
-          setTimeout(() => { this.initPrTomSelect(); this.initRfqTomSelect(); }, 50);
-        },
-
-        closeModal() {
-          this.isModalOpen = false;
-          if (this.tsInstance) { this.tsInstance.destroy(); this.tsInstance = null; }
-          if (this.rfqTsInstance) { this.rfqTsInstance.destroy(); this.rfqTsInstance = null; }
-          if (this.$refs.fileInput) this.$refs.fileInput.value = '';
-        },
-
-        // ADDED: uid to ensure specific item row deletes properly without confusing DOM framework
-        addItemRow() { this.form.Items.push({ uid: Date.now() + Math.random(), Items: '', Item_Name: '', Unit: '', Quantity: '', Deliver_to_Plant: '' }); },
-
-        removeItemRow(index) {
-          const removedItem = this.form.Items[index];
-          this.form.Items.splice(index, 1);
-
-          // Bug Fix: Auto-cleanup corresponding vendor rows if you delete an item
-          if (removedItem && removedItem.Items) {
-            this.form.Quotation_Comparison_Statement = this.form.Quotation_Comparison_Statement.filter(v => v.Items_Master !== removedItem.Items);
-          }
-          this.recalculateTotals();
-        },
-
-        // ADDED: uid for vendor row tracking
-        addVendorRow() { this.form.Quotation_Comparison_Statement.push({ uid: Date.now() + Math.random(), Vendor_Name: '', Vendor_Display: '', Items_Master: '', Item_Name: '', Basic_Rate: '', Negotiated_Rate: 0, Disc: '', Freight: '', GST: '', Landed_Rate: '', Payment_Terms: '', Rank: 'No' }); },
-        removeVendorRow(index) { this.form.Quotation_Comparison_Statement.splice(index, 1); this.recalculateTotals(); },
-
-        syncRates(vendor, source) {
-          let basic = parseFloat(vendor.Basic_Rate) || 0;
-          if (source === 'basic' || source === 'disc') {
-            let disc = parseFloat(vendor.Disc) || 0;
-            vendor.Negotiated_Rate = parseFloat((basic - (basic * disc / 100)).toFixed(2));
-          } else if (source === 'neg') {
-            let neg = parseFloat(vendor.Negotiated_Rate) || 0;
-            vendor.Disc = basic > 0 ? parseFloat((((basic - neg) / basic) * 100).toFixed(2)) : 0;
-          }
-          let negRate = parseFloat(vendor.Negotiated_Rate) || parseFloat(vendor.Basic_Rate) || 0;
-          let freight = parseFloat(vendor.Freight) || 0;
-          let gst = parseFloat(vendor.GST) || 0;
-          let subtotal = negRate + freight;
-          vendor.Landed_Rate = parseFloat((subtotal + (subtotal * gst / 100)).toFixed(2));
-          if (vendor.Rank === 'Yes') this.recalculateTotals();
-        },
-
-        handleRankChange(vendor, index) {
-          const chosenVendorId = vendor.Vendor_Name;
-          if (vendor.Rank === 'Yes') {
-            this.form.Quotation_Comparison_Statement.forEach(v => { v.Rank = (v.Vendor_Name === chosenVendorId) ? 'Yes' : 'No'; });
-          } else {
-            this.form.Quotation_Comparison_Statement.forEach(v => { if (v.Vendor_Name === chosenVendorId) v.Rank = 'No'; });
-          }
-          this.recalculateTotals();
-        },
-
-        recalculateTotals() {
-          let finalizedRow = this.form.Quotation_Comparison_Statement.find(v => v.Rank === 'Yes');
-          if (finalizedRow && finalizedRow.Vendor_Name) {
-            let finalizedVendorId = finalizedRow.Vendor_Name;
-            this.form.Finalized_Vendor = finalizedRow.Vendor_Display || finalizedVendorId;
-
-            let total = 0;
-            this.form.Quotation_Comparison_Statement.forEach(v => {
-              if (v.Vendor_Name === finalizedVendorId && v.Rank === 'Yes') {
-                // Because rows are per-item, we calculate (Qty * Landed Rate)
-                let reqItem = this.form.Items.find(i => i.Items === v.Items_Master);
-                let qty = reqItem ? (parseFloat(reqItem.Quantity) || 0) : 0;
-                let unitLandedRate = parseFloat(v.Landed_Rate) || 0;
-                total += (qty * unitLandedRate);
-              }
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3500,
+                timerProgressBar: true,
+                customClass: { popup: 'font-[Lato] text-sm' }
             });
-            this.form.Total_Landed_Rate = total > 0 ? parseFloat(total.toFixed(2)) : '';
-          } else {
-            this.form.Finalized_Vendor = ''; this.form.Total_Landed_Rate = '';
-          }
-        },
 
-        // --- TomSelect Configurations ---
-        initPrTomSelect() {
-          this.tsInstance = new TomSelect(this.$refs.prSelect, {
-            valueField: 'ID', labelField: 'PR_Number', searchField: ['PR_Number'],
-            create: false, maxItems: 1, placeholder: 'Search PR...', loadThrottle: 350,
-            onChange: (value) => {
-              this.form.PR_Ref = value;
-              if (this.rfqTsInstance) {
-                this.rfqTsInstance.clear(); this.rfqTsInstance.clearOptions();
-                if (value) {
-                  Toast.fire({ icon: 'info', title: 'Fetching available RFQs...' });
-                  ZOHO.CREATOR.DATA.getRecords({ report_name: 'Request_For_Quotation_Report', criteria: `(PR_Refs.contains(${value}))` })
-                    .then(res => {
-                      if (res.code === 3000 && res.data) {
-                        res.data.forEach(rfq => this.rfqTsInstance.addOption(rfq));
-                        this.rfqTsInstance.refreshOptions(false);
-                      }
-                    });
-                }
-              }
-            },
-            load: (query, callback) => {
-              var q = query.replace(/'/g, "\\'");
-              ZOHO.CREATOR.DATA.getRecords({ report_name: 'Purchase_Requisition_Report', criteria: `(PR_Number.contains("${q}"))` })
-                .then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(() => callback());
-            },
-            render: { option: (data, escape) => '<div class="font-mono font-medium">' + escape(data.PR_Number) + '</div>', item: (data, escape) => '<div class="font-mono">' + escape(data.PR_Number) + '</div>' }
-          });
-        },
+            Alpine.data('vcApp', () => ({
+                REPORT_NAME: 'Quote_Comparison_Report',
+                FORM_NAME: 'Quote_Comparison',
 
-        initRfqTomSelect() {
-          this.rfqTsInstance = new TomSelect(this.$refs.rfqSelect, {
-            valueField: 'ID', labelField: 'RFQ_Ref_Number', searchField: ['RFQ_Ref_Number', 'RFQ_Number'],
-            create: false, maxItems: 1, placeholder: 'Search RFQ...', loadThrottle: 350,
-            onChange: (value) => {
-              this.form.RFQ_Ref = value;
-              if (value) this.fetchRFQDetails(value);
-            },
-            load: (query, callback) => {
-              var q = query.replace(/'/g, "\\'");
-              let crit = `(RFQ_Ref_Number.contains("${q}") || RFQ_Number.contains("${q}"))`;
-              if (this.form.PR_Ref) crit += ` && (PR_Refs.contains(${this.form.PR_Ref}))`;
-              ZOHO.CREATOR.DATA.getRecords({ report_name: 'Request_For_Quotation_Report', criteria: crit })
-                .then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(() => callback());
-            },
-            render: { option: (data, escape) => '<div class="font-mono font-medium">' + escape(data.RFQ_Ref_Number || data.RFQ_Number) + '</div>', item: (data, escape) => '<div class="font-mono">' + escape(data.RFQ_Ref_Number || data.RFQ_Number) + '</div>' }
-          });
-        },
+                allRecords: [],
+                isLoading: true,
+                searchQuery: '',
+                filter: 'all',
+                sortCol: 'date',
+                sortDir: 'desc',
+                page: 1,
+                perPage: 10,
 
-        initDynamicItem(el, targetObj, idKey, nameKey) {
-          let ts = new TomSelect(el, {
-            valueField: 'ID', labelField: 'item_name', searchField: ['item_name'],
-            create: false, maxItems: 1, placeholder: 'Select Item...', loadThrottle: 350,
-            onChange: (val) => {
-              targetObj[idKey] = val;
-              let opt = ts.options[val];
-              if (opt) { targetObj[nameKey] = opt.item_name; if (opt.unit_of_measure && targetObj.Unit !== undefined) targetObj.Unit = opt.unit_of_measure; }
-            },
-            load: (query, callback) => {
-              let q = query.replace(/'/g, "\\'");
-              ZOHO.CREATOR.DATA.getRecords({ report_name: 'Items_Report', criteria: `(item_name.contains("${q}"))` })
-                .then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(() => callback());
-            },
-            render: { option: (data, escape) => `<div class="font-medium text-xs py-1 px-2">${escape(data.item_name)}</div>`, item: (data, escape) => `<div class="text-xs">${escape(data.item_name)}</div>` }
-          });
-          if (targetObj[idKey] && targetObj[nameKey]) {
-            ts.addOption({ ID: targetObj[idKey], item_name: targetObj[nameKey] });
-            ts.setValue(targetObj[idKey], true);
-          }
-          return ts;
-        },
+                stats: { total: '–', pending: '–', finalized: '–', rejected: '–' },
 
-        initDynamicVendor(el, targetObj) {
-          let ts = new TomSelect(el, {
-            valueField: 'ID', labelField: 'Display_Name', searchField: ['Display_Name'],
-            create: false, maxItems: 1, placeholder: 'Select Vendor...', loadThrottle: 350,
-            onChange: (val) => {
-              targetObj.Vendor_Name = val;
-              let opt = ts.options[val];
-              if (opt) targetObj.Vendor_Display = opt.Display_Name;
-            },
-            load: (query, callback) => {
-              let q = query.replace(/'/g, "\\'");
-              ZOHO.CREATOR.DATA.getRecords({ report_name: 'Vendor_Report', criteria: `(Display_Name.contains("${q}"))` })
-                .then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(() => callback());
-            },
-            render: { option: (data, escape) => `<div class="font-medium text-xs py-1 px-2">${escape(data.Display_Name)}</div>`, item: (data, escape) => `<div class="text-xs">${escape(data.Display_Name)}</div>` }
-          });
-          if (targetObj.Vendor_Name && targetObj.Vendor_Display) {
-            ts.addOption({ ID: targetObj.Vendor_Name, Display_Name: targetObj.Vendor_Display });
-            ts.setValue(targetObj.Vendor_Name, true);
-          }
-          return ts;
-        },
+                isModalOpen: false,
+                isSubmitting: false,
+                tsInstance: null,
+                rfqTsInstance: null,
 
-        // --- Custom API Logic ---
-        async fetchRFQDetails(rfqId) {
-          Toast.fire({ icon: 'info', title: 'Fetching RFQ details...' });
-          try {
-            let res = await ZOHO.CREATOR.DATA.invokeCustomApi({ api_name: "Get_RFQ_Details", http_method: "GET", content_type: "application/json", query_params: `recId=${rfqId}` });
-            if (res.code === 3000 && res.result && res.result.length > 0) {
-              const rfq = res.result[0];
+                // Form – Vendor-centric structure
+                form: {
+                    Quote_Comparison_Subject: '',
+                    PR_Ref: '',
+                    RFQ_Ref: '',
+                    Finalized_Vendor: '',
+                    Total_Landed_Rate: '',
+                    Justification: '',
+                    Items: [], // { uid, Items, Item_Name, Unit, Quantity, Deliver_to_Plant }
+                    Vendors: [] // { uid, Vendor_Name, Vendor_Display, finalized, QuoteLines: [{ uid, Items_Master, Item_Name, Basic_Rate, Disc, Negotiated_Rate, Freight, GST, Landed_Rate, Payment_Terms, Rank }] }
+                },
 
-              // Wipe slate clean and assign new arrays
-              this.form.Items = [];
-              this.form.Quotation_Comparison_Statement = [];
+                // --- INIT ---
+                initApp() {
+                    this.fetchRecords();
+                    this.$watch('searchQuery', Alpine.debounce(() => { this.page = 1;
+                        this.fetchRecords(); }, 400));
+                    this.$watch('filter', () => { this.page = 1;
+                        this.fetchRecords(); });
+                },
 
-              if (rfq.Items && rfq.Items.length > 0) {
-                rfq.Items.forEach(itemRow => {
-                  if (itemRow.Item && itemRow.Item.ID) {
-
-                    const reqItem = {
-                      uid: Date.now() + Math.random(), // Unique mapping ID
-                      Items: itemRow.Item.ID,
-                      Item_Name: itemRow.Item.display_value || itemRow.Item.item_name,
-                      Unit: itemRow.Unit || itemRow.Item.unit_of_measure || 'Nos',
-                      Quantity: itemRow.Quantity || 0,
-                      Deliver_to_Plant: ''
-                    };
-
-                    this.form.Items.push(reqItem);
-
-                    // Reverted Logic: 1 Row per Vendor per Item (Unique combinations)
-                    if (itemRow.vendors && Array.isArray(itemRow.vendors)) {
-                      itemRow.vendors.forEach(v => {
-                        this.form.Quotation_Comparison_Statement.push({
-                          uid: Date.now() + Math.random(),
-                          Vendor_Name: v.ID,
-                          Vendor_Display: v.Display_Name || v.Vendor_Name,
-                          Items_Master: reqItem.Items,
-                          Item_Name: reqItem.Item_Name,
-                          Basic_Rate: '', Negotiated_Rate: 0, Disc: '', Freight: '', GST: '', Landed_Rate: '', Payment_Terms: '', Rank: 'No'
-                        });
-                      });
+                // --- DATA FETCHING ---
+                buildCriteria() {
+                    let criteria = [];
+                    if (this.searchQuery.trim()) {
+                        let q = this.searchQuery.trim().replace(/'/g, "\\'");
+                        criteria.push(
+                            `(QC_Ref_Number.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))`
+                            );
                     }
-                  }
-                });
-              }
+                    if (this.filter === 'pending') criteria.push(
+                        '(Status == "Submitted" || Status == "Requested For Re Negotiation" || (Status == "" && Finalized_Vendor == ""))'
+                        );
+                    else if (this.filter === 'finalized') criteria.push(
+                        '(Status == "Finalized" || Status == "Freezed" || (Status == "" && Finalized_Vendor != ""))');
+                    else if (this.filter === 'rejected') criteria.push('(Status == "Rejected")');
+                    return criteria.join(' && ');
+                },
 
-              this.recalculateTotals();
-              Toast.fire({ icon: 'success', title: 'Items and Vendor lines loaded!' });
-            } else {
-              Toast.fire({ icon: 'warning', title: 'No items found in RFQ.' });
-            }
-          } catch (err) { Toast.fire({ icon: 'error', title: 'Failed to load RFQ Details' }); }
-        },
+                async fetchRecords() {
+                    this.isLoading = true;
+                    try {
+                        let accumulated = [];
+                        let cursor = null;
+                        let crit = this.buildCriteria();
+                        do {
+                            let config = { report_name: this.REPORT_NAME, max_records: 200, field_config: 'all' };
+                            if (crit) config.criteria = crit;
+                            if (cursor) config.record_cursor = cursor;
+                            let res = await ZOHO.CREATOR.DATA.getRecords(config);
+                            if (res.code === 3000 && res.data) {
+                                accumulated = accumulated.concat(res.data);
+                                cursor = res.data.length >= 200 ? res.record_cursor : null;
+                            } else { cursor = null; }
+                        } while (cursor);
+                        this.allRecords = accumulated;
+                        this.computeStats();
+                    } catch (err) {
+                        console.error('Fetch error', err);
+                        this.allRecords = [];
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
 
-        async submitForm() {
-          if (this.form.Items.length === 0) { Toast.fire({ icon: 'error', title: 'Please add at least one item requirement.' }); return; }
-          if (this.form.Quotation_Comparison_Statement.length === 0) { Toast.fire({ icon: 'error', title: 'Please add at least one vendor quote line.' }); return; }
+                async computeStats() {
+                    let q = this.searchQuery.trim().replace(/'/g, "\\'");
+                    let searchCrit = q ?
+                        `(QC_Ref_Number.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))` :
+                        '';
+                    const build = (statusCrit) => [searchCrit, statusCrit].filter(Boolean).join(' && ');
+                    const map = [
+                        { key: 'total', crit: build('') },
+                        { key: 'pending', crit: build(
+                                '(Status == "Submitted" || Status == "Requested For Re Negotiation" || (Status == "" && Finalized_Vendor == ""))'
+                                ) },
+                        { key: 'finalized', crit: build(
+                                '(Status == "Finalized" || Status == "Freezed" || (Status == "" && Finalized_Vendor != ""))'
+                                ) },
+                        { key: 'rejected', crit: build('(Status == "Rejected")') }
+                    ];
+                    for (let m of map) {
+                        let config = { report_name: this.REPORT_NAME };
+                        if (m.crit) config.criteria = m.crit;
+                        try {
+                            let res = await ZOHO.CREATOR.DATA.getRecordCount(config);
+                            this.stats[m.key] = res.result ? res.result.records_count : 0;
+                        } catch (e) { this.stats[m.key] = 0; }
+                    }
+                },
 
-          this.isSubmitting = true;
+                // --- UI HELPERS ---
+                setFilter(f) { this.filter = f; },
 
-          try {
-            const payload = {
-              data: {
-                Quote_Comparison_Subject: this.form.Quote_Comparison_Subject,
-                PR_Ref: this.form.PR_Ref,
-                RFQ_Ref: this.form.RFQ_Ref,
-                Finalized_Vendor: this.form.Finalized_Vendor,
-                Total_Landed_Rate: parseFloat(this.form.Total_Landed_Rate) || 0,
-                Justification: this.form.Justification,
-                Status: "Submitted",
-                Items: this.form.Items.map(i => ({ "Item": i.Items, "Unit": i.Unit, "Quantity": parseFloat(i.Quantity) || 0, "Deliver_to_Plant": i.Deliver_to_Plant || "" })),
-                Quotation_Comparison_Statement: this.form.Quotation_Comparison_Statement.map(v => ({
-                  "Vendor_Name": v.Vendor_Display || v.Vendor_Name, "Items": [v.Items_Master], "Basic_Rate": parseFloat(v.Basic_Rate) || 0,
-                  "Negotiated_Rate": parseFloat(v.Negotiated_Rate) || 0, "Disc": parseFloat(v.Disc) || 0, "Freight": parseFloat(v.Freight) || 0,
-                  "GST": parseFloat(v.GST) || 0, "Landed_Rate": parseFloat(v.Landed_Rate) || 0, "Payment_Terms": v.Payment_Terms || "", "Rank": v.Rank || "No"
-                }))
-              }
-            };
+                toggleSort(col) {
+                    if (this.sortCol === col) {
+                        this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        this.sortCol = col;
+                        this.sortDir = (col === 'date' || col === 'total_rate') ? 'desc' : 'asc';
+                    }
+                    this.page = 1;
+                },
 
-            let res = await ZOHO.CREATOR.DATA.addRecords({ form_name: this.FORM_NAME, payload });
-            if (res.code === 3000 && res.data) {
-              const newId = res.data.ID;
-              const files = this.$refs.fileInput.files;
-              if (files.length > 0) {
-                const uploadPromises = Array.from(files).map(f => ZOHO.CREATOR.FILE.uploadFile({ report_name: this.REPORT_NAME, field_name: "Attachments", file: f, id: newId }));
-                await Promise.all(uploadPromises);
-              }
-              Toast.fire({ icon: 'success', title: 'Quote Comparison created successfully!' });
-              this.closeModal();
-              this.searchQuery = '';
-              this.fetchRecords();
-            } else {
-              throw new Error(res.message || 'Error occurred during creation.');
-            }
-          } catch (err) {
-            Toast.fire({ icon: 'error', title: err.message || 'Submission failed.' });
-          } finally {
-            this.isSubmitting = false;
-          }
-        }
-      }));
-    });
-  </script>
+                getSortValue(rec, col) {
+                    switch (col) {
+                        case 'qc_no':
+                            return (rec.QC_Ref_Number || '').toString().toLowerCase();
+                        case 'subject':
+                            return (rec.Quote_Comparison_Subject || '').toString().toLowerCase();
+                        case 'pr_ref':
+                            return (rec.PR_Ref?.zc_display_value || '').toLowerCase();
+                        case 'rfq_ref':
+                            return (rec.RFQ_Ref?.zc_display_value || '').toLowerCase();
+                        case 'date':
+                            return rec.Added_Time ? dayjs(rec.Added_Time).valueOf() : 0;
+                        case 'status':
+                            return this.normalizeStatusGroup(rec);
+                        case 'final_vendor':
+                            return (rec.Finalized_Vendor || '').toString().toLowerCase();
+                        case 'total_rate':
+                            return parseFloat(rec.Total_Landed_Rate) || 0;
+                        default:
+                            return '';
+                    }
+                },
+
+                normalizeStatusGroup(rec) {
+                    if (!rec || (!rec.Status && !rec.Finalized_Vendor)) return 'pending';
+                    const st = (rec.Status || '').toLowerCase();
+                    if (st === 'rejected') return 'rejected';
+                    if (st === 'finalized' || st === 'freezed' || (!rec.Status && rec.Finalized_Vendor)) return 'finalized';
+                    return 'pending';
+                },
+
+                getStatusStyle(rec) {
+                    const group = this.normalizeStatusGroup(rec);
+                    const map = {
+                        pending: { classes: 'border-amber-200 bg-amber-50 text-amber-800', dot: 'bg-amber-500' },
+                        finalized: { classes: 'border-emerald-200 bg-emerald-50 text-emerald-800', dot: 'bg-emerald-600' },
+                        rejected: { classes: 'border-red-200 bg-red-50 text-red-800', dot: 'bg-red-600' }
+                    };
+                    return map[group] || map.pending;
+                },
+
+                formatDate(dateStr) { return dateStr ? (dayjs(dateStr).isValid() ? dayjs(dateStr).format(
+                    'DD MMM YYYY') : dateStr) : '–'; },
+
+                formatINR(amt) {
+                    if (amt == null || isNaN(amt) || amt === '') return '–';
+                    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR',
+                        maximumFractionDigits: 2 }).format(amt);
+                },
+
+                getPagesArray() {
+                    let pages = [];
+                    for (let p = 1; p <= this.totalPages; p++) {
+                        if (p <= 2 || p === this.totalPages || (p >= this.page - 1 && p <= this.page + 1)) pages.push(p);
+                    }
+                    pages = [...new Set(pages)].sort((a, b) => a - b);
+                    let finalPages = [];
+                    for (let i = 0; i < pages.length; i++) {
+                        if (i > 0 && pages[i] - pages[i - 1] > 1) finalPages.push('…');
+                        finalPages.push(pages[i]);
+                    }
+                    return finalPages;
+                },
+
+                get filteredRecords() {
+                    let recs = [...this.allRecords];
+                    return recs.sort((a, b) => {
+                        let va = this.getSortValue(a, this.sortCol);
+                        let vb = this.getSortValue(b, this.sortCol);
+                        let cmp = 0;
+                        if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+                        else {
+                            va = String(va).toLowerCase();
+                            vb = String(vb).toLowerCase();
+                            cmp = va < vb ? -1 : va > vb ? 1 : 0;
+                        }
+                        return this.sortDir === 'asc' ? cmp : -cmp;
+                    });
+                },
+
+                get paginatedRecords() {
+                    const start = (this.page - 1) * this.perPage;
+                    return this.filteredRecords.slice(start, start + this.perPage);
+                },
+
+                get totalPages() {
+                    return Math.max(1, Math.ceil(this.filteredRecords.length / this.perPage));
+                },
+
+                // --- MODAL ---
+                openModal() {
+                    this.form = {
+                        Quote_Comparison_Subject: '',
+                        PR_Ref: '',
+                        RFQ_Ref: '',
+                        Finalized_Vendor: '',
+                        Total_Landed_Rate: '',
+                        Justification: '',
+                        Items: [],
+                        Vendors: []
+                    };
+                    if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+                    this.isModalOpen = true;
+                    setTimeout(() => {
+                        this.initPrTomSelect();
+                        this.initRfqTomSelect();
+                    }, 50);
+                },
+
+                closeModal() {
+                    this.isModalOpen = false;
+                    if (this.tsInstance) { this.tsInstance.destroy();
+                        this.tsInstance = null; }
+                    if (this.rfqTsInstance) { this.rfqTsInstance.destroy();
+                        this.rfqTsInstance = null; }
+                    if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+                    // Clean up any vendor TomSelect instances
+                    if (window.vendorTsRefs) {
+                        Object.values(window.vendorTsRefs).forEach(ts => { try { ts.destroy(); } catch (e) {} });
+                        window.vendorTsRefs = {};
+                    }
+                    if (window.itemTsRefs) {
+                        Object.values(window.itemTsRefs).forEach(ts => { try { ts.destroy(); } catch (e) {} });
+                        window.itemTsRefs = {};
+                    }
+                },
+
+                // --- ITEMS GRID ---
+                addItemRow() {
+                    this.form.Items.push({ uid: Date.now() + Math.random(), Items: '', Item_Name: '', Unit: '',
+                        Quantity: '', Deliver_to_Plant: '' });
+                },
+
+                removeItemRow(index) {
+                    const removed = this.form.Items[index];
+                    this.form.Items.splice(index, 1);
+                    // Remove orphaned vendor lines
+                    if (removed && removed.Items) {
+                        this.form.Vendors.forEach(v => {
+                            v.QuoteLines = v.QuoteLines.filter(l => l.Items_Master !== removed.Items);
+                        });
+                    }
+                    this.recalculateAllTotals();
+                },
+
+                // --- VENDOR-CENTRIC METHODS ---
+                addVendor() {
+                    this.form.Vendors.push({
+                        uid: Date.now() + Math.random(),
+                        Vendor_Name: '',
+                        Vendor_Display: '',
+                        finalized: false,
+                        QuoteLines: []
+                    });
+                },
+
+                removeVendor(vIdx) {
+                    this.form.Vendors.splice(vIdx, 1);
+                    this.recalculateAllTotals();
+                },
+
+                addVendorLine(vIdx) {
+                    const vendor = this.form.Vendors[vIdx];
+                    if (!vendor) return;
+                    // Auto-select first item if available
+                    let defaultItem = '';
+                    let defaultItemName = '';
+                    if (this.form.Items.length > 0) {
+                        const first = this.form.Items[0];
+                        defaultItem = first.Items || '';
+                        defaultItemName = first.Item_Name || '';
+                    }
+                    vendor.QuoteLines.push({
+                        uid: Date.now() + Math.random(),
+                        Items_Master: defaultItem,
+                        Item_Name: defaultItemName,
+                        Basic_Rate: '',
+                        Disc: '',
+                        Negotiated_Rate: 0,
+                        Freight: '',
+                        GST: '',
+                        Landed_Rate: '',
+                        Payment_Terms: '',
+                        Rank: 'No'
+                    });
+                    // If vendor has only 1 quote line and no other lines, mark as Rank? No, let user decide.
+                    this.recalculateAllTotals();
+                },
+
+                removeVendorLine(vIdx, lIdx) {
+                    const vendor = this.form.Vendors[vIdx];
+                    if (!vendor) return;
+                    vendor.QuoteLines.splice(lIdx, 1);
+                    // If vendor has no lines, unfinalize
+                    if (vendor.QuoteLines.length === 0) {
+                        vendor.finalized = false;
+                    }
+                    this.recalculateAllTotals();
+                },
+
+                // Sync rates for a specific vendor line
+                syncVendorLineRates(vIdx, lIdx, source) {
+                    const vendor = this.form.Vendors[vIdx];
+                    if (!vendor) return;
+                    const line = vendor.QuoteLines[lIdx];
+                    if (!line) return;
+
+                    let basic = parseFloat(line.Basic_Rate) || 0;
+                    if (source === 'basic' || source === 'disc') {
+                        let disc = parseFloat(line.Disc) || 0;
+                        line.Negotiated_Rate = parseFloat((basic - (basic * disc / 100)).toFixed(2));
+                    } else if (source === 'neg') {
+                        let neg = parseFloat(line.Negotiated_Rate) || 0;
+                        line.Disc = basic > 0 ? parseFloat((((basic - neg) / basic) * 100).toFixed(2)) : 0;
+                    }
+                    let negRate = parseFloat(line.Negotiated_Rate) || parseFloat(line.Basic_Rate) || 0;
+                    let freight = parseFloat(line.Freight) || 0;
+                    let gst = parseFloat(line.GST) || 0;
+                    let subtotal = negRate + freight;
+                    line.Landed_Rate = parseFloat((subtotal + (subtotal * gst / 100)).toFixed(2));
+
+                    if (line.Rank === 'Yes') this.recalculateAllTotals();
+                },
+
+                // Handle Rank change per vendor line
+                handleVendorLineRank(vIdx, lIdx) {
+                    const vendor = this.form.Vendors[vIdx];
+                    if (!vendor) return;
+                    const line = vendor.QuoteLines[lIdx];
+                    if (!line) return;
+
+                    // If setting to Yes, clear other vendors' Yes and set this vendor's all lines to Yes
+                    if (line.Rank === 'Yes') {
+                        // Clear all other vendors' finalized status
+                        this.form.Vendors.forEach((v, i) => {
+                            if (i !== vIdx) {
+                                v.finalized = false;
+                                v.QuoteLines.forEach(l => l.Rank = 'No');
+                            }
+                        });
+                        // Set this vendor as finalized and all its lines to Yes
+                        vendor.finalized = true;
+                        vendor.QuoteLines.forEach(l => l.Rank = 'Yes');
+                        // Set Finalized_Vendor
+                        this.form.Finalized_Vendor = vendor.Vendor_Display || vendor.Vendor_Name || 'Selected Vendor';
+                    } else {
+                        // If setting to No, check if any other line in this vendor is Yes
+                        const hasYes = vendor.QuoteLines.some(l => l.Rank === 'Yes');
+                        if (!hasYes) {
+                            vendor.finalized = false;
+                            // Clear Finalized_Vendor if no vendor has Yes
+                            const anyVendorFinalized = this.form.Vendors.some(v => v.finalized);
+                            if (!anyVendorFinalized) this.form.Finalized_Vendor = '';
+                        }
+                    }
+                    this.recalculateAllTotals();
+                },
+
+                // Finalize a vendor (all lines Rank = Yes)
+                finalizeVendor(vIdx) {
+                    const vendor = this.form.Vendors[vIdx];
+                    if (!vendor) return;
+                    if (vendor.QuoteLines.length === 0) {
+                        Toast.fire({ icon: 'warning', title: 'Add at least one item quote for this vendor.' });
+                        return;
+                    }
+
+                    // Toggle: if already finalized, unfinalize
+                    if (vendor.finalized) {
+                        vendor.finalized = false;
+                        vendor.QuoteLines.forEach(l => l.Rank = 'No');
+                        // Check if any other vendor is finalized
+                        const anyFinalized = this.form.Vendors.some(v => v.finalized);
+                        if (!anyFinalized) this.form.Finalized_Vendor = '';
+                        this.recalculateAllTotals();
+                        return;
+                    }
+
+                    // Clear all other vendors
+                    this.form.Vendors.forEach((v, i) => {
+                        if (i !== vIdx) {
+                            v.finalized = false;
+                            v.QuoteLines.forEach(l => l.Rank = 'No');
+                        }
+                    });
+                    vendor.finalized = true;
+                    vendor.QuoteLines.forEach(l => l.Rank = 'Yes');
+                    this.form.Finalized_Vendor = vendor.Vendor_Display || vendor.Vendor_Name || 'Selected Vendor';
+                    this.recalculateAllTotals();
+                    Toast.fire({ icon: 'success', title: `Vendor "${this.form.Finalized_Vendor}" finalized.` });
+                },
+
+                // Recalculate Total Landed Rate across all vendors
+                recalculateAllTotals() {
+                    let total = 0;
+                    let finalizedVendor = null;
+
+                    this.form.Vendors.forEach(v => {
+                        if (v.finalized) {
+                            finalizedVendor = v;
+                            v.QuoteLines.forEach(line => {
+                                if (line.Rank === 'Yes') {
+                                    // Find matching item to get quantity
+                                    const item = this.form.Items.find(i => i.Items === line.Items_Master);
+                                    const qty = item ? (parseFloat(item.Quantity) || 0) : 0;
+                                    const landed = parseFloat(line.Landed_Rate) || 0;
+                                    total += (qty * landed);
+                                }
+                            });
+                        }
+                    });
+
+                    if (finalizedVendor) {
+                        this.form.Finalized_Vendor = finalizedVendor.Vendor_Display || finalizedVendor.Vendor_Name ||
+                            'Selected Vendor';
+                        this.form.Total_Landed_Rate = total > 0 ? parseFloat(total.toFixed(2)) : '';
+                    } else {
+                        this.form.Finalized_Vendor = '';
+                        this.form.Total_Landed_Rate = '';
+                    }
+                },
+
+                // --- TOMSELECT: PR ---
+                initPrTomSelect() {
+                    this.tsInstance = new TomSelect(this.$refs.prSelect, {
+                        valueField: 'ID',
+                        labelField: 'PR_Number',
+                        searchField: ['PR_Number'],
+                        create: false,
+                        maxItems: 1,
+                        placeholder: 'Search PR...',
+                        loadThrottle: 350,
+                        onChange: (value) => {
+                            this.form.PR_Ref = value;
+                            if (this.rfqTsInstance) {
+                                this.rfqTsInstance.clear();
+                                this.rfqTsInstance.clearOptions();
+                                if (value) {
+                                    Toast.fire({ icon: 'info', title: 'Fetching available RFQs...' });
+                                    ZOHO.CREATOR.DATA.getRecords({
+                                        report_name: 'Request_For_Quotation_Report',
+                                        criteria: `(PR_Refs.contains(${value}))`
+                                    }).then(res => {
+                                        if (res.code === 3000 && res.data) {
+                                            res.data.forEach(rfq => this.rfqTsInstance.addOption(rfq));
+                                            this.rfqTsInstance.refreshOptions(false);
+                                        }
+                                    });
+                                }
+                            }
+                        },
+                        load: (query, callback) => {
+                            var q = query.replace(/'/g, "\\'");
+                            ZOHO.CREATOR.DATA.getRecords({
+                                report_name: 'Purchase_Requisition_Report',
+                                criteria: `(PR_Number.contains("${q}"))`
+                            }).then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(
+                            () => callback());
+                        },
+                        render: {
+                            option: (data, escape) => '<div class="font-mono font-medium">' + escape(data
+                                .PR_Number) + '</div>',
+                            item: (data, escape) => '<div class="font-mono">' + escape(data.PR_Number) +
+                            '</div>'
+                        }
+                    });
+                },
+
+                // --- TOMSELECT: RFQ ---
+                initRfqTomSelect() {
+                    this.rfqTsInstance = new TomSelect(this.$refs.rfqSelect, {
+                        valueField: 'ID',
+                        labelField: 'RFQ_Ref_Number',
+                        searchField: ['RFQ_Ref_Number', 'RFQ_Number'],
+                        create: false,
+                        maxItems: 1,
+                        placeholder: 'Search RFQ...',
+                        loadThrottle: 350,
+                        onChange: (value) => {
+                            this.form.RFQ_Ref = value;
+                            if (value) this.fetchRFQDetails(value);
+                        },
+                        load: (query, callback) => {
+                            var q = query.replace(/'/g, "\\'");
+                            let crit = `(RFQ_Ref_Number.contains("${q}") || RFQ_Number.contains("${q}"))`;
+                            if (this.form.PR_Ref) crit += ` && (PR_Refs.contains(${this.form.PR_Ref}))`;
+                            ZOHO.CREATOR.DATA.getRecords({
+                                report_name: 'Request_For_Quotation_Report',
+                                criteria: crit
+                            }).then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(
+                                () => callback());
+                        },
+                        render: {
+                            option: (data, escape) => '<div class="font-mono font-medium">' + escape(data
+                                .RFQ_Ref_Number || data.RFQ_Number) + '</div>',
+                            item: (data, escape) => '<div class="font-mono">' + escape(data.RFQ_Ref_Number ||
+                                data.RFQ_Number) + '</div>'
+                        }
+                    });
+                },
+
+                // --- TOMSELECT: Dynamic Item (used in Items grid and Vendor lines) ---
+                initDynamicItem(el, targetObj, idKey, nameKey) {
+                    let ts = new TomSelect(el, {
+                        valueField: 'ID',
+                        labelField: 'item_name',
+                        searchField: ['item_name'],
+                        create: false,
+                        maxItems: 1,
+                        placeholder: 'Select Item...',
+                        loadThrottle: 350,
+                        onChange: (val) => {
+                            targetObj[idKey] = val;
+                            let opt = ts.options[val];
+                            if (opt) {
+                                targetObj[nameKey] = opt.item_name;
+                                if (opt.unit_of_measure && targetObj.Unit !== undefined) targetObj.Unit = opt
+                                    .unit_of_measure;
+                            }
+                            // If this is a vendor line, recalc totals
+                            if (targetObj.Items_Master !== undefined) {
+                                // Find parent vendor and recalc
+                                this.recalculateAllTotals();
+                            }
+                        },
+                        load: (query, callback) => {
+                            let q = query.replace(/'/g, "\\'");
+                            ZOHO.CREATOR.DATA.getRecords({
+                                report_name: 'Items_Report',
+                                criteria: `(item_name.contains("${q}"))`
+                            }).then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(
+                                () => callback());
+                        },
+                        render: {
+                            option: (data, escape) =>
+                                `<div class="font-medium text-xs py-1 px-2">${escape(data.item_name)}</div>`,
+                            item: (data, escape) => `<div class="text-xs">${escape(data.item_name)}</div>`
+                        }
+                    });
+                    if (targetObj[idKey] && targetObj[nameKey]) {
+                        ts.addOption({ ID: targetObj[idKey], item_name: targetObj[nameKey] });
+                        ts.setValue(targetObj[idKey], true);
+                    }
+                    return ts;
+                },
+
+                // --- TOMSELECT: Dynamic Vendor ---
+                initDynamicVendor(el, vendorObj) {
+                    let ts = new TomSelect(el, {
+                        valueField: 'ID',
+                        labelField: 'Display_Name',
+                        searchField: ['Display_Name'],
+                        create: false,
+                        maxItems: 1,
+                        placeholder: 'Select Vendor...',
+                        loadThrottle: 350,
+                        onChange: (val) => {
+                            vendorObj.Vendor_Name = val;
+                            let opt = ts.options[val];
+                            if (opt) {
+                                vendorObj.Vendor_Display = opt.Display_Name;
+                                // If vendor was finalized, update Finalized_Vendor
+                                if (vendorObj.finalized) {
+                                    this.form.Finalized_Vendor = vendorObj.Vendor_Display || vendorObj
+                                    .Vendor_Name || 'Selected Vendor';
+                                }
+                            }
+                            this.recalculateAllTotals();
+                        },
+                        load: (query, callback) => {
+                            let q = query.replace(/'/g, "\\'");
+                            ZOHO.CREATOR.DATA.getRecords({
+                                report_name: 'Vendor_Report',
+                                criteria: `(Display_Name.contains("${q}"))`
+                            }).then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(
+                                () => callback());
+                        },
+                        render: {
+                            option: (data, escape) =>
+                                `<div class="font-medium text-xs py-1 px-2">${escape(data.Display_Name)}</div>`,
+                            item: (data, escape) => `<div class="text-xs">${escape(data.Display_Name)}</div>`
+                        }
+                    });
+                    if (vendorObj.Vendor_Name && vendorObj.Vendor_Display) {
+                        ts.addOption({ ID: vendorObj.Vendor_Name, Display_Name: vendorObj.Vendor_Display });
+                        ts.setValue(vendorObj.Vendor_Name, true);
+                    }
+                    // Store ref for cleanup
+                    if (!window.vendorTsRefs) window.vendorTsRefs = {};
+                    const key = 'vts_' + Date.now() + Math.random();
+                    window.vendorTsRefs[key] = ts;
+                    return ts;
+                },
+
+                // --- CUSTOM API: Fetch RFQ Details ---
+                async fetchRFQDetails(rfqId) {
+                    Toast.fire({ icon: 'info', title: 'Fetching RFQ details...' });
+                    try {
+                        let res = await ZOHO.CREATOR.DATA.invokeCustomApi({
+                            api_name: "Get_RFQ_Details",
+                            http_method: "GET",
+                            content_type: "application/json",
+                            query_params: `recId=${rfqId}`
+                        });
+                        if (res.code === 3000 && res.result && res.result.length > 0) {
+                            const rfq = res.result[0];
+
+                            // Reset form items and vendors
+                            this.form.Items = [];
+                            this.form.Vendors = [];
+                            this.form.Finalized_Vendor = '';
+                            this.form.Total_Landed_Rate = '';
+
+                            if (rfq.Items && rfq.Items.length > 0) {
+                                // Build a map of vendor -> items
+                                const vendorMap = {};
+
+                                rfq.Items.forEach(itemRow => {
+                                    if (itemRow.Item && itemRow.Item.ID) {
+                                        const reqItem = {
+                                            uid: Date.now() + Math.random(),
+                                            Items: itemRow.Item.ID,
+                                            Item_Name: itemRow.Item.display_value || itemRow.Item
+                                                .item_name,
+                                            Unit: itemRow.Unit || itemRow.Item.unit_of_measure ||
+                                                'Nos',
+                                            Quantity: itemRow.Quantity || 0,
+                                            Deliver_to_Plant: ''
+                                        };
+                                        this.form.Items.push(reqItem);
+
+                                        // Process vendors for this item
+                                        if (itemRow.vendors && Array.isArray(itemRow.vendors)) {
+                                            itemRow.vendors.forEach(v => {
+                                                const vKey = v.ID;
+                                                if (!vendorMap[vKey]) {
+                                                    vendorMap[vKey] = {
+                                                        uid: Date.now() + Math.random(),
+                                                        Vendor_Name: v.ID,
+                                                        Vendor_Display: v
+                                                        .Display_Name || v
+                                                        .Vendor_Name,
+                                                        finalized: false,
+                                                        QuoteLines: []
+                                                    };
+                                                }
+                                                // Add a quote line for this item
+                                                vendorMap[vKey].QuoteLines.push({
+                                                    uid: Date.now() + Math
+                                                    .random(),
+                                                    Items_Master: reqItem
+                                                    .Items,
+                                                    Item_Name: reqItem
+                                                    .Item_Name,
+                                                    Basic_Rate: '',
+                                                    Disc: '',
+                                                    Negotiated_Rate: 0,
+                                                    Freight: '',
+                                                    GST: '',
+                                                    Landed_Rate: '',
+                                                    Payment_Terms: '',
+                                                    Rank: 'No'
+                                                });
+                                            });
+                                        }
+                                    }
+                                });
+
+                                // Convert vendorMap to array
+                                this.form.Vendors = Object.values(vendorMap);
+
+                                // Auto-sync rates for each vendor line
+                                this.form.Vendors.forEach((v, vIdx) => {
+                                    v.QuoteLines.forEach((line, lIdx) => {
+                                        this.syncVendorLineRates(vIdx, lIdx, 'basic');
+                                    });
+                                });
+
+                                this.recalculateAllTotals();
+                                Toast.fire({ icon: 'success', title: `Loaded ${this.form.Items.length} items from ${this.form.Vendors.length} vendors.` });
+                            } else {
+                                Toast.fire({ icon: 'warning', title: 'No items found in RFQ.' });
+                            }
+                        } else {
+                            Toast.fire({ icon: 'warning', title: 'No items found in RFQ.' });
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        Toast.fire({ icon: 'error', title: 'Failed to load RFQ Details' });
+                    }
+                },
+
+                // --- SUBMIT ---
+                async submitForm() {
+                    // Validation
+                    if (this.form.Items.length === 0) {
+                        Toast.fire({ icon: 'error', title: 'Please add at least one item requirement.' });
+                        return;
+                    }
+                    if (this.form.Vendors.length === 0) {
+                        Toast.fire({ icon: 'error', title: 'Please add at least one vendor.' });
+                        return;
+                    }
+                    // Check each vendor has at least one quote line
+                    let hasEmptyVendor = false;
+                    this.form.Vendors.forEach(v => {
+                        if (v.QuoteLines.length === 0) hasEmptyVendor = true;
+                    });
+                    if (hasEmptyVendor) {
+                        Toast.fire({ icon: 'error', title: 'Each vendor must have at least one item quote.' });
+                        return;
+                    }
+                    // Check if any vendor is finalized
+                    const hasFinalized = this.form.Vendors.some(v => v.finalized);
+                    if (!hasFinalized) {
+                        Toast.fire({ icon: 'warning', title: 'No vendor finalized. Please select a final vendor.' });
+                        return;
+                    }
+
+                    this.isSubmitting = true;
+
+                    try {
+                        // Flatten Vendors into Quotation_Comparison_Statement rows
+                        const qcsRows = [];
+                        this.form.Vendors.forEach(v => {
+                            v.QuoteLines.forEach(line => {
+                                qcsRows.push({
+                                    "Vendor_Name": v.Vendor_Display || v.Vendor_Name || '',
+                                    "Items": line.Items_Master ? [line.Items_Master] : [],
+                                    "Basic_Rate": parseFloat(line.Basic_Rate) || 0,
+                                    "Negotiated_Rate": parseFloat(line.Negotiated_Rate) || 0,
+                                    "Disc": parseFloat(line.Disc) || 0,
+                                    "Freight": parseFloat(line.Freight) || 0,
+                                    "GST": parseFloat(line.GST) || 0,
+                                    "Landed_Rate": parseFloat(line.Landed_Rate) || 0,
+                                    "Payment_Terms": line.Payment_Terms || '',
+                                    "Rank": line.Rank || 'No'
+                                });
+                            });
+                        });
+
+                        const payload = {
+                            data: {
+                                Quote_Comparison_Subject: this.form.Quote_Comparison_Subject,
+                                PR_Ref: this.form.PR_Ref,
+                                RFQ_Ref: this.form.RFQ_Ref,
+                                Finalized_Vendor: this.form.Finalized_Vendor,
+                                Total_Landed_Rate: parseFloat(this.form.Total_Landed_Rate) || 0,
+                                Justification: this.form.Justification,
+                                Status: "Submitted",
+                                Items: this.form.Items.map(i => ({
+                                    "Item": i.Items,
+                                    "Unit": i.Unit,
+                                    "Quantity": parseFloat(i.Quantity) || 0,
+                                    "Deliver_to_Plant": i.Deliver_to_Plant || ""
+                                })),
+                                Quotation_Comparison_Statement: qcsRows
+                            }
+                        };
+
+                        let res = await ZOHO.CREATOR.DATA.addRecords({ form_name: this.FORM_NAME, payload });
+                        if (res.code === 3000 && res.data) {
+                            const newId = res.data.ID;
+                            const files = this.$refs.fileInput.files;
+                            if (files.length > 0) {
+                                const uploadPromises = Array.from(files).map(f =>
+                                    ZOHO.CREATOR.FILE.uploadFile({ report_name: this.REPORT_NAME,
+                                        field_name: "Attachments", file: f, id: newId })
+                                );
+                                await Promise.all(uploadPromises);
+                            }
+                            Toast.fire({ icon: 'success', title: 'Quote Comparison created successfully!' });
+                            this.closeModal();
+                            this.searchQuery = '';
+                            this.fetchRecords();
+                        } else {
+                            throw new Error(res.message || 'Error occurred during creation.');
+                        }
+                    } catch (err) {
+                        Toast.fire({ icon: 'error', title: err.message || 'Submission failed.' });
+                    } finally {
+                        this.isSubmitting = false;
+                    }
+                }
+
+            }));
+        });
+    </script>
 </body>
 
 </html>
