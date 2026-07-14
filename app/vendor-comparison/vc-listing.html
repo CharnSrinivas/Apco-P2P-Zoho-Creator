@@ -19,6 +19,8 @@
 
     <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js">
     </script>
+    <script
+        src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js">
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
@@ -603,8 +605,7 @@
                                             <tr
                                                 class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors bg-white">
                                                 <td class="px-2 py-2 grid-select relative">
-                                                    <select disabled="w-full text-xs"
-                                                    class="cursor-not-allowed"
+                                                    <select disabled="w-full text-xs" class="cursor-not-allowed"
                                                         x-init="() => { const ts = initDynamicItem($el, item, 'Items', 'Item_Name'); return () => ts.destroy(); }"></select>
                                                 </td>
                                                 <td class="px-2 py-2"><input disabled x-model="item.Unit" type="text"
@@ -632,10 +633,6 @@
                             <div class="flex items-center justify-between mb-3">
                                 <span class="text-xs font-semibold text-gray-700 tracking-wide">Vendor Quotes <span
                                         class="text-red-500">*</span></span>
-                                <button type="button" @click="addVendor()"
-                                    class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-3 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">
-                                    <i class="bi bi-plus-lg mr-1"></i> Add Vendor
-                                </button>
                             </div>
 
                             <!-- No vendors -->
@@ -646,37 +643,18 @@
 
                             <!-- Vendor Cards -->
                             <template x-for="(vendor, vIdx) in form.Vendors" :key="vendor.uid">
-                                <div class="vendor-card mb-4 fade-slide-in"
-                                    :class="vendor.finalized ? 'finalized' : ''">
+                                <div class="vendor-card mb-4 fade-slide-in">
 
                                     <!-- Vendor Card Header -->
-                                    <div class="vendor-card-header" :class="vendor.finalized ? 'finalized' : ''">
+                                    <div class="vendor-card-header">
                                         <div class="flex items-center gap-3 flex-1 min-w-0 flex-wrap">
                                             <span class="text-xs font-semibold text-gray-600 shrink-0">Vendor</span>
                                             <div class="grid-select relative flex-1 min-w-[160px] max-w-[280px]">
-                                                <select class="w-full text-xs" :x-ref="'vendorSelect_' + vIdx"
+                                                <select disabled class="w-full text-xs" :x-ref="'vendorSelect_' + vIdx"
                                                     x-init="() => { const ts = initDynamicVendor($el, vendor); window['vendorTs_'+vIdx] = ts; return () => { if(window['vendorTs_'+vIdx]) window['vendorTs_'+vIdx].destroy(); }; }"></select>
                                             </div>
-                                            <span x-show="vendor.finalized"
-                                                class="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full text-[10px] font-bold border border-emerald-200 shrink-0">
-                                                <i class="bi bi-check-circle-fill text-emerald-500 text-[11px]"></i>
-                                                Finalized
-                                            </span>
                                         </div>
-                                        <div class="flex items-center gap-1.5 shrink-0">
-                                            <button type="button" @click="finalizeVendor(vIdx)"
-                                                class="text-[10px] font-semibold px-2.5 py-1 rounded-md transition-colors"
-                                                :class="vendor.finalized ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
-                                                <i class="bi"
-                                                    :class="vendor.finalized ? 'bi-check2-all' : 'bi-check2'"></i>
-                                                <span x-text="vendor.finalized ? 'Finalized' : 'Finalize'"></span>
-                                            </button>
-                                            <button type="button" @click="removeVendor(vIdx)"
-                                                class="text-gray-400 hover:text-red-500 p-1 rounded-md hover:bg-red-50 transition-colors"
-                                                title="Remove Vendor">
-                                                <i class="bi bi-trash3"></i>
-                                            </button>
-                                        </div>
+
                                     </div>
 
                                     <!-- Vendor Quote Table -->
@@ -692,8 +670,7 @@
                                                     <th style="min-width:60px;">GST %</th>
                                                     <th style="min-width:90px;">Landed Rate</th>
                                                     <th style="min-width:90px;">Payment Terms</th>
-                                                    <th style="min-width:65px; text-align:center;">Rank</th>
-                                                    <th style="min-width:36px; text-align:center;"></th>
+                                                    <th style="min-width:110px;">Delivery Date</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -703,7 +680,7 @@
                                                         item quotes for this vendor. Click "Add Item Quote" below.</td>
                                                 </tr>
                                                 <template x-for="(line, lIdx) in vendor.QuoteLines" :key="line.uid">
-                                                    <tr :class="line.Rank === 'Yes' ? 'bg-emerald-50/40' : ''">
+                                                    <tr>
                                                         <!-- Item -->
                                                         <td class="grid-select relative" style="min-width:140px;">
                                                             <select class="w-full text-xs"
@@ -713,28 +690,28 @@
                                                         <!-- Basic Rate -->
                                                         <td><input x-model.number="line.Basic_Rate"
                                                                 @input="syncVendorLineRates(vIdx, lIdx, 'basic')"
-                                                                type="number" step="any" class="grid-input"
-                                                                style="min-width:70px;"></td>
+                                                                type="number" step="any" min="0" required
+                                                                class="grid-input" style="min-width:70px;"></td>
                                                         <!-- Disc % -->
                                                         <td><input x-model.number="line.Disc"
                                                                 @input="syncVendorLineRates(vIdx, lIdx, 'disc')"
-                                                                type="number" step="any" class="grid-input"
-                                                                style="min-width:55px;"></td>
+                                                                type="number" step="any" min="0" required
+                                                                class="grid-input" style="min-width:55px;"></td>
                                                         <!-- Neg. Rate -->
                                                         <td><input x-model.number="line.Negotiated_Rate"
                                                                 @input="syncVendorLineRates(vIdx, lIdx, 'neg')"
-                                                                type="number" step="any" class="grid-input"
-                                                                style="min-width:75px;"></td>
+                                                                type="number" step="any" min="0" required
+                                                                class="grid-input" style="min-width:75px;"></td>
                                                         <!-- Freight -->
                                                         <td><input x-model.number="line.Freight"
                                                                 @input="syncVendorLineRates(vIdx, lIdx, 'freight')"
-                                                                type="number" step="any" class="grid-input"
-                                                                style="min-width:60px;"></td>
+                                                                type="number" step="any" min="0" required
+                                                                class="grid-input" style="min-width:60px;"></td>
                                                         <!-- GST % -->
                                                         <td><input x-model.number="line.GST"
                                                                 @input="syncVendorLineRates(vIdx, lIdx, 'gst')"
-                                                                type="number" step="any" class="grid-input"
-                                                                style="min-width:50px;"></td>
+                                                                type="number" step="any" min="0" required
+                                                                class="grid-input" style="min-width:50px;"></td>
                                                         <!-- Landed Rate (auto) -->
                                                         <td><input x-model.number="line.Landed_Rate" type="number"
                                                                 disabled
@@ -743,7 +720,7 @@
                                                         <!-- Payment Terms -->
                                                         <td style="min-width:90px;">
                                                             <select x-model="line.Payment_Terms" class="grid-input"
-                                                                style="min-width:80px;">
+                                                                required style="min-width:80px;">
                                                                 <option value="">Select…</option>
                                                                 <option value="Advance">Advance</option>
                                                                 <option value="15 Days Credit">15 Days</option>
@@ -751,69 +728,23 @@
                                                                 <option value="45 Days Credit">45 Days</option>
                                                             </select>
                                                         </td>
-                                                        <!-- Rank -->
-                                                        <td style="text-align:center; min-width:65px;">
-                                                            <select x-model="line.Rank"
-                                                                @change="handleVendorLineRank(vIdx, lIdx)"
-                                                                class="grid-input font-semibold text-center"
-                                                                :class="line.Rank === 'Yes' ? 'text-emerald-700 border-emerald-500 bg-emerald-50' : ''"
-                                                                style="min-width:55px;">
-                                                                <option value="No">No</option>
-                                                                <option value="Yes">Yes</option>
-                                                            </select>
+                                                        <!-- Delivery Date -->
+                                                        <td style="min-width:110px;">
+                                                            <input x-model="line.Delivery_Date" type="date"
+                                                                class="grid-input" required style="min-width:100px;">
                                                         </td>
-                                                        <!-- Remove -->
-                                                        <td style="text-align:center; min-width:36px;">
-                                                            <button type="button" @click="removeVendorLine(vIdx, lIdx)"
-                                                                class="text-gray-400 hover:text-red-500 p-1 rounded-md hover:bg-red-50 transition-colors"><i
-                                                                    class="bi bi-x"></i></button>
-                                                        </td>
+
                                                     </tr>
                                                 </template>
                                             </tbody>
                                         </table>
                                     </div>
 
-                                    <!-- Add Item Quote -->
-                                    <div
-                                        class="px-3 py-2 border-t border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                                        <button type="button" @click="addVendorLine(vIdx)"
-                                            class="add-quote-btn text-[10px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">
-                                            <i class="bi bi-plus-lg mr-0.5"></i> Add Item Quote
-                                        </button>
-                                        <span x-show="vendor.QuoteLines.length > 0" class="text-[10px] text-gray-400">
-                                            <span
-                                                x-text="vendor.QuoteLines.filter(l => l.Rank === 'Yes').length"></span>
-                                            ranked Yes
-                                        </span>
-                                    </div>
+
                                 </div>
                             </template>
                         </div>
 
-                        <!-- Final Decision -->
-                        <h4 class="text-xs font-bold text-emerald-600 tracking-wide mb-3 border-b border-gray-100 pb-1">
-                            Final Decision</h4>
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label
-                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Finalized
-                                    Vendor</label>
-                                <input x-model="form.Finalized_Vendor" type="text" readonly
-                                    class="w-full py-2 px-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] font-semibold text-emerald-700 cursor-not-allowed outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Grand
-                                    Total Landed Rate <span class="text-gray-400 font-normal normal-case">(Qty × Landed
-                                        Rate)</span></label>
-                                <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₹</span>
-                                    <input x-model.number="form.Total_Landed_Rate" type="number" step="any" readonly
-                                        class="w-full py-2 pl-7 pr-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] font-bold text-[#1B5CA8] cursor-not-allowed outline-none">
-                                </div>
-                            </div>
-                        </div>
 
                         <!-- Justification -->
                         <div class="mb-4">
@@ -892,7 +823,7 @@
                     Total_Landed_Rate: '',
                     Justification: '',
                     Items: [], // { uid, Items, Item_Name, Unit, Quantity, Deliver_to_Plant }
-                    Vendors: [] // { uid, Vendor_Name, Vendor_Display, finalized, QuoteLines: [{ uid, Items_Master, Item_Name, Basic_Rate, Disc, Negotiated_Rate, Freight, GST, Landed_Rate, Payment_Terms, Rank }] }
+                    Vendors: [] // { uid, Vendor_Name, Vendor_Display, finalized, QuoteLines: [{ uid, Items_Master, Item_Name, Basic_Rate, Disc, Negotiated_Rate, Freight, GST, Landed_Rate, Payment_Terms, Delivery_Date }] }
                 },
 
                 // --- INIT ---
@@ -1038,7 +969,7 @@
 
                 formatDate(dateStr) {
                     return dateStr ? (dayjs(dateStr).isValid() ? dayjs(dateStr).format(
-                        'DD MMM YYYY') : dateStr) : '–';
+                        'DD-MMM-YYYY') : dateStr) : '–';
                 },
 
                 formatINR(amt) {
@@ -1186,9 +1117,8 @@
                         GST: '',
                         Landed_Rate: '',
                         Payment_Terms: '',
-                        Rank: 'No'
+                        Delivery_Date: ''
                     });
-                    // If vendor has only 1 quote line and no other lines, mark as Rank? No, let user decide.
                     this.recalculateAllTotals();
                 },
 
@@ -1564,7 +1494,7 @@
                                                     GST: '',
                                                     Landed_Rate: '',
                                                     Payment_Terms: '',
-                                                    Rank: 'No'
+                                                    Delivery_Date: ''
                                                 });
                                             });
                                         }
@@ -1615,10 +1545,36 @@
                         Toast.fire({ icon: 'error', title: 'Each vendor must have at least one item quote.' });
                         return;
                     }
-                    // Check if any vendor is finalized
-                    const hasFinalized = this.form.Vendors.some(v => v.finalized);
-                    if (!hasFinalized) {
-                        Toast.fire({ icon: 'warning', title: 'No vendor finalized. Please select a final vendor.' });
+                    // Validate all vendor quote lines — all fields are mandatory
+                    let incompleteVendor = null;
+                    let incompleteField = null;
+                    outer: for (const v of this.form.Vendors) {
+                        for (const line of v.QuoteLines) {
+                            if (line.Basic_Rate === '' || line.Basic_Rate === null || isNaN(parseFloat(line.Basic_Rate))) {
+                                incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Basic Rate'; break outer;
+                            }
+                            if (line.Disc === '' || line.Disc === null || isNaN(parseFloat(line.Disc))) {
+                                incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Disc %'; break outer;
+                            }
+                            if (line.Negotiated_Rate === '' || line.Negotiated_Rate === null || isNaN(parseFloat(line.Negotiated_Rate))) {
+                                incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Negotiated Rate'; break outer;
+                            }
+                            if (line.Freight === '' || line.Freight === null || isNaN(parseFloat(line.Freight))) {
+                                incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Freight'; break outer;
+                            }
+                            if (line.GST === '' || line.GST === null || isNaN(parseFloat(line.GST))) {
+                                incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'GST %'; break outer;
+                            }
+                            if (!line.Payment_Terms) {
+                                incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Payment Terms'; break outer;
+                            }
+                            if (!line.Delivery_Date) {
+                                incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Delivery Date'; break outer;
+                            }
+                        }
+                    }
+                    if (incompleteVendor !== null) {
+                        Toast.fire({ icon: 'error', title: `"${incompleteField}" is required for vendor "${incompleteVendor}".` });
                         return;
                     }
 
@@ -1639,7 +1595,7 @@
                                     "GST": parseFloat(line.GST) || 0,
                                     "Landed_Rate": parseFloat(line.Landed_Rate) || 0,
                                     "Payment_Terms": line.Payment_Terms || '',
-                                    "Rank": line.Rank || 'No'
+                                    "Delivery_Date": P2PWorkflowUtils.formatDateForZoho(line.Delivery_Date)
                                 });
                             });
                         });
@@ -1688,6 +1644,15 @@
                     } finally {
                         this.isSubmitting = false;
                     }
+                },
+
+                // Convert yyyy-MM-dd (HTML date input) → dd-MMM-yyyy (Zoho Creator format)
+                formatDateForZoho(dateStr) {
+                    if (!dateStr) return '';
+                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    const d = new Date(dateStr + 'T00:00:00'); // force local time parse
+                    if (isNaN(d.getTime())) return dateStr;
+                    return String(d.getDate()).padStart(2, '0') + '-' + months[d.getMonth()] + '-' + d.getFullYear();
                 }
 
             }));

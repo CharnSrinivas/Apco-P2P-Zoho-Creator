@@ -17,7 +17,8 @@
     <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
 
-    <script src="https://app-02d838.tiiny.site/utils/process-flow-renderer.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1124,8 +1125,8 @@
                         { label: 'RFQ Number', value: this.rfqNumber },
                         { label: 'PR References', value: this.prRefDisplay },
                         { label: 'Requester', value: this.rec.Added_User },
-                        { label: 'Request Date', value: this.formatDate(this.rec.Request_Date) },
-                        { label: 'Due Date', value: this.formatDate(this.rec.Due_Date) },
+                        { label: 'Request Date', value: P2PWorkflowUtils.formatDateForZoho(this.rec.Request_Date) },
+                        { label: 'Due Date', value: P2PWorkflowUtils.formatDateForZoho(this.rec.Due_Date) },
                         { label: 'Status', value: this.getStatusBadge(this.rec.Status), isHtml: true },
                     ];
                 },
@@ -1400,7 +1401,7 @@
                                     <strong>${this.escapeHtml(this.getItemName(item))}</strong>
                                     ${item.Comment ? `<br><small>${this.escapeHtml(item.Comment)}</small>` : ''}
                                 </td>
-                                <td class="text-center">${this.formatDate(this.rec.Request_Date)}</td>
+                                <td class="text-center">${P2PWorkflowUtils.formatDateForZoho(this.rec.Request_Date)}</td>
                                 <td class="text-center">${item.Quantity || 0}</td>
                                 <td class="text-center">${this.escapeHtml(unit)}</td>
                                 <td class="text-right"></td>
@@ -1508,8 +1509,8 @@
                                         <h2>Request for Quote</h2>
                                         <div class="rfq-meta">
                                             <strong>RFQ No:</strong> <span>${this.escapeHtml(this.rfqNumber)}</span>
-                                            <strong>Date:</strong> <span>${this.formatDate(this.rec.Request_Date)}</span>
-                                            <strong>Valid Until:</strong> <span>${this.formatDate(this.rec.Due_Date)}</span>
+                                            <strong>Date:</strong> <span>${P2PWorkflowUtils.formatDateForZoho(this.rec.Request_Date)}</span>
+                                            <strong>Valid Until:</strong> <span>${P2PWorkflowUtils.formatDateForZoho(this.rec.Due_Date)}</span>
                                         </div>
                                     </div>
                                 </header>

@@ -228,7 +228,7 @@ const P2PWorkflowUtils = {
 			const comment = action.Comment || "";
 			const performer = action.Added_User || "-";
 			const addedTime = action.Added_Time
-				? this.formatDate(action.Added_Time)
+				? this.formatDateForZoho(action.Added_Time)
 				: "–";
 
 			// Styling Rules

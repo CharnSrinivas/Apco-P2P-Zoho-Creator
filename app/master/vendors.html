@@ -356,6 +356,9 @@
           this.isEdit = true; this.editId = rec.ID;
           this.form = this.getBlankForm();
           Object.assign(this.form, rec);
+          delete this.form.Added_Time;
+          delete this.form.Added_User
+          delete this.form.ID;
           if (!this.form.Billing_Address) this.form.Billing_Address = this.getBlankForm().Billing_Address;
 
           if (Array.isArray(this.form.Contact_Details)) {

@@ -587,6 +587,7 @@
     if (!rec) return 'pending';
     if (rec.Status && rec.Status.toLowerCase() === 'rejected') return 'rejected';
     if (rec.Status && rec.Status.toLowerCase() === 'completed') return 'completed';
+    if (rec.Status && rec.Status.toLowerCase() === 'in progress') return 'in_progress'
     var stage = rec.Current_Stage;
     if (!stage || stage === 'Purchase Requisition') return 'pending';
     // Payment stage = fully Completed; intermediate stages = In Progress
@@ -1058,7 +1059,8 @@
           const notFinalized = results.filter(name => name !== null);
           if (notFinalized.length > 0) {
             // this.rfqVisible = true; // Temporaly disabled RFQ visible
-            this.rfqChoice = 'Yes';
+            // this.rfqChoice = 'Yes';
+            this.rfqChoice = 'No';
             this.rfqMessage = "No goods received for the following item(s): <strong>" + notFinalized.join(", ") + "</strong>";
           } else {
             this.rfqVisible = false;

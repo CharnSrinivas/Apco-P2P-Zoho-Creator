@@ -49,6 +49,11 @@
       padding: 0.4rem 0.75rem !important;
       font-size: 0.75rem !important;
     }
+
+    /* Ensure TomSelect dropdown appended to body renders above modals */
+    body > .ts-dropdown {
+      z-index: 9999 !important;
+    }
   </style>
 </head>
 

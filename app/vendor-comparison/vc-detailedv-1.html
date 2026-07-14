@@ -460,7 +460,7 @@
                                                 <template x-for="(line, lIdx) in vendor.QuoteLines" :key="line.uid">
                                                     <tr>
                                                         <td class="grid-select relative" style="min-width:140px;">
-                                                            <select class="w-full text-xs" disabled
+                                                            <select class="w-full text-xs"
                                                                 :x-ref="'itemSelectEdit_'+vIdx+'_'+lIdx"
                                                                 x-init="() => { const ts = initDynamicItemEdit($el, line, 'Items_Master', 'Item_Name'); return () => ts.destroy(); }"></select>
                                                         </td>
@@ -739,104 +739,6 @@
                 </div>
             </div>
 
-            <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm mb-6" x-show="comparativeMatrix.rows.length > 0">
-                <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-                    <div class="text-sm font-bold text-[#1B5CA8] flex items-center gap-2">
-                        <i class="bi bi-calculator"></i> Cost Simulation & Evaluation
-                    </div>
-                </div>
-
-                <div class="p-4 border-b border-gray-100 bg-white">
-                    <div class="flex gap-6 items-center">
-                        <label class="flex items-center gap-2 cursor-pointer group">
-                            <input type="radio" x-model="evaluationStrategy" value="lowest" class="text-[#1B5CA8] focus:ring-[#1B5CA8] w-4 h-4 cursor-pointer">
-                            <span class="text-[13px] font-bold text-gray-700 group-hover:text-[#1B5CA8] transition-colors">Lowest Bidder</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer group">
-                            <input type="radio" x-model="evaluationStrategy" value="item_wise" class="text-[#1B5CA8] focus:ring-[#1B5CA8] w-4 h-4 cursor-pointer">
-                            <span class="text-[13px] font-bold text-gray-700 group-hover:text-[#1B5CA8] transition-colors">Item-wise L1</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer group">
-                            <input type="radio" x-model="evaluationStrategy" value="earliest" class="text-[#1B5CA8] focus:ring-[#1B5CA8] w-4 h-4 cursor-pointer">
-                            <span class="text-[13px] font-bold text-gray-700 group-hover:text-[#1B5CA8] transition-colors">Earliest Delivery</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto w-full">
-                    <table class="w-full border-collapse text-[11px]">
-                        <thead>
-                            <tr class="bg-gray-50 border-b border-gray-200 text-gray-600">
-                                <th class="px-4 py-2.5 text-left font-bold border-r border-gray-200">Vendor</th>
-                                <th class="px-4 py-2.5 text-left font-bold border-r border-gray-200">Item(s)</th>
-                                <th class="px-4 py-2.5 text-center font-bold border-r border-gray-200">Qty</th>
-                                <th class="px-4 py-2.5 text-right font-bold border-r border-gray-200">Rate</th>
-                                <th class="px-4 py-2.5 text-right font-bold border-r border-gray-200">Landed Rate</th>
-                                <th class="px-4 py-2.5 text-right font-bold border-r border-gray-200 text-[#1B5CA8]">Amount</th>
-                                <th class="px-4 py-2.5 text-center font-bold border-r border-gray-200">Delivery Date</th>
-                                <th class="px-4 py-2.5 text-left font-bold">Payment Terms</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <template x-for="(row, idx) in evaluationRows" :key="idx">
-                                <tr class="border-b border-gray-100 hover:bg-gray-50/80 bg-white">
-                                    <td class="px-4 py-2.5 font-bold text-gray-800 border-r border-gray-100 bg-gray-50/30" x-text="row.vendor"></td>
-                                    <td class="px-4 py-2.5 text-gray-700 border-r border-gray-100 font-medium" x-text="row.item"></td>
-                                    <td class="px-4 py-2.5 text-center text-gray-700 border-r border-gray-100" x-text="row.qty"></td>
-                                    <td class="px-4 py-2.5 text-right text-gray-600 border-r border-gray-100 tabular-nums" x-text="formatINR(row.rate, false)"></td>
-                                    <td class="px-4 py-2.5 text-right font-semibold text-gray-800 border-r border-gray-100 tabular-nums" x-text="formatINR(row.landedRate, false)"></td>
-                                    <td class="px-4 py-2.5 text-right font-bold text-[#1B5CA8] border-r border-gray-100 tabular-nums bg-blue-50/20" x-text="formatINR(row.amount, false)"></td>
-                                    <td class="px-4 py-2.5 text-center text-gray-600 border-r border-gray-100" x-text="formatDate(row.delivery)"></td>
-                                    <td class="px-4 py-2.5 text-left text-gray-600" x-text="row.terms"></td>
-                                </tr>
-                            </template>
-                            <tr x-show="evaluationRows.length === 0">
-                                <td colspan="8" class="text-center py-8 text-gray-400 italic">No quotes match this simulation strategy.</td>
-                            </tr>
-                        </tbody>
-                        <tfoot x-show="evaluationRows.length > 0">
-                            <tr class="bg-gray-100 border-t border-gray-300">
-                                <td colspan="5" class="px-4 py-3 text-right font-bold text-gray-800 uppercase tracking-wide">Simulation Total</td>
-                                <td class="px-4 py-3 text-right font-black text-[#1B5CA8] text-[13px] tabular-nums" x-text="formatINR(simulationTotal, true)"></td>
-                                <td colspan="2"></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-
-            <div x-show="!['finalized', 'approved', 'rejected', 'cancelled'].includes((rec.Status || '').toLowerCase()) && comparativeMatrix.rows.length > 0" class="bg-blue-50/40 border border-blue-200 rounded-lg overflow-hidden shadow-sm mb-6 p-5">
-                <div class="flex items-center gap-2 text-[14px] font-bold text-[#1B5CA8] mb-4 border-b border-blue-200/50 pb-2">
-                    <i class="bi bi-award-fill text-lg"></i> Vendor Finalization & Decision
-                </div>
-                <div class="grid grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-[11px] font-semibold text-gray-700 tracking-wide mb-1.5">Select Final Vendor <span class="text-red-500">*</span></label>
-                        <select x-model="decisionVendor" class="w-full py-2.5 px-3 bg-white border border-gray-300 rounded-lg text-[13px] text-gray-800 font-medium focus:outline-none focus:border-[#1B5CA8] focus:ring-1 focus:ring-[#1B5CA8] shadow-sm transition-all">
-                            <option value="">-- Select Vendor to Award --</option>
-                            <option value="AUTO" class="font-bold text-[#1B5CA8]">✨ Auto-Finalize based on selected Strategy</option>
-                            <template x-for="vName in comparativeMatrix.vendorNames" :key="vName">
-                                <option :value="vName" x-text="vName"></option>
-                            </template>
-                        </select>
-                        <div class="mt-2 text-[11px] text-gray-500 leading-relaxed">
-                            Selecting <strong class="text-[#1B5CA8]">Auto-Finalize</strong> will automatically map the vendors based on your current active tab above (<span x-text="evaluationStrategy === 'lowest' ? 'Lowest Bidder' : (evaluationStrategy === 'item_wise' ? 'Item-wise L1' : 'Earliest Delivery')"></span>).
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold text-gray-700 tracking-wide mb-1.5">Justification / Remarks <span class="text-red-500">*</span></label>
-                        <textarea x-model="decisionJustification" rows="3" class="w-full py-2 px-3 bg-white border border-gray-300 rounded-lg text-[13px] text-gray-800 focus:outline-none focus:border-[#1B5CA8] focus:ring-1 focus:ring-[#1B5CA8] shadow-sm transition-all" placeholder="Provide strong reason for this selection..."></textarea>
-                    </div>
-                </div>
-                <div class="mt-5 flex justify-end">
-                    <button @click="finalizeDecision()" :disabled="isFinalizingDecision"
-                        class="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-xs font-bold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors cursor-pointer shadow-md disabled:opacity-70">
-                        <template x-if="isFinalizingDecision"><div class="btn-spinner border-t-white w-4 h-4 mr-1"></div></template>
-                        <i class="bi bi-check-circle-fill" x-show="!isFinalizingDecision"></i>
-                        <span x-text="isFinalizingDecision ? 'Finalizing...' : 'Approve & Finalize Vendor'"></span>
-                    </button>
-                </div>
-            </div>
             <div class="grid grid-cols-5 gap-5 w-full">
                 <div class="col-span-5 md:col-span-3 space-y-4">
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
@@ -964,12 +866,6 @@
                 vendors: [],
                 actions: [],
 
-                // Interactive Evaluation & Decision states
-                evaluationStrategy: 'lowest', // lowest, item_wise, earliest
-                decisionVendor: '',
-                decisionJustification: '',
-                isFinalizingDecision: false,
-
                 // Edit Modal States
                 isEditModalOpen: false,
                 isUpdatingRecord: false,
@@ -1040,73 +936,7 @@
                     });
                 },
 
-                // ---- Evaluation / Simulation Getters ----
-                get lowestBidderVendor() {
-                    let minTotal = Infinity;
-                    let bestVendor = null;
-                    let totals = this.comparativeMatrix.vendorTotals;
-                    for (let vName in totals) {
-                        if (totals[vName] > 0 && totals[vName] < minTotal) {
-                            minTotal = totals[vName];
-                            bestVendor = vName;
-                        }
-                    }
-                    return bestVendor;
-                },
-
-                get earliestDeliveryVendor() {
-                    let earliestDate = null;
-                    let bestVendor = null;
-                    this.vendors.forEach(v => {
-                        if (v.Delivery_Date) {
-                            let d = new Date(v.Delivery_Date);
-                            if (!earliestDate || d < earliestDate) {
-                                earliestDate = d;
-                                bestVendor = v.Vendor_Name;
-                            }
-                        }
-                    });
-                    return bestVendor;
-                },
-
-                get evaluationRows() {
-                    let rows = [];
-                    if (this.evaluationStrategy === 'lowest') {
-                        let v = this.lowestBidderVendor;
-                        if (!v) return [];
-                        this.comparativeMatrix.rows.forEach(r => {
-                            let q = r.quotes[v];
-                            if (q) rows.push({ item: r.itemName, qty: r.quantity, vendor: v, rate: q.rate, landedRate: q.landedRate, amount: q.amount, terms: q.terms, delivery: this.getVendorDelivery(v) });
-                        });
-                    } else if (this.evaluationStrategy === 'item_wise') {
-                        this.comparativeMatrix.rows.forEach(r => {
-                            let v = r.l1Vendor;
-                            if (v && v !== '–') {
-                                let q = r.quotes[v];
-                                rows.push({ item: r.itemName, qty: r.quantity, vendor: v, rate: q.rate, landedRate: q.landedRate, amount: q.amount, terms: q.terms, delivery: this.getVendorDelivery(v) });
-                            }
-                        });
-                    } else if (this.evaluationStrategy === 'earliest') {
-                        let v = this.earliestDeliveryVendor;
-                        if (!v) return [];
-                        this.comparativeMatrix.rows.forEach(r => {
-                            let q = r.quotes[v];
-                            if (q) rows.push({ item: r.itemName, qty: r.quantity, vendor: v, rate: q.rate, landedRate: q.landedRate, amount: q.amount, terms: q.terms, delivery: this.getVendorDelivery(v) });
-                        });
-                    }
-                    return rows;
-                },
-
-                get simulationTotal() {
-                    return this.evaluationRows.reduce((sum, row) => sum + (row.amount || 0), 0);
-                },
-
-                getVendorDelivery(vName) {
-                    let v = this.vendors.find(v => (v.Vendor_Display || v.Vendor_Name) === vName);
-                    return v ? v.Delivery_Date : '';
-                },
-
-                // ---- Comparative Matrix ----
+                // ---- Comparative Matrix (unchanged) ----
                 get comparativeMatrix() {
                     if (!this.rec.Items) return { vendorNames: [], rows: [], vendorTotals: {}, vendorTotalFormulas: {} };
 
@@ -1220,90 +1050,6 @@
                     if (s === 'approved' || s === 'finalized') { border = 'border-emerald-200'; bg = 'bg-emerald-50'; text = 'text-emerald-800'; dot = 'bg-emerald-600'; label = status; }
                     if (s === 'rejected') { border = 'border-red-200'; bg = 'bg-red-50'; text = 'text-red-800'; dot = 'bg-red-600'; label = 'Rejected'; }
                     return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border ${border} ${bg} ${text}"><span class="w-[5px] h-[5px] rounded-full ${dot} shrink-0"></span>${label}</span>`;
-                },
-
-                // ---- Direct Evaluation Vendor Finalization Action ----
-                async finalizeDecision() {
-                    if (!this.decisionVendor) { Toast.fire({ icon: 'error', title: 'Please select a vendor to finalize.' }); return; }
-                    if (!this.decisionJustification.trim()) { Toast.fire({ icon: 'error', title: 'Justification is required.' }); return; }
-
-                    this.isFinalizingDecision = true;
-                    try {
-                        let totalLanded = 0;
-                        let finalizedVendorNames = new Set();
-                        let strategyToApply = this.evaluationStrategy;
-                        const qcsRows = [];
-
-                        (this.rec.Quotation_Comparison_Statement || []).forEach(q => {
-                            let vName = q.Vendor_Name || '';
-                            let isWinner = false;
-
-                            if (this.decisionVendor === 'AUTO') {
-                                if (strategyToApply === 'lowest') {
-                                    isWinner = (vName === this.lowestBidderVendor);
-                                } else if (strategyToApply === 'earliest') {
-                                    isWinner = (vName === this.earliestDeliveryVendor);
-                                } else if (strategyToApply === 'item_wise') {
-                                    let itemId = q.Items && q.Items.length > 0 ? q.Items[0].ID : '';
-                                    let itemName = q.Items && q.Items.length > 0 ? (q.Items[0].item_name || q.Items[0].display_value) : '';
-                                    let rowItem = this.comparativeMatrix.rows.find(r => r.itemName === itemName);
-                                    if (rowItem && rowItem.l1Vendor === vName) {
-                                        isWinner = true;
-                                    }
-                                }
-                            } else {
-                                isWinner = (vName === this.decisionVendor);
-                            }
-
-                            if (isWinner) {
-                                finalizedVendorNames.add(vName);
-                                let itemId = q.Items && q.Items.length > 0 ? q.Items[0].ID : '';
-                                let reqItem = (this.rec.Items || []).find(i => i.Item?.ID === itemId);
-                                let qty = reqItem ? (parseFloat(reqItem.Quantity) || 0) : 0;
-                                totalLanded += (parseFloat(q.Landed_Rate) || 0) * qty;
-                            }
-
-                            let qcsRow = {
-                                "ID": q.ID, 
-                                "Rank": isWinner ? 'Yes' : 'No'
-                            };
-                            qcsRows.push(qcsRow);
-                        });
-
-                        if (finalizedVendorNames.size === 0) {
-                            Toast.fire({ icon: 'warning', title: 'No vendor selected or matched criteria. Cannot finalize.' });
-                            this.isFinalizingDecision = false;
-                            return;
-                        }
-
-                        let finalVendorStr = Array.from(finalizedVendorNames).join(', ');
-                        if (finalVendorStr.length > 200) finalVendorStr = finalVendorStr.substring(0, 197) + '...';
-
-                        const payload = {
-                            data: {
-                                Status: "Finalized",
-                                Finalized_Vendor: finalVendorStr,
-                                Total_Landed_Rate: parseFloat(totalLanded.toFixed(2)),
-                                Justification: this.decisionJustification,
-                                Quotation_Comparison_Statement: qcsRows
-                            }
-                        };
-
-                        let res = await ZOHO.CREATOR.DATA.updateRecordById({ report_name: 'Quote_Comparison_Report', id: this.recordId, payload });
-                        
-                        if (res.code === 3000) {
-                            Toast.fire({ icon: 'success', title: 'Vendor Finalized successfully!' });
-                            this.decisionVendor = '';
-                            this.decisionJustification = '';
-                            this.fetchData();
-                        } else {
-                            throw new Error(res.message || 'Finalization failed');
-                        }
-                    } catch (err) {
-                        Toast.fire({ icon: 'error', title: err.message || 'Action failed. Please try again.' });
-                    } finally {
-                        this.isFinalizingDecision = false;
-                    }
                 },
 
                 // ---- Action Modal ----
@@ -1621,6 +1367,7 @@
                     if (this.editForm.Items.length === 0) { Toast.fire({ icon: 'error', title: 'Please add at least one item.' }); return; }
                     if (this.editForm.Vendors.length === 0) { Toast.fire({ icon: 'error', title: 'Please add at least one vendor.' }); return; }
 
+                    // Validate all vendor quote lines — all fields are mandatory
                     let incompleteVendor = null;
                     let incompleteField = null;
                     outer: for (const v of this.editForm.Vendors) {
@@ -1655,9 +1402,11 @@
 
                     this.isUpdatingRecord = true;
                     try {
+                        // Flatten Vendors into Quotation_Comparison_Statement
                         const qcsRows = [];
                         this.editForm.Vendors.forEach(v => {
                             v.QuoteLines.forEach(line => {
+                                // CRITICAL FIX: Ensure 'Items' is passed as an Array of String IDs for the multiselect field 
                                 let qcsRow = {
                                     "Vendor_Name": v.Vendor_Display || v.Vendor_Name || '',
                                     "Items": line.Items_Master ? [line.Items_Master.toString()] : [],
@@ -1671,6 +1420,8 @@
                                     "Delivery_Date": P2PWorkflowUtils.formatDateForZoho(line.Delivery_Date),
                                     "Rank": line.Rank || 'No'
                                 };
+
+                                // CRITICAL FIX: Persist subform Row ID to prevent empty wipes on update
                                 if (line.rowId) {
                                     qcsRow.ID = line.rowId;
                                 }
@@ -1692,7 +1443,7 @@
                                 Quotation_Comparison_Statement: qcsRows
                             }
                         };
-                        
+                        // console.log("Payload: ", payload)
                         let res = await ZOHO.CREATOR.DATA.updateRecordById({ report_name: 'Quote_Comparison_Report', id: this.recordId, payload });
                         if (res.code === 3000) {
                             Toast.fire({ icon: 'success', title: 'Comparison updated successfully!' });
@@ -1877,6 +1628,7 @@
 
                 escapeHtml(str) { if (!str) return ''; const d = document.createElement('div'); d.textContent = str; return d.innerHTML; },
 
+                // Convert Zoho date string (dd-MMM-yyyy or yyyy-MM-dd) → yyyy-MM-dd (for HTML date input)
                 parseZohoDate(dateStr) {
                     if (!dateStr) return '';
                     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
@@ -1895,10 +1647,11 @@
                     return '';
                 },
 
+                // Convert yyyy-MM-dd (HTML date input) → dd-MMM-yyyy (Zoho Creator format)
                 formatDateForZoho(dateStr) {
                     if (!dateStr) return '';
                     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                    const d = new Date(dateStr + 'T00:00:00'); 
+                    const d = new Date(dateStr + 'T00:00:00'); // force local time parse
                     if (isNaN(d.getTime())) return dateStr;
                     return String(d.getDate()).padStart(2, '0') + '-' + months[d.getMonth()] + '-' + d.getFullYear();
                 },
