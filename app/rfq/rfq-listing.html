@@ -394,28 +394,45 @@
         </div>
 
         <form @submit.prevent="submitRFQ" class="p-5">
+          <!-- PR Ref — full width, shown first so it can drive auto-fill -->
+          <div class="mb-4">
+            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
+              PR Reference
+              <span class="text-gray-400 font-normal ml-0.5">
+                <!-- Only approved prs -->
+                (Search approved / partailly approved PRs)
+              </span>
+            </label>
+            <select id="rfqPrRef" class="w-full text-xs"></select>
+          </div>
+
           <div class="grid grid-cols-2 gap-4 mb-5">
+            <!-- Department — locked (read-only) when a PR is selected -->
             <div>
-              <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Department /
-                Unit</label>
+              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
+                Department / Unit
+                <span x-show="rfqForm.prLocked"
+                  class="ml-1 text-[10px] font-normal text-[#1B5CA8] bg-[#1B5CA8]/10 px-1.5 py-0.5 rounded-full">Auto-filled</span>
+              </label>
               <select id="rfqDept" class="w-full text-xs"></select>
             </div>
             <div>
-              <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Request Date
-                <span class="text-red-500">*</span></label>
+              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Request Date
+                <span class="text-red-500">*</span>
+                <span x-show="rfqForm.prLocked"
+                  class="ml-1 text-[10px] font-normal text-[#1B5CA8] bg-[#1B5CA8]/10 px-1.5 py-0.5 rounded-full">Auto-filled</span>
+              </label>
               <input type="date" x-model="rfqForm.reqDate" required
                 class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
             </div>
             <div>
-              <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Due Date <span
-                  class="text-red-500">*</span></label>
+              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Due Date
+                <span class="text-red-500">*</span>
+                <span x-show="rfqForm.prLocked"
+                  class="ml-1 text-[10px] font-normal text-[#1B5CA8] bg-[#1B5CA8]/10 px-1.5 py-0.5 rounded-full">Auto-filled</span>
+              </label>
               <input type="date" x-model="rfqForm.dueDate" :min="todayDate" required
                 class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">PR Ref <span
-                  class="text-gray-400 font-normal ml-0.5">(Optional)</span></label>
-              <select id="rfqPrRef" class="w-full text-xs"></select>
             </div>
           </div>
 
@@ -423,9 +440,9 @@
             <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
               <span class="text-xs font-semibold text-gray-700  tracking-wide">Items <span
                   class="text-red-500">*</span></span>
-              <button type="button" @click="addItemRow()"
+              <!-- <button type="button" @click="addItemRow()"
                 class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+
-                Add Item</button>
+                Add Item</button> -->
             </div>
             <div class="overflow-x-auto" style="overflow:visible;">
               <table class="w-full border-collapse min-w-[700px]">
@@ -446,7 +463,7 @@
                   <template x-for="(item, index) in rfqForm.items" :key="item.uid">
                     <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors bg-white">
                       <td class="px-3 py-2 relative">
-                        <select x-init="initItemSelect($el, item)" class="w-full text-xs" required></select>
+                        <select disabled x-init="initItemSelect($el, item)" class="w-full text-xs" required></select>
                       </td>
                       <td class="px-3 py-2 relative">
                         <select x-init="initVendorRowSelect($el, item)" class="w-full text-xs" multiple></select>
@@ -526,7 +543,7 @@
         isSubmitting: false,
         todayDate: dayjs().format('YYYY-MM-DD'),
 
-        rfqForm: { dept: '', reqDate: '', dueDate: '', prRef: '', purpose: '', items: [] },
+        rfqForm: { dept: '', reqDate: '', dueDate: '', prRef: '', prLocked: false, purpose: '', items: [] },
 
         // TS instances manager
         tsInstances: { dept: null, pr: null, items: [], vendorItems: [] },
@@ -694,16 +711,15 @@
 
             const payload = {
               report_name: this.REPORT_NAME,
-              // id: recordId,
+              id: recordId,
               payload: {
-                criteria: `ID=${recordId}`,
                 data: {
                   Status: newStatus
                 }
               }
             };
 
-            const response = await ZOHO.CREATOR.DATA.updateRecords(payload);
+            const response = await ZOHO.CREATOR.DATA.updateRecordById(payload);
             if (response.code === 3000) {
               Swal.fire({ icon: 'success', title: `RFQ ${newStatus}!`, toast: true, position: 'top-end', timer: 3000, showConfirmButton: false });
               this.fetchRecords();
@@ -785,7 +801,7 @@
         // --- Form & Modal Logic ---
         openCreateModal() {
           this.rfqForm = {
-            dept: '', reqDate: this.todayDate, dueDate: '', prRef: '', purpose: '',
+            dept: '', reqDate: this.todayDate, dueDate: '', prRef: '', prLocked: false, purpose: '',
             items: []
           };
           this.isModalOpen = true;
@@ -842,17 +858,29 @@
         initPrSelect() {
           this.tsInstances.pr = new TomSelect(document.getElementById('rfqPrRef'), {
             valueField: 'ID', labelField: 'PR_Number', searchField: ['PR_Number', 'Requisition_Number'],
-            maxItems: 1, placeholder: 'Search PR...', loadThrottle: 350,
+            maxItems: 1, placeholder: 'Search PR number to auto-fill…', loadThrottle: 350,
             onChange: (val) => {
               this.rfqForm.prRef = val;
-              if (val) this.fetchPRDetailsForRFQ(val);
+              if (val) {
+                this.fetchPRDetailsForRFQ(val);
+              } else {
+                // PR cleared — unlock all auto-filled fields
+                this.rfqForm.prLocked = false;
+                this.rfqForm.reqDate = this.todayDate;
+                this.rfqForm.dueDate = '';
+                this.rfqForm.dept = '';
+                if (this.tsInstances.dept) {
+                  this.tsInstances.dept.enable();
+                  this.tsInstances.dept.clear(true);
+                }
+              }
             },
             load: (query, callback) => {
               if (!query.length) return callback();
               var q = query.replace(/'/g, "\\'");
               ZOHO.CREATOR.DATA.getRecords({
                 report_name: this.PR_REPORT_NAME,
-                criteria: `(PR_Number.contains("${q}") || Requisition_Number.contains("${q}"))`
+                criteria: `((PR_Number.contains("${q}") || Requisition_Number.contains("${q}")) &&( Status == "In Progress" || Status == "Partially Approved"))`
               }).then(res => callback(res.code === 3000 ? res.data : [])).catch(() => callback());
             },
             render: {
@@ -946,9 +974,51 @@
             });
 
             if (res && res.result && res.result.length > 0) {
-              const items = res.result[0].Items || [];
+              const pr = res.result[0];
+              const items = pr.Requested_Items || [];
 
-              // Clear TS instances
+              // ── 1. Auto-fill Department ──────────────────────────────────────────
+              // The PR record exposes Department as a lookup object with ID & Name,
+              // or sometimes as a plain string name. We need the ID for the RFQ form.
+              const dept = pr.Department_Unit || pr.Department;
+              const deptId = (dept && typeof dept === 'object') ? (dept.ID || dept.id || '') : '';
+              const deptName = (dept && typeof dept === 'object') ? (dept.Name || dept.zc_display_value || dept.display_value || '') : (dept || '');
+
+              if (deptId && this.tsInstances.dept) {
+                // Make sure the option exists in TomSelect before setting it
+                if (!this.tsInstances.dept.options[deptId]) {
+                  this.tsInstances.dept.addOption({ ID: String(deptId), Name: deptName });
+                }
+                this.tsInstances.dept.setValue(deptId, true);
+                this.rfqForm.dept = deptId;
+              } else if (deptName) {
+                // Fall back: match by name in the unitMasters list
+                const matched = this.unitMasters.find(u =>
+                  (u.Name || '').toLowerCase() === deptName.toLowerCase()
+                );
+                if (matched && this.tsInstances.dept) {
+                  this.tsInstances.dept.setValue(matched.ID, true);
+                  this.rfqForm.dept = matched.ID;
+                }
+              }
+
+              // ── 2. Auto-fill Dates ───────────────────────────────────────────────
+              // PR_Date → Request Date  |  Due_Date → Due Date
+              if (pr.PR_Date) {
+                // Zoho dates arrive as "DD-MMM-YYYY" or ISO — normalise to YYYY-MM-DD for <input type=date>
+                const parsed = dayjs(pr.PR_Date);
+                if (parsed.isValid()) this.rfqForm.reqDate = parsed.format('YYYY-MM-DD');
+              }
+              if (pr.Due_Date) {
+                const parsed = dayjs(pr.Due_Date);
+                if (parsed.isValid()) this.rfqForm.dueDate = parsed.format('YYYY-MM-DD');
+              }
+
+              // Lock department & date fields so user can't accidentally override them
+              this.rfqForm.prLocked = true;
+              if (this.tsInstances.dept) this.tsInstances.dept.disable();
+
+              // ── 3. Auto-fill Line Items ──────────────────────────────────────────
               this.tsInstances.items.forEach(ts => ts && ts.destroy());
               this.tsInstances.items = [];
               this.tsInstances.vendorItems.forEach(ts => ts && ts.destroy());
@@ -973,23 +1043,24 @@
                   tempVendorNames.push(prItem.Vendor.zc_display_value || prItem.Vendor.Display_Name || '');
                 }
 
-                let masterItem = this.itemMasters.find(m => m.ID === prItem.Item.ID);
+                let masterItem = this.itemMasters.find(m => m.ID === (prItem.Item && prItem.Item.ID));
                 let unit = prItem.Unit || (masterItem ? masterItem.unit_of_measure : '') || '';
 
                 this.rfqForm.items.push({
                   uid: Date.now() + Math.random(),
-                  id: prItem.Item.ID,
-                  tempName: prItem.Item.item_name, // fallback for TomSelect render
+                  id: prItem.Item && prItem.Item.ID,
+                  tempName: prItem.Item && prItem.Item.item_name, // fallback for TomSelect render
                   vendorIds: vendorIds,
                   tempVendorNames: tempVendorNames,
                   unit: unit,
                   quantity: prItem.Quantity || 1,
-                  comment: ''
+                  comment: prItem.Comment || ''
                 });
               });
-              Toast.fire({ icon: 'success', title: 'Items loaded from PR' });
+              Toast.fire({ icon: 'success', title: `PR loaded — ${items.length} item(s) auto-filled` });
             }
           } catch (err) {
+            console.error('fetchPRDetailsForRFQ error', err);
             Toast.fire({ icon: 'error', title: 'Failed to fetch PR details' });
           }
         },

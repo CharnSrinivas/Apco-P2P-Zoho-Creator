@@ -10,11 +10,16 @@
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
     <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
+
+    <!-- Standardized P2P Workflow Utility -->
+    <script src="https://app-02d838.tiiny.site/utils/process-flow-renderer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
         rel="stylesheet">
+
     <style>
         /* ── Loading spinner ── */
         .btn-spinner {
@@ -171,6 +176,7 @@
                 <div class="text-xs text-gray-400 mt-1" id="headerSub">–</div>
             </div>
 
+            <!-- Global Progress Container -->
             <div class="bg-white border border-gray-200 rounded-lg p-5 mb-4 fade-in">
                 <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">PR Process Progress
                 </div>
@@ -256,6 +262,7 @@
                         </div>
                     </div>
 
+                    <!-- Global Audit Trail Container -->
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden fade-in">
                         <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
                             <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
@@ -277,30 +284,23 @@
         (function () {
             'use strict';
 
-            const PROCESS_STEPS = [
-                { key: 'purchase_requisition', label: 'Purchase Requisition', icon: 'bi-receipt' },
-                { key: 'request_for_quotation', label: 'Request For Quotation', icon: 'bi-bucket' },
-                { key: 'quote_comparison', label: 'Quote Comparison', icon: 'bi-shop-window' },
-                { key: 'purchase_order', label: 'Purchase Order', icon: 'bi-cart-check' },
-                { key: 'grn', label: 'GRN', icon: 'bi-box-seam' },
-                { key: 'bill', label: 'Bill', icon: 'bi-coin' },
-                { key: 'payment', label: 'Payment', icon: 'bi-cash' }
-            ];
-
             const $loading = document.getElementById('loadingState');
             const $error = document.getElementById('errorState');
             const $main = document.getElementById('mainContent');
             const $headerPrNum = document.getElementById('headerPrNum');
             const $headerBadge = document.getElementById('headerBadge');
             const $headerSub = document.getElementById('headerSub');
+
+            // Progress & Audit nodes
             const $progressContainer = document.getElementById('progressContainer');
             const $progressFill = document.getElementById('progressFill');
+            const $auditTrailBody = document.getElementById('auditTrailBody');
+
             const $prDetails = document.getElementById('prDetailsBody');
             const $requestedItemsTableBody = document.getElementById('requestedItemsTableBody');
             const $approvedItemsCard = document.getElementById('approvedItemsCard');
             const $approvedItemsTableBody = document.getElementById('approvedItemsTableBody');
             const $actionButtons = document.getElementById('actionButtons');
-            const $auditTrail = document.getElementById('auditTrailBody');
             const $attachmentsCard = document.getElementById('attachmentsCard');
             const $attachmentsBody = document.getElementById('attachmentsBody');
             const $breadcrumbPrNum = document.getElementById('breadcrumbPrNum');
@@ -356,101 +356,6 @@
                 };
                 const c = config[norm] || config.submitted;
                 return '<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border ' + c.border + ' ' + c.bg + ' ' + c.text + '"><span class="w-[5px] h-[5px] rounded-full ' + c.dot + ' shrink-0"></span>' + esc(c.label) + '</span>';
-            }
-
-            function stageToStepKey(stage) {
-                if (!stage) return null;
-                const s = stage.toLowerCase().trim();
-                if (s === 'purchase requisition') return 'purchase_requisition';
-                if (s === 'request for quotation') return 'request_for_quotation';
-                if (s === 'quote comparison') return 'quote_comparison';
-                if (s === 'purchase order') return 'purchase_order';
-                if (s === 'grn') return 'grn';
-                if (s === 'bill') return 'bill';
-                if (s === 'payment') return 'payment';
-                return null;
-            }
-
-            function renderProgress(rec, actions) {
-                var currentStageKey = stageToStepKey(rec.Current_Stage);
-                var completed = { 'purchase_requisition': true };
-                var rejectedStepKey = null;
-
-                if (actions && actions.length) {
-                    actions.forEach(function (action) {
-                        var stepKey = stageToStepKey(action.Moved_To);
-                        if (stepKey) {
-                            if (action.Status && action.Status.toLowerCase() === 'rejected') {
-                                rejectedStepKey = stepKey;
-                            } else {
-                                completed[stepKey] = true;
-                            }
-                        }
-                    });
-                }
-
-                var rejectedIdx = -1;
-                if (rejectedStepKey) {
-                    PROCESS_STEPS.forEach(function (step, i) {
-                        if (step.key === rejectedStepKey) rejectedIdx = i;
-                    });
-                }
-
-                var currentIdx = 0;
-                if (currentStageKey) {
-                    PROCESS_STEPS.forEach(function (step, i) {
-                        if (step.key === currentStageKey) currentIdx = i;
-                    });
-                } else {
-                    PROCESS_STEPS.forEach(function (step, i) {
-                        if (completed[step.key] && i > currentIdx) currentIdx = i;
-                    });
-                }
-
-                var isRejected = (rejectedIdx !== -1);
-                var fillIdx = isRejected ? rejectedIdx : currentIdx;
-
-                var stepsHtml = '';
-                PROCESS_STEPS.forEach(function (step, i) {
-                    var isRejectedStep = (i === rejectedIdx);
-                    var isDone = isRejected ? (i < rejectedIdx) : (i <= currentIdx);
-                    var isCurrent = (i === currentIdx) && !isRejectedStep;
-
-                    var circleClass, labelClass;
-                    if (isRejectedStep) {
-                        circleClass = 'bg-red-600 text-white border-red-600 shadow-md shadow-red-200';
-                        labelClass = 'text-red-700 font-semibold';
-                    } else if (isDone && isCurrent) {
-                        circleClass = 'bg-[#1B5CA8] text-white border-[#1B5CA8] shadow-md shadow-blue-200';
-                        labelClass = 'text-[#1B5CA8] font-semibold';
-                    } else if (isDone) {
-                        circleClass = 'bg-emerald-600 text-white border-emerald-600';
-                        labelClass = 'text-gray-700 font-medium';
-                    } else {
-                        circleClass = 'bg-white text-gray-400 border-gray-300';
-                        labelClass = 'text-gray-400';
-                    }
-
-                    var iconHtml = isRejectedStep ? '<i class="bi bi-x-lg text-[13px]"></i>'
-                        : (isDone && !isCurrent) ? '<i class="bi bi-check-lg text-[13px]"></i>'
-                            : '<i class="bi ' + step.icon + ' text-[13px]"></i>';
-                    var stepLabel = isRejectedStep ? 'Rejected' : step.label;
-
-                    stepsHtml += '<div class="flex flex-col items-center relative z-10" style="width: ' + (100 / PROCESS_STEPS.length) + '%">'
-                        + '<div class="w-[30px] h-[30px] rounded-full border-2 flex items-center justify-center text-[13px] ' + circleClass + ' transition-all duration-300">'
-                        + iconHtml
-                        + '</div>'
-                        + '<div class="text-[10px] mt-1.5 text-center leading-tight ' + labelClass + '">'
-                        + stepLabel
-                        + '</div></div>';
-                });
-
-                var oldSteps = $progressContainer.querySelectorAll('.flex.flex-col');
-                oldSteps.forEach(function (el) { el.remove(); });
-                $progressContainer.insertAdjacentHTML('beforeend', stepsHtml);
-
-                $progressFill.style.width = ((fillIdx / (PROCESS_STEPS.length - 1)) * 100) + '%';
-                $progressFill.style.background = isRejected ? '#dc2626' : '#1B5CA8';
             }
 
             function renderPRDetails(rec) {
@@ -523,62 +428,15 @@
             function renderActionButtons(rec) {
                 var isRejected = rec.Status && rec.Status.toLowerCase() === 'rejected';
                 var isApproved = rec.Status && rec.Status.toLowerCase() === 'approved';
-                var isPRStage = rec.Current_Stage === 'Purchase Requisition';
+                var isPRStage = rec.Current_Stage === 'Purchase Requisition' && rec.Status.toLowerCase() === 'submitted';
                 $actionButtons.style.display = (isPRStage && !isRejected && !isApproved) ? 'flex' : 'none';
-            }
-
-            function renderAuditTrail(actions, prRec) {
-                if (!actions || actions.length === 0) {
-                    $auditTrail.innerHTML = '<div class="text-center py-8 text-gray-400"><i class="bi bi-clock-history-off text-xl mb-1.5 block"></i><div class="text-xs font-medium text-gray-500">No activity recorded yet</div></div>';
-                    return;
-                }
-                var sorted = actions.slice().sort(function (a, b) { return (parseInt(a.ID) || 0) - (parseInt(b.ID) || 0); });
-                var html = '<div class="space-y-0">';
-
-                sorted.forEach(function (action) {
-                    var status = action.Status || '–';
-                    var stage = action.Moved_To || '–';
-                    var comment = action.Comment || '';
-                    var performer = action.Added_User || '-';
-                    var addedTime = action.Added_Time ? formatDate(action.Added_Time) : '–';
-
-                    var iconBg = (status === 'Approved') ? 'bg-emerald-50' : (status === 'Rejected') ? 'bg-red-50' : 'bg-blue-50';
-                    var iconColor = (status === 'Approved') ? 'text-emerald-600' : (status === 'Rejected') ? 'text-red-600' : 'text-blue-600';
-                    var iconName = (status === 'Approved') ? 'bi-check-lg' : (status === 'Rejected') ? 'bi-x-lg' : 'bi-arrow-right';
-
-                    var stageBg = 'bg-gray-100 text-gray-600 border-gray-200';
-                    var stageKey = stageToStepKey(stage);
-                    if (stageKey === 'purchase_order') stageBg = 'bg-blue-50 text-blue-700 border-blue-200';
-                    else if (stageKey === 'grn') stageBg = 'bg-violet-50 text-violet-700 border-violet-200';
-
-                    var initials = performer !== '–' ? performer.charAt(0).toUpperCase() : '?';
-
-                    html += '<div class="bimeline-item relative pl-10 pb-5">'
-                        + '<div class="absolute left-0 top-0 w-[30px] h-[30px] rounded-full ' + iconBg + ' flex items-center justify-center border-2 border-white shadow-sm z-10">'
-                        + '<i class="bi ' + iconName + ' text-[13px] ' + iconColor + '"></i></div>'
-                        + '<div class="bg-gray-50 border border-gray-200 rounded-lg px-3.5 py-3">'
-                        + '<div class="flex items-center justify-between mb-1.5">'
-                        + '<div class="flex items-center gap-2">'
-                        + '<span class="text-xs font-semibold ' + ((status === 'Approved') ? 'text-emerald-700' : status === 'Rejected' ? 'text-red-700' : 'text-gray-700') + '">' + esc(status) + '</span>'
-                        + '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border ' + stageBg + '"><i class="bi bi-arrow-right text-[9px] mr-1 opacity-60"></i>' + esc(stage) + '</span>'
-                        + '</div><span class="text-[10px] text-gray-400">' + esc(addedTime) + '</span></div>'
-                        + (comment ? '<div class="text-xs text-gray-600 mt-1.5">' + esc(comment) + '</div>' : '')
-                        + '<div class="flex items-center gap-1.5 mt-2 text-[11px] text-gray-500">'
-                        + '<div class="w-[18px] h-[18px] rounded-full bg-[#1B5CA8] text-white flex items-center justify-center text-[9px] font-bold">' + initials + '</div>'
-                        + '<span class="font-medium">' + esc(performer) + '</span></div></div></div>';
-                });
-                html += '</div>';
-                $auditTrail.innerHTML = html;
             }
 
             // Function to render the Attachment UI
             function renderAttachments(attachmentData, recordId) {
-                // Ensure there is attachment data before rendering
                 if (!attachmentData) return;
 
-                // Normalize to an array
                 let attachments = Array.isArray(attachmentData) ? attachmentData : [attachmentData];
-
                 let html = '<div class="space-y-3">';
 
                 attachments.forEach(function (att) {
@@ -615,6 +473,7 @@
 
                 $attachmentsBody.innerHTML = html;
             }
+
             window.downloadAttachment = function (filePath, recordId) {
                 var config = {
                     report_name: "Purchase_Requisition_Report",
@@ -623,107 +482,13 @@
                     file_path: filePath
                 };
 
-                // window.open("https://creatorapp.zoho.in/creator/v2.1/data/zohoone_apcobuildingsolut/npk-p2p-software/report/Purchase_Requisition_Report/422709000000101106/Attachments/download?filepath=1783688716841568_kali-maa-img-1.png")
-                //            https://creatorapp.zoho.in/creator/v2.1/data/npk-p2p-software/report/Purchase_Requisition_Report/422709000000101106/Attachments/download?filepath=1783687190687882_logo.jpg
                 ZOHO.CREATOR.UTIL.getInitParams().then(function (response) {
-                    console.log(response)
                     var appOwner = response.scope;
                     var appLinkName = response.appLinkName || "npk-p2p-software";
                     var url = `https://creatorapp.zoho.in/creator/v2.1/data/${appOwner}/${appLinkName}/report/Purchase_Requisition_Report/${recordId}/Attachments/download?filepath=${filePath}`;
                     window.open(url);
                 });
-                // ZOHO.CREATOR.FILE.readFile(config).then(function (response) {
-                //     try {
-                //         // Resolve the display filename first
-                //         var filename = filePath;
-                //         var parts = filePath.split('_');
-                //         if (parts.length > 1 && !isNaN(parts[0])) {
-                //             filename = parts.slice(1).join('_');
-                //         }
-
-                //         // Figure out MIME type from the extension
-                //         var mimeType = getMimeType(filename);
-                //         var blob;
-
-                //         if (response instanceof Blob) {
-                //             // Already a Blob — just re-wrap with the correct type
-                //             blob = response.type ? response : new Blob([response], { type: mimeType });
-                //         }
-                //         else if (typeof response === 'string') {
-
-                //             // 1. Strip Data URI prefix if Zoho included it (e.g., "data:image/png;base64,")
-                //             var base64Data = response;
-                //             if (base64Data.includes('base64,')) {
-                //                 base64Data = base64Data.split('base64,')[1];
-                //             }
-
-                //             try {
-                //                 // 2. Decode the Base64 string back into binary characters
-                //                 var byteCharacters = window.atob(base64Data);
-                //                 var byteArray = new Uint8Array(byteCharacters.length);
-
-                //                 for (var i = 0; i < byteCharacters.length; i++) {
-                //                     byteArray[i] = byteCharacters.charCodeAt(i);
-                //                 }
-                //                 blob = new Blob([byteArray], { type: mimeType });
-
-                //             } catch (b64Error) {
-                //                 // Fallback: If atob() fails, it wasn't Base64. Fall back to raw string parsing.
-                //                 console.warn("Response is not valid Base64, falling back to raw byte parsing.");
-                //                 var fallbackArray = new Uint8Array(response.length);
-                //                 for (var j = 0; j < response.length; j++) {
-                //                     fallbackArray[j] = response.charCodeAt(j) & 0xff;
-                //                 }
-                //                 blob = new Blob([fallbackArray], { type: mimeType });
-                //             }
-                //         }
-                //         else {
-                //             // Catch-all for ArrayBuffers
-                //             blob = new Blob([response], { type: mimeType });
-                //         }
-
-                //         // Trigger the download natively in the browser
-                //         var downloadUrl = window.URL.createObjectURL(blob);
-                //         var a = document.createElement('a');
-                //         a.style.display = 'none';
-                //         a.href = downloadUrl;
-                //         a.download = filename;
-                //         document.body.appendChild(a);
-                //         a.click();
-
-                //         // Clean up the URL object after the download starts
-                //         setTimeout(function () {
-                //             window.URL.revokeObjectURL(downloadUrl);
-                //             document.body.removeChild(a);
-                //         }, 150);
-
-                //     } catch (e) {
-                //         console.error("Failed to process file download: ", e);
-                //         alert("Could not process the file for download. Please check console for errors.");
-                //     }
-                // }).catch(function (err) {
-                //     console.error("Error fetching file from Zoho API: ", err);
-                //     alert("Failed to fetch attachment from server.");
-                // });
             };
-            function getMimeType(filename) {
-                var ext = filename.split('.').pop().toLowerCase();
-                var map = {
-                    pdf: 'application/pdf',
-                    png: 'image/png',
-                    jpg: 'image/jpeg',
-                    jpeg: 'image/jpeg',
-                    gif: 'image/gif',
-                    doc: 'application/msword',
-                    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                    xls: 'application/vnd.ms-excel',
-                    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                    txt: 'text/plain',
-                    csv: 'text/csv',
-                    zip: 'application/zip'
-                };
-                return map[ext] || 'application/octet-stream';
-            }
 
             var pendingAction = { recordId: null, status: '', movedTo: '', requestedItemsData: [] };
 
@@ -780,9 +545,14 @@
                         $approvedItemsCard.classList.add('hidden');
                     }
 
+                    // ── Integration of standardized P2PWorkflowUtils ──
                     var actions = (rec.PR_Actions && rec.PR_Actions.length) ? rec.PR_Actions : [];
-                    renderProgress(rec, actions);
-                    renderAuditTrail(actions, rec);
+                    if (typeof P2PWorkflowUtils !== 'undefined') {
+                        P2PWorkflowUtils.renderProgress(actions, rec.Current_Stage, $progressContainer, $progressFill);
+                        P2PWorkflowUtils.renderAuditTrail(actions, $auditTrailBody);
+                    } else {
+                        console.error("P2PWorkflowUtils script not loaded.");
+                    }
 
                     $loading.classList.add('hidden');
                     $main.classList.remove('hidden');
@@ -790,9 +560,14 @@
                     let rfqRequested = rec.Request_For_Quotation === "Yes" || false;
                     $approveBtn.querySelector('span').textContent = rfqRequested ? "Approve & Submit For RFQ" : "Approve & Submit";
 
+                    // $approveBtn.onclick = function () {
+                    //     openActionModal("Approve PR", "Approved", rfqRequested ? "Request For Quotation" : "Purchase Order", "bg-emerald-600", "hover:bg-emerald-700");
+                    // };
+
                     $approveBtn.onclick = function () {
-                        openActionModal("Approve PR", "Approved", rfqRequested ? "Request For Quotation" : "Purchase Order", "bg-emerald-600", "hover:bg-emerald-700");
+                        openActionModal("Approve PR", "Approved", "Request For Quotation", "bg-emerald-600", "hover:bg-emerald-700");
                     };
+
                     $rejectBtn.onclick = function () {
                         openActionModal("Reject PR", "Rejected", "Request For Quotation", "bg-red-600", "hover:bg-red-700");
                     };
@@ -862,8 +637,8 @@
                             'value="' + esc(reqQty) + '" max="' + esc(reqQty) + '" min="0">' +
                             '</div>' +
                             '</div>' +
-                            '<div class="qty-warning hidden mt-1.5 text-[11px] text-red-500 font-medium text-right flex justify-end items-center gap-1">' +
-                            '<i class="bi bi-exclamation-triangle"></i> Cannot exceed requested qty (' + esc(reqQty) + ')' +
+                            '<div class="qty-warning hidden mt-1.5 text-[11px] text-orange-400 font-medium text-right flex justify-end items-center gap-1">' +
+                            '<i class="bi bi-exclamation-triangle"></i> Exceeding requested qty (' + esc(reqQty) + ')' +
                             '</div>' +
                             '</div>';
                     });
@@ -889,16 +664,16 @@
                             }
 
                             // Validate global state for Submit button
-                            var hasError = Array.from(inputs).some(function (inp) {
-                                return (parseInt(inp.value, 10) || 0) > (parseInt(inp.getAttribute('max'), 10) || 0);
-                            });
+                            // var hasError = Array.from(inputs).some(function (inp) {
+                            //     return (parseInt(inp.value, 10) || 0) > (parseInt(inp.getAttribute('max'), 10) || 0);
+                            // });
 
-                            $confirmActionBtn.disabled = hasError;
-                            if (hasError) {
-                                $confirmActionBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                            } else {
-                                $confirmActionBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                            }
+                            // $confirmActionBtn.disabled = hasError;
+                            // if (hasError) {
+                            //     $confirmActionBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                            // } else {
+                            // }
+                            $confirmActionBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                         });
                     });
 
@@ -950,7 +725,7 @@
                             };
 
                             if (originalItem.Due_Date && originalItem.Due_Date.trim() !== '' && originalItem.Due_Date !== '-') {
-                                payloadItem["Due_Date"] = originalItem.Due_Date;
+                                payloadItem["Due_Date"] = dayjs(originalItem.Due_Date).format("DD-MMM-YYYY")
                             }
                             if (originalItem.Comment && originalItem.Comment.trim() !== '' && originalItem.Comment !== '-') {
                                 payloadItem["Comment"] = originalItem.Comment;
@@ -969,7 +744,7 @@
                             "data": {
                                 "PR_Number": pendingAction.recordId,
                                 "Status": "Approved",
-                                "Moved_To": pendingAction.movedTo,
+                                "Moved_To": "Purchase Requisition",
                                 "Comment": commentVal
                             }
                         }
@@ -981,7 +756,7 @@
                         id: pendingAction.recordId,
                         payload: {
                             data: {
-                                "Status": "Approved",
+                                "Status": "In Progress",
                                 "Items": finalApprovedItems,
                                 "Items_Approval_Status": itemApprovalStatus,
                             }

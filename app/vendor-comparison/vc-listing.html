@@ -9,10 +9,13 @@
     <script src="https://cdn.tailwindcss.com">
     </script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+        rel="stylesheet">
 
     <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js">
     </script>
@@ -282,6 +285,7 @@
                 opacity: 0;
                 transform: translateY(8px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -311,14 +315,17 @@
         .modal-scroll::-webkit-scrollbar {
             width: 5px;
         }
+
         .modal-scroll::-webkit-scrollbar-track {
             background: #f1f5f9;
             border-radius: 4px;
         }
+
         .modal-scroll::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 4px;
         }
+
         .modal-scroll::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
@@ -326,26 +333,31 @@
 </head>
 
 <body class="bg-gray-50 p-6">
-    <div id="app" x-data="vcApp()" x-init="initApp()" class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-[1400px] mx-auto" x-cloak>
+    <div id="app" x-data="vcApp()" x-init="initApp()"
+        class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-[1400px] mx-auto" x-cloak>
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-4 gap-2.5 mb-4">
-            <div class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-[#1B5CA8]">
+            <div
+                class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-[#1B5CA8]">
                 <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Total Comparisons</div>
                 <div class="text-[25px] font-bold leading-none text-[#1B5CA8]" x-text="stats.total"></div>
                 <div class="text-[11px] text-gray-400 mt-1.5">All created records</div>
             </div>
-            <div class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-amber-500">
+            <div
+                class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-amber-500">
                 <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Pending</div>
                 <div class="text-[25px] font-bold leading-none text-amber-500" x-text="stats.pending"></div>
                 <div class="text-[11px] text-gray-400 mt-1.5">Submitted / Re-negotiating</div>
             </div>
-            <div class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-emerald-600">
+            <div
+                class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-emerald-600">
                 <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Finalized</div>
                 <div class="text-[25px] font-bold leading-none text-emerald-600" x-text="stats.finalized"></div>
                 <div class="text-[11px] text-gray-400 mt-1.5">Vendor Selected</div>
             </div>
-            <div class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-red-600">
+            <div
+                class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-red-600">
                 <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Rejected</div>
                 <div class="text-[25px] font-bold leading-none text-red-600" x-text="stats.rejected"></div>
                 <div class="text-[11px] text-gray-400 mt-1.5">Declined VC</div>
@@ -358,17 +370,32 @@
         </div>
         <div class="flex items-center justify-between gap-2.5 mb-2 flex-wrap">
             <div class="flex bg-gray-100 rounded-full p-[3px] gap-[2px]">
-                <button @click="setFilter('all')" :class="filter === 'all' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'" class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">All (<span x-text="stats.total"></span>)</button>
-                <button @click="setFilter('pending')" :class="filter === 'pending' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'" class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Pending (<span x-text="stats.pending"></span>)</button>
-                <button @click="setFilter('finalized')" :class="filter === 'finalized' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'" class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Finalized (<span x-text="stats.finalized"></span>)</button>
-                <button @click="setFilter('rejected')" :class="filter === 'rejected' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'" class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Rejected (<span x-text="stats.rejected"></span>)</button>
+                <button @click="setFilter('all')"
+                    :class="filter === 'all' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
+                    class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">All (<span
+                        x-text="stats.total"></span>)</button>
+                <button @click="setFilter('pending')"
+                    :class="filter === 'pending' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
+                    class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Pending (<span
+                        x-text="stats.pending"></span>)</button>
+                <button @click="setFilter('finalized')"
+                    :class="filter === 'finalized' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
+                    class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Finalized (<span
+                        x-text="stats.finalized"></span>)</button>
+                <button @click="setFilter('rejected')"
+                    :class="filter === 'rejected' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
+                    class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Rejected (<span
+                        x-text="stats.rejected"></span>)</button>
             </div>
             <div class="flex gap-2 items-center">
                 <div class="relative">
-                    <i class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px] pointer-events-none"></i>
-                    <input x-model="searchQuery" type="text" placeholder="Search by ID#, Subject, PR..." class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[230px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10">
+                    <i
+                        class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px] pointer-events-none"></i>
+                    <input x-model="searchQuery" type="text" placeholder="Search by ID#, Subject, PR..."
+                        class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[230px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10">
                 </div>
-                <button @click="openModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-all shadow-sm">
+                <button @click="openModal()"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-all shadow-sm">
                     <i class="bi bi-plus-lg"></i> Create Quote Comparison
                 </button>
             </div>
@@ -390,13 +417,21 @@
                 </colgroup>
                 <thead>
                     <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
-                        <template x-for="col in ['qc_no', 'subject', 'pr_ref', 'rfq_ref', 'date', 'status', 'final_vendor', 'total_rate']" :key="col">
-                            <th @click="toggleSort(col)" data-sort class="px-3 py-2 text-[11px] font-semibold text-gray-500 tracking-wide text-left whitespace-nowrap" :class="sortCol === col ? 'sort-active' : ''">
-                                <span x-text="{qc_no: 'ID #', subject: 'Subject', pr_ref: 'PR Ref', rfq_ref: 'RFQ Ref', date: 'Created Date', status: 'Status', final_vendor: 'Final Vendor', total_rate: 'Total Rate'}[col]"></span>
-                                <span class="sort-indicator" x-text="sortCol === col ? (sortDir === 'asc' ? '▲' : '▼') : ''"></span>
+                        <template
+                            x-for="col in ['qc_no', 'subject', 'pr_ref', 'rfq_ref', 'date', 'status', 'final_vendor', 'total_rate']"
+                            :key="col">
+                            <th @click="toggleSort(col)" data-sort
+                                class="px-3 py-2 text-[11px] font-semibold text-gray-500 tracking-wide text-left whitespace-nowrap"
+                                :class="sortCol === col ? 'sort-active' : ''">
+                                <span
+                                    x-text="{qc_no: 'ID #', subject: 'Subject', pr_ref: 'PR Ref', rfq_ref: 'RFQ Ref', date: 'Created Date', status: 'Status', final_vendor: 'Final Vendor', total_rate: 'Total Rate'}[col]"></span>
+                                <span class="sort-indicator"
+                                    x-text="sortCol === col ? (sortDir === 'asc' ? '▲' : '▼') : ''"></span>
                             </th>
                         </template>
-                        <th class="px-3 py-2 text-[11px] font-semibold text-gray-500 tracking-wide text-left whitespace-nowrap bg-gray-50 sticky-action-cell">Actions</th>
+                        <th
+                            class="px-3 py-2 text-[11px] font-semibold text-gray-500 tracking-wide text-left whitespace-nowrap bg-gray-50 sticky-action-cell">
+                            Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -417,39 +452,65 @@
                     </tr>
                     <template x-for="rec in paginatedRecords" :key="rec.ID">
                         <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors duration-150 group">
-                            <td class="px-3 py-[9px] align-middle whitespace-nowrap"><span class="font-semibold text-[#1B5CA8] font-mono text-[11px]" x-text="rec.QC_Ref_Number || '–'"></span></td>
-                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900 max-w-[160px]" x-text="rec.Quote_Comparison_Subject || '–'"></td>
-                            <td class="px-3 py-[9px] align-middle whitespace-nowrap font-mono text-[11px] font-semibold" x-text="rec.PR_Ref?.zc_display_value || rec.PR_Ref?.PR_Number || '–'"></td>
-                            <td class="px-3 py-[9px] align-middle whitespace-nowrap font-mono text-[11px] font-semibold" x-text="rec.RFQ_Ref?.zc_display_value || rec.RFQ_Ref?.RFQ_Ref_Number || '–'"></td>
-                            <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[11px] text-gray-500" x-text="formatDate(rec.Added_Time)"></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap"><span
+                                    class="font-semibold text-[#1B5CA8] font-mono text-[11px]"
+                                    x-text="rec.QC_Ref_Number || '–'"></span></td>
+                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900 max-w-[160px]"
+                                x-text="rec.Quote_Comparison_Subject || '–'"></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap font-mono text-[11px] font-semibold"
+                                x-text="rec.PR_Ref?.zc_display_value || rec.PR_Ref?.PR_Number || '–'"></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap font-mono text-[11px] font-semibold"
+                                x-text="rec.RFQ_Ref?.zc_display_value || rec.RFQ_Ref?.RFQ_Ref_Number || '–'"></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[11px] text-gray-500"
+                                x-text="formatDate(rec.Added_Time)"></td>
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap">
-                                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap border" :class="getStatusStyle(rec).classes">
-                                    <span class="w-[5px] h-[5px] rounded-full shrink-0" :class="getStatusStyle(rec).dot"></span>
+                                <span
+                                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap border"
+                                    :class="getStatusStyle(rec).classes">
+                                    <span class="w-[5px] h-[5px] rounded-full shrink-0"
+                                        :class="getStatusStyle(rec).dot"></span>
                                     <span x-text="rec.Status || 'Submitted'"></span>
                                 </span>
                             </td>
-                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap max-w-[140px]"><span class="text-[12px] font-medium text-gray-800" x-text="rec.Finalized_Vendor || '–'"></span></td>
-                            <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[12px] font-medium text-gray-700" x-text="formatINR(rec.Total_Landed_Rate)"></td>
-                            <td class="px-3 py-[9px] align-middle whitespace-nowrap bg-white group-hover:bg-[#EBF3FC] sticky-action-cell">
-                                <button @click="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:Quote_Comparison_Detailed?recordId='+rec.ID,window:'same'})" class="inline-flex items-center gap-[3px] px-2 py-[3px] rounded bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 text-[11px] font-medium transition-colors"><i class="bi bi-box-arrow-up-right"></i> View</button>
+                            <td
+                                class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap max-w-[140px]">
+                                <span class="text-[12px] font-medium text-gray-800"
+                                    x-text="rec.Finalized_Vendor || '–'"></span>
+                            </td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[12px] font-medium text-gray-700"
+                                x-text="formatINR(rec.Total_Landed_Rate)"></td>
+                            <td
+                                class="px-3 py-[9px] align-middle whitespace-nowrap bg-white group-hover:bg-[#EBF3FC] sticky-action-cell">
+                                <button
+                                    @click="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:Quote_Comparison_Detailed?recordId='+rec.ID,window:'same'})"
+                                    class="inline-flex items-center gap-[3px] px-2 py-[3px] rounded bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 text-[11px] font-medium transition-colors"><i
+                                        class="bi bi-box-arrow-up-right"></i> View</button>
                             </td>
                         </tr>
                     </template>
                 </tbody>
             </table>
 
-            <div x-show="!isLoading && totalPages > 0" class="flex items-center justify-between px-[13px] py-[9px] border-t border-gray-200 bg-gray-50 text-xs text-gray-500" x-cloak>
-                <span>Showing <span x-text="(page - 1) * perPage + 1"></span>–<span x-text="Math.min(page * perPage, filteredRecords.length)"></span> of <span x-text="filteredRecords.length"></span> records</span>
+            <div x-show="!isLoading && totalPages > 0"
+                class="flex items-center justify-between px-[13px] py-[9px] border-t border-gray-200 bg-gray-50 text-xs text-gray-500"
+                x-cloak>
+                <span>Showing <span x-text="(page - 1) * perPage + 1"></span>–<span
+                        x-text="Math.min(page * perPage, filteredRecords.length)"></span> of <span
+                        x-text="filteredRecords.length"></span> records</span>
                 <div class="flex gap-1">
-                    <button @click="page > 1 ? page-- : null" :disabled="page <= 1" class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]">
+                    <button @click="page > 1 ? page-- : null" :disabled="page <= 1"
+                        class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]">
                         <i class="bi bi-chevron-left"></i>
                     </button>
                     <template x-for="p in getPagesArray()" :key="p">
-                        <button @click="typeof p === 'number' ? page = p : null" :class="page === p ? 'border-[#1B5CA8] bg-[#1B5CA8] text-white font-semibold' : (typeof p === 'number' ? 'border-gray-300 bg-white text-gray-600 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]' : 'border-transparent bg-transparent text-gray-400 cursor-default')" class="min-w-[27px] h-[27px] px-1 border rounded inline-flex items-center justify-center transition-colors">
+                        <button @click="typeof p === 'number' ? page = p : null"
+                            :class="page === p ? 'border-[#1B5CA8] bg-[#1B5CA8] text-white font-semibold' : (typeof p === 'number' ? 'border-gray-300 bg-white text-gray-600 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]' : 'border-transparent bg-transparent text-gray-400 cursor-default')"
+                            class="min-w-[27px] h-[27px] px-1 border rounded inline-flex items-center justify-center transition-colors">
                             <span x-text="p"></span>
                         </button>
                     </template>
-                    <button @click="page < totalPages ? page++ : null" :disabled="page >= totalPages" class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]">
+                    <button @click="page < totalPages ? page++ : null" :disabled="page >= totalPages"
+                        class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]">
                         <i class="bi bi-chevron-right"></i>
                     </button>
                 </div>
@@ -464,9 +525,12 @@
             <div class="vc-modal-box max-w-7xl" style="max-height: 94vh;" x-show="isModalOpen" x-transition>
 
                 <!-- Modal Header -->
-                <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50 sticky top-0 z-20">
+                <div
+                    class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50 sticky top-0 z-20">
                     <h3 class="text-[15px] font-bold text-gray-800">New Quote Comparison</h3>
-                    <button @click="closeModal()" type="button" class="text-gray-400 hover:text-gray-700 transition-colors"><i class="bi bi-x-lg text-lg"></i></button>
+                    <button @click="closeModal()" type="button"
+                        class="text-gray-400 hover:text-gray-700 transition-colors"><i
+                            class="bi bi-x-lg text-lg"></i></button>
                 </div>
 
                 <!-- Modal Body -->
@@ -475,54 +539,87 @@
                     <form @submit.prevent="submitForm">
 
                         <!-- Comparison Details -->
-                        <h4 class="text-xs font-bold text-[#1B5CA8] tracking-wide mb-3 border-b border-gray-100 pb-1">Comparison Details</h4>
+                        <h4 class="text-xs font-bold text-[#1B5CA8] tracking-wide mb-3 border-b border-gray-100 pb-1">
+                            Comparison Details</h4>
                         <div class="grid grid-cols-3 gap-4 mb-6">
                             <div>
-                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Subject <span class="text-red-500">*</span></label>
-                                <input x-model="form.Quote_Comparison_Subject" type="text" required class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm" placeholder="e.g. Bulk Material Comparison">
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Subject
+                                    <span class="text-red-500">*</span></label>
+                                <input x-model="form.Quote_Comparison_Subject" type="text" required
+                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"
+                                    placeholder="e.g. Bulk Material Comparison">
                             </div>
                             <div>
-                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PR Reference</label>
-                                <select x-ref="prSelect" class="w-full text-xs" placeholder="Search PR Number..."></select>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PR
+                                    Reference</label>
+                                <select x-ref="prSelect" class="w-full text-xs"
+                                    placeholder="Search PR Number..."></select>
                             </div>
                             <div>
-                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">RFQ Reference <span class="text-gray-400 font-normal normal-case ml-0.5">(Select to Auto-fill)</span></label>
-                                <select x-ref="rfqSelect" class="w-full text-xs" placeholder="Search RFQ Number..."></select>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">RFQ
+                                    Reference <span class="text-gray-400 font-normal normal-case ml-0.5">(Select to
+                                        Auto-fill)</span></label>
+                                <select x-ref="rfqSelect" class="w-full text-xs"
+                                    placeholder="Search RFQ Number..."></select>
                             </div>
                         </div>
 
                         <!-- Items Requirement -->
                         <div class="mb-6 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
-                            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                                <span class="text-xs font-semibold text-gray-700 tracking-wide">Items Requirement <span class="text-red-500">*</span></span>
-                                <button type="button" @click="addItemRow()" class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+ Add Item</button>
+                            <div
+                                class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                                <span class="text-xs font-semibold text-gray-700 tracking-wide">Items Requirement <span
+                                        class="text-red-500">*</span></span>
+                                <!-- <button type="button" @click="addItemRow()" class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+ Add Item</button> -->
                             </div>
                             <div class="overflow-x-auto" style="overflow:visible;">
                                 <table class="w-full border-collapse">
                                     <thead class="bg-white border-b border-gray-200">
                                         <tr>
-                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[40%]">Item Lookup</th>
-                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[15%]">Unit</th>
-                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[15%]">Req. Qty</th>
-                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[25%]">Deliver To / Plant</th>
-                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-8"></th>
+                                            <th
+                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[40%]">
+                                                Item Lookup</th>
+                                            <th
+                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[15%]">
+                                                Unit</th>
+                                            <th
+                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[15%]">
+                                                Req. Qty</th>
+                                            <th
+                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[25%]">
+                                                Deliver To / Plant</th>
+                                            <!-- <th
+                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-8">
+                                            </th> -->
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr x-show="form.Items.length === 0">
-                                            <td colspan="5" class="px-3 py-4 text-center text-xs text-gray-400 italic">No items added. Select an RFQ or add manually.</td>
+                                            <td colspan="5" class="px-3 py-4 text-center text-xs text-gray-400 italic">
+                                                No items added. Select an RFQ or add manually.</td>
                                         </tr>
                                         <template x-for="(item, index) in form.Items" :key="item.uid">
-                                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors bg-white">
+                                            <tr
+                                                class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors bg-white">
                                                 <td class="px-2 py-2 grid-select relative">
-                                                    <select class="w-full text-xs" x-init="() => { const ts = initDynamicItem($el, item, 'Items', 'Item_Name'); return () => ts.destroy(); }"></select>
+                                                    <select disabled="w-full text-xs"
+                                                    class="cursor-not-allowed"
+                                                        x-init="() => { const ts = initDynamicItem($el, item, 'Items', 'Item_Name'); return () => ts.destroy(); }"></select>
                                                 </td>
-                                                <td class="px-2 py-2"><input x-model="item.Unit" type="text" class="grid-input bg-gray-100 text-gray-500 cursor-not-allowed" placeholder="e.g. Kg, Nos" readonly></td>
-                                                <td class="px-2 py-2"><input x-model.number="item.Quantity" @input="recalculateAllTotals()" type="number" min="1" step="any" class="grid-input"></td>
-                                                <td class="px-2 py-2"><input x-model="item.Deliver_to_Plant" type="text" class="grid-input"></td>
-                                                <td class="px-2 py-2 text-center">
-                                                    <button type="button" @click="removeItemRow(index)" class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50"><i class="bi bi-trash"></i></button>
-                                                </td>
+                                                <td class="px-2 py-2"><input disabled x-model="item.Unit" type="text"
+                                                        class="grid-input bg-gray-100 text-gray-500 cursor-not-allowed"
+                                                        placeholder="e.g. Kg, Nos" readonly></td>
+                                                <td class="px-2 py-2"><input disabled x-model.number="item.Quantity"
+                                                        @input="recalculateAllTotals()" type="number" min="1" step="any"
+                                                        class="grid-input cursor-not-allowed"></td>
+                                                <td class="px-2 py-2"><input disabled x-model="item.Deliver_to_Plant"
+                                                        type="text" class="grid-input cursor-not-allowed"></td>
+                                                <!-- <td class="px-2 py-2 text-center">
+                                                    <button type="button" @click="removeItemRow(index)"
+                                                        class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50"><i
+                                                            class="bi bi-trash"></i></button>
+                                                </td> -->
                                             </tr>
                                         </template>
                                     </tbody>
@@ -533,38 +630,50 @@
                         <!-- Vendor Quotes - VENDOR-CENTRIC -->
                         <div class="mb-6">
                             <div class="flex items-center justify-between mb-3">
-                                <span class="text-xs font-semibold text-gray-700 tracking-wide">Vendor Quotes <span class="text-red-500">*</span></span>
-                                <button type="button" @click="addVendor()" class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-3 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">
+                                <span class="text-xs font-semibold text-gray-700 tracking-wide">Vendor Quotes <span
+                                        class="text-red-500">*</span></span>
+                                <button type="button" @click="addVendor()"
+                                    class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-3 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">
                                     <i class="bi bi-plus-lg mr-1"></i> Add Vendor
                                 </button>
                             </div>
 
                             <!-- No vendors -->
-                            <div x-show="form.Vendors.length === 0" class="border border-gray-200 rounded-lg p-6 text-center text-xs text-gray-400 italic bg-gray-50">
+                            <div x-show="form.Vendors.length === 0"
+                                class="border border-gray-200 rounded-lg p-6 text-center text-xs text-gray-400 italic bg-gray-50">
                                 No vendors added. Click "Add Vendor" to start.
                             </div>
 
                             <!-- Vendor Cards -->
                             <template x-for="(vendor, vIdx) in form.Vendors" :key="vendor.uid">
-                                <div class="vendor-card mb-4 fade-slide-in" :class="vendor.finalized ? 'finalized' : ''">
+                                <div class="vendor-card mb-4 fade-slide-in"
+                                    :class="vendor.finalized ? 'finalized' : ''">
 
                                     <!-- Vendor Card Header -->
                                     <div class="vendor-card-header" :class="vendor.finalized ? 'finalized' : ''">
                                         <div class="flex items-center gap-3 flex-1 min-w-0 flex-wrap">
                                             <span class="text-xs font-semibold text-gray-600 shrink-0">Vendor</span>
                                             <div class="grid-select relative flex-1 min-w-[160px] max-w-[280px]">
-                                                <select class="w-full text-xs" :x-ref="'vendorSelect_' + vIdx" x-init="() => { const ts = initDynamicVendor($el, vendor); window['vendorTs_'+vIdx] = ts; return () => { if(window['vendorTs_'+vIdx]) window['vendorTs_'+vIdx].destroy(); }; }"></select>
+                                                <select class="w-full text-xs" :x-ref="'vendorSelect_' + vIdx"
+                                                    x-init="() => { const ts = initDynamicVendor($el, vendor); window['vendorTs_'+vIdx] = ts; return () => { if(window['vendorTs_'+vIdx]) window['vendorTs_'+vIdx].destroy(); }; }"></select>
                                             </div>
-                                            <span x-show="vendor.finalized" class="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full text-[10px] font-bold border border-emerald-200 shrink-0">
-                                                <i class="bi bi-check-circle-fill text-emerald-500 text-[11px]"></i> Finalized
+                                            <span x-show="vendor.finalized"
+                                                class="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full text-[10px] font-bold border border-emerald-200 shrink-0">
+                                                <i class="bi bi-check-circle-fill text-emerald-500 text-[11px]"></i>
+                                                Finalized
                                             </span>
                                         </div>
                                         <div class="flex items-center gap-1.5 shrink-0">
-                                            <button type="button" @click="finalizeVendor(vIdx)" class="text-[10px] font-semibold px-2.5 py-1 rounded-md transition-colors" :class="vendor.finalized ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
-                                                <i class="bi" :class="vendor.finalized ? 'bi-check2-all' : 'bi-check2'"></i>
+                                            <button type="button" @click="finalizeVendor(vIdx)"
+                                                class="text-[10px] font-semibold px-2.5 py-1 rounded-md transition-colors"
+                                                :class="vendor.finalized ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+                                                <i class="bi"
+                                                    :class="vendor.finalized ? 'bi-check2-all' : 'bi-check2'"></i>
                                                 <span x-text="vendor.finalized ? 'Finalized' : 'Finalize'"></span>
                                             </button>
-                                            <button type="button" @click="removeVendor(vIdx)" class="text-gray-400 hover:text-red-500 p-1 rounded-md hover:bg-red-50 transition-colors" title="Remove Vendor">
+                                            <button type="button" @click="removeVendor(vIdx)"
+                                                class="text-gray-400 hover:text-red-500 p-1 rounded-md hover:bg-red-50 transition-colors"
+                                                title="Remove Vendor">
                                                 <i class="bi bi-trash3"></i>
                                             </button>
                                         </div>
@@ -589,29 +698,52 @@
                                             </thead>
                                             <tbody>
                                                 <tr x-show="vendor.QuoteLines.length === 0">
-                                                    <td colspan="10" class="text-center text-gray-400 italic py-3 text-[11px]">No item quotes for this vendor. Click "Add Item Quote" below.</td>
+                                                    <td colspan="10"
+                                                        class="text-center text-gray-400 italic py-3 text-[11px]">No
+                                                        item quotes for this vendor. Click "Add Item Quote" below.</td>
                                                 </tr>
                                                 <template x-for="(line, lIdx) in vendor.QuoteLines" :key="line.uid">
                                                     <tr :class="line.Rank === 'Yes' ? 'bg-emerald-50/40' : ''">
                                                         <!-- Item -->
                                                         <td class="grid-select relative" style="min-width:140px;">
-                                                            <select class="w-full text-xs" :x-ref="'itemSelect_'+vIdx+'_'+lIdx" x-init="() => { const ts = initDynamicItem($el, line, 'Items_Master', 'Item_Name'); return () => ts.destroy(); }"></select>
+                                                            <select class="w-full text-xs"
+                                                                :x-ref="'itemSelect_'+vIdx+'_'+lIdx"
+                                                                x-init="() => { const ts = initDynamicItem($el, line, 'Items_Master', 'Item_Name'); return () => ts.destroy(); }"></select>
                                                         </td>
                                                         <!-- Basic Rate -->
-                                                        <td><input x-model.number="line.Basic_Rate" @input="syncVendorLineRates(vIdx, lIdx, 'basic')" type="number" step="any" class="grid-input" style="min-width:70px;"></td>
+                                                        <td><input x-model.number="line.Basic_Rate"
+                                                                @input="syncVendorLineRates(vIdx, lIdx, 'basic')"
+                                                                type="number" step="any" class="grid-input"
+                                                                style="min-width:70px;"></td>
                                                         <!-- Disc % -->
-                                                        <td><input x-model.number="line.Disc" @input="syncVendorLineRates(vIdx, lIdx, 'disc')" type="number" step="any" class="grid-input" style="min-width:55px;"></td>
+                                                        <td><input x-model.number="line.Disc"
+                                                                @input="syncVendorLineRates(vIdx, lIdx, 'disc')"
+                                                                type="number" step="any" class="grid-input"
+                                                                style="min-width:55px;"></td>
                                                         <!-- Neg. Rate -->
-                                                        <td><input x-model.number="line.Negotiated_Rate" @input="syncVendorLineRates(vIdx, lIdx, 'neg')" type="number" step="any" class="grid-input" style="min-width:75px;"></td>
+                                                        <td><input x-model.number="line.Negotiated_Rate"
+                                                                @input="syncVendorLineRates(vIdx, lIdx, 'neg')"
+                                                                type="number" step="any" class="grid-input"
+                                                                style="min-width:75px;"></td>
                                                         <!-- Freight -->
-                                                        <td><input x-model.number="line.Freight" @input="syncVendorLineRates(vIdx, lIdx, 'freight')" type="number" step="any" class="grid-input" style="min-width:60px;"></td>
+                                                        <td><input x-model.number="line.Freight"
+                                                                @input="syncVendorLineRates(vIdx, lIdx, 'freight')"
+                                                                type="number" step="any" class="grid-input"
+                                                                style="min-width:60px;"></td>
                                                         <!-- GST % -->
-                                                        <td><input x-model.number="line.GST" @input="syncVendorLineRates(vIdx, lIdx, 'gst')" type="number" step="any" class="grid-input" style="min-width:50px;"></td>
+                                                        <td><input x-model.number="line.GST"
+                                                                @input="syncVendorLineRates(vIdx, lIdx, 'gst')"
+                                                                type="number" step="any" class="grid-input"
+                                                                style="min-width:50px;"></td>
                                                         <!-- Landed Rate (auto) -->
-                                                        <td><input x-model.number="line.Landed_Rate" type="number" disabled class="grid-input font-bold text-[#1B5CA8] bg-gray-100 cursor-not-allowed" style="min-width:80px;"></td>
+                                                        <td><input x-model.number="line.Landed_Rate" type="number"
+                                                                disabled
+                                                                class="grid-input font-bold text-[#1B5CA8] bg-gray-100 cursor-not-allowed"
+                                                                style="min-width:80px;"></td>
                                                         <!-- Payment Terms -->
                                                         <td style="min-width:90px;">
-                                                            <select x-model="line.Payment_Terms" class="grid-input" style="min-width:80px;">
+                                                            <select x-model="line.Payment_Terms" class="grid-input"
+                                                                style="min-width:80px;">
                                                                 <option value="">Select…</option>
                                                                 <option value="Advance">Advance</option>
                                                                 <option value="15 Days Credit">15 Days</option>
@@ -621,14 +753,20 @@
                                                         </td>
                                                         <!-- Rank -->
                                                         <td style="text-align:center; min-width:65px;">
-                                                            <select x-model="line.Rank" @change="handleVendorLineRank(vIdx, lIdx)" class="grid-input font-semibold text-center" :class="line.Rank === 'Yes' ? 'text-emerald-700 border-emerald-500 bg-emerald-50' : ''" style="min-width:55px;">
+                                                            <select x-model="line.Rank"
+                                                                @change="handleVendorLineRank(vIdx, lIdx)"
+                                                                class="grid-input font-semibold text-center"
+                                                                :class="line.Rank === 'Yes' ? 'text-emerald-700 border-emerald-500 bg-emerald-50' : ''"
+                                                                style="min-width:55px;">
                                                                 <option value="No">No</option>
                                                                 <option value="Yes">Yes</option>
                                                             </select>
                                                         </td>
                                                         <!-- Remove -->
                                                         <td style="text-align:center; min-width:36px;">
-                                                            <button type="button" @click="removeVendorLine(vIdx, lIdx)" class="text-gray-400 hover:text-red-500 p-1 rounded-md hover:bg-red-50 transition-colors"><i class="bi bi-x"></i></button>
+                                                            <button type="button" @click="removeVendorLine(vIdx, lIdx)"
+                                                                class="text-gray-400 hover:text-red-500 p-1 rounded-md hover:bg-red-50 transition-colors"><i
+                                                                    class="bi bi-x"></i></button>
                                                         </td>
                                                     </tr>
                                                 </template>
@@ -637,12 +775,16 @@
                                     </div>
 
                                     <!-- Add Item Quote -->
-                                    <div class="px-3 py-2 border-t border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                                        <button type="button" @click="addVendorLine(vIdx)" class="add-quote-btn text-[10px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">
+                                    <div
+                                        class="px-3 py-2 border-t border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                                        <button type="button" @click="addVendorLine(vIdx)"
+                                            class="add-quote-btn text-[10px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">
                                             <i class="bi bi-plus-lg mr-0.5"></i> Add Item Quote
                                         </button>
                                         <span x-show="vendor.QuoteLines.length > 0" class="text-[10px] text-gray-400">
-                                            <span x-text="vendor.QuoteLines.filter(l => l.Rank === 'Yes').length"></span> ranked Yes
+                                            <span
+                                                x-text="vendor.QuoteLines.filter(l => l.Rank === 'Yes').length"></span>
+                                            ranked Yes
                                         </span>
                                     </div>
                                 </div>
@@ -650,39 +792,54 @@
                         </div>
 
                         <!-- Final Decision -->
-                        <h4 class="text-xs font-bold text-emerald-600 tracking-wide mb-3 border-b border-gray-100 pb-1">Final Decision</h4>
+                        <h4 class="text-xs font-bold text-emerald-600 tracking-wide mb-3 border-b border-gray-100 pb-1">
+                            Final Decision</h4>
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div>
-                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Finalized Vendor</label>
-                                <input x-model="form.Finalized_Vendor" type="text" readonly class="w-full py-2 px-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] font-semibold text-emerald-700 cursor-not-allowed outline-none">
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Finalized
+                                    Vendor</label>
+                                <input x-model="form.Finalized_Vendor" type="text" readonly
+                                    class="w-full py-2 px-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] font-semibold text-emerald-700 cursor-not-allowed outline-none">
                             </div>
                             <div>
-                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Grand Total Landed Rate <span class="text-gray-400 font-normal normal-case">(Qty × Landed Rate)</span></label>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Grand
+                                    Total Landed Rate <span class="text-gray-400 font-normal normal-case">(Qty × Landed
+                                        Rate)</span></label>
                                 <div class="relative">
-                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₹</span>
-                                    <input x-model.number="form.Total_Landed_Rate" type="number" step="any" readonly class="w-full py-2 pl-7 pr-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] font-bold text-[#1B5CA8] cursor-not-allowed outline-none">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₹</span>
+                                    <input x-model.number="form.Total_Landed_Rate" type="number" step="any" readonly
+                                        class="w-full py-2 pl-7 pr-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] font-bold text-[#1B5CA8] cursor-not-allowed outline-none">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Justification -->
                         <div class="mb-4">
-                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Justification</label>
-                            <textarea x-model="form.Justification" rows="3" class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></textarea>
+                            <label
+                                class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Justification</label>
+                            <textarea x-model="form.Justification" rows="3"
+                                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></textarea>
                         </div>
 
                         <!-- Attachments -->
                         <div class="mb-5">
-                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Attachments</label>
-                            <input x-ref="fileInput" type="file" multiple class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-[#EBF3FC] file:text-[#1B5CA8] hover:file:bg-[#d8e8fa] transition-colors cursor-pointer border border-gray-200 rounded-lg bg-gray-50 py-1.5 px-2">
+                            <label
+                                class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Attachments</label>
+                            <input x-ref="fileInput" type="file" multiple
+                                class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-[#EBF3FC] file:text-[#1B5CA8] hover:file:bg-[#d8e8fa] transition-colors cursor-pointer border border-gray-200 rounded-lg bg-gray-50 py-1.5 px-2">
                         </div>
 
                         <!-- Form Actions -->
                         <div class="flex justify-end gap-2 border-t border-gray-100 pt-4 mt-2">
-                            <button type="button" @click="closeModal()" class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button type="submit" :disabled="isSubmitting" class="inline-flex items-center justify-center min-w-[100px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70">
+                            <button type="button" @click="closeModal()"
+                                class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button type="submit" :disabled="isSubmitting"
+                                class="inline-flex items-center justify-center min-w-[100px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70">
                                 <span x-show="!isSubmitting">Submit VC</span>
-                                <div x-show="isSubmitting" class="vc-spinner" style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
+                                <div x-show="isSubmitting" class="vc-spinner"
+                                    style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
                             </button>
                         </div>
 
@@ -741,10 +898,14 @@
                 // --- INIT ---
                 initApp() {
                     this.fetchRecords();
-                    this.$watch('searchQuery', Alpine.debounce(() => { this.page = 1;
-                        this.fetchRecords(); }, 400));
-                    this.$watch('filter', () => { this.page = 1;
-                        this.fetchRecords(); });
+                    this.$watch('searchQuery', Alpine.debounce(() => {
+                        this.page = 1;
+                        this.fetchRecords();
+                    }, 400));
+                    this.$watch('filter', () => {
+                        this.page = 1;
+                        this.fetchRecords();
+                    });
                 },
 
                 // --- DATA FETCHING ---
@@ -754,11 +915,11 @@
                         let q = this.searchQuery.trim().replace(/'/g, "\\'");
                         criteria.push(
                             `(QC_Ref_Number.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))`
-                            );
+                        );
                     }
                     if (this.filter === 'pending') criteria.push(
                         '(Status == "Submitted" || Status == "Requested For Re Negotiation" || (Status == "" && Finalized_Vendor == ""))'
-                        );
+                    );
                     else if (this.filter === 'finalized') criteria.push(
                         '(Status == "Finalized" || Status == "Freezed" || (Status == "" && Finalized_Vendor != ""))');
                     else if (this.filter === 'rejected') criteria.push('(Status == "Rejected")');
@@ -799,12 +960,16 @@
                     const build = (statusCrit) => [searchCrit, statusCrit].filter(Boolean).join(' && ');
                     const map = [
                         { key: 'total', crit: build('') },
-                        { key: 'pending', crit: build(
+                        {
+                            key: 'pending', crit: build(
                                 '(Status == "Submitted" || Status == "Requested For Re Negotiation" || (Status == "" && Finalized_Vendor == ""))'
-                                ) },
-                        { key: 'finalized', crit: build(
+                            )
+                        },
+                        {
+                            key: 'finalized', crit: build(
                                 '(Status == "Finalized" || Status == "Freezed" || (Status == "" && Finalized_Vendor != ""))'
-                                ) },
+                            )
+                        },
                         { key: 'rejected', crit: build('(Status == "Rejected")') }
                     ];
                     for (let m of map) {
@@ -871,13 +1036,17 @@
                     return map[group] || map.pending;
                 },
 
-                formatDate(dateStr) { return dateStr ? (dayjs(dateStr).isValid() ? dayjs(dateStr).format(
-                    'DD MMM YYYY') : dateStr) : '–'; },
+                formatDate(dateStr) {
+                    return dateStr ? (dayjs(dateStr).isValid() ? dayjs(dateStr).format(
+                        'DD MMM YYYY') : dateStr) : '–';
+                },
 
                 formatINR(amt) {
                     if (amt == null || isNaN(amt) || amt === '') return '–';
-                    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR',
-                        maximumFractionDigits: 2 }).format(amt);
+                    return new Intl.NumberFormat('en-IN', {
+                        style: 'currency', currency: 'INR',
+                        maximumFractionDigits: 2
+                    }).format(amt);
                 },
 
                 getPagesArray() {
@@ -941,27 +1110,31 @@
 
                 closeModal() {
                     this.isModalOpen = false;
-                    if (this.tsInstance) { this.tsInstance.destroy();
-                        this.tsInstance = null; }
-                    if (this.rfqTsInstance) { this.rfqTsInstance.destroy();
-                        this.rfqTsInstance = null; }
+                    if (this.tsInstance) {
+                        this.tsInstance.destroy();
+                        this.tsInstance = null;
+                    }
+                    if (this.rfqTsInstance) {
+                        this.rfqTsInstance.destroy();
+                        this.rfqTsInstance = null;
+                    }
                     if (this.$refs.fileInput) this.$refs.fileInput.value = '';
                     // Clean up any vendor TomSelect instances
                     if (window.vendorTsRefs) {
-                        Object.values(window.vendorTsRefs).forEach(ts => { try { ts.destroy(); } catch (e) {} });
+                        Object.values(window.vendorTsRefs).forEach(ts => { try { ts.destroy(); } catch (e) { } });
                         window.vendorTsRefs = {};
                     }
                     if (window.itemTsRefs) {
-                        Object.values(window.itemTsRefs).forEach(ts => { try { ts.destroy(); } catch (e) {} });
+                        Object.values(window.itemTsRefs).forEach(ts => { try { ts.destroy(); } catch (e) { } });
                         window.itemTsRefs = {};
                     }
                 },
 
                 // --- ITEMS GRID ---
-                addItemRow() {
-                    this.form.Items.push({ uid: Date.now() + Math.random(), Items: '', Item_Name: '', Unit: '',
-                        Quantity: '', Deliver_to_Plant: '' });
-                },
+                // addItemRow() {
+                //     this.form.Items.push({ uid: Date.now() + Math.random(), Items: '', Item_Name: '', Unit: '',
+                //         Quantity: '', Deliver_to_Plant: '' });
+                // },
 
                 removeItemRow(index) {
                     const removed = this.form.Items[index];
@@ -1187,13 +1360,13 @@
                                 report_name: 'Purchase_Requisition_Report',
                                 criteria: `(PR_Number.contains("${q}"))`
                             }).then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(
-                            () => callback());
+                                () => callback());
                         },
                         render: {
                             option: (data, escape) => '<div class="font-mono font-medium">' + escape(data
                                 .PR_Number) + '</div>',
                             item: (data, escape) => '<div class="font-mono">' + escape(data.PR_Number) +
-                            '</div>'
+                                '</div>'
                         }
                     });
                 },
@@ -1294,7 +1467,7 @@
                                 // If vendor was finalized, update Finalized_Vendor
                                 if (vendorObj.finalized) {
                                     this.form.Finalized_Vendor = vendorObj.Vendor_Display || vendorObj
-                                    .Vendor_Name || 'Selected Vendor';
+                                        .Vendor_Name || 'Selected Vendor';
                                 }
                             }
                             this.recalculateAllTotals();
@@ -1370,8 +1543,8 @@
                                                         uid: Date.now() + Math.random(),
                                                         Vendor_Name: v.ID,
                                                         Vendor_Display: v
-                                                        .Display_Name || v
-                                                        .Vendor_Name,
+                                                            .Display_Name || v
+                                                                .Vendor_Name,
                                                         finalized: false,
                                                         QuoteLines: []
                                                     };
@@ -1379,11 +1552,11 @@
                                                 // Add a quote line for this item
                                                 vendorMap[vKey].QuoteLines.push({
                                                     uid: Date.now() + Math
-                                                    .random(),
+                                                        .random(),
                                                     Items_Master: reqItem
-                                                    .Items,
+                                                        .Items,
                                                     Item_Name: reqItem
-                                                    .Item_Name,
+                                                        .Item_Name,
                                                     Basic_Rate: '',
                                                     Disc: '',
                                                     Negotiated_Rate: 0,
@@ -1496,8 +1669,10 @@
                             const files = this.$refs.fileInput.files;
                             if (files.length > 0) {
                                 const uploadPromises = Array.from(files).map(f =>
-                                    ZOHO.CREATOR.FILE.uploadFile({ report_name: this.REPORT_NAME,
-                                        field_name: "Attachments", file: f, id: newId })
+                                    ZOHO.CREATOR.FILE.uploadFile({
+                                        report_name: this.REPORT_NAME,
+                                        field_name: "Attachments", file: f, id: newId
+                                    })
                                 );
                                 await Promise.all(uploadPromises);
                             }

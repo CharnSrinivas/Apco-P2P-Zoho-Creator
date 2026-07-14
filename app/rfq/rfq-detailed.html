@@ -10,16 +10,14 @@
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
 
-    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
-    <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js">
-    </script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js">
-    </script>
+    <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+
+    <script src="https://app-02d838.tiiny.site/utils/process-flow-renderer.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -243,7 +241,6 @@
     <div id="app" x-data="rfqWidget()" x-init="initWidget()" x-cloak
         class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-5xl mx-auto">
 
-        <!-- Toast -->
         <div x-show="toast.show" x-cloak
             class="fixed top-5 right-5 z-[100] flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-[13px] font-medium max-w-sm"
             :class="{
@@ -258,7 +255,6 @@
             </button>
         </div>
 
-        <!-- Action Modal (Approve / Reject) -->
         <div x-show="showModal" style="display: none;"
             class="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm transition-opacity">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden fade-in mx-4 border border-gray-200 flex flex-col max-h-[90vh]"
@@ -295,7 +291,6 @@
             </div>
         </div>
 
-        <!-- Edit Modal -->
         <div x-show="isEditModalOpen" style="display: none;" class="rfq-modal-overlay">
             <div class="rfq-modal-bg" x-show="isEditModalOpen" x-transition.opacity @click="closeEditModal()"></div>
             <div class="rfq-modal-box max-w-5xl fade-in" style="max-height: 90vh; overflow-y: auto;"
@@ -303,8 +298,9 @@
                 <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
                     <h3 class="text-[15px] font-bold text-gray-800">Edit Request For Quotation</h3>
                     <button @click="closeEditModal()"
-                        class="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer"><i
-                            class="bi bi-x-lg text-lg"></i></button>
+                        class="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer">
+                        <i class="bi bi-x-lg text-lg"></i>
+                    </button>
                 </div>
 
                 <form @submit.prevent="submitEditRFQ" class="p-5">
@@ -369,28 +365,31 @@
                                         <tr
                                             class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors bg-white">
                                             <td class="px-3 py-2 relative">
-                                                <select x-init="initItemSelect($el, item)" class="w-full text-xs"
-                                                    required></select>
+                                                <select disabled x-init="initItemSelect($el, item)"
+                                                    class="w-full text-xs" required></select>
                                             </td>
                                             <td class="px-3 py-2 relative">
                                                 <select x-init="initVendorRowSelect($el, item)" class="w-full text-xs"
                                                     multiple></select>
                                             </td>
-                                            <td class="px-3 py-2"><input type="text" x-model="item.unit" readonly
+                                            <td class="px-3 py-2">
+                                                <input type="text" x-model="item.unit" readonly
                                                     class="w-full py-1.5 px-2.5 bg-gray-100 border border-gray-200 rounded-md text-[13px] text-gray-500 cursor-not-allowed focus:outline-none"
-                                                    placeholder="e.g. Kg, Pcs"></td>
-                                            <td class="px-3 py-2"><input type="number" x-model.number="item.quantity"
-                                                    required min="1"
+                                                    placeholder="e.g. Kg, Pcs">
+                                            </td>
+                                            <td class="px-3 py-2">
+                                                <input type="number" x-model.number="item.quantity" required min="1"
                                                     class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
                                             </td>
-                                            <td class="px-3 py-2"><input type="text" x-model="item.comment"
-                                                    placeholder="Optional"
+                                            <td class="px-3 py-2">
+                                                <input type="text" x-model="item.comment" placeholder="Optional"
                                                     class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
                                             </td>
                                             <td class="px-3 py-2 text-center">
                                                 <button type="button" @click="removeItemRow(index)"
-                                                    class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50 cursor-pointer"><i
-                                                        class="bi bi-trash"></i></button>
+                                                    class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50 cursor-pointer">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
                                             </td>
                                         </tr>
                                     </template>
@@ -420,7 +419,6 @@
             </div>
         </div>
 
-        <!-- Loading / Error -->
         <div x-show="isLoading" class="flex flex-col items-center justify-center py-24 gap-3">
             <div class="pr-spinner"></div>
             <div class="text-sm text-gray-400 font-medium">Loading RFQ details…</div>
@@ -433,10 +431,8 @@
                 x-text="errorMessage || 'Please check the record ID and try again.'"></div>
         </div>
 
-        <!-- Main Content -->
         <div x-show="!isLoading && !hasError" class="fade-in">
 
-            <!-- ===== HEADER with Top-Right Buttons ===== -->
             <div class="mb-5">
                 <nav class="flex items-center gap-1.5 text-xs mb-2.5">
                     <button
@@ -448,22 +444,18 @@
                     <span class="text-gray-500 font-medium" x-text="rfqNumber"></span>
                 </nav>
 
-                <!-- Flex row: left (RFQ # + status) / right (Edit + Download) -->
                 <div class="flex items-center justify-between flex-wrap gap-3">
                     <div class="flex items-center gap-2.5">
                         <h1 class="text-[17px] font-bold text-gray-900 leading-none" x-text="rfqNumber"></h1>
                         <span x-html="getStatusBadge(rec.Status)"></span>
                     </div>
 
-                    <!-- Top-right buttons: Edit + Download Full PDF (styled like QC page) -->
                     <div class="flex items-center gap-2 shrink-0">
-                        <!-- Edit -->
                         <button x-show="canEdit" @click="openEditModal()"
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer">
                             <i class="bi bi-pencil-square"></i> Edit
                         </button>
 
-                        <!-- Download Full PDF -->
                         <button @click="downloadCompletePDF()" :disabled="isExportingFull"
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#EBF3FC] border border-[#1B5CA8]/30 text-[#1B5CA8] hover:bg-blue-100 rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer disabled:opacity-50">
                             <template x-if="!isExportingFull"><i class="bi bi-download"></i></template>
@@ -481,35 +473,19 @@
                 </div>
             </div>
 
-            <!-- Progress Steps -->
             <div class="bg-white border border-gray-200 rounded-lg p-5 mb-4">
                 <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">PR Process Progress
                 </div>
-                <div class="relative flex justify-between items-start">
+                <div class="relative flex justify-between items-start" id="globalProgressContainer">
                     <div class="step-connector">
-                        <div class="step-connector-fill"
-                            :style="`width: ${progressData.fillPct}%; background: ${progressData.isRejected ? '#dc2626' : '#1B5CA8'};`">
-                        </div>
+                        <div class="step-connector-fill" id="globalProgressFill" style="width: 0%"></div>
                     </div>
-                    <template x-for="(step, index) in processSteps" :key="step.key">
-                        <div class="flex flex-col items-center relative z-10"
-                            :style="`width: ${100 / processSteps.length}%`">
-                            <div class="w-[30px] h-[30px] rounded-full border-2 flex items-center justify-center text-[13px] transition-all duration-300"
-                                :class="getStepCircleClass(index)">
-                                <i class="bi" :class="getStepIcon(step, index)"></i>
-                            </div>
-                            <div class="text-[10px] mt-1.5 text-center leading-tight" :class="getStepLabelClass(index)"
-                                x-text="index === progressData.rejectedIdx ? 'Rejected' : step.label"></div>
-                        </div>
-                    </template>
                 </div>
             </div>
 
-            <!-- Main Grid -->
             <div class="grid grid-cols-5 gap-4">
                 <div class="col-span-3 space-y-4">
 
-                    <!-- RFQ Details -->
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
                         <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
                             <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
@@ -539,7 +515,6 @@
                         </div>
                     </div>
 
-                    <!-- Line Items -->
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
                         <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
                             <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
@@ -590,8 +565,6 @@
                         </table>
                     </div>
 
-                    <!-- ===== VENDOR QUOTATIONS RECEIVED ===== -->
-                    <!-- Grouped by Vendor: one row per vendor, all items listed inside -->
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
                         <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
                             <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
@@ -625,10 +598,8 @@
                             <tbody>
                                 <template x-for="group in vendorGroups" :key="group.vendorId">
                                     <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                                        <!-- Vendor -->
                                         <td class="px-4 py-2.5 align-top">
                                             <div class="font-semibold text-gray-800" x-text="group.vendorName"></div>
-                                            <!-- Optional: show email sent count if any -->
                                             <template x-if="group.recordedQuotes.some(q => q.Emails_Sent)">
                                                 <div class="text-[10px] text-gray-400 mt-0.5">
                                                     <i class="bi bi-envelope-check text-blue-500"></i>
@@ -638,7 +609,6 @@
                                                 </div>
                                             </template>
                                         </td>
-                                        <!-- Items -->
                                         <td class="px-4 py-2.5 align-top">
                                             <div class="vendor-items-list">
                                                 <template x-for="it in group.items" :key="it.itemId">
@@ -662,15 +632,12 @@
                                                 </div>
                                             </template>
                                         </td>
-                                        <!-- Actions -->
                                         <td class="px-4 py-2.5 text-right space-x-1.5 whitespace-nowrap align-top">
-                                            <!-- Download PDF for this vendor (all items) -->
                                             <button @click="downloadVendorGroupPDF(group)"
                                                 title="Download PDF for this Vendor"
                                                 class="inline-flex items-center justify-center w-7 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors cursor-pointer">
                                                 <i class="bi bi-file-earmark-pdf"></i>
                                             </button>
-                                            <!-- Send Email -->
                                             <button @click="sendEmailToVendor(group)" title="Send Email"
                                                 :disabled="sendingEmailVendorId === group.vendorId"
                                                 class="inline-flex items-center justify-center w-7 h-7 rounded bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer">
@@ -688,7 +655,6 @@
                         </table>
                     </div>
 
-                    <!-- Action Buttons (Approve / Reject / Cancel) -->
                     <div class="flex items-center gap-1.5">
                         <div class="flex items-center gap-2.5 fade-in" id="actionButtons" x-show="showActionButtons"
                             x-cloak>
@@ -702,7 +668,6 @@
                             </button>
                         </div>
 
-                        <!-- Cancel (always visible if not already cancelled) -->
                         <button x-show="(rec.Status || '').toLowerCase() !== 'cancelled'" @click="cancelRFQ()"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors no-underline cursor-pointer shadow-sm">
                             <i class="bi bi-slash-circle"></i> Cancel
@@ -710,7 +675,6 @@
                     </div>
                 </div>
 
-                <!-- Audit Trail (col-span-2) -->
                 <div class="col-span-2">
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
                         <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
@@ -722,50 +686,7 @@
                                 Audit Trail
                             </div>
                         </div>
-                        <div class="px-[18px] py-[15px]">
-                            <div x-show="actions.length === 0" class="text-center py-8 text-gray-400">
-                                <i class="bi bi-clock-history-off text-xl mb-1.5 block"></i>
-                                <div class="text-xs font-medium text-gray-500">No activity recorded yet</div>
-                            </div>
-                            <div x-show="actions.length > 0" class="space-y-0">
-                                <template x-for="(action, i) in sortedActions" :key="i">
-                                    <div class="timeline-item relative pl-10 pb-5">
-                                        <div class="timeline-line"></div>
-                                        <div class="absolute left-0 top-0 w-[30px] h-[30px] rounded-full flex items-center justify-center border-2 border-white shadow-sm z-10"
-                                            :class="getAuditIconClass(action.Status).bg">
-                                            <i class="bi text-[13px]"
-                                                :class="getAuditIconClass(action.Status).icon"></i>
-                                        </div>
-                                        <div class="bg-gray-50 border border-gray-200 rounded-lg px-3.5 py-3">
-                                            <div class="flex items-center justify-between mb-1.5">
-                                                <div class="flex items-center gap-2">
-                                                    <span class="text-xs font-semibold"
-                                                        :class="getAuditIconClass(action.Status).text"
-                                                        x-text="action.Status || '–'"></span>
-                                                    <span
-                                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border"
-                                                        :class="getAuditStageClass(action.Moved_To)">
-                                                        <i class="bi bi-arrow-right text-[9px] mr-1 opacity-60"></i>
-                                                        <span x-text="action.Moved_To || '–'"></span>
-                                                    </span>
-                                                </div>
-                                                <span class="text-[10px] text-gray-400"
-                                                    x-text="formatDate(action.Added_Time, true)"></span>
-                                            </div>
-                                            <template x-if="action.Comment">
-                                                <div class="text-xs text-gray-600 leading-relaxed mt-1.5 prose prose-xs max-w-none"
-                                                    x-text="action.Comment"></div>
-                                            </template>
-                                            <div class="flex items-center gap-1.5 mt-2 text-[11px] text-gray-500">
-                                                <div class="w-[18px] h-[18px] rounded-full bg-[#1B5CA8] text-white flex items-center justify-center text-[9px] font-bold"
-                                                    x-text="getInitials(action.Added_User)"></div>
-                                                <span class="font-medium" x-text="action.Added_User || '–'"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
+                        <div class="px-[18px] py-[15px]" id="globalAuditTrail"></div>
                     </div>
                 </div>
             </div>
@@ -819,16 +740,6 @@
                 toast: { show: false, message: '', type: 'success' },
                 toastTimer: null,
 
-                processSteps: [
-                    { key: 'purchase_requisition', label: 'Purchase Requisition', icon: 'bi-receipt' },
-                    { key: 'request_for_quotation', label: 'Request For Quotation', icon: 'bi-bucket' },
-                    { key: 'quote_comparison', label: 'Quote Comparison', icon: 'bi-shop-window' },
-                    { key: 'purchase_order', label: 'Purchase Order', icon: 'bi-cart-check' },
-                    { key: 'grn', label: 'GRN', icon: 'bi-box-seam' },
-                    { key: 'bill', label: 'Bill', icon: 'bi-coin' },
-                    { key: 'payment', label: 'Payment', icon: 'bi-cash' }
-                ],
-
                 // ===== INIT =====
                 initWidget() {
                     ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
@@ -860,6 +771,25 @@
                         this.rec = response.result[0];
                         this.items = this.rec.Items || [];
                         this.actions = this.rec.Actions || [];
+
+                        // ── Integration of standardized P2PWorkflowUtils ──
+                        this.$nextTick(() => {
+                            if (typeof P2PWorkflowUtils !== 'undefined') {
+                                P2PWorkflowUtils.renderProgress(
+                                    this.actions,
+                                    this.rec.Current_Stage,
+                                    document.getElementById('globalProgressContainer'),
+                                    document.getElementById('globalProgressFill')
+                                );
+                                P2PWorkflowUtils.renderAuditTrail(
+                                    this.actions,
+                                    document.getElementById('globalAuditTrail')
+                                );
+                            } else {
+                                console.error("P2PWorkflowUtils script not loaded.");
+                            }
+                        });
+
                         this.isLoading = false;
                     }).catch((err) => {
                         console.error('API Error:', err);
@@ -1030,14 +960,11 @@
                             ZOHO.CREATOR.DATA.getRecords({
                                 report_name: this.PR_REPORT_NAME,
                                 criteria: `(PR_Number.contains("${q}") || Requisition_Number.contains("${q}"))`
-                            }).then(res => callback(res.code === 3000 ? res.data : [])).catch(() =>
-                                callback());
+                            }).then(res => callback(res.code === 3000 ? res.data : [])).catch(() => callback());
                         },
                         render: {
-                            option: (d, e) =>
-                                `<div class="font-mono">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>`,
-                            item: (d, e) =>
-                                `<div class="font-mono">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>`
+                            option: (d, e) => `<div class="font-mono">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>`,
+                            item: (d, e) => `<div class="font-mono">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>`
                         }
                     });
                     if (this.rfqForm.prRef) {
@@ -1059,8 +986,7 @@
                             itemRef.id = val;
                             if (val) {
                                 let masterItem = this.itemMasters.find(m => m.ID === val);
-                                if (masterItem && masterItem.unit_of_measure) itemRef.unit = masterItem
-                                    .unit_of_measure;
+                                if (masterItem && masterItem.unit_of_measure) itemRef.unit = masterItem.unit_of_measure;
                             }
                         },
                         render: {
@@ -1088,14 +1014,11 @@
                         plugins: ['remove_button'],
                         placeholder: 'Search & select vendor(s)...',
                         onChange: (val) => {
-                            itemRef.vendorIds = Array.isArray(val) ? val : (val ? [val] :
-                                []);
+                            itemRef.vendorIds = Array.isArray(val) ? val : (val ? [val] : []);
                         },
                         render: {
-                            option: (d, e) =>
-                                `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>`,
-                            item: (d, e) =>
-                                `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>`
+                            option: (d, e) => `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>`,
+                            item: (d, e) => `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>`
                         },
                         load: (query, callback) => {
                             if (!query.length) return callback();
@@ -1106,8 +1029,7 @@
                             }).then(res => {
                                 const data = res.code === 3000 ? res.data : [];
                                 data.forEach(v => {
-                                    if (!this.vendorMasters.some(existing => existing.ID === v
-                                        .ID)) this.vendorMasters.push(v);
+                                    if (!this.vendorMasters.some(existing => existing.ID === v.ID)) this.vendorMasters.push(v);
                                 });
                                 callback(data);
                             }).catch(() => callback());
@@ -1116,8 +1038,7 @@
                     if (itemRef.vendorIds && itemRef.vendorIds.length) {
                         itemRef.vendorIds.forEach((vId, i) => {
                             if (!ts.options[vId]) {
-                                const fallbackName = (itemRef.tempVendorNames && itemRef.tempVendorNames[
-                                    i]) || ('Vendor #' + vId);
+                                const fallbackName = (itemRef.tempVendorNames && itemRef.tempVendorNames[i]) || ('Vendor #' + vId);
                                 ts.addOption({ ID: String(vId), Display_Name: fallbackName });
                             }
                         });
@@ -1230,15 +1151,12 @@
                                 groups.set(vId, {
                                     vendor: v,
                                     vendorId: vId,
-                                    vendorName: v.display_value || v.Display_Name || v
-                                        .Company_Name || 'Unknown Vendor',
+                                    vendorName: v.display_value || v.Display_Name || v.Company_Name || 'Unknown Vendor',
                                     items: [],
                                     recordedQuotes: []
                                 });
                             }
                             let group = groups.get(vId);
-                            // Avoid duplicate items for same vendor (if same item appears twice, we still want to show both? but they are separate rows in items)
-                            // Since items are unique per row, we push each.
                             group.items.push({
                                 itemRow: itemRow,
                                 itemId: itemId,
@@ -1247,7 +1165,6 @@
                                 unit: unit,
                                 comment: comment
                             });
-                            // Find recorded quote for this item-vendor pair
                             let recordedQuote = recordedQuotes.find(q => {
                                 let qVid = q.Vendor?.ID || q.Vendor;
                                 let qIid = q.item_master?.ID || q.item_master;
@@ -1266,14 +1183,6 @@
                     if (!this.rec.PR_Refs || this.rec.PR_Refs.length === 0) return false;
                     const status = (this.rec.Status || '').toLowerCase();
                     return status !== 'approved' && status !== 'rejected' && status !== 'cancelled';
-                },
-
-                get sortedActions() {
-                    return [...this.actions].sort((a, b) => {
-                        let tA = a.Added_Time || "";
-                        let tB = b.Added_Time || "";
-                        return tA.localeCompare(tB);
-                    });
                 },
 
                 get modalBtnText() { return this.modalTitle ? this.modalTitle.split(' ')[0] : 'Submit'; },
@@ -1310,90 +1219,6 @@
                     return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border ${border} ${bg} ${text}"><span class="w-[5px] h-[5px] rounded-full ${dot} shrink-0"></span>${label}</span>`;
                 },
 
-                // ===== PROGRESS =====
-                get progressData() {
-                    let completed = {},
-                        rejectedStepKey = null,
-                        currentStageKey = 'request_for_quotation';
-                    this.actions.forEach(a => {
-                        let key = this.stageToStepKey(a.Moved_To);
-                        if (key) {
-                            if (a.Status && a.Status.toLowerCase() === 'rejected') rejectedStepKey = key;
-                            else completed[key] = true;
-                        }
-                    });
-                    completed['purchase_requisition'] = true;
-                    completed['request_for_quotation'] = true;
-                    let rejectedIdx = this.processSteps.findIndex(s => s.key === rejectedStepKey);
-                    let currentIdx = this.processSteps.findIndex(s => s.key === currentStageKey);
-                    this.processSteps.forEach((s, i) => { if (completed[s.key] && i > currentIdx) currentIdx = i; });
-                    let fillIdx = rejectedIdx !== -1 ? rejectedIdx : currentIdx;
-                    return {
-                        fillPct: (fillIdx / (this.processSteps.length - 1)) * 100, isRejected: rejectedIdx !== -1,
-                        rejectedIdx, currentIdx
-                    };
-                },
-
-                getStepCircleClass(i) {
-                    const { isRejected, rejectedIdx, currentIdx } = this.progressData;
-                    if (i === rejectedIdx) return 'bg-red-600 text-white border-red-600 shadow-md shadow-red-200';
-                    if (isRejected ? (i < rejectedIdx) : (i <= currentIdx)) return (i === currentIdx && !isRejected) ?
-                        'bg-[#1B5CA8] text-white border-[#1B5CA8] shadow-md shadow-blue-200' :
-                        'bg-emerald-600 text-white border-emerald-600';
-                    return 'bg-white text-gray-400 border-gray-300';
-                },
-
-                getStepIcon(step, i) {
-                    const { isRejected, rejectedIdx, currentIdx } = this.progressData;
-                    if (i === rejectedIdx) return 'bi-x-lg text-[13px]';
-                    if ((isRejected ? (i < rejectedIdx) : (i <= currentIdx)) && !(i === currentIdx && !isRejected))
-                        return 'bi-check-lg text-[13px]';
-                    return `${step.icon} text-[13px]`;
-                },
-
-                getStepLabelClass(i) {
-                    const { isRejected, rejectedIdx, currentIdx } = this.progressData;
-                    if (i === rejectedIdx) return 'text-red-700 font-semibold';
-                    if (i === currentIdx && !isRejected) return 'text-[#1B5CA8] font-semibold';
-                    if ((isRejected && i < rejectedIdx) || (!isRejected && i < currentIdx)) return 'text-gray-700 font-medium';
-                    return 'text-gray-400';
-                },
-
-                stageToStepKey(stage) {
-                    if (!stage) return null;
-                    const s = stage.toLowerCase().trim();
-                    if (s === 'purchase requisition') return 'purchase_requisition';
-                    if (s === 'request for quotation') return 'request_for_quotation';
-                    if (s === 'quote comparison') return 'quote_comparison';
-                    if (s === 'purchase order') return 'purchase_order';
-                    if (s === 'grn') return 'grn';
-                    if (s === 'bill') return 'bill';
-                    if (s === 'payment') return 'payment';
-                    return null;
-                },
-
-                // ===== AUDIT TRAIL =====
-                getAuditIconClass(status) {
-                    if (status === 'Approved') return {
-                        bg: 'bg-emerald-50', text: 'text-emerald-600',
-                        icon: 'bi-check-lg text-emerald-600'
-                    };
-                    if (status === 'Rejected') return {
-                        bg: 'bg-red-50', text: 'text-red-600',
-                        icon: 'bi-x-lg text-red-600'
-                    };
-                    return { bg: 'bg-blue-50', text: 'text-blue-600', icon: 'bi-arrow-right text-blue-600' };
-                },
-
-                getAuditStageClass(stage) {
-                    const key = this.stageToStepKey(stage);
-                    if (key === 'purchase_order') return 'bg-blue-50 text-blue-700 border-blue-200';
-                    if (key === 'grn') return 'bg-violet-50 text-violet-700 border-violet-200';
-                    if (key === 'bill') return 'bg-cyan-50 text-cyan-700 border-cyan-200';
-                    if (key === 'payment') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-                    return 'bg-gray-100 text-gray-600 border-gray-200';
-                },
-
                 // ===== HELPERS =====
                 getItemName(itemObj) {
                     return (itemObj.Item && typeof itemObj.Item === 'object') ?
@@ -1410,8 +1235,7 @@
                 getVendorName(itemObj) {
                     const vl = itemObj.vendors || itemObj.Vendor;
                     if (!vl) return '–';
-                    if (Array.isArray(vl)) return vl.map(v => v.display_value || v.Display_Name || v).filter(Boolean)
-                        .join(', ') || '–';
+                    if (Array.isArray(vl)) return vl.map(v => v.display_value || v.Display_Name || v).filter(Boolean).join(', ') || '–';
                     return typeof vl === 'object' ? (vl.display_value || vl.Display_Name || '–') : vl;
                 },
 
@@ -1420,17 +1244,12 @@
                     try {
                         const d = new Date(dateStr);
                         if (isNaN(d.getTime())) return dateStr;
-                        const mos = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov',
-                            'Dec'
-                        ];
-                        let res =
-                            `${String(d.getDate()).padStart(2, '0')} ${mos[d.getMonth()]} ${d.getFullYear()}`;
+                        const mos = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        let res = `${String(d.getDate()).padStart(2, '0')} ${mos[d.getMonth()]} ${d.getFullYear()}`;
                         if (incTime) res += ` · ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
                         return res;
                     } catch (e) { return dateStr; }
                 },
-
-                getInitials(name) { return (!name || name === '–') ? '?' : name.charAt(0).toUpperCase(); },
 
                 escapeHtml(str) {
                     if (!str) return '';
@@ -1471,24 +1290,35 @@
                 },
 
                 approveRFQ() {
-                    this.openModal("Approve RFQ & Submit", "Approved", "Quote Comparison",
-                        "bg-emerald-600", "hover:bg-emerald-700");
+                    this.openModal("Approve RFQ & Submit", "Approved", "Request For Quotation", "bg-emerald-600", "hover:bg-emerald-700");
                 },
 
                 rejectRFQ() {
-                    this.openModal("Reject RFQ", "Rejected", "Quote Comparison", "bg-red-600",
-                        "hover:bg-red-700");
+                    this.openModal("Reject RFQ", "Rejected", "Request For Quotation", "bg-red-600", "hover:bg-red-700");
                 },
 
                 async submitAction() {
                     this.isSubmitting = true;
                     try {
+                        // Step 1: If approving, update the RFQ's own Status to "Approved" first
+                        if (this.pendingStatus === 'Approved') {
+                            const updateRes = await ZOHO.CREATOR.DATA.updateRecordById({
+                                report_name: "Request_For_Quotation_Report",
+                                id: this.recordId,
+                                payload: { data: { Status: "Approved" } }
+                            });
+                            if (updateRes.code !== 3000) {
+                                throw new Error(updateRes.message || 'Failed to update RFQ status');
+                            }
+                        }
+
+                        // Step 2: Create the PR Action record
                         let prIds = Array.isArray(this.rec.PR_Refs) ? this.rec.PR_Refs.map(pr => pr.ID) : undefined;
                         const config = {
                             form_name: "PR_Action",
                             payload: {
                                 "data": {
-                                    "PR_Number": prIds,
+                                    "PR_Number": prIds[0],
                                     "Request_For_Quotation": this.recordId,
                                     "Status": this.pendingStatus,
                                     "Moved_To": this.pendingStage,
@@ -1497,7 +1327,7 @@
                             }
                         };
                         const response = await ZOHO.CREATOR.DATA.addRecords(config);
-                        this.closeModal()
+                        this.closeModal();
                         if (response.code === 3000) this.fetchData();
                         else throw new Error(response.message || 'Action failed');
                     } catch (err) {
@@ -1549,7 +1379,6 @@
 
                 // ===== DOWNLOAD: Per-Vendor PDF (all items for this vendor) =====
                 downloadVendorGroupPDF(group) {
-                    // Filter items that belong to this vendor
                     const vendorItems = this.items.filter(item => {
                         let vendors = item.vendors || item.Vendor;
                         if (!vendors) return false;
@@ -1583,10 +1412,8 @@
                     if (vendorData) {
                         const vName = vendorData.Company_Name || vendorData.Display_Name || 'Vendor';
                         const vContact = vendorData.Display_Name || '';
-                        const vAddress1 = (vendorData.Billing_Address) ? (vendorData.Billing_Address
-                            .address_line_1 || '') : '';
-                        const vAddress2 = (vendorData.Billing_Address) ? (vendorData.Billing_Address
-                            .address_line_2 || '') : '';
+                        const vAddress1 = (vendorData.Billing_Address) ? (vendorData.Billing_Address.address_line_1 || '') : '';
+                        const vAddress2 = (vendorData.Billing_Address) ? (vendorData.Billing_Address.address_line_2 || '') : '';
                         const vEmail = vendorData.email || '';
                         const vPhone = vendorData.mobile || '';
                         vendorDetailsHtml = `
@@ -1598,7 +1425,6 @@
                             ${vPhone ? 'Phone: ' + this.escapeHtml(vPhone) : ''}
                         `;
                     } else {
-                        // Full RFQ: show all vendors
                         const uniqueVendors = new Map();
                         itemsToPrint.forEach(item => {
                             let vendors = item.vendors || item.Vendor;
@@ -1614,24 +1440,19 @@
                         } else {
                             const vendorEntries = Array.from(uniqueVendors.values());
                             vendorEntries.forEach((v, idx) => {
-                                const name = v.Company_Name || v.Display_Name || v.display_value ||
-                                    'Unknown Vendor';
+                                const name = v.Company_Name || v.Display_Name || v.display_value || 'Unknown Vendor';
                                 const contact = v.Display_Name || v.display_value || '';
-                                const addr1 = (v.Billing_Address) ? (v.Billing_Address
-                                    .address_line_1 || '') : '';
-                                const addr2 = (v.Billing_Address) ? (v.Billing_Address
-                                    .address_line_2 || '') : '';
+                                const addr1 = (v.Billing_Address) ? (v.Billing_Address.address_line_1 || '') : '';
+                                const addr2 = (v.Billing_Address) ? (v.Billing_Address.address_line_2 || '') : '';
                                 const email = v.email || v.Email || '';
                                 const phone = v.mobile || v.Mobile || v.Phone || '';
                                 vendorDetailsHtml += `<strong>${this.escapeHtml(name)}</strong>`;
-                                if (contact && contact !== name) vendorDetailsHtml +=
-                                    `<br>${this.escapeHtml(contact)}`;
+                                if (contact && contact !== name) vendorDetailsHtml += `<br>${this.escapeHtml(contact)}`;
                                 if (addr1) vendorDetailsHtml += `<br>${this.escapeHtml(addr1)}`;
                                 if (addr2) vendorDetailsHtml += `<br>${this.escapeHtml(addr2)}`;
                                 if (email) vendorDetailsHtml += `<br>Email: ${this.escapeHtml(email)}`;
                                 if (phone) vendorDetailsHtml += `<br>Phone: ${this.escapeHtml(phone)}`;
-                                if (idx < vendorEntries.length - 1) vendorDetailsHtml +=
-                                    `<hr style="border:none;border-top:1px dashed #bdc3c7;margin:10px 0;">`;
+                                if (idx < vendorEntries.length - 1) vendorDetailsHtml += `<hr style="border:none;border-top:1px dashed #bdc3c7;margin:10px 0;">`;
                             });
                         }
                     }
@@ -1748,7 +1569,6 @@
                         setTimeout(() => document.body.removeChild(iframe), 2000);
                     }, 500);
                 }
-
             }));
         });
     </script>

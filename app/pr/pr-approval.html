@@ -212,7 +212,7 @@
 <body class="bg-gray-50 p-6">
   <div id="app" x-data="prApp()" x-init="init()" x-cloak
     class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-6xl mx-auto">
-    <div class="grid grid-cols-4 gap-2.5 mb-4">
+    <div class="grid grid-cols-5 gap-2.5 mb-4">
       <div
         class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-[#1B5CA8]">
         <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Total</div>
@@ -226,10 +226,16 @@
         <div class="text-[11px] text-gray-400 mt-1.5">Awaiting action</div>
       </div>
       <div
+        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-blue-500">
+        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">In Progress</div>
+        <div class="text-[25px] font-bold leading-none text-blue-500" x-text="stats.in_progress">–</div>
+        <div class="text-[11px] text-gray-400 mt-1.5">Being processed</div>
+      </div>
+      <div
         class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-emerald-600">
-        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Approved</div>
-        <div class="text-[25px] font-bold leading-none text-emerald-600" x-text="stats.approved">–</div>
-        <div class="text-[11px] text-gray-400 mt-1.5">Processed</div>
+        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Completed</div>
+        <div class="text-[25px] font-bold leading-none text-emerald-600" x-text="stats.completed">–</div>
+        <div class="text-[11px] text-gray-400 mt-1.5">Payment done</div>
       </div>
       <div
         class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-red-600">
@@ -423,7 +429,7 @@
 
     <div class="pr-modal-overlay" :class="{ active: showModal }">
       <div class="pr-modal-bg" @click="closeModal()"></div>
-      <div class="pr-modal-box max-w-3xl" style="max-height: 90vh; overflow-y: auto;">
+      <div class="pr-modal-box max-w-5xl" style="max-height: 90vh; overflow-y: auto;">
         <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
           <h3 class="text-[15px] font-bold text-gray-800">New Purchase Requisition</h3>
           <button @click="closeModal()" class="text-gray-400 hover:text-gray-700 transition-colors"><i
@@ -498,7 +504,7 @@
 
           <div class="">
             <div class="mb-3" :class="{ hidden: !rfqVisible }">
-              <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center justify-between mb-1.5 ">
                 <label class="block text-[11px] font-semibold text-gray-500  tracking-wide">Request For
                   Quotation</label>
                 <span
@@ -580,11 +586,13 @@
   function normalizeStatus(rec) {
     if (!rec) return 'pending';
     if (rec.Status && rec.Status.toLowerCase() === 'rejected') return 'rejected';
-    if (rec.Status && rec.Status.toLowerCase() === 'approved') return 'approved';
+    if (rec.Status && rec.Status.toLowerCase() === 'completed') return 'completed';
     var stage = rec.Current_Stage;
     if (!stage || stage === 'Purchase Requisition') return 'pending';
-    if (['Request For Quotation', "Quote Comparison", 'Purchase Order', "Bill", "Payment"].includes(stage))
-      return 'approved';
+    // Payment stage = fully Completed; intermediate stages = In Progress
+    if (stage === 'Payment') return 'completed';
+    if (['Request For Quotation', 'Quote Comparison', 'Purchase Order', 'GRN', 'Bill'].includes(stage))
+      return 'in_progress';
     return 'pending';
   }
 
@@ -592,22 +600,24 @@
     const stageLabel = rec.Current_Stage || 'Purchase Requisition';
     const map = {
       pending: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500', label: stageLabel },
-      approved: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600', label: stageLabel },
+      in_progress: { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500', label: stageLabel },
+      completed: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600', label: stageLabel },
       rejected: { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600', label: 'Rejected' },
     };
     return map[norm] || map.pending;
   }
 
   function getStatusColors(norm) {
-    if (norm === 'approved') return { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' };
+    if (norm === 'completed') return { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' };
+    if (norm === 'in_progress') return { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500' };
     if (norm === 'rejected') return { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600' };
     return { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' };
   }
 
   function getItemApprovalColors(itemApproval) {
-    if (itemApproval === 'Approved') return { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' };
+    if (itemApproval === 'Completed') return { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' };
     if (itemApproval === 'Rejected') return { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600' };
-    if (itemApproval === 'Partially Approved') return { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' };
+    if (itemApproval === 'Partially Completed') return { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' };
     return { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400' };
   }
 
@@ -652,7 +662,8 @@
   function buildStatusCriteria(filter) {
     if (!filter || filter === 'all') return '';
     if (filter === 'pending') return '(Current_Stage == "Purchase Requisition" && Status != "Rejected")';
-    if (filter === 'approved') return '(( Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill" || Current_Stage == "Payment") && Status != "Rejected")';
+    if (filter === 'in_progress') return '((Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill") && Status != "Rejected")';
+    if (filter === 'completed') return '(Current_Stage == "Payment" && Status != "Rejected")';
     if (filter === 'rejected') return '(Status == "Rejected")';
     return '';
   }
@@ -680,11 +691,12 @@
   function prApp() {
     return {
       // ── stats ──
-      stats: { all: '–', pending: '–', approved: '–', rejected: '–' },
+      stats: { all: '–', pending: '–', in_progress: '–', completed: '–', rejected: '–' },
       filterTabs: [
         { key: 'all', label: 'All' },
-        { key: 'pending', label: 'Pending' },
-        { key: 'approved', label: 'Approved' },
+        { key: 'pending', label: 'Submitted' },
+        { key: 'in_progress', label: 'In Progress' },
+        { key: 'completed', label: 'Completed' },
         { key: 'rejected', label: 'Rejected' }
       ],
       sortableColumns: [
@@ -776,7 +788,7 @@
         rec._dateFormatted = formatDate(rec.PR_Date);
         rec._stageBadge = getStatusBadge(rec, norm);
         rec._statusBadge = getStatusColors(norm);
-        rec._statusLabel = norm === 'pending' ? 'Pending' : norm === 'approved' ? 'Approved' : 'Rejected';
+        rec._statusLabel = norm === 'pending' ? 'Submitted' : norm === 'in_progress' ? 'In Progress' : norm === 'completed' ? 'Completed' : 'Rejected';
         const itemApproval = rec.Items_Approval_Status || '-';
         rec._itemApproval = itemApproval;
         rec._itemApprovalBadge = getItemApprovalColors(itemApproval);
@@ -893,7 +905,8 @@
         const counts = [
           { key: 'all', crit: combineCriteria('') },
           { key: 'pending', crit: combineCriteria('(Current_Stage == "Purchase Requisition" && Status != "Rejected")') },
-          { key: 'approved', crit: combineCriteria('(( Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill" || Current_Stage == "Payment") && Status != "Rejected")') },
+          { key: 'in_progress', crit: combineCriteria('((Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill") && Status != "Rejected")') },
+          { key: 'completed', crit: combineCriteria('(Current_Stage == "Payment" && Status != "Rejected")') },
           { key: 'rejected', crit: combineCriteria('(Status == "Rejected")') }
         ];
 
@@ -1044,7 +1057,7 @@
         Promise.all(checks).then((results) => {
           const notFinalized = results.filter(name => name !== null);
           if (notFinalized.length > 0) {
-            this.rfqVisible = true;
+            // this.rfqVisible = true; // Temporaly disabled RFQ visible
             this.rfqChoice = 'Yes';
             this.rfqMessage = "No goods received for the following item(s): <strong>" + notFinalized.join(", ") + "</strong>";
           } else {
