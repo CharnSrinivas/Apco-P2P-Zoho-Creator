@@ -51,31 +51,31 @@ const P2PWorkflowUtils = {
 		div.textContent = String(str);
 		return div.innerHTML;
 	},
-
-	// Helper: Parse Zoho Date format
-	formatDate: function (dateStr) {
-		if (!dateStr) return "–";
-		try {
-			const d = new Date(dateStr);
-			if (isNaN(d.getTime())) return dateStr;
-			const months = [
-				"Jan",
-				"Feb",
-				"Mar",
-				"Apr",
-				"May",
-				"Jun",
-				"Jul",
-				"Aug",
-				"Sep",
-				"Oct",
-				"Nov",
-				"Dec",
-			];
-			return `${String(d.getDate()).padStart(2, "0")} ${months[d.getMonth()]} ${d.getFullYear()} ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-		} catch (e) {
-			return dateStr;
-		}
+	formatDateForZoho(dateStr) {
+		if (!dateStr) return "";
+		const months = [
+			"Jan",
+			"Feb",
+			"Mar",
+			"Apr",
+			"May",
+			"Jun",
+			"Jul",
+			"Aug",
+			"Sep",
+			"Oct",
+			"Nov",
+			"Dec",
+		];
+		const d = new Date(dateStr + "T00:00:00"); // force local time parse
+		if (isNaN(d.getTime())) return dateStr;
+		return (
+			String(d.getDate()).padStart(2, "0") +
+			"-" +
+			months[d.getMonth()] +
+			"-" +
+			d.getFullYear()
+		);
 	},
 
 	// Main Function 1: Render Clickable Progress Stepper
@@ -144,7 +144,8 @@ const P2PWorkflowUtils = {
 			// If it's normal, everything up to and including currentIdx is "done" (or current)
 			const isDone = isRejected ? i < rejectedIdx : i <= currentIdx;
 			// isCurrent is true only if this is the active step AND the last status is NOT approved
-			const isCurrent = i === currentIdx && !isRejectedStep && !lastStatusApproved;
+			const isCurrent =
+				i === currentIdx && !isRejectedStep && !lastStatusApproved;
 			let circleClass, labelClass;
 			if (isRejectedStep) {
 				circleClass =
