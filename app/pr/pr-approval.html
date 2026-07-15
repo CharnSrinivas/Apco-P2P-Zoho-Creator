@@ -154,6 +154,16 @@
       height: 28px;
       animation: spin 0.7s linear infinite;
     }
+    
+    /* ── Draft Spinner ── */
+    .draft-spinner {
+      border: 2px solid #e5e7eb;
+      border-top-color: #6b7280;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      animation: spin 0.7s linear infinite;
+    }
 
     @keyframes spin {
       to {
@@ -539,11 +549,20 @@
           <div class="flex justify-end gap-2 border-t border-gray-100 pt-4 mt-2">
             <button type="button" @click="closeModal()"
               class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
-            <button type="submit" :disabled="submitting"
-              class="inline-flex items-center justify-center min-w-[90px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm">
-              <div x-show="submitting" class="pr-spinner"
+
+            <!-- Save as Draft -->
+            <button type="submit" @click="submitType = 'Draft'" :disabled="submitting"
+              class="inline-flex items-center justify-center min-w-[110px] px-4 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors shadow-sm">
+              <div x-show="submitting && submitType === 'Draft'" class="draft-spinner"></div>
+              <span x-show="!(submitting && submitType === 'Draft')">Save as Draft</span>
+            </button>
+            
+            <!-- Submit Requisition -->
+            <button type="submit" @click="submitType = 'Submitted'" :disabled="submitting"
+              class="inline-flex items-center justify-center min-w-[130px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm">
+              <div x-show="submitting && submitType === 'Submitted'" class="pr-spinner"
                 style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
-              <span x-show="!submitting">Submit PR</span>
+              <span x-show="!(submitting && submitType === 'Submitted')">Submit Requisition</span>
             </button>
           </div>
         </form>
@@ -587,6 +606,7 @@
 
   function normalizeStatus(rec) {
     if (!rec) return 'pending';
+    if (rec.Status && rec.Status.toLowerCase() === 'draft') return 'draft';
     if (rec.Status && rec.Status.toLowerCase() === 'rejected') return 'rejected';
     if (rec.Status && rec.Status.toLowerCase() === 'completed') return 'completed';
     if (rec.Status && rec.Status.toLowerCase() === 'in progress') return 'in_progress'
@@ -602,6 +622,7 @@
   function getStatusBadge(rec, norm) {
     const stageLabel = rec.Current_Stage || 'Purchase Requisition';
     const map = {
+      draft: { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400', label: 'Draft' },
       pending: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500', label: stageLabel },
       in_progress: { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500', label: stageLabel },
       completed: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600', label: stageLabel },
@@ -611,6 +632,7 @@
   }
 
   function getStatusColors(norm) {
+    if (norm === 'draft') return { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400' };
     if (norm === 'completed') return { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' };
     if (norm === 'in_progress') return { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500' };
     if (norm === 'rejected') return { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600' };
@@ -624,10 +646,6 @@
     return { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400' };
   }
 
-  // ── Bug fix: Request_For_Quotation_RFQ_Ref_Number sometimes arrives as a
-  // JSON-encoded string (or a single object) instead of a real array, which
-  // used to fail the Array.isArray() check and leak raw field data into the
-  // RFQ column. This normalizes every shape into a clean array of {ID, zc_display_value}. ──
   function parseRfqList(rec) {
     let raw = rec.Request_For_Quotation_RFQ_Ref_Number;
     if (!raw) return [];
@@ -637,7 +655,6 @@
       try {
         raw = JSON.parse(trimmed);
       } catch (e) {
-        // Not valid JSON — don't leak the raw string into the UI.
         return [];
       }
     }
@@ -653,7 +670,6 @@
         return numMatch ? parseInt(numMatch[1], 10) : prVal.toLowerCase();
       case 'unit': return (rec.Unit || '').toString().toLowerCase();
       case 'date':
-        // Greatly simplified sorting Date using Day.js
         return rec.PR_Date ? dayjs(rec.PR_Date).valueOf() : 0;
       case 'stage': return (rec.Current_Stage || '').toString().toLowerCase();
       case 'status': return normalizeStatus(rec);
@@ -664,7 +680,7 @@
 
   function buildStatusCriteria(filter) {
     if (!filter || filter === 'all') return '';
-    if (filter === 'pending') return '(Current_Stage == "Purchase Requisition" && Status != "Rejected")';
+    if (filter === 'pending') return '(Current_Stage == "Purchase Requisition" && Status != "Rejected" && Status != "Draft")';
     if (filter === 'in_progress') return '((Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill") && Status != "Rejected")';
     if (filter === 'completed') return '(Current_Stage == "Payment" && Status != "Rejected")';
     if (filter === 'rejected') return '(Status == "Rejected")';
@@ -738,6 +754,7 @@
       rfqMessage: '',
       rfqChoice: 'No',
       submitting: false,
+      submitType: 'Submitted', // 'Draft' or 'Submitted'
       todayStr: new Date().toISOString().split('T')[0],
 
       init() {
@@ -779,9 +796,7 @@
       },
 
       // ════════════════════════════════════════════
-      //  RECORD DECORATION (computed once per fetch/sort,
-      //  not recomputed on every render — this is the main
-      //  perf win over the old per-render template building)
+      //  RECORD DECORATION
       // ════════════════════════════════════════════
 
       decorateRecord(rec) {
@@ -791,7 +806,15 @@
         rec._dateFormatted = formatDate(rec.PR_Date);
         rec._stageBadge = getStatusBadge(rec, norm);
         rec._statusBadge = getStatusColors(norm);
-        rec._statusLabel = norm === 'pending' ? 'Submitted' : norm === 'in_progress' ? 'In Progress' : norm === 'completed' ? 'Completed' : 'Rejected';
+        
+        let label = 'Submitted';
+        if (norm === 'draft') label = 'Draft';
+        if (norm === 'in_progress') label = 'In Progress';
+        if (norm === 'completed') label = 'Completed';
+        if (norm === 'rejected') label = 'Rejected';
+        
+        rec._statusLabel = label;
+        
         const itemApproval = rec.Items_Approval_Status || '-';
         rec._itemApproval = itemApproval;
         rec._itemApprovalBadge = getItemApprovalColors(itemApproval);
@@ -907,7 +930,7 @@
 
         const counts = [
           { key: 'all', crit: combineCriteria('') },
-          { key: 'pending', crit: combineCriteria('(Current_Stage == "Purchase Requisition" && Status != "Rejected")') },
+          { key: 'pending', crit: combineCriteria('(Current_Stage == "Purchase Requisition" && Status != "Rejected" && Status != "Draft")') },
           { key: 'in_progress', crit: combineCriteria('((Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill") && Status != "Rejected")') },
           { key: 'completed', crit: combineCriteria('(Current_Stage == "Payment" && Status != "Rejected")') },
           { key: 'rejected', crit: combineCriteria('(Status == "Rejected")') }
@@ -948,6 +971,7 @@
         this.rfqMessage = '';
         this.rfqChoice = 'No';
         this.submitting = false;
+        this.submitType = 'Submitted';
         this.showModal = true;
 
         this.$nextTick(() => {
@@ -1031,7 +1055,6 @@
 
         const checks = itemsToCheck.map(item => {
           return ZOHO.CREATOR.DATA.invokeCustomApi({
-            // api_name: "Check_Vendor_Requirement_For_Item",
             api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_RFQ_DETAILS,
             http_method: "POST",
             payload: {
@@ -1043,7 +1066,6 @@
               if (typeof resultArr === 'string') resultArr = JSON.parse(resultArr);
               if (resultArr.response) resultArr = resultArr.response;
 
-              // "You will get list of GRNs data in result array. if array len is 0 then item is not used"
               if (Array.isArray(resultArr) && resultArr.length === 0) {
                 return item.name;
               }
@@ -1061,8 +1083,6 @@
         Promise.all(checks).then((results) => {
           const notFinalized = results.filter(name => name !== null);
           if (notFinalized.length > 0) {
-            // this.rfqVisible = true; // Temporaly disabled RFQ visible
-            // this.rfqChoice = 'Yes';
             this.rfqChoice = 'No';
             this.rfqMessage = "No goods received for the following item(s): <strong>" + notFinalized.join(", ") + "</strong>";
           } else {
@@ -1103,12 +1123,14 @@
           return;
         }
 
+        const finalStatus = this.submitType === 'Draft' ? 'Draft' : 'Submitted';
+
         const payload = {
           "data": {
             "Department": this.unitTomSelect ? this.unitTomSelect.getValue() : '',
             "PR_Date": formatZohoDateSubmission(new Date().toISOString().split('T')[0]),
             "Due_Date": formatZohoDateSubmission(this.prDueDate),
-            "Status": "Submitted",
+            "Status": finalStatus,
             "Items_Approval_Status": "Pending",
             "Current_Stage": "Purchase Requisition",
             "description": this.prDescription,
@@ -1122,7 +1144,6 @@
             const newRecordId = response.data.ID;
             const files = this.$refs.prFiles ? this.$refs.prFiles.files : [];
 
-            // Replaced manual looping increments with cleaner Promise.all
             if (files.length > 0) {
               const uploadPromises = Array.from(files).map(file => {
                 return ZOHO.CREATOR.FILE.uploadFile({ report_name: REPORT_NAME, field_name: "Attachments", file: file, id: newRecordId });
@@ -1147,7 +1168,13 @@
 
       completeSubmission() {
         this.closeModal();
-        showToast('Purchase Requisition created successfully!', 'success');
+        
+        let toastMessage = 'Purchase Requisition submitted successfully!';
+        if (this.submitType === 'Draft') {
+           toastMessage = 'Purchase Requisition saved as draft!';
+        }
+        
+        showToast(toastMessage, 'success');
         this.searchQuery = '';
         this.searchInputValue = '';
         this.fetchRecords();

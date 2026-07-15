@@ -575,7 +575,6 @@
             const prId = params.prId || '';
             if (shouldCreate) {
               this.pendingPrId = prId || null;
-              // Wait for masters to be available before opening the modal
               this.openCreateModal(prId || null);
             }
           }).catch((err) => {
@@ -1012,10 +1011,15 @@
             if (res && res.result && res.result.length > 0) {
               const pr = res.result[0];
               const items = pr.Requested_Items || [];
+              const PrNumber = pr.PR_Number || pr.Requisition_Number || '';
+              if (PrNumber && this.tsInstances.pr && this.tsInstances.pr.options[prId]) {
+                this.tsInstances.pr.updateOption(prId, {
+                  ID: String(prId),
+                  PR_Number: PrNumber,
+                  Requisition_Number: pr.Requisition_Number || ''
+                });
+              }
 
-              // ── 1. Auto-fill Department ──────────────────────────────────────────
-              // The PR record exposes Department as a lookup object with ID & Name,
-              // or sometimes as a plain string name. We need the ID for the RFQ form.
               const dept = pr.Department_Unit || pr.Department;
               const deptId = (dept && typeof dept === 'object') ? (dept.ID || dept.id || '') : '';
               const deptName = (dept && typeof dept === 'object') ? (dept.Name || dept.zc_display_value || dept.display_value || '') : (dept || '');
@@ -1135,6 +1139,7 @@
               this.closeModal();
               this.search = '';
               this.fetchRecords();
+              this.closeModal();
             } else {
               throw new Error(res.message);
             }

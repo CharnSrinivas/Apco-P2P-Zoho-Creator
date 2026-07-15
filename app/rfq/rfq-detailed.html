@@ -452,6 +452,12 @@
                     </div>
 
                     <div class="flex items-center gap-2 shrink-0">
+                        
+                        <button x-show="isApproved" @click="createQC()"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white hover:bg-[#12427b] rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer">
+                            <i class="bi bi-file-earmark-plus"></i> Create QC
+                        </button>
+
                         <button x-show="canEdit" @click="openEditModal()"
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer">
                             <i class="bi bi-pencil-square"></i> Edit
@@ -1108,6 +1114,10 @@
                     return s === 'submitted' || s === 'draft';
                 },
 
+                get isApproved() {
+                    return (this.rec.Status || '').toLowerCase() === 'approved';
+                },
+
                 get rfqNumber() {
                     return this.rec.RFQ_Ref_Number || (this.rec.RFQ_Number ? 'RFQ-' + this.rec.RFQ_Number : '–');
                 },
@@ -1257,6 +1267,15 @@
                     const d = document.createElement('div');
                     d.textContent = str;
                     return d.innerHTML;
+                },
+
+                // ===== ROUTING / NEW BUTTON METHOD =====
+                createQC() {
+                    ZOHO.CREATOR.UTIL.navigateParentURL({
+                        action: 'open', 
+                        window: 'same',
+                        url: '#Page:Quote_Comparisons?rfqId=' + this.recordId + '&createQc=true'
+                    });
                 },
 
                 // ===== TOAST =====

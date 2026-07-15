@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quote Comparison Listing & Creation</title>
 
-    <script src="https://cdn.tailwindcss.com">
-    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
@@ -17,21 +16,16 @@
         href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
         rel="stylesheet">
 
-    <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js">
-    </script>
+    <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
     <script
         src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js">
-    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
         [x-cloak] {
@@ -184,8 +178,6 @@
         .grid-input:focus {
             background-color: #ffffff;
             border-color: #1B5CA8;
-            focus: ring-[3px];
-            focus: ring-[#1B5CA8]/15;
         }
 
         .vendor-card {
@@ -307,7 +299,6 @@
             opacity: 1;
         }
 
-        /* scrollable modal body */
         .modal-scroll {
             max-height: 80vh;
             overflow-y: auto;
@@ -501,20 +492,17 @@
                         x-text="filteredRecords.length"></span> records</span>
                 <div class="flex gap-1">
                     <button @click="page > 1 ? page-- : null" :disabled="page <= 1"
-                        class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]">
-                        <i class="bi bi-chevron-left"></i>
-                    </button>
+                        class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]"><i
+                            class="bi bi-chevron-left"></i></button>
                     <template x-for="p in getPagesArray()" :key="p">
                         <button @click="typeof p === 'number' ? page = p : null"
                             :class="page === p ? 'border-[#1B5CA8] bg-[#1B5CA8] text-white font-semibold' : (typeof p === 'number' ? 'border-gray-300 bg-white text-gray-600 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]' : 'border-transparent bg-transparent text-gray-400 cursor-default')"
-                            class="min-w-[27px] h-[27px] px-1 border rounded inline-flex items-center justify-center transition-colors">
-                            <span x-text="p"></span>
-                        </button>
+                            class="min-w-[27px] h-[27px] px-1 border rounded inline-flex items-center justify-center transition-colors"><span
+                                x-text="p"></span></button>
                     </template>
                     <button @click="page < totalPages ? page++ : null" :disabled="page >= totalPages"
-                        class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]">
-                        <i class="bi bi-chevron-right"></i>
-                    </button>
+                        class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]"><i
+                            class="bi bi-chevron-right"></i></button>
                 </div>
             </div>
         </div>
@@ -537,7 +525,6 @@
 
                 <!-- Modal Body -->
                 <div class="modal-scroll">
-
                     <form @submit.prevent="submitForm">
 
                         <!-- Comparison Details -->
@@ -573,7 +560,6 @@
                                 class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
                                 <span class="text-xs font-semibold text-gray-700 tracking-wide">Items Requirement <span
                                         class="text-red-500">*</span></span>
-                                <!-- <button type="button" @click="addItemRow()" class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+ Add Item</button> -->
                             </div>
                             <div class="overflow-x-auto" style="overflow:visible;">
                                 <table class="w-full border-collapse">
@@ -591,9 +577,6 @@
                                             <th
                                                 class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[25%]">
                                                 Deliver To / Plant</th>
-                                            <!-- <th
-                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-8">
-                                            </th> -->
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -616,11 +599,6 @@
                                                         class="grid-input cursor-not-allowed"></td>
                                                 <td class="px-2 py-2"><input disabled x-model="item.Deliver_to_Plant"
                                                         type="text" class="grid-input cursor-not-allowed"></td>
-                                                <!-- <td class="px-2 py-2 text-center">
-                                                    <button type="button" @click="removeItemRow(index)"
-                                                        class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50"><i
-                                                            class="bi bi-trash"></i></button>
-                                                </td> -->
                                             </tr>
                                         </template>
                                     </tbody>
@@ -635,13 +613,11 @@
                                         class="text-red-500">*</span></span>
                             </div>
 
-                            <!-- No vendors -->
                             <div x-show="form.Vendors.length === 0"
                                 class="border border-gray-200 rounded-lg p-6 text-center text-xs text-gray-400 italic bg-gray-50">
                                 No vendors added. Click "Add Vendor" to start.
                             </div>
 
-                            <!-- Vendor Cards -->
                             <template x-for="(vendor, vIdx) in form.Vendors" :key="vendor.uid">
                                 <div class="vendor-card mb-4 fade-slide-in">
 
@@ -653,8 +629,16 @@
                                                 <select disabled class="w-full text-xs" :x-ref="'vendorSelect_' + vIdx"
                                                     x-init="() => { const ts = initDynamicVendor($el, vendor); window['vendorTs_'+vIdx] = ts; return () => { if(window['vendorTs_'+vIdx]) window['vendorTs_'+vIdx].destroy(); }; }"></select>
                                             </div>
+                                            <div class="ml-auto flex items-center gap-3">
+                                                <label
+                                                    class="flex items-center gap-1.5 cursor-pointer bg-white px-2 py-1 rounded border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors">
+                                                    <input type="checkbox" x-model="vendor.Consider"
+                                                        @change="recalculateAllTotals()"
+                                                        class="w-3.5 h-3.5 text-[#1B5CA8] rounded border-gray-300 focus:ring-[#1B5CA8]">
+                                                    <span class="text-[11px] font-bold text-gray-700">Consider</span>
+                                                </label>
+                                            </div>
                                         </div>
-
                                     </div>
 
                                     <!-- Vendor Quote Table -->
@@ -681,43 +665,35 @@
                                                 </tr>
                                                 <template x-for="(line, lIdx) in vendor.QuoteLines" :key="line.uid">
                                                     <tr>
-                                                        <!-- Item -->
                                                         <td class="grid-select relative" style="min-width:140px;">
                                                             <select class="w-full text-xs"
                                                                 :x-ref="'itemSelect_'+vIdx+'_'+lIdx"
                                                                 x-init="() => { const ts = initDynamicItem($el, line, 'Items_Master', 'Item_Name'); return () => ts.destroy(); }"></select>
                                                         </td>
-                                                        <!-- Basic Rate -->
                                                         <td><input x-model.number="line.Basic_Rate"
                                                                 @input="syncVendorLineRates(vIdx, lIdx, 'basic')"
                                                                 type="number" step="any" min="0" required
                                                                 class="grid-input" style="min-width:70px;"></td>
-                                                        <!-- Disc % -->
                                                         <td><input x-model.number="line.Disc"
                                                                 @input="syncVendorLineRates(vIdx, lIdx, 'disc')"
                                                                 type="number" step="any" min="0" required
                                                                 class="grid-input" style="min-width:55px;"></td>
-                                                        <!-- Neg. Rate -->
                                                         <td><input x-model.number="line.Negotiated_Rate"
                                                                 @input="syncVendorLineRates(vIdx, lIdx, 'neg')"
                                                                 type="number" step="any" min="0" required
                                                                 class="grid-input" style="min-width:75px;"></td>
-                                                        <!-- Freight -->
                                                         <td><input x-model.number="line.Freight"
                                                                 @input="syncVendorLineRates(vIdx, lIdx, 'freight')"
                                                                 type="number" step="any" min="0" required
                                                                 class="grid-input" style="min-width:60px;"></td>
-                                                        <!-- GST % -->
                                                         <td><input x-model.number="line.GST"
                                                                 @input="syncVendorLineRates(vIdx, lIdx, 'gst')"
                                                                 type="number" step="any" min="0" required
                                                                 class="grid-input" style="min-width:50px;"></td>
-                                                        <!-- Landed Rate (auto) -->
                                                         <td><input x-model.number="line.Landed_Rate" type="number"
                                                                 disabled
                                                                 class="grid-input font-bold text-[#1B5CA8] bg-gray-100 cursor-not-allowed"
                                                                 style="min-width:80px;"></td>
-                                                        <!-- Payment Terms -->
                                                         <td style="min-width:90px;">
                                                             <select x-model="line.Payment_Terms" class="grid-input"
                                                                 required style="min-width:80px;">
@@ -728,23 +704,18 @@
                                                                 <option value="45 Days Credit">45 Days</option>
                                                             </select>
                                                         </td>
-                                                        <!-- Delivery Date -->
                                                         <td style="min-width:110px;">
                                                             <input x-model="line.Delivery_Date" type="date"
                                                                 class="grid-input" required style="min-width:100px;">
                                                         </td>
-
                                                     </tr>
                                                 </template>
                                             </tbody>
                                         </table>
                                     </div>
-
-
                                 </div>
                             </template>
                         </div>
-
 
                         <!-- Justification -->
                         <div class="mb-4">
@@ -776,10 +747,8 @@
 
                     </form>
                 </div>
-                <!-- end modal-scroll -->
             </div>
         </div>
-
     </div>
 
     <script>
@@ -814,7 +783,6 @@
                 tsInstance: null,
                 rfqTsInstance: null,
 
-                // Form – Vendor-centric structure
                 form: {
                     Quote_Comparison_Subject: '',
                     PR_Ref: '',
@@ -822,8 +790,8 @@
                     Finalized_Vendor: '',
                     Total_Landed_Rate: '',
                     Justification: '',
-                    Items: [], // { uid, Items, Item_Name, Unit, Quantity, Deliver_to_Plant }
-                    Vendors: [] // { uid, Vendor_Name, Vendor_Display, finalized, QuoteLines: [{ uid, Items_Master, Item_Name, Basic_Rate, Disc, Negotiated_Rate, Freight, GST, Landed_Rate, Payment_Terms, Delivery_Date }] }
+                    Items: [],
+                    Vendors: []
                 },
 
                 // --- INIT ---
@@ -837,6 +805,18 @@
                         this.page = 1;
                         this.fetchRecords();
                     });
+
+                    ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
+                        const shouldCreate = String(params.createQc || '').toLowerCase() === 'true';
+                        const rfqId = params.rfqId || '';
+                        if (shouldCreate) {
+                            setTimeout(() => {
+                                this.openModal(rfqId || null);
+                            }, 100);
+                        }
+                    }).catch((err) => {
+                        console.warn('getQueryParams error', err);
+                    });
                 },
 
                 // --- DATA FETCHING ---
@@ -844,15 +824,10 @@
                     let criteria = [];
                     if (this.searchQuery.trim()) {
                         let q = this.searchQuery.trim().replace(/'/g, "\\'");
-                        criteria.push(
-                            `(QC_Ref_Number.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))`
-                        );
+                        criteria.push(`(QC_Ref_Number.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))`);
                     }
-                    if (this.filter === 'pending') criteria.push(
-                        '(Status == "Submitted" || Status == "Requested For Re Negotiation" || (Status == "" && Finalized_Vendor == ""))'
-                    );
-                    else if (this.filter === 'finalized') criteria.push(
-                        '(Status == "Finalized" || Status == "Freezed" || (Status == "" && Finalized_Vendor != ""))');
+                    if (this.filter === 'pending') criteria.push('(Status == "Submitted" || Status == "Requested For Re Negotiation" || (Status == "" && Finalized_Vendor == ""))');
+                    else if (this.filter === 'finalized') criteria.push('(Status == "Finalized" || Status == "Freezed" || (Status == "" && Finalized_Vendor != ""))');
                     else if (this.filter === 'rejected') criteria.push('(Status == "Rejected")');
                     return criteria.join(' && ');
                 },
@@ -876,7 +851,6 @@
                         this.allRecords = accumulated;
                         this.computeStats();
                     } catch (err) {
-                        console.error('Fetch error', err);
                         this.allRecords = [];
                     } finally {
                         this.isLoading = false;
@@ -885,22 +859,12 @@
 
                 async computeStats() {
                     let q = this.searchQuery.trim().replace(/'/g, "\\'");
-                    let searchCrit = q ?
-                        `(QC_Ref_Number.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))` :
-                        '';
+                    let searchCrit = q ? `(QC_Ref_Number.contains("${q}") || Quote_Comparison_Subject.contains("${q}") || PR_Ref.PR_Number.contains("${q}"))` : '';
                     const build = (statusCrit) => [searchCrit, statusCrit].filter(Boolean).join(' && ');
                     const map = [
                         { key: 'total', crit: build('') },
-                        {
-                            key: 'pending', crit: build(
-                                '(Status == "Submitted" || Status == "Requested For Re Negotiation" || (Status == "" && Finalized_Vendor == ""))'
-                            )
-                        },
-                        {
-                            key: 'finalized', crit: build(
-                                '(Status == "Finalized" || Status == "Freezed" || (Status == "" && Finalized_Vendor != ""))'
-                            )
-                        },
+                        { key: 'pending', crit: build('(Status == "Submitted" || Status == "Requested For Re Negotiation" || (Status == "" && Finalized_Vendor == ""))') },
+                        { key: 'finalized', crit: build('(Status == "Finalized" || Status == "Freezed" || (Status == "" && Finalized_Vendor != ""))') },
                         { key: 'rejected', crit: build('(Status == "Rejected")') }
                     ];
                     for (let m of map) {
@@ -917,35 +881,22 @@
                 setFilter(f) { this.filter = f; },
 
                 toggleSort(col) {
-                    if (this.sortCol === col) {
-                        this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        this.sortCol = col;
-                        this.sortDir = (col === 'date' || col === 'total_rate') ? 'desc' : 'asc';
-                    }
+                    if (this.sortCol === col) { this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc'; }
+                    else { this.sortCol = col; this.sortDir = (col === 'date' || col === 'total_rate') ? 'desc' : 'asc'; }
                     this.page = 1;
                 },
 
                 getSortValue(rec, col) {
                     switch (col) {
-                        case 'qc_no':
-                            return (rec.QC_Ref_Number || '').toString().toLowerCase();
-                        case 'subject':
-                            return (rec.Quote_Comparison_Subject || '').toString().toLowerCase();
-                        case 'pr_ref':
-                            return (rec.PR_Ref?.zc_display_value || '').toLowerCase();
-                        case 'rfq_ref':
-                            return (rec.RFQ_Ref?.zc_display_value || '').toLowerCase();
-                        case 'date':
-                            return rec.Added_Time ? dayjs(rec.Added_Time).valueOf() : 0;
-                        case 'status':
-                            return this.normalizeStatusGroup(rec);
-                        case 'final_vendor':
-                            return (rec.Finalized_Vendor || '').toString().toLowerCase();
-                        case 'total_rate':
-                            return parseFloat(rec.Total_Landed_Rate) || 0;
-                        default:
-                            return '';
+                        case 'qc_no': return (rec.QC_Ref_Number || '').toString().toLowerCase();
+                        case 'subject': return (rec.Quote_Comparison_Subject || '').toString().toLowerCase();
+                        case 'pr_ref': return (rec.PR_Ref?.zc_display_value || '').toLowerCase();
+                        case 'rfq_ref': return (rec.RFQ_Ref?.zc_display_value || '').toLowerCase();
+                        case 'date': return rec.Added_Time ? dayjs(rec.Added_Time).valueOf() : 0;
+                        case 'status': return this.normalizeStatusGroup(rec);
+                        case 'final_vendor': return (rec.Finalized_Vendor || '').toString().toLowerCase();
+                        case 'total_rate': return parseFloat(rec.Total_Landed_Rate) || 0;
+                        default: return '';
                     }
                 },
 
@@ -968,16 +919,12 @@
                 },
 
                 formatDate(dateStr) {
-                    return dateStr ? (dayjs(dateStr).isValid() ? dayjs(dateStr).format(
-                        'DD-MMM-YYYY') : dateStr) : '–';
+                    return dateStr ? (dayjs(dateStr).isValid() ? dayjs(dateStr).format('DD-MMM-YYYY') : dateStr) : '–';
                 },
 
                 formatINR(amt) {
                     if (amt == null || isNaN(amt) || amt === '') return '–';
-                    return new Intl.NumberFormat('en-IN', {
-                        style: 'currency', currency: 'INR',
-                        maximumFractionDigits: 2
-                    }).format(amt);
+                    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(amt);
                 },
 
                 getPagesArray() {
@@ -1015,12 +962,10 @@
                     return this.filteredRecords.slice(start, start + this.perPage);
                 },
 
-                get totalPages() {
-                    return Math.max(1, Math.ceil(this.filteredRecords.length / this.perPage));
-                },
+                get totalPages() { return Math.max(1, Math.ceil(this.filteredRecords.length / this.perPage)); },
 
                 // --- MODAL ---
-                openModal() {
+                openModal(rfqId = null) {
                     this.form = {
                         Quote_Comparison_Subject: '',
                         PR_Ref: '',
@@ -1033,44 +978,70 @@
                     };
                     if (this.$refs.fileInput) this.$refs.fileInput.value = '';
                     this.isModalOpen = true;
+
                     setTimeout(() => {
                         this.initPrTomSelect();
                         this.initRfqTomSelect();
-                    }, 50);
+
+                        if (rfqId) {
+                            this.form.RFQ_Ref = rfqId;
+                            if (this.rfqTsInstance) {
+                                if (!this.rfqTsInstance.options[rfqId]) {
+                                    this.rfqTsInstance.addOption({ ID: String(rfqId), RFQ_Ref_Number: 'Loading RFQ…', RFQ_Number: '' });
+                                }
+                                this.rfqTsInstance.setValue(rfqId);
+                            } else {
+                                this.fetchRFQDetails(rfqId);
+                            }
+
+                            ZOHO.CREATOR.DATA.getRecordById({ report_name: 'Request_For_Quotation_Report', id: rfqId }).then(res => {
+                                if (res.code === 3000 && res.data) {
+                                    if (this.rfqTsInstance) {
+                                        this.rfqTsInstance.updateOption(rfqId, {
+                                            ID: String(rfqId),
+                                            RFQ_Ref_Number: res.data.RFQ_Ref_Number || res.data.RFQ_Number || 'Loaded RFQ'
+                                        });
+                                    }
+
+                                    let prObj = null;
+                                    if (Array.isArray(res.data.PR_Refs) && res.data.PR_Refs.length > 0) {
+                                        prObj = res.data.PR_Refs[0];
+                                    } else if (res.data.PR_Refs && typeof res.data.PR_Refs === 'object') {
+                                        prObj = res.data.PR_Refs;
+                                    }
+
+                                    if (prObj && prObj.ID) {
+                                        const prIdToSet = prObj.ID;
+                                        const prDisplay = prObj.display_value || prObj.PR_Number || 'Loaded PR';
+
+                                        this.form.PR_Ref = prIdToSet;
+
+                                        if (this.tsInstance) {
+                                            if (!this.tsInstance.options[prIdToSet]) {
+                                                this.tsInstance.addOption({ ID: String(prIdToSet), PR_Number: prDisplay });
+                                            }
+                                            this.tsInstance.setValue(prIdToSet, true);
+                                        }
+                                    }
+                                }
+                            }).catch(e => console.warn('Could not fetch RFQ details for PR auto-fill', e));
+                        }
+                    }, 200);
                 },
 
                 closeModal() {
                     this.isModalOpen = false;
-                    if (this.tsInstance) {
-                        this.tsInstance.destroy();
-                        this.tsInstance = null;
-                    }
-                    if (this.rfqTsInstance) {
-                        this.rfqTsInstance.destroy();
-                        this.rfqTsInstance = null;
-                    }
+                    if (this.tsInstance) { this.tsInstance.destroy(); this.tsInstance = null; }
+                    if (this.rfqTsInstance) { this.rfqTsInstance.destroy(); this.rfqTsInstance = null; }
                     if (this.$refs.fileInput) this.$refs.fileInput.value = '';
-                    // Clean up any vendor TomSelect instances
-                    if (window.vendorTsRefs) {
-                        Object.values(window.vendorTsRefs).forEach(ts => { try { ts.destroy(); } catch (e) { } });
-                        window.vendorTsRefs = {};
-                    }
-                    if (window.itemTsRefs) {
-                        Object.values(window.itemTsRefs).forEach(ts => { try { ts.destroy(); } catch (e) { } });
-                        window.itemTsRefs = {};
-                    }
+                    if (window.vendorTsRefs) { Object.values(window.vendorTsRefs).forEach(ts => { try { ts.destroy(); } catch (e) { } }); window.vendorTsRefs = {}; }
+                    if (window.itemTsRefs) { Object.values(window.itemTsRefs).forEach(ts => { try { ts.destroy(); } catch (e) { } }); window.itemTsRefs = {}; }
                 },
 
                 // --- ITEMS GRID ---
-                // addItemRow() {
-                //     this.form.Items.push({ uid: Date.now() + Math.random(), Items: '', Item_Name: '', Unit: '',
-                //         Quantity: '', Deliver_to_Plant: '' });
-                // },
-
                 removeItemRow(index) {
                     const removed = this.form.Items[index];
                     this.form.Items.splice(index, 1);
-                    // Remove orphaned vendor lines
                     if (removed && removed.Items) {
                         this.form.Vendors.forEach(v => {
                             v.QuoteLines = v.QuoteLines.filter(l => l.Items_Master !== removed.Items);
@@ -1086,6 +1057,7 @@
                         Vendor_Name: '',
                         Vendor_Display: '',
                         finalized: false,
+                        Consider: true,
                         QuoteLines: []
                     });
                 },
@@ -1098,9 +1070,7 @@
                 addVendorLine(vIdx) {
                     const vendor = this.form.Vendors[vIdx];
                     if (!vendor) return;
-                    // Auto-select first item if available
-                    let defaultItem = '';
-                    let defaultItemName = '';
+                    let defaultItem = ''; let defaultItemName = '';
                     if (this.form.Items.length > 0) {
                         const first = this.form.Items[0];
                         defaultItem = first.Items || '';
@@ -1126,14 +1096,10 @@
                     const vendor = this.form.Vendors[vIdx];
                     if (!vendor) return;
                     vendor.QuoteLines.splice(lIdx, 1);
-                    // If vendor has no lines, unfinalize
-                    if (vendor.QuoteLines.length === 0) {
-                        vendor.finalized = false;
-                    }
+                    if (vendor.QuoteLines.length === 0) vendor.finalized = false;
                     this.recalculateAllTotals();
                 },
 
-                // Sync rates for a specific vendor line
                 syncVendorLineRates(vIdx, lIdx, source) {
                     const vendor = this.form.Vendors[vIdx];
                     if (!vendor) return;
@@ -1157,33 +1123,26 @@
                     if (line.Rank === 'Yes') this.recalculateAllTotals();
                 },
 
-                // Handle Rank change per vendor line
                 handleVendorLineRank(vIdx, lIdx) {
                     const vendor = this.form.Vendors[vIdx];
                     if (!vendor) return;
                     const line = vendor.QuoteLines[lIdx];
                     if (!line) return;
 
-                    // If setting to Yes, clear other vendors' Yes and set this vendor's all lines to Yes
                     if (line.Rank === 'Yes') {
-                        // Clear all other vendors' finalized status
                         this.form.Vendors.forEach((v, i) => {
                             if (i !== vIdx) {
                                 v.finalized = false;
                                 v.QuoteLines.forEach(l => l.Rank = 'No');
                             }
                         });
-                        // Set this vendor as finalized and all its lines to Yes
                         vendor.finalized = true;
                         vendor.QuoteLines.forEach(l => l.Rank = 'Yes');
-                        // Set Finalized_Vendor
                         this.form.Finalized_Vendor = vendor.Vendor_Display || vendor.Vendor_Name || 'Selected Vendor';
                     } else {
-                        // If setting to No, check if any other line in this vendor is Yes
                         const hasYes = vendor.QuoteLines.some(l => l.Rank === 'Yes');
                         if (!hasYes) {
                             vendor.finalized = false;
-                            // Clear Finalized_Vendor if no vendor has Yes
                             const anyVendorFinalized = this.form.Vendors.some(v => v.finalized);
                             if (!anyVendorFinalized) this.form.Finalized_Vendor = '';
                         }
@@ -1191,7 +1150,6 @@
                     this.recalculateAllTotals();
                 },
 
-                // Finalize a vendor (all lines Rank = Yes)
                 finalizeVendor(vIdx) {
                     const vendor = this.form.Vendors[vIdx];
                     if (!vendor) return;
@@ -1200,18 +1158,15 @@
                         return;
                     }
 
-                    // Toggle: if already finalized, unfinalize
                     if (vendor.finalized) {
                         vendor.finalized = false;
                         vendor.QuoteLines.forEach(l => l.Rank = 'No');
-                        // Check if any other vendor is finalized
                         const anyFinalized = this.form.Vendors.some(v => v.finalized);
                         if (!anyFinalized) this.form.Finalized_Vendor = '';
                         this.recalculateAllTotals();
                         return;
                     }
 
-                    // Clear all other vendors
                     this.form.Vendors.forEach((v, i) => {
                         if (i !== vIdx) {
                             v.finalized = false;
@@ -1225,7 +1180,6 @@
                     Toast.fire({ icon: 'success', title: `Vendor "${this.form.Finalized_Vendor}" finalized.` });
                 },
 
-                // Recalculate Total Landed Rate across all vendors
                 recalculateAllTotals() {
                     let total = 0;
                     let finalizedVendor = null;
@@ -1235,7 +1189,6 @@
                             finalizedVendor = v;
                             v.QuoteLines.forEach(line => {
                                 if (line.Rank === 'Yes') {
-                                    // Find matching item to get quantity
                                     const item = this.form.Items.find(i => i.Items === line.Items_Master);
                                     const qty = item ? (parseFloat(item.Quantity) || 0) : 0;
                                     const landed = parseFloat(line.Landed_Rate) || 0;
@@ -1246,8 +1199,7 @@
                     });
 
                     if (finalizedVendor) {
-                        this.form.Finalized_Vendor = finalizedVendor.Vendor_Display || finalizedVendor.Vendor_Name ||
-                            'Selected Vendor';
+                        this.form.Finalized_Vendor = finalizedVendor.Vendor_Display || finalizedVendor.Vendor_Name || 'Selected Vendor';
                         this.form.Total_Landed_Rate = total > 0 ? parseFloat(total.toFixed(2)) : '';
                     } else {
                         this.form.Finalized_Vendor = '';
@@ -1258,13 +1210,8 @@
                 // --- TOMSELECT: PR ---
                 initPrTomSelect() {
                     this.tsInstance = new TomSelect(this.$refs.prSelect, {
-                        valueField: 'ID',
-                        labelField: 'PR_Number',
-                        searchField: ['PR_Number'],
-                        create: false,
-                        maxItems: 1,
-                        placeholder: 'Search PR...',
-                        loadThrottle: 350,
+                        valueField: 'ID', labelField: 'PR_Number', searchField: ['PR_Number'],
+                        create: false, maxItems: 1, placeholder: 'Search PR...', loadThrottle: 350,
                         onChange: (value) => {
                             this.form.PR_Ref = value;
                             if (this.rfqTsInstance) {
@@ -1288,15 +1235,12 @@
                             var q = query.replace(/'/g, "\\'");
                             ZOHO.CREATOR.DATA.getRecords({
                                 report_name: 'Purchase_Requisition_Report',
-                                criteria: `(PR_Number.contains("${q}"))`
-                            }).then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(
-                                () => callback());
+                                criteria: `(PR_Number.contains("${q}") && Status=="In Progress")`
+                            }).then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(() => callback());
                         },
                         render: {
-                            option: (data, escape) => '<div class="font-mono font-medium">' + escape(data
-                                .PR_Number) + '</div>',
-                            item: (data, escape) => '<div class="font-mono">' + escape(data.PR_Number) +
-                                '</div>'
+                            option: (data, escape) => '<div class="font-mono font-medium">' + escape(data.PR_Number) + '</div>',
+                            item: (data, escape) => '<div class="font-mono">' + escape(data.PR_Number) + '</div>'
                         }
                     });
                 },
@@ -1304,13 +1248,8 @@
                 // --- TOMSELECT: RFQ ---
                 initRfqTomSelect() {
                     this.rfqTsInstance = new TomSelect(this.$refs.rfqSelect, {
-                        valueField: 'ID',
-                        labelField: 'RFQ_Ref_Number',
-                        searchField: ['RFQ_Ref_Number', 'RFQ_Number'],
-                        create: false,
-                        maxItems: 1,
-                        placeholder: 'Search RFQ...',
-                        loadThrottle: 350,
+                        valueField: 'ID', labelField: 'RFQ_Ref_Number', searchField: ['RFQ_Ref_Number', 'RFQ_Number'],
+                        create: false, maxItems: 1, placeholder: 'Search RFQ...', loadThrottle: 350,
                         onChange: (value) => {
                             this.form.RFQ_Ref = value;
                             if (value) this.fetchRFQDetails(value);
@@ -1322,53 +1261,38 @@
                             ZOHO.CREATOR.DATA.getRecords({
                                 report_name: 'Request_For_Quotation_Report',
                                 criteria: crit
-                            }).then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(
-                                () => callback());
+                            }).then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(() => callback());
                         },
                         render: {
-                            option: (data, escape) => '<div class="font-mono font-medium">' + escape(data
-                                .RFQ_Ref_Number || data.RFQ_Number) + '</div>',
-                            item: (data, escape) => '<div class="font-mono">' + escape(data.RFQ_Ref_Number ||
-                                data.RFQ_Number) + '</div>'
+                            option: (data, escape) => '<div class="font-mono font-medium">' + escape(data.RFQ_Ref_Number || data.RFQ_Number) + '</div>',
+                            item: (data, escape) => '<div class="font-mono">' + escape(data.RFQ_Ref_Number || data.RFQ_Number) + '</div>'
                         }
                     });
                 },
 
-                // --- TOMSELECT: Dynamic Item (used in Items grid and Vendor lines) ---
+                // --- TOMSELECT: Dynamic Item ---
                 initDynamicItem(el, targetObj, idKey, nameKey) {
                     let ts = new TomSelect(el, {
-                        valueField: 'ID',
-                        labelField: 'item_name',
-                        searchField: ['item_name'],
-                        create: false,
-                        maxItems: 1,
-                        placeholder: 'Select Item...',
-                        loadThrottle: 350,
+                        valueField: 'ID', labelField: 'item_name', searchField: ['item_name'],
+                        create: false, maxItems: 1, placeholder: 'Select Item...', loadThrottle: 350,
                         onChange: (val) => {
                             targetObj[idKey] = val;
                             let opt = ts.options[val];
                             if (opt) {
                                 targetObj[nameKey] = opt.item_name;
-                                if (opt.unit_of_measure && targetObj.Unit !== undefined) targetObj.Unit = opt
-                                    .unit_of_measure;
+                                if (opt.unit_of_measure && targetObj.Unit !== undefined) targetObj.Unit = opt.unit_of_measure;
                             }
-                            // If this is a vendor line, recalc totals
-                            if (targetObj.Items_Master !== undefined) {
-                                // Find parent vendor and recalc
-                                this.recalculateAllTotals();
-                            }
+                            if (targetObj.Items_Master !== undefined) this.recalculateAllTotals();
                         },
                         load: (query, callback) => {
                             let q = query.replace(/'/g, "\\'");
                             ZOHO.CREATOR.DATA.getRecords({
                                 report_name: 'Items_Report',
                                 criteria: `(item_name.contains("${q}"))`
-                            }).then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(
-                                () => callback());
+                            }).then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(() => callback());
                         },
                         render: {
-                            option: (data, escape) =>
-                                `<div class="font-medium text-xs py-1 px-2">${escape(data.item_name)}</div>`,
+                            option: (data, escape) => `<div class="font-medium text-xs py-1 px-2">${escape(data.item_name)}</div>`,
                             item: (data, escape) => `<div class="text-xs">${escape(data.item_name)}</div>`
                         }
                     });
@@ -1382,22 +1306,15 @@
                 // --- TOMSELECT: Dynamic Vendor ---
                 initDynamicVendor(el, vendorObj) {
                     let ts = new TomSelect(el, {
-                        valueField: 'ID',
-                        labelField: 'Display_Name',
-                        searchField: ['Display_Name'],
-                        create: false,
-                        maxItems: 1,
-                        placeholder: 'Select Vendor...',
-                        loadThrottle: 350,
+                        valueField: 'ID', labelField: 'Display_Name', searchField: ['Display_Name'],
+                        create: false, maxItems: 1, placeholder: 'Select Vendor...', loadThrottle: 350,
                         onChange: (val) => {
                             vendorObj.Vendor_Name = val;
                             let opt = ts.options[val];
                             if (opt) {
                                 vendorObj.Vendor_Display = opt.Display_Name;
-                                // If vendor was finalized, update Finalized_Vendor
                                 if (vendorObj.finalized) {
-                                    this.form.Finalized_Vendor = vendorObj.Vendor_Display || vendorObj
-                                        .Vendor_Name || 'Selected Vendor';
+                                    this.form.Finalized_Vendor = vendorObj.Vendor_Display || vendorObj.Vendor_Name || 'Selected Vendor';
                                 }
                             }
                             this.recalculateAllTotals();
@@ -1407,12 +1324,10 @@
                             ZOHO.CREATOR.DATA.getRecords({
                                 report_name: 'Vendor_Report',
                                 criteria: `(Display_Name.contains("${q}"))`
-                            }).then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(
-                                () => callback());
+                            }).then(res => callback((res.code === 3000 && res.data) ? res.data : [])).catch(() => callback());
                         },
                         render: {
-                            option: (data, escape) =>
-                                `<div class="font-medium text-xs py-1 px-2">${escape(data.Display_Name)}</div>`,
+                            option: (data, escape) => `<div class="font-medium text-xs py-1 px-2">${escape(data.Display_Name)}</div>`,
                             item: (data, escape) => `<div class="text-xs">${escape(data.Display_Name)}</div>`
                         }
                     });
@@ -1420,7 +1335,6 @@
                         ts.addOption({ ID: vendorObj.Vendor_Name, Display_Name: vendorObj.Vendor_Display });
                         ts.setValue(vendorObj.Vendor_Name, true);
                     }
-                    // Store ref for cleanup
                     if (!window.vendorTsRefs) window.vendorTsRefs = {};
                     const key = 'vts_' + Date.now() + Math.random();
                     window.vendorTsRefs[key] = ts;
@@ -1439,15 +1353,12 @@
                         });
                         if (res.code === 3000 && res.result && res.result.length > 0) {
                             const rfq = res.result[0];
-
-                            // Reset form items and vendors
                             this.form.Items = [];
                             this.form.Vendors = [];
                             this.form.Finalized_Vendor = '';
                             this.form.Total_Landed_Rate = '';
 
                             if (rfq.Items && rfq.Items.length > 0) {
-                                // Build a map of vendor -> items
                                 const vendorMap = {};
 
                                 rfq.Items.forEach(itemRow => {
@@ -1455,16 +1366,13 @@
                                         const reqItem = {
                                             uid: Date.now() + Math.random(),
                                             Items: itemRow.Item.ID,
-                                            Item_Name: itemRow.Item.display_value || itemRow.Item
-                                                .item_name,
-                                            Unit: itemRow.Unit || itemRow.Item.unit_of_measure ||
-                                                'Nos',
+                                            Item_Name: itemRow.Item.display_value || itemRow.Item.item_name,
+                                            Unit: itemRow.Unit || itemRow.Item.unit_of_measure || 'Nos',
                                             Quantity: itemRow.Quantity || 0,
                                             Deliver_to_Plant: ''
                                         };
                                         this.form.Items.push(reqItem);
 
-                                        // Process vendors for this item
                                         if (itemRow.vendors && Array.isArray(itemRow.vendors)) {
                                             itemRow.vendors.forEach(v => {
                                                 const vKey = v.ID;
@@ -1472,21 +1380,16 @@
                                                     vendorMap[vKey] = {
                                                         uid: Date.now() + Math.random(),
                                                         Vendor_Name: v.ID,
-                                                        Vendor_Display: v
-                                                            .Display_Name || v
-                                                                .Vendor_Name,
+                                                        Vendor_Display: v.Display_Name || v.Vendor_Name,
                                                         finalized: false,
+                                                        Consider: true,
                                                         QuoteLines: []
                                                     };
                                                 }
-                                                // Add a quote line for this item
                                                 vendorMap[vKey].QuoteLines.push({
-                                                    uid: Date.now() + Math
-                                                        .random(),
-                                                    Items_Master: reqItem
-                                                        .Items,
-                                                    Item_Name: reqItem
-                                                        .Item_Name,
+                                                    uid: Date.now() + Math.random(),
+                                                    Items_Master: reqItem.Items,
+                                                    Item_Name: reqItem.Item_Name,
                                                     Basic_Rate: '',
                                                     Disc: '',
                                                     Negotiated_Rate: 0,
@@ -1501,10 +1404,8 @@
                                     }
                                 });
 
-                                // Convert vendorMap to array
                                 this.form.Vendors = Object.values(vendorMap);
 
-                                // Auto-sync rates for each vendor line
                                 this.form.Vendors.forEach((v, vIdx) => {
                                     v.QuoteLines.forEach((line, lIdx) => {
                                         this.syncVendorLineRates(vIdx, lIdx, 'basic');
@@ -1520,68 +1421,35 @@
                             Toast.fire({ icon: 'warning', title: 'No items found in RFQ.' });
                         }
                     } catch (err) {
-                        console.error(err);
                         Toast.fire({ icon: 'error', title: 'Failed to load RFQ Details' });
                     }
                 },
 
-                // --- SUBMIT ---
                 async submitForm() {
-                    // Validation
-                    if (this.form.Items.length === 0) {
-                        Toast.fire({ icon: 'error', title: 'Please add at least one item requirement.' });
-                        return;
-                    }
-                    if (this.form.Vendors.length === 0) {
-                        Toast.fire({ icon: 'error', title: 'Please add at least one vendor.' });
-                        return;
-                    }
-                    // Check each vendor has at least one quote line
+                    if (this.form.Items.length === 0) { Toast.fire({ icon: 'error', title: 'Please add at least one item requirement.' }); return; }
+                    if (this.form.Vendors.length === 0) { Toast.fire({ icon: 'error', title: 'Please add at least one vendor.' }); return; }
+
                     let hasEmptyVendor = false;
-                    this.form.Vendors.forEach(v => {
-                        if (v.QuoteLines.length === 0) hasEmptyVendor = true;
-                    });
-                    if (hasEmptyVendor) {
-                        Toast.fire({ icon: 'error', title: 'Each vendor must have at least one item quote.' });
-                        return;
-                    }
-                    // Validate all vendor quote lines — all fields are mandatory
-                    let incompleteVendor = null;
-                    let incompleteField = null;
+                    this.form.Vendors.forEach(v => { if (v.QuoteLines.length === 0) hasEmptyVendor = true; });
+                    if (hasEmptyVendor) { Toast.fire({ icon: 'error', title: 'Each vendor must have at least one item quote.' }); return; }
+
+                    let incompleteVendor = null; let incompleteField = null;
                     outer: for (const v of this.form.Vendors) {
                         for (const line of v.QuoteLines) {
-                            if (line.Basic_Rate === '' || line.Basic_Rate === null || isNaN(parseFloat(line.Basic_Rate))) {
-                                incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Basic Rate'; break outer;
-                            }
-                            if (line.Disc === '' || line.Disc === null || isNaN(parseFloat(line.Disc))) {
-                                incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Disc %'; break outer;
-                            }
-                            if (line.Negotiated_Rate === '' || line.Negotiated_Rate === null || isNaN(parseFloat(line.Negotiated_Rate))) {
-                                incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Negotiated Rate'; break outer;
-                            }
-                            if (line.Freight === '' || line.Freight === null || isNaN(parseFloat(line.Freight))) {
-                                incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Freight'; break outer;
-                            }
-                            if (line.GST === '' || line.GST === null || isNaN(parseFloat(line.GST))) {
-                                incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'GST %'; break outer;
-                            }
-                            if (!line.Payment_Terms) {
-                                incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Payment Terms'; break outer;
-                            }
-                            if (!line.Delivery_Date) {
-                                incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Delivery Date'; break outer;
-                            }
+                            if (line.Basic_Rate === '' || line.Basic_Rate === null || isNaN(parseFloat(line.Basic_Rate))) { incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Basic Rate'; break outer; }
+                            if (line.Disc === '' || line.Disc === null || isNaN(parseFloat(line.Disc))) { incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Disc %'; break outer; }
+                            if (line.Negotiated_Rate === '' || line.Negotiated_Rate === null || isNaN(parseFloat(line.Negotiated_Rate))) { incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Negotiated Rate'; break outer; }
+                            if (line.Freight === '' || line.Freight === null || isNaN(parseFloat(line.Freight))) { incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Freight'; break outer; }
+                            if (line.GST === '' || line.GST === null || isNaN(parseFloat(line.GST))) { incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'GST %'; break outer; }
+                            if (!line.Payment_Terms) { incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Payment Terms'; break outer; }
+                            if (!line.Delivery_Date) { incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Delivery Date'; break outer; }
                         }
                     }
-                    if (incompleteVendor !== null) {
-                        Toast.fire({ icon: 'error', title: `"${incompleteField}" is required for vendor "${incompleteVendor}".` });
-                        return;
-                    }
+                    if (incompleteVendor !== null) { Toast.fire({ icon: 'error', title: `"${incompleteField}" is required for vendor "${incompleteVendor}".` }); return; }
 
                     this.isSubmitting = true;
 
                     try {
-                        // Flatten Vendors into Quotation_Comparison_Statement rows
                         const qcsRows = [];
                         this.form.Vendors.forEach(v => {
                             v.QuoteLines.forEach(line => {
@@ -1595,7 +1463,9 @@
                                     "GST": parseFloat(line.GST) || 0,
                                     "Landed_Rate": parseFloat(line.Landed_Rate) || 0,
                                     "Payment_Terms": line.Payment_Terms || '',
-                                    "Delivery_Date": P2PWorkflowUtils.formatDateForZoho(line.Delivery_Date)
+                                    "Delivery_Date": P2PWorkflowUtils.formatDateForZoho(line.Delivery_Date),
+                                    "Consider": v.Consider !== false,
+                                    "Rank": line.Rank || 'No'
                                 });
                             });
                         });
@@ -1646,11 +1516,10 @@
                     }
                 },
 
-                // Convert yyyy-MM-dd (HTML date input) → dd-MMM-yyyy (Zoho Creator format)
                 formatDateForZoho(dateStr) {
                     if (!dateStr) return '';
                     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                    const d = new Date(dateStr + 'T00:00:00'); // force local time parse
+                    const d = new Date(dateStr + 'T00:00:00');
                     if (isNaN(d.getTime())) return dateStr;
                     return String(d.getDate()).padStart(2, '0') + '-' + months[d.getMonth()] + '-' + d.getFullYear();
                 }

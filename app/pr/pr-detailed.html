@@ -11,7 +11,6 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
     <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
 
-    <!-- Standardized P2P Workflow Utility -->
     <script
         src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
@@ -170,14 +169,27 @@
                     <i class="bi bi-chevron-right text-[11px] text-gray-400"></i>
                     <span class="text-gray-500 font-medium" id="breadcrumbPrNum">–</span>
                 </nav>
-                <div class="flex items-center gap-2.5">
-                    <h1 class="text-[17px] font-bold text-gray-900 leading-none" id="headerPrNum">–</h1>
-                    <span id="headerBadge"></span>
+                <div class="flex items-center justify-between gap-2.5">
+                    <div class="flex items-center gap-2.5">
+                        <h1 class="text-[17px] font-bold text-gray-900 leading-none" id="headerPrNum">–</h1>
+                        <span id="headerBadge"></span>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0" id="topActions">
+                        <button id="editBtn"
+                            class="hidden inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </button>
+                        <div id="createRFQBtnWrapper" class="hidden">
+                            <button id="createRFQBtn"
+                                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#1B5CA8] text-white hover:bg-[#12427b] transition-colors no-underline cursor-pointer shadow-sm">
+                                <i class="bi bi-file-earmark-plus"></i> Create New RFQ
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div class="text-xs text-gray-400 mt-1" id="headerSub">–</div>
             </div>
 
-            <!-- Global Progress Container -->
             <div class="bg-white border border-gray-200 rounded-lg p-5 mb-4 fade-in">
                 <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">PR Process Progress
                 </div>
@@ -231,27 +243,27 @@
                     </div>
 
                     <div class="flex items-center gap-2.5 fade-in" id="actionButtons" style="display:none;">
-                        <button id="approveBtn"
+                        <button id="submitDraftBtn" style="display:none;"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#1B5CA8] text-white hover:bg-[#12427b] transition-colors no-underline cursor-pointer shadow-sm">
+                            <i class="bi bi-send"></i> <span class="btn-text">Submit Requisition</span>
+                        </button>
+
+                        <button id="approveBtn" style="display:none;"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors no-underline cursor-pointer shadow-sm">
                             <i class="bi bi-check-lg"></i> <span class="btn-text">Approve</span>
                         </button>
-                        <button id="rejectBtn"
+                        <button id="rejectBtn" style="display:none;"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors no-underline cursor-pointer shadow-sm">
                             <i class="bi bi-x-lg"></i> Reject
                         </button>
+
                         <button id="cancelBtn"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors no-underline cursor-pointer shadow-sm">
                             <i class="bi bi-slash-circle"></i> Cancel
                         </button>
                     </div>
 
-                    <!-- Create RFQ shortcut — always visible once PR data is loaded -->
-                    <div id="createRFQBtnWrapper" class="hidden">
-                        <button id="createRFQBtn"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#1B5CA8] text-white hover:bg-[#12427b] transition-colors no-underline cursor-pointer shadow-sm">
-                            <i class="bi bi-file-earmark-plus"></i> Create RFQ
-                        </button>
-                    </div>
+
                 </div>
 
                 <div class="col-span-2 space-y-4">
@@ -271,7 +283,6 @@
                         </div>
                     </div>
 
-                    <!-- Global Audit Trail Container -->
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden fade-in">
                         <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
                             <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
@@ -289,7 +300,7 @@
         </div>
     </div>
 
-    <script>
+    <script type="module" defer>
         (function () {
             'use strict';
 
@@ -313,9 +324,14 @@
             const $attachmentsCard = document.getElementById('attachmentsCard');
             const $attachmentsBody = document.getElementById('attachmentsBody');
             const $breadcrumbPrNum = document.getElementById('breadcrumbPrNum');
+            
+            // Buttons
             const $approveBtn = document.getElementById('approveBtn');
             const $rejectBtn = document.getElementById('rejectBtn');
             const $cancelBtn = document.getElementById('cancelBtn');
+            const $submitDraftBtn = document.getElementById('submitDraftBtn');
+            const $editBtn = document.getElementById('editBtn');
+            
             const $createRFQBtn = document.getElementById('createRFQBtn');
             const $createRFQBtnWrapper = document.getElementById('createRFQBtnWrapper');
 
@@ -348,19 +364,23 @@
             }
 
             function normalizeStatus(status) {
-                if (!status) return 'submitted';
+                if (!status) return 'draft';
                 const s = status.toLowerCase();
-                if (s === 'submitted' || s === 'draft') return 'submitted';
+                if (s === 'draft') return 'draft';
+                if (s === 'submitted') return 'submitted';
                 if (s === 'approved') return 'approved';
                 if (s === 'rejected') return 'rejected';
                 if (s === 'cancelled') return 'cancelled';
+                if (s === 'in progress') return 'in progress';
                 return 'submitted';
             }
 
             function getStatusBadgeHTML(status) {
                 const norm = normalizeStatus(status);
                 const config = {
+                    draft: { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400', label: status || 'Draft' },
                     submitted: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500', label: status || 'Submitted' },
+                    'in progress': { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500', label: status || 'In Progress' },
                     approved: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600', label: status || 'Approved' },
                     rejected: { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600', label: 'Rejected' },
                     cancelled: { border: 'border-gray-300', bg: 'bg-gray-100', text: 'text-gray-700', dot: 'bg-gray-500', label: 'Cancelled' },
@@ -439,8 +459,34 @@
             function renderActionButtons(rec) {
                 var isRejected = rec.Status && rec.Status.toLowerCase() === 'rejected';
                 var isApproved = rec.Status && rec.Status.toLowerCase() === 'approved';
+                var isDraft = rec.Status && rec.Status.toLowerCase() === 'draft';
                 var isPRStage = rec.Current_Stage === 'Purchase Requisition' && rec.Status.toLowerCase() === 'submitted';
-                $actionButtons.style.display = (isPRStage && !isRejected && !isApproved) ? 'flex' : 'none';
+
+                // Reset visibility
+                $actionButtons.style.display = 'none';
+                $approveBtn.style.display = 'none';
+                $rejectBtn.style.display = 'none';
+                $submitDraftBtn.style.display = 'none';
+                
+                if (isDraft) {
+                    $actionButtons.style.display = 'flex';
+                    $submitDraftBtn.style.display = 'inline-flex';
+                    $cancelBtn.style.display = 'inline-flex';
+                } else if (isPRStage && !isRejected && !isApproved) {
+                    $actionButtons.style.display = 'flex';
+                    $approveBtn.style.display = 'inline-flex';
+                    $rejectBtn.style.display = 'inline-flex';
+                    $cancelBtn.style.display = 'inline-flex';
+                } else {
+                    $actionButtons.style.display = 'none';
+                }
+
+                // Show/Hide Top Right Edit Button Based on Draft Status
+                if (isDraft) {
+                    $editBtn.classList.remove('hidden');
+                } else {
+                    $editBtn.classList.add('hidden');
+                }
             }
 
             // Function to render the Attachment UI
@@ -507,28 +553,21 @@
                 $loading.classList.remove('hidden');
                 $error.classList.add('hidden');
                 $main.classList.add('hidden');
-                ZOHO.CREATOR.UTIL.getInitParams().then((response) => {
-                    console.log(response);
-                })
-                console.log(ZOHO.CREATOR.DATA)
-                console.log(ZOHO.CREATOR.DATA.getRecordById)
+
                 Promise.all([
-                    ZOHO.CREATOR.DATA.getRecordById({
-                        report_name: "Purchase_Requisition_Report",
-                        id: recordId
-                    }).catch(function () { return { data: {} }; }),
                     ZOHO.CREATOR.DATA.invokeCustomApi({
-                        api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_RFQ_DETAILS,
+                        api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_PR_DETAILS,
                         http_method: "GET",
                         content_type: "application/json",
                         query_params: 'recId=' + recordId,
-                        header: {
-                            "environment": "development" // Directs the call to your development environment
-                        },
+                    }),
+                    ZOHO.CREATOR.DATA.getRecordById({
+                        report_name: "Purchase_Requisition_Report",
+                        id: recordId
                     })
                 ]).then(function (responses) {
-                    var recordRes = responses[0];
-                    var apiRes = responses[1];
+                    var apiRes = responses[0];
+                    var recordByIdRes = responses[1];
 
                     if (!apiRes || !apiRes.result || apiRes.result.length === 0) {
                         $loading.classList.add('hidden');
@@ -543,9 +582,11 @@
                     renderPRDetails(rec);
                     renderActionButtons(rec);
 
-                    // Render Attachments conditionally based on getRecordById response
-                    var attachments = recordRes.data && recordRes.data.Attachments;
-                    if (attachments && attachments.length > 0) {
+                    // Render Attachments using getRecordById response which includes file paths
+                    var attachments = recordByIdRes && recordByIdRes.data && recordByIdRes.data.Attachments
+                        ? recordByIdRes.data.Attachments
+                        : rec.Attachments;
+                    if (attachments) {
                         $attachmentsCard.classList.remove('hidden');
                         renderAttachments(attachments, pendingAction.recordId);
                     } else {
@@ -578,10 +619,6 @@
                     let rfqRequested = rec.Request_For_Quotation === "Yes" || false;
                     $approveBtn.querySelector('span').textContent = rfqRequested ? "Approve & Submit For RFQ" : "Approve & Submit";
 
-                    // $approveBtn.onclick = function () {
-                    //     openActionModal("Approve PR", "Approved", rfqRequested ? "Request For Quotation" : "Purchase Order", "bg-emerald-600", "hover:bg-emerald-700");
-                    // };
-
                     $approveBtn.onclick = function () {
                         openActionModal("Approve PR", "Approved", "Request For Quotation", "bg-emerald-600", "hover:bg-emerald-700");
                     };
@@ -589,12 +626,72 @@
                     $rejectBtn.onclick = function () {
                         openActionModal("Reject PR", "Rejected", "Request For Quotation", "bg-red-600", "hover:bg-red-700");
                     };
+
+                    // New: Submit Draft Action
+                    $submitDraftBtn.onclick = function () {
+                        $submitDraftBtn.disabled = true;
+                        $submitDraftBtn.innerHTML = '<div class="btn-spinner mr-1"></div> Submitting...';
+
+                        var updatePrConfig = {
+                            report_name: "Purchase_Requisition_Report",
+                            id: pendingAction.recordId,
+                            payload: {
+                                data: {
+                                    "Status": "Submitted"
+                                }
+                            }
+                        };
+
+                        ZOHO.CREATOR.DATA.updateRecordById(updatePrConfig).then(function (updateResponse) {
+                            if (updateResponse.code === 3000) {
+                                var prActionConfig = {
+                                    form_name: "PR_Action",
+                                    payload: {
+                                        "data": {
+                                            "PR_Number": pendingAction.recordId,
+                                            "Status": "Submitted",
+                                            "Moved_To": "Purchase Requisition",
+                                            "Comment": "Submitted for approval"
+                                        }
+                                    }
+                                };
+                                return ZOHO.CREATOR.DATA.addRecords(prActionConfig);
+                            } else {
+                                throw new Error("Failed to update PR status.");
+                            }
+                        }).then(function (actionResponse) {
+                            if (actionResponse.code === 3000) {
+                                loadPrDetails();
+                            } else {
+                                throw new Error("Failed to log PR action.");
+                            }
+                        }).catch(function (err) {
+                            console.error("API Error: ", err);
+                            alert("An error occurred while submitting. Please try again.");
+                            $submitDraftBtn.disabled = false;
+                            $submitDraftBtn.innerHTML = '<i class="bi bi-send"></i> <span class="btn-text">Submit Requisition</span>';
+                        });
+                    };
+
+                    // Edit Native Record
+                    $editBtn.onclick = function() {
+                        ZOHO.CREATOR.UTIL.navigateParentURL({
+                            action: 'open',
+                            window: 'same',
+                            url: '#Form:Purchase_Requisition?recLinkID=' + pendingAction.recordId + '&viewLinkName=Purchase_Requisition_Report'
+                        });
+                    };
+
                     $cancelBtn.onclick = function () {
                         ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', window: 'same', url: '#Page:PR_Approval' });
                     };
 
-                    // ── Create RFQ button ─────────────────────────────────────────────────
-                    $createRFQBtnWrapper.classList.remove('hidden');
+                    var isInProgress = rec.Status && rec.Status.toLowerCase() === 'in progress';
+                    if (isInProgress) {
+                        $createRFQBtnWrapper.classList.remove('hidden');
+                    } else {
+                        $createRFQBtnWrapper.classList.add('hidden');
+                    }
                     $createRFQBtn.onclick = function () {
                         ZOHO.CREATOR.UTIL.navigateParentURL({
                             action: 'open',
@@ -690,17 +787,6 @@
                                 this.classList.remove('border-red-400', 'focus:border-red-500', 'focus:ring-red-500/20');
                                 this.classList.add('border-gray-300', 'focus:border-[#1B5CA8]', 'focus:ring-[#1B5CA8]/20');
                             }
-
-                            // Validate global state for Submit button
-                            // var hasError = Array.from(inputs).some(function (inp) {
-                            //     return (parseInt(inp.value, 10) || 0) > (parseInt(inp.getAttribute('max'), 10) || 0);
-                            // });
-
-                            // $confirmActionBtn.disabled = hasError;
-                            // if (hasError) {
-                            //     $confirmActionBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                            // } else {
-                            // }
                             $confirmActionBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                         });
                     });
@@ -778,7 +864,6 @@
                         }
                     };
 
-                    // IMPORTANT: You may need to change "Purchase_Requisition_Report" to match your exact Report Name.
                     var updatePrConfig = {
                         report_name: "Purchase_Requisition_Report",
                         id: pendingAction.recordId,
