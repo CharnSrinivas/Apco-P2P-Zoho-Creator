@@ -29,7 +29,13 @@ const P2PWorkflowUtils = {
 		{ key: "bill", label: "Bill", icon: "bi-coin", page: "Bills" },
 		{ key: "payment", label: "Payment", icon: "bi-cash", page: "Payments" },
 	],
-
+	CUSTOM_API_NAMES: {
+		FETCH_PR_DETAILS: "Dev__Fetch_PR_Details",
+		FETCH_RFQ_DETAILS: "Dev__Get_RFQ_Details",
+		FETCH_QC_DETAILS: "Dev__Fetch_Vendor_Comparison_Details",
+		SEND_RFQ_EMAIL_TO_VENDOR: "Dev__Send_RFQ_Email_To_Vendor",
+		CHECK_ITEM_IN_GRN: "Dev__Check_Vendor_Requirement_For_Item",
+	},
 	// Helper: Map Creator Stage Strings to Step Keys
 	stageToStepKey: function (stage) {
 		if (!stage) return null;

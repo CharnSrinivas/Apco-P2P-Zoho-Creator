@@ -244,6 +244,14 @@
                             <i class="bi bi-slash-circle"></i> Cancel
                         </button>
                     </div>
+
+                    <!-- Create RFQ shortcut — always visible once PR data is loaded -->
+                    <div id="createRFQBtnWrapper" class="hidden">
+                        <button id="createRFQBtn"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#1B5CA8] text-white hover:bg-[#12427b] transition-colors no-underline cursor-pointer shadow-sm">
+                            <i class="bi bi-file-earmark-plus"></i> Create RFQ
+                        </button>
+                    </div>
                 </div>
 
                 <div class="col-span-2 space-y-4">
@@ -308,6 +316,8 @@
             const $approveBtn = document.getElementById('approveBtn');
             const $rejectBtn = document.getElementById('rejectBtn');
             const $cancelBtn = document.getElementById('cancelBtn');
+            const $createRFQBtn = document.getElementById('createRFQBtn');
+            const $createRFQBtnWrapper = document.getElementById('createRFQBtnWrapper');
 
             function esc(str) {
                 if (str == null || str === '') return '–';
@@ -497,17 +507,24 @@
                 $loading.classList.remove('hidden');
                 $error.classList.add('hidden');
                 $main.classList.add('hidden');
-
+                ZOHO.CREATOR.UTIL.getInitParams().then((response) => {
+                    console.log(response);
+                })
+                console.log(ZOHO.CREATOR.DATA)
+                console.log(ZOHO.CREATOR.DATA.getRecordById)
                 Promise.all([
                     ZOHO.CREATOR.DATA.getRecordById({
                         report_name: "Purchase_Requisition_Report",
                         id: recordId
                     }).catch(function () { return { data: {} }; }),
                     ZOHO.CREATOR.DATA.invokeCustomApi({
-                        api_name: "Fetch_PR_Details",
+                        api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_RFQ_DETAILS,
                         http_method: "GET",
                         content_type: "application/json",
-                        query_params: 'recId=' + recordId
+                        query_params: 'recId=' + recordId,
+                        header: {
+                            "environment": "development" // Directs the call to your development environment
+                        },
                     })
                 ]).then(function (responses) {
                     var recordRes = responses[0];
@@ -574,6 +591,16 @@
                     };
                     $cancelBtn.onclick = function () {
                         ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', window: 'same', url: '#Page:PR_Approval' });
+                    };
+
+                    // ── Create RFQ button ─────────────────────────────────────────────────
+                    $createRFQBtnWrapper.classList.remove('hidden');
+                    $createRFQBtn.onclick = function () {
+                        ZOHO.CREATOR.UTIL.navigateParentURL({
+                            action: 'open',
+                            window: 'same',
+                            url: '#Page:Request_For_Quotations?prId=' + pendingAction.recordId + '&createPr=true'
+                        });
                     };
                 }).catch(function (err) {
                     console.error('Error loading PR:', err);

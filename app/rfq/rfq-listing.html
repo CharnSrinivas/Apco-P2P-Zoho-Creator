@@ -16,6 +16,8 @@
     href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
     rel="stylesheet">
 
+  <script
+    src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js"></script>
   <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
@@ -548,6 +550,9 @@
         // TS instances manager
         tsInstances: { dept: null, pr: null, items: [], vendorItems: [] },
 
+        // Holds a PR ID passed via query params so openCreateModal can pre-load it
+        pendingPrId: null,
+
         init() {
           this.fetchRecords();
           this.fetchItemMasters();
@@ -562,6 +567,19 @@
           this.$watch('filter', () => {
             this.page = 1;
             this.fetchRecords();
+          });
+
+          // ── Auto-open RFQ creation if launched with createPr=true ──────────────
+          ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
+            const shouldCreate = String(params.createPr || '').toLowerCase() === 'true';
+            const prId = params.prId || '';
+            if (shouldCreate) {
+              this.pendingPrId = prId || null;
+              // Wait for masters to be available before opening the modal
+              this.openCreateModal(prId || null);
+            }
+          }).catch((err) => {
+            console.warn('getQueryParams error', err);
           });
         },
 
@@ -799,7 +817,7 @@
         },
 
         // --- Form & Modal Logic ---
-        openCreateModal() {
+        openCreateModal(prId = null) {
           this.rfqForm = {
             dept: '', reqDate: this.todayDate, dueDate: '', prRef: '', prLocked: false, purpose: '',
             items: []
@@ -811,7 +829,25 @@
           this.$nextTick(() => {
             this.initDeptSelect();
             this.initPrSelect();
-            this.addItemRow(); // Default row
+
+            if (prId) {
+              // Pre-select the PR in the TomSelect dropdown and trigger auto-fill
+              this.rfqForm.prRef = prId;
+              // Add the option with a placeholder label so TomSelect can render it,
+              // then trigger onChange which calls fetchPRDetailsForRFQ
+              const ts = this.tsInstances.pr;
+              if (ts) {
+                if (!ts.options[prId]) {
+                  ts.addOption({ ID: String(prId), PR_Number: 'Loading PR…', Requisition_Number: '' });
+                }
+                ts.setValue(prId); // triggers onChange → fetchPRDetailsForRFQ
+              } else {
+                // Fallback: call directly if TomSelect isn't ready yet
+                this.fetchPRDetailsForRFQ(prId);
+              }
+            } else {
+              this.addItemRow(); // Default empty row when no PR
+            }
           });
         },
 
@@ -880,7 +916,7 @@
               var q = query.replace(/'/g, "\\'");
               ZOHO.CREATOR.DATA.getRecords({
                 report_name: this.PR_REPORT_NAME,
-                criteria: `((PR_Number.contains("${q}") || Requisition_Number.contains("${q}")) &&( Status == "In Progress" || Status == "Partially Approved"))`
+                criteria: `PR_Number.startsWith("${q}") &&( Status == "In Progress" || Status == "Partially Approved"))`
               }).then(res => callback(res.code === 3000 ? res.data : [])).catch(() => callback());
             },
             render: {
@@ -970,7 +1006,7 @@
           Toast.fire({ icon: 'info', title: 'Fetching PR details...' });
           try {
             let res = await ZOHO.CREATOR.DATA.invokeCustomApi({
-              api_name: "Fetch_PR_Details", http_method: "GET", query_params: 'recId=' + prId
+              api_name: "Dev__Fetch_PR_Details", http_method: "GET", query_params: 'recId=' + prId
             });
 
             if (res && res.result && res.result.length > 0) {

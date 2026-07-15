@@ -1432,7 +1432,7 @@
                     Toast.fire({ icon: 'info', title: 'Fetching RFQ details...' });
                     try {
                         let res = await ZOHO.CREATOR.DATA.invokeCustomApi({
-                            api_name: "Get_RFQ_Details",
+                            api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_RFQ_DETAILS,
                             http_method: "GET",
                             content_type: "application/json",
                             query_params: `recId=${rfqId}`

@@ -16,6 +16,8 @@
     href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
     rel="stylesheet">
 
+  <script
+    src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js"></script>
   <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
@@ -829,7 +831,7 @@
         this.isLoading = true;
 
         var q = this.searchQuery.replace(/'/g, "\\'");
-        var searchCrit = this.searchQuery ? `Unit=("${q}") || PR_Number=("${q}") || Current_Stage=("${q}")` : '';
+        var searchCrit = this.searchQuery ? `PR_Number.startsWith("${q}")` : '';
         var statusCrit = buildStatusCriteria(this.currentFilter);
         var criteria = [searchCrit, statusCrit].filter(Boolean).join(' && ');
 
@@ -894,7 +896,7 @@
 
       computeStats() {
         var q = this.searchQuery.replace(/'/g, "\\'");
-        var searchCrit = this.searchQuery ? `(PR_Number=("${q}") || Requisition_Number=("${q}")` : '';
+        var searchCrit = this.searchQuery ? `( PR_Number=("${q}") || Requisition_Number=("${q}") )` : '';
 
         function combineCriteria(statusCrit) {
           var parts = [];
@@ -1029,7 +1031,8 @@
 
         const checks = itemsToCheck.map(item => {
           return ZOHO.CREATOR.DATA.invokeCustomApi({
-            api_name: "Check_Vendor_Requirement_For_Item",
+            // api_name: "Check_Vendor_Requirement_For_Item",
+            api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_RFQ_DETAILS,
             http_method: "POST",
             payload: {
               itemIds: item.id

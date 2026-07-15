@@ -739,7 +739,8 @@
                 </div>
             </div>
 
-            <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm mb-6" x-show="comparativeMatrix.rows.length > 0">
+            <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm mb-6"
+                x-show="comparativeMatrix.rows.length > 0">
                 <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
                     <div class="text-sm font-bold text-[#1B5CA8] flex items-center gap-2">
                         <i class="bi bi-calculator"></i> Cost Simulation & Evaluation
@@ -749,16 +750,25 @@
                 <div class="p-4 border-b border-gray-100 bg-white">
                     <div class="flex gap-6 items-center">
                         <label class="flex items-center gap-2 cursor-pointer group">
-                            <input type="radio" x-model="evaluationStrategy" value="lowest" class="text-[#1B5CA8] focus:ring-[#1B5CA8] w-4 h-4 cursor-pointer">
-                            <span class="text-[13px] font-bold text-gray-700 group-hover:text-[#1B5CA8] transition-colors">Lowest Bidder</span>
+                            <input type="radio" x-model="evaluationStrategy" value="lowest"
+                                class="text-[#1B5CA8] focus:ring-[#1B5CA8] w-4 h-4 cursor-pointer">
+                            <span
+                                class="text-[13px] font-bold text-gray-700 group-hover:text-[#1B5CA8] transition-colors">Lowest
+                                Bidder</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer group">
-                            <input type="radio" x-model="evaluationStrategy" value="item_wise" class="text-[#1B5CA8] focus:ring-[#1B5CA8] w-4 h-4 cursor-pointer">
-                            <span class="text-[13px] font-bold text-gray-700 group-hover:text-[#1B5CA8] transition-colors">Item-wise L1</span>
+                            <input type="radio" x-model="evaluationStrategy" value="item_wise"
+                                class="text-[#1B5CA8] focus:ring-[#1B5CA8] w-4 h-4 cursor-pointer">
+                            <span
+                                class="text-[13px] font-bold text-gray-700 group-hover:text-[#1B5CA8] transition-colors">Item-wise
+                                L1</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer group">
-                            <input type="radio" x-model="evaluationStrategy" value="earliest" class="text-[#1B5CA8] focus:ring-[#1B5CA8] w-4 h-4 cursor-pointer">
-                            <span class="text-[13px] font-bold text-gray-700 group-hover:text-[#1B5CA8] transition-colors">Earliest Delivery</span>
+                            <input type="radio" x-model="evaluationStrategy" value="earliest"
+                                class="text-[#1B5CA8] focus:ring-[#1B5CA8] w-4 h-4 cursor-pointer">
+                            <span
+                                class="text-[13px] font-bold text-gray-700 group-hover:text-[#1B5CA8] transition-colors">Earliest
+                                Delivery</span>
                         </label>
                     </div>
                 </div>
@@ -772,71 +782,141 @@
                                 <th class="px-4 py-2.5 text-center font-bold border-r border-gray-200">Qty</th>
                                 <th class="px-4 py-2.5 text-right font-bold border-r border-gray-200">Rate</th>
                                 <th class="px-4 py-2.5 text-right font-bold border-r border-gray-200">Landed Rate</th>
-                                <th class="px-4 py-2.5 text-right font-bold border-r border-gray-200 text-[#1B5CA8]">Amount</th>
-                                <th class="px-4 py-2.5 text-center font-bold border-r border-gray-200">Delivery Date</th>
+                                <th class="px-4 py-2.5 text-right font-bold border-r border-gray-200 text-[#1B5CA8]">
+                                    Amount</th>
+                                <th class="px-4 py-2.5 text-center font-bold border-r border-gray-200">Delivery Date
+                                </th>
                                 <th class="px-4 py-2.5 text-left font-bold">Payment Terms</th>
                             </tr>
                         </thead>
                         <tbody>
                             <template x-for="(row, idx) in evaluationRows" :key="idx">
                                 <tr class="border-b border-gray-100 hover:bg-gray-50/80 bg-white">
-                                    <td class="px-4 py-2.5 font-bold text-gray-800 border-r border-gray-100 bg-gray-50/30" x-text="row.vendor"></td>
-                                    <td class="px-4 py-2.5 text-gray-700 border-r border-gray-100 font-medium" x-text="row.item"></td>
-                                    <td class="px-4 py-2.5 text-center text-gray-700 border-r border-gray-100" x-text="row.qty"></td>
-                                    <td class="px-4 py-2.5 text-right text-gray-600 border-r border-gray-100 tabular-nums" x-text="formatINR(row.rate, false)"></td>
-                                    <td class="px-4 py-2.5 text-right font-semibold text-gray-800 border-r border-gray-100 tabular-nums" x-text="formatINR(row.landedRate, false)"></td>
-                                    <td class="px-4 py-2.5 text-right font-bold text-[#1B5CA8] border-r border-gray-100 tabular-nums bg-blue-50/20" x-text="formatINR(row.amount, false)"></td>
-                                    <td class="px-4 py-2.5 text-center text-gray-600 border-r border-gray-100" x-text="formatDate(row.delivery)"></td>
+                                    <td class="px-4 py-2.5 font-bold text-gray-800 border-r border-gray-100 bg-gray-50/30"
+                                        x-text="row.vendor"></td>
+                                    <td class="px-4 py-2.5 text-gray-700 border-r border-gray-100 font-medium"
+                                        x-text="row.item"></td>
+                                    <td class="px-4 py-2.5 text-center text-gray-700 border-r border-gray-100"
+                                        x-text="row.qty"></td>
+                                    <td class="px-4 py-2.5 text-right text-gray-600 border-r border-gray-100 tabular-nums"
+                                        x-text="formatINR(row.rate, false)"></td>
+                                    <td class="px-4 py-2.5 text-right font-semibold text-gray-800 border-r border-gray-100 tabular-nums"
+                                        x-text="formatINR(row.landedRate, false)"></td>
+                                    <td class="px-4 py-2.5 text-right font-bold text-[#1B5CA8] border-r border-gray-100 tabular-nums bg-blue-50/20"
+                                        x-text="formatINR(row.amount, false)"></td>
+                                    <td class="px-4 py-2.5 text-center text-gray-600 border-r border-gray-100"
+                                        x-text="formatDate(row.delivery)"></td>
                                     <td class="px-4 py-2.5 text-left text-gray-600" x-text="row.terms"></td>
                                 </tr>
                             </template>
                             <tr x-show="evaluationRows.length === 0">
-                                <td colspan="8" class="text-center py-8 text-gray-400 italic">No quotes match this simulation strategy.</td>
+                                <td colspan="8" class="text-center py-8 text-gray-400 italic">No quotes match this
+                                    simulation strategy.</td>
                             </tr>
                         </tbody>
                         <tfoot x-show="evaluationRows.length > 0">
                             <tr class="bg-gray-100 border-t border-gray-300">
-                                <td colspan="5" class="px-4 py-3 text-right font-bold text-gray-800 uppercase tracking-wide">Simulation Total</td>
-                                <td class="px-4 py-3 text-right font-black text-[#1B5CA8] text-[13px] tabular-nums" x-text="formatINR(simulationTotal, true)"></td>
+                                <td colspan="5"
+                                    class="px-4 py-3 text-right font-bold text-gray-800 uppercase tracking-wide">
+                                    Simulation Total</td>
+                                <td class="px-4 py-3 text-right font-black text-[#1B5CA8] text-[13px] tabular-nums"
+                                    x-text="formatINR(simulationTotal, true)"></td>
                                 <td colspan="2"></td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
             </div>
-
-            <div x-show="!['finalized', 'approved', 'rejected', 'cancelled'].includes((rec.Status || '').toLowerCase()) && comparativeMatrix.rows.length > 0" class="bg-blue-50/40 border border-blue-200 rounded-lg overflow-hidden shadow-sm mb-6 p-5">
-                <div class="flex items-center gap-2 text-[14px] font-bold text-[#1B5CA8] mb-4 border-b border-blue-200/50 pb-2">
+            <!-- ===== VENDOR DECISION MAKING SECTION (Only shows when Freezed) ===== -->
+            <div x-show="isFreezed && comparativeMatrix.rows.length > 0"
+                class="bg-blue-50/40 border border-blue-200 rounded-lg overflow-hidden shadow-sm mb-6 p-5">
+                <div
+                    class="flex items-center gap-2 text-[14px] font-bold text-[#1B5CA8] mb-4 border-b border-blue-200/50 pb-2">
                     <i class="bi bi-award-fill text-lg"></i> Vendor Finalization & Decision
                 </div>
                 <div class="grid grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-[11px] font-semibold text-gray-700 tracking-wide mb-1.5">Select Final Vendor <span class="text-red-500">*</span></label>
-                        <select x-model="decisionVendor" class="w-full py-2.5 px-3 bg-white border border-gray-300 rounded-lg text-[13px] text-gray-800 font-medium focus:outline-none focus:border-[#1B5CA8] focus:ring-1 focus:ring-[#1B5CA8] shadow-sm transition-all">
+                        <label class="block text-[11px] font-semibold text-gray-700 tracking-wide mb-1.5">Select Final
+                            Vendor <span class="text-red-500">*</span></label>
+                        <select x-model="decisionVendor"
+                            class="w-full py-2.5 px-3 bg-white border border-gray-300 rounded-lg text-[13px] text-gray-800 font-medium focus:outline-none focus:border-[#1B5CA8] focus:ring-1 focus:ring-[#1B5CA8] shadow-sm transition-all">
                             <option value="">-- Select Vendor to Award --</option>
-                            <option value="AUTO" class="font-bold text-[#1B5CA8]">✨ Auto-Finalize based on selected Strategy</option>
+                            <option value="AUTO" class="font-bold text-[#1B5CA8]">✨ Auto-Finalize based on selected
+                                Strategy</option>
                             <template x-for="vName in comparativeMatrix.vendorNames" :key="vName">
                                 <option :value="vName" x-text="vName"></option>
                             </template>
                         </select>
                         <div class="mt-2 text-[11px] text-gray-500 leading-relaxed">
-                            Selecting <strong class="text-[#1B5CA8]">Auto-Finalize</strong> will automatically map the vendors based on your current active tab above (<span x-text="evaluationStrategy === 'lowest' ? 'Lowest Bidder' : (evaluationStrategy === 'item_wise' ? 'Item-wise L1' : 'Earliest Delivery')"></span>).
+                            Selecting <strong class="text-[#1B5CA8]">Auto-Finalize</strong> will automatically map the
+                            vendors based on your current active tab above (<span
+                                x-text="evaluationStrategy === 'lowest' ? 'Lowest Bidder' : (evaluationStrategy === 'item_wise' ? 'Item-wise L1' : 'Earliest Delivery')"></span>).
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-gray-700 tracking-wide mb-1.5">Justification / Remarks <span class="text-red-500">*</span></label>
-                        <textarea x-model="decisionJustification" rows="3" class="w-full py-2 px-3 bg-white border border-gray-300 rounded-lg text-[13px] text-gray-800 focus:outline-none focus:border-[#1B5CA8] focus:ring-1 focus:ring-[#1B5CA8] shadow-sm transition-all" placeholder="Provide strong reason for this selection..."></textarea>
+                        <label class="block text-[11px] font-semibold text-gray-700 tracking-wide mb-1.5">Justification
+                            / Remarks <span class="text-red-500">*</span></label>
+                        <textarea x-model="decisionJustification" rows="3"
+                            class="w-full py-2 px-3 bg-white border border-gray-300 rounded-lg text-[13px] text-gray-800 focus:outline-none focus:border-[#1B5CA8] focus:ring-1 focus:ring-[#1B5CA8] shadow-sm transition-all"
+                            placeholder="Provide strong reason for this selection..."></textarea>
                     </div>
                 </div>
                 <div class="mt-5 flex justify-end">
                     <button @click="finalizeDecision()" :disabled="isFinalizingDecision"
                         class="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-xs font-bold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors cursor-pointer shadow-md disabled:opacity-70">
-                        <template x-if="isFinalizingDecision"><div class="btn-spinner border-t-white w-4 h-4 mr-1"></div></template>
+                        <template x-if="isFinalizingDecision">
+                            <div class="btn-spinner border-t-white w-4 h-4 mr-1"></div>
+                        </template>
                         <i class="bi bi-check-circle-fill" x-show="!isFinalizingDecision"></i>
                         <span x-text="isFinalizingDecision ? 'Finalizing...' : 'Approve & Finalize Vendor'"></span>
                     </button>
                 </div>
             </div>
+            <!-- ============================================== -->
+            <!-- <div x-show="!['finalized', 'approved', 'rejected', 'cancelled'].includes((rec.Status || '').toLowerCase()) && comparativeMatrix.rows.length > 0"
+                class="bg-blue-50/40 border border-blue-200 rounded-lg overflow-hidden shadow-sm mb-6 p-5">
+                <div
+                    class="flex items-center gap-2 text-[14px] font-bold text-[#1B5CA8] mb-4 border-b border-blue-200/50 pb-2">
+                    <i class="bi bi-award-fill text-lg"></i> Vendor Finalization & Decision
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-gray-700 tracking-wide mb-1.5">Select Final
+                            Vendor <span class="text-red-500">*</span></label>
+                        <select x-model="decisionVendor"
+                            class="w-full py-2.5 px-3 bg-white border border-gray-300 rounded-lg text-[13px] text-gray-800 font-medium focus:outline-none focus:border-[#1B5CA8] focus:ring-1 focus:ring-[#1B5CA8] shadow-sm transition-all">
+                            <option value="">-- Select Vendor to Award --</option>
+                            <option value="AUTO" class="font-bold text-[#1B5CA8]">✨ Auto-Finalize based on selected
+                                Strategy</option>
+                            <template x-for="vName in comparativeMatrix.vendorNames" :key="vName">
+                                <option :value="vName" x-text="vName"></option>
+                            </template>
+                        </select>
+                        <div class="mt-2 text-[11px] text-gray-500 leading-relaxed">
+                            Selecting <strong class="text-[#1B5CA8]">Auto-Finalize</strong> will automatically map the
+                            vendors based on your current active tab above (<span
+                                x-text="evaluationStrategy === 'lowest' ? 'Lowest Bidder' : (evaluationStrategy === 'item_wise' ? 'Item-wise L1' : 'Earliest Delivery')"></span>).
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-gray-700 tracking-wide mb-1.5">Justification
+                            / Remarks <span class="text-red-500">*</span></label>
+                        <textarea x-model="decisionJustification" rows="3"
+                            class="w-full py-2 px-3 bg-white border border-gray-300 rounded-lg text-[13px] text-gray-800 focus:outline-none focus:border-[#1B5CA8] focus:ring-1 focus:ring-[#1B5CA8] shadow-sm transition-all"
+                            placeholder="Provide strong reason for this selection..."></textarea>
+                    </div>
+                </div>
+                <div class="mt-5 flex justify-end">
+                    <button @click="finalizeDecision()" :disabled="isFinalizingDecision"
+                        class="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-xs font-bold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors cursor-pointer shadow-md disabled:opacity-70">
+                        <template x-if="isFinalizingDecision">
+                            <div class="btn-spinner border-t-white w-4 h-4 mr-1"></div>
+                        </template>
+                        <i class="bi bi-check-circle-fill" x-show="!isFinalizingDecision"></i>
+                        <span x-text="isFinalizingDecision ? 'Finalizing...' : 'Approve & Finalize Vendor'"></span>
+                    </button>
+                </div>
+            </div> -->
             <div class="grid grid-cols-5 gap-5 w-full">
                 <div class="col-span-5 md:col-span-3 space-y-4">
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
@@ -883,10 +963,10 @@
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-blue-600 text-white border border-blue-600 hover:bg-blue-700 transition-colors cursor-pointer shadow-sm">
                             <i class="bi bi-check-lg"></i> <span>Freeze & Submit For Approval</span>
                         </button>
-                        <button x-show="isFreezed" @click="finalizeVC()"
+                        <!-- <button x-show="isFreezed" @click="finalizeVC()"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors cursor-pointer shadow-sm">
                             <i class="bi bi-check-lg"></i> <span>Approve & Finalize</span>
-                        </button>
+                        </button> -->
                         <button @click="requestReNegotiation()"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-amber-500 text-white border border-amber-500 hover:bg-amber-600 transition-colors cursor-pointer shadow-sm">
                             <i class="bi bi-arrow-repeat"></i> Request For Re Negotiation
@@ -1002,7 +1082,7 @@
                 fetchData() {
                     this.isLoading = true;
                     ZOHO.CREATOR.DATA.invokeCustomApi({
-                        api_name: "Fetch_Vendor_Comparison_Details",
+                        api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_QC_DETAILS,
                         http_method: "GET",
                         content_type: "application/json",
                         query_params: 'recId=' + this.recordId
@@ -1263,10 +1343,24 @@
                                 totalLanded += (parseFloat(q.Landed_Rate) || 0) * qty;
                             }
 
+                            // EXTRACT ALL EXISTING DATA TO PREVENT ZOHO FROM WIPING IT
+                            let itemIdStr = q.Items && q.Items.length > 0 ? q.Items[0].ID : '';
+
                             let qcsRow = {
-                                "ID": q.ID, 
+                                "ID": q.ID,
+                                "Vendor_Name": q.Vendor_Name || '',
+                                "Items": itemIdStr ? [itemIdStr.toString()] : [],
+                                "Basic_Rate": parseFloat(q.Basic_Rate) || 0,
+                                "Negotiated_Rate": parseFloat(q.Negotiated_Rate) || 0,
+                                "Disc": parseFloat(q.Disc) || 0,
+                                "Freight": parseFloat(q.Freight || q.Fright) || 0,
+                                "GST": parseFloat(q.GST) || 0,
+                                "Landed_Rate": parseFloat(q.Landed_Rate) || 0,
+                                "Payment_Terms": q.Payment_Terms || '',
+                                "Delivery_Date": this.formatDateForZoho(q.Delivery_Date),
                                 "Rank": isWinner ? 'Yes' : 'No'
                             };
+
                             qcsRows.push(qcsRow);
                         });
 
@@ -1289,10 +1383,30 @@
                             }
                         };
 
+                        // 1. Update the Quote Comparison Record
                         let res = await ZOHO.CREATOR.DATA.updateRecordById({ report_name: 'Quote_Comparison_Report', id: this.recordId, payload });
-                        
+
                         if (res.code === 3000) {
-                            Toast.fire({ icon: 'success', title: 'Vendor Finalized successfully!' });
+                            // 2. Insert into PR Action for the Timeline workflow
+                            let prId = this.rec.PR_Ref?.ID;
+                            if (prId) {
+                                try {
+                                    await ZOHO.CREATOR.DATA.addRecords({
+                                        form_name: "PR_Action",
+                                        payload: {
+                                            data: {
+                                                "PR_Number": prId,
+                                                "Quote_Comparison": this.recordId,
+                                                "Status": "Approved", // Logged as 'Approved' internally, moving to PO
+                                                "Moved_To": "Purchase Order",
+                                                "Comment": this.decisionJustification
+                                            }
+                                        }
+                                    });
+                                } catch (e) { console.warn("Failed to insert PR action", e); }
+                            }
+
+                            Toast.fire({ icon: 'success', title: 'Vendor Approved & Finalized successfully!' });
                             this.decisionVendor = '';
                             this.decisionJustification = '';
                             this.fetchData();
@@ -1304,6 +1418,47 @@
                     } finally {
                         this.isFinalizingDecision = false;
                     }
+                },
+
+                // ---- Action Modal ----
+                openModal(title, status, movedTo, btnBgClass, btnHoverClass) {
+                    this.modalTitle = title; this.pendingStatus = status; this.pendingStage = movedTo;
+                    this.modalBtnClass = btnBgClass; this.modalBtnHoverClass = btnHoverClass;
+                    this.modalComment = ''; this.showModal = true;
+                },
+                closeModal() { if (!this.isSubmitting) this.showModal = false; },
+                freezeVC() { this.openModal("Freeze Quote Comparison", "Freezed", "Quote Comparison", "bg-blue-600", "hover:bg-blue-700"); },
+                rejectVC() { this.openModal("Reject", "Rejected", "Quote Comparison", "bg-red-600", "hover:bg-red-700"); },
+                requestReNegotiation() { this.openModal("Request Re Negotiation", "Requested For Re Negotiation", "Quote Comparison", "bg-amber-500", "hover:bg-amber-600"); },
+
+                async submitAction() {
+                    this.isSubmitting = true;
+                    try {
+                        const response = await ZOHO.CREATOR.DATA.updateRecordById({ report_name: "Quote_Comparison_Report", id: this.recordId, payload: { data: { "Status": this.pendingStatus } } });
+                        if (response.code !== 3000) throw new Error('Failed');
+
+                        // Keep PR Action timeline updated for Freezes, Rejections, etc.
+                        let prId = this.rec.PR_Ref?.ID;
+                        if (prId) {
+                            try {
+                                await ZOHO.CREATOR.DATA.addRecords({
+                                    form_name: "PR_Action",
+                                    payload: {
+                                        data: {
+                                            "PR_Number": prId,
+                                            "Quote_Comparison": this.recordId,
+                                            "Status": this.pendingStatus,
+                                            "Moved_To": this.pendingStage,
+                                            "Comment": this.modalComment.trim()
+                                        }
+                                    }
+                                });
+                            } catch (e) { console.warn("Failed to insert PR action", e); }
+                        }
+
+                        this.closeModal(); this.fetchData();
+                    } catch (err) { Toast.fire({ icon: 'error', title: 'Action failed. Please try again.' }); }
+                    finally { this.isSubmitting = false; }
                 },
 
                 // ---- Action Modal ----
@@ -1692,7 +1847,7 @@
                                 Quotation_Comparison_Statement: qcsRows
                             }
                         };
-                        
+
                         let res = await ZOHO.CREATOR.DATA.updateRecordById({ report_name: 'Quote_Comparison_Report', id: this.recordId, payload });
                         if (res.code === 3000) {
                             Toast.fire({ icon: 'success', title: 'Comparison updated successfully!' });
@@ -1898,7 +2053,7 @@
                 formatDateForZoho(dateStr) {
                     if (!dateStr) return '';
                     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                    const d = new Date(dateStr + 'T00:00:00'); 
+                    const d = new Date(dateStr + 'T00:00:00');
                     if (isNaN(d.getTime())) return dateStr;
                     return String(d.getDate()).padStart(2, '0') + '-' + months[d.getMonth()] + '-' + d.getFullYear();
                 },

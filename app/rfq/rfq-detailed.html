@@ -761,7 +761,7 @@
                 fetchData() {
                     this.isLoading = true;
                     ZOHO.CREATOR.DATA.invokeCustomApi({
-                        api_name: "Get_RFQ_Details",
+                        api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_RFQ_DETAILS,
                         http_method: "GET",
                         content_type: "application/json",
                         query_params: 'recId=' + this.recordId,
@@ -1350,7 +1350,7 @@
                     this.sendingEmailVendorId = group.vendorId;
                     try {
                         const response = await ZOHO.CREATOR.DATA.invokeCustomApi({
-                            api_name: "Send_RFQ_Email_To_Vendor",
+                            api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.SEND_RFQ_EMAIL_TO_VENDOR,
                             http_method: "POST",
                             content_type: "application/json",
                             payload: { rfqId: this.recordId, vendorId: group.vendorId }
