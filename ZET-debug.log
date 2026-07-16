@@ -82,3 +82,39 @@
 [info] [2026-07-15T14:07:01.037Z] :  ==> app/grn/.DS_Store
 [info] [2026-07-15T14:07:01.038Z] :  ==> app/vendor-comparison/.DS_Store
 [info] [2026-07-15T14:07:01.038Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-07-16T09:06:59.937Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-07-16T09:06:59.945Z] :  ==> app/.DS_Store
+[info] [2026-07-16T09:06:59.945Z] :  ==> app/grn/.DS_Store
+[info] [2026-07-16T09:06:59.945Z] :  ==> app/pr/.DS_Store
+[info] [2026-07-16T09:06:59.945Z] :  ==> app/vendor-comparison/.DS_Store
+[info] [2026-07-16T09:06:59.945Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-07-16T09:06:59.949Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-07-16T09:06:59.950Z] :  ==> app/.DS_Store
+[info] [2026-07-16T09:06:59.950Z] :  ==> app/grn/.DS_Store
+[info] [2026-07-16T09:06:59.950Z] :  ==> app/pr/.DS_Store
+[info] [2026-07-16T09:06:59.950Z] :  ==> app/vendor-comparison/.DS_Store
+[info] [2026-07-16T09:06:59.951Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-07-16T09:11:59.345Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-07-16T09:11:59.351Z] :  ==> app/.DS_Store
+[info] [2026-07-16T09:11:59.352Z] :  ==> app/grn/.DS_Store
+[info] [2026-07-16T09:11:59.352Z] :  ==> app/pr/.DS_Store
+[info] [2026-07-16T09:11:59.352Z] :  ==> app/vendor-comparison/.DS_Store
+[info] [2026-07-16T09:11:59.352Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-07-16T09:11:59.356Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-07-16T09:11:59.357Z] :  ==> app/.DS_Store
+[info] [2026-07-16T09:11:59.357Z] :  ==> app/grn/.DS_Store
+[info] [2026-07-16T09:11:59.357Z] :  ==> app/pr/.DS_Store
+[info] [2026-07-16T09:11:59.357Z] :  ==> app/vendor-comparison/.DS_Store
+[info] [2026-07-16T09:11:59.358Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-07-16T09:46:04.994Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-07-16T09:46:05.001Z] :  ==> app/.DS_Store
+[info] [2026-07-16T09:46:05.002Z] :  ==> app/grn/.DS_Store
+[info] [2026-07-16T09:46:05.002Z] :  ==> app/pr/.DS_Store
+[info] [2026-07-16T09:46:05.003Z] :  ==> app/vendor-comparison/.DS_Store
+[info] [2026-07-16T09:46:05.005Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-07-16T09:46:05.013Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-07-16T09:46:05.013Z] :  ==> app/.DS_Store
+[info] [2026-07-16T09:46:05.013Z] :  ==> app/grn/.DS_Store
+[info] [2026-07-16T09:46:05.014Z] :  ==> app/pr/.DS_Store
+[info] [2026-07-16T09:46:05.014Z] :  ==> app/vendor-comparison/.DS_Store
+[info] [2026-07-16T09:46:05.014Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2

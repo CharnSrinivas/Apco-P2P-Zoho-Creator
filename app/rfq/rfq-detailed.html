@@ -452,7 +452,7 @@
                     </div>
 
                     <div class="flex items-center gap-2 shrink-0">
-                        
+
                         <button x-show="isApproved" @click="createQC()"
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white hover:bg-[#12427b] rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer">
                             <i class="bi bi-file-earmark-plus"></i> Create QC
@@ -1081,7 +1081,6 @@
                                         Quantity: i.quantity,
                                         Comment: i.comment
                                     };
-                                    if (i.recId) obj.ID = i.recId;
                                     return obj;
                                 })
                             }
@@ -1272,7 +1271,7 @@
                 // ===== ROUTING / NEW BUTTON METHOD =====
                 createQC() {
                     ZOHO.CREATOR.UTIL.navigateParentURL({
-                        action: 'open', 
+                        action: 'open',
                         window: 'same',
                         url: '#Page:Quote_Comparisons?rfqId=' + this.recordId + '&createQc=true'
                     });
@@ -1354,6 +1353,7 @@
                         alert("An error occurred while submitting. Please try again.");
                     } finally {
                         this.isSubmitting = false;
+                        this.closeModal()
                     }
                 },
 

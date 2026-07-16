@@ -69,7 +69,7 @@
       <table class="w-full border-collapse">
         <thead>
           <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
-            <th class="px-4 py-2.5 text-[11px] font-semibold text-gray-500 tracking-wide text-left">Department Name</th>
+            <th class="px-4 py-2.5 text-[11px] font-semibold text-gray-500 tracking-wide text-left">Unit Name</th>
             <th class="px-4 py-2.5 text-[11px] font-semibold text-gray-500 tracking-wide text-left">City</th>
             <th class="px-4 py-2.5 text-[11px] font-semibold text-gray-500 tracking-wide text-left">State</th>
             <th
@@ -140,14 +140,14 @@
       <div @click.away="closeModal()"
         class="bg-white rounded-[11px] w-full max-w-2xl shadow-2xl flex flex-col overflow-hidden">
         <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
-          <h3 class="text-[15px] font-bold text-gray-800" x-text="isEdit ? 'Edit Department' : 'New Department'"></h3>
+          <h3 class="text-[15px] font-bold text-gray-800" x-text="isEdit ? 'Edit Unit' : 'New Unit'"></h3>
           <button @click="closeModal()" class="text-gray-400 hover:text-gray-700"><i
               class="bi bi-x-lg text-lg"></i></button>
         </div>
         <form @submit.prevent="saveRecord" class="p-5 overflow-y-auto max-h-[75vh]">
           <div class="grid grid-cols-2 gap-4 mb-4">
             <div class="col-span-2">
-              <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Department Name <span
+              <label class="block text-[11px] font-semibold text-gray-500 mb-1.5">Unit Name <span
                   class="text-red-500">*</span></label>
               <input x-model="form.Name" type="text" required
                 class="w-full py-2 px-3 border border-gray-300 rounded-lg text-xs focus:border-[#1B5CA8] outline-none">

@@ -12,8 +12,12 @@
     <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
 
     <script
-        src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js"></script>
+        src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js">
+        </script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -21,7 +25,7 @@
         rel="stylesheet">
 
     <style>
-        /* ── Loading spinner ── */
+        /* ── Spinners ── */
         .btn-spinner {
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-top-color: #ffffff;
@@ -96,57 +100,201 @@
         .fade-in {
             animation: fadeInUp 0.35s ease-out both;
         }
+
+        /* ── Edit Modal styles (from RFQ) ── */
+        .rfq-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 80;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(17, 24, 39, 0.4);
+            backdrop-filter: blur(2px);
+        }
+
+        .rfq-modal-box {
+            position: relative;
+            z-index: 1;
+            background: #fff;
+            border-radius: 11px;
+            width: 100%;
+            max-width: 5xl;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+        }
+
+        .ts-control {
+            border: 1px solid #e5e7eb !important;
+            border-radius: 0.5rem !important;
+            font-size: 0.8125rem !important;
+            padding: 0.5rem 0.75rem !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+            font-family: inherit;
+            background-color: #f9fafb !important;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .ts-control.focus {
+            border-color: #1B5CA8 !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(27, 92, 168, 0.15) !important;
+        }
+
+        .ts-dropdown {
+            border-radius: 0.5rem !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+            border: 1px solid #f3f4f6 !important;
+            padding: 0.35rem !important;
+            margin-top: 4px !important;
+            font-size: 0.8125rem !important;
+        }
+
+        .ts-dropdown .option {
+            border-radius: 0.375rem !important;
+            padding: 0.5rem 0.75rem !important;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .ts-dropdown .active {
+            background-color: #f3f4f6 !important;
+            color: #111827 !important;
+        }
+
+        /* Toast (optional) – we can reuse the RFQ toast style if needed */
+        .toast-enter {
+            animation: toastIn 0.3s ease-out both;
+        }
+
+        .toast-leave {
+            animation: toastOut 0.25s ease-in both;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(-12px) scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-12px) scale(0.96);
+            }
+        }
     </style>
 </head>
 
 <body class="bg-gray-50 p-6">
-    <div id="actionModal"
-        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm transition-opacity">
-        <div
-            class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden fade-in mx-4 border border-gray-200 flex flex-col max-h-[90vh]">
-            <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-white shrink-0">
-                <h3 id="modalTitle" class="text-[14px] font-bold text-gray-800">Submit Action</h3>
-                <button id="closeModalBtn" class="text-gray-400 hover:text-gray-700 cursor-pointer transition-colors">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
-
-            <div class="p-5 bg-gray-50/50 overflow-y-auto flex-1">
-                <div id="approvalItemsWrapper" class="hidden mb-5">
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="block text-xs font-semibold text-gray-700">
-                            Adjust Approved Quantities
-                        </label>
-                        <span class="text-[10px] text-gray-400 font-medium">Set quantity to 0 to remove item</span>
-                    </div>
-                    <div id="approvalItemsList"
-                        class="bg-white border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-100">
-                    </div>
-                </div>
-
-                <label class="block text-xs font-semibold text-gray-700 mb-2">
-                    Comment <span class="text-gray-400 font-normal text-[11px]">(Optional)</span>
-                </label>
-                <textarea id="actionComment" rows="3"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1B5CA8]/20 focus:border-[#1B5CA8] transition-all shadow-sm"
-                    placeholder="Enter your remarks here..."></textarea>
-            </div>
-
-            <div class="px-5 py-3.5 bg-white flex justify-end gap-2.5 border-t border-gray-100 shrink-0">
-                <button id="cancelActionBtn"
-                    class="px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors cursor-pointer shadow-sm">
-                    Cancel
-                </button>
-                <button id="confirmActionBtn"
-                    class="px-4 py-2 rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer shadow-sm flex items-center gap-1.5">
-                    <span id="confirmActionText">Submit</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <div id="app" class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-5xl mx-auto">
 
+        <!-- Toast container -->
+        <div id="toastContainer" class="fixed top-5 right-5 z-[100] flex flex-col gap-2"></div>
+
+        <!-- Edit Modal (inspired by RFQ) -->
+        <div id="editModal" class="rfq-modal-overlay hidden fade-in">
+            <div class="rfq-modal-box max-w-5xl">
+                <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
+                    <h3 class="text-[15px] font-bold text-gray-800">Edit Purchase Requisition</h3>
+                    <button id="closeEditModalBtn"
+                        class="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer">
+                        <i class="bi bi-x-lg text-lg"></i>
+                    </button>
+                </div>
+
+                <form id="editPrForm" class="p-5">
+                    <div class="grid grid-cols-2 gap-4 mb-5">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Department
+                                / Unit <span class="text-red-500">*</span></label>
+                            <select id="prDeptSelect" class="w-full text-xs" required></select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PR Date
+                                <span class="text-red-500">*</span></label>
+                            <input type="date" id="prDateInput" required
+                                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Due Date
+                                <span class="text-red-500">*</span></label>
+                            <input type="date" id="prDueDateInput" required
+                                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
+                        </div>
+                        <div>
+                            <label
+                                class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Description</label>
+                            <input type="text" id="prDescriptionInput"
+                                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
+                        </div>
+                    </div>
+
+                    <!-- Items Grid (Requested_Items) -->
+                    <div class="mb-5 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
+                        <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                            <span class="text-xs font-semibold text-gray-700 tracking-wide">Requested Items <span
+                                    class="text-red-500">*</span></span>
+                            <button type="button" id="addItemRowBtn"
+                                class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors cursor-pointer">+
+                                Add Item</button>
+                        </div>
+                        <div class="overflow-x-auto" style="overflow:visible;">
+                            <table class="w-full border-collapse min-w-[700px]">
+                                <thead class="bg-white border-b border-gray-200">
+                                    <tr>
+                                        <th
+                                            class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[30%]">
+                                            Item</th>
+                                        <th
+                                            class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[12%]">
+                                            Qty</th>
+                                        <th
+                                            class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[20%]">
+                                            Due Date</th>
+                                        <th
+                                            class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[25%]">
+                                            Comment</th>
+                                        <th
+                                            class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-10">
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="editItemsBody">
+                                    <!-- Rows will be inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-2 border-t border-gray-100 pt-4">
+                        <button type="button" id="cancelEditBtn"
+                            class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors cursor-pointer">Cancel</button>
+                        <button type="submit" id="saveEditBtn"
+                            class="inline-flex items-center justify-center min-w-[100px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70 cursor-pointer">
+                            <span id="saveEditText">Save Changes</span>
+                            <div id="saveEditSpinner" class="btn-spinner hidden"
+                                style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Loading, Error, Main -->
         <div id="loadingState" class="flex flex-col items-center justify-center py-24 gap-3">
             <div class="pr-spinner"></div>
             <div class="text-sm text-gray-400 font-medium">Loading PR details…</div>
@@ -262,8 +410,6 @@
                             <i class="bi bi-slash-circle"></i> Cancel
                         </button>
                     </div>
-
-
                 </div>
 
                 <div class="col-span-2 space-y-4">
@@ -300,41 +446,11 @@
         </div>
     </div>
 
-    <script type="module" defer>
+    <script>
         (function () {
             'use strict';
 
-            const $loading = document.getElementById('loadingState');
-            const $error = document.getElementById('errorState');
-            const $main = document.getElementById('mainContent');
-            const $headerPrNum = document.getElementById('headerPrNum');
-            const $headerBadge = document.getElementById('headerBadge');
-            const $headerSub = document.getElementById('headerSub');
-
-            // Progress & Audit nodes
-            const $progressContainer = document.getElementById('progressContainer');
-            const $progressFill = document.getElementById('progressFill');
-            const $auditTrailBody = document.getElementById('auditTrailBody');
-
-            const $prDetails = document.getElementById('prDetailsBody');
-            const $requestedItemsTableBody = document.getElementById('requestedItemsTableBody');
-            const $approvedItemsCard = document.getElementById('approvedItemsCard');
-            const $approvedItemsTableBody = document.getElementById('approvedItemsTableBody');
-            const $actionButtons = document.getElementById('actionButtons');
-            const $attachmentsCard = document.getElementById('attachmentsCard');
-            const $attachmentsBody = document.getElementById('attachmentsBody');
-            const $breadcrumbPrNum = document.getElementById('breadcrumbPrNum');
-            
-            // Buttons
-            const $approveBtn = document.getElementById('approveBtn');
-            const $rejectBtn = document.getElementById('rejectBtn');
-            const $cancelBtn = document.getElementById('cancelBtn');
-            const $submitDraftBtn = document.getElementById('submitDraftBtn');
-            const $editBtn = document.getElementById('editBtn');
-            
-            const $createRFQBtn = document.getElementById('createRFQBtn');
-            const $createRFQBtnWrapper = document.getElementById('createRFQBtnWrapper');
-
+            // ─── Utility functions ────────────────────────────────────────────
             function esc(str) {
                 if (str == null || str === '') return '–';
                 const div = document.createElement('div');
@@ -354,12 +470,22 @@
                 }
             }
 
+            function formatDateInput(dateStr) {
+                if (!dateStr) return '';
+                try {
+                    const d = new Date(dateStr);
+                    if (isNaN(d.getTime())) return '';
+                    return d.toISOString().split('T')[0];
+                } catch (e) { return ''; }
+            }
+
             function getDisplayName(field) {
                 if (!field) return '–';
                 if (typeof field === 'object' && field.display_value) return field.display_value;
                 if (typeof field === 'object' && field.first_name) {
                     return ((field.first_name || '') + ' ' + (field.last_name || '')).trim() || '–';
                 }
+                if (typeof field === 'object' && field.Name) return field.Name;
                 return String(field);
             }
 
@@ -378,78 +504,212 @@
             function getStatusBadgeHTML(status) {
                 const norm = normalizeStatus(status);
                 const config = {
-                    draft: { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400', label: status || 'Draft' },
-                    submitted: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500', label: status || 'Submitted' },
-                    'in progress': { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500', label: status || 'In Progress' },
-                    approved: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600', label: status || 'Approved' },
-                    rejected: { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600', label: 'Rejected' },
-                    cancelled: { border: 'border-gray-300', bg: 'bg-gray-100', text: 'text-gray-700', dot: 'bg-gray-500', label: 'Cancelled' },
+                    draft: {
+                        border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400',
+                        label: status || 'Draft'
+                    },
+                    submitted: {
+                        border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800',
+                        dot: 'bg-amber-500', label: status || 'Submitted'
+                    },
+                    'in progress': {
+                        border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800',
+                        dot: 'bg-blue-500', label: status || 'In Progress'
+                    },
+                    approved: {
+                        border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800',
+                        dot: 'bg-emerald-600', label: status || 'Approved'
+                    },
+                    rejected: {
+                        border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600',
+                        label: 'Rejected'
+                    },
+                    cancelled: {
+                        border: 'border-gray-300', bg: 'bg-gray-100', text: 'text-gray-700',
+                        dot: 'bg-gray-500', label: 'Cancelled'
+                    },
                 };
                 const c = config[norm] || config.submitted;
-                return '<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border ' + c.border + ' ' + c.bg + ' ' + c.text + '"><span class="w-[5px] h-[5px] rounded-full ' + c.dot + ' shrink-0"></span>' + esc(c.label) + '</span>';
+                return '<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border ' +
+                    c.border + ' ' + c.bg + ' ' + c.text +
+                    '"><span class="w-[5px] h-[5px] rounded-full ' + c.dot +
+                    ' shrink-0"></span>' + esc(c.label) + '</span>';
             }
 
+            // ─── DOM refs ────────────────────────────────────────────────────
+            const $loading = document.getElementById('loadingState');
+            const $error = document.getElementById('errorState');
+            const $main = document.getElementById('mainContent');
+            const $headerPrNum = document.getElementById('headerPrNum');
+            const $headerBadge = document.getElementById('headerBadge');
+            const $headerSub = document.getElementById('headerSub');
+            const $breadcrumbPrNum = document.getElementById('breadcrumbPrNum');
+            const $progressContainer = document.getElementById('progressContainer');
+            const $progressFill = document.getElementById('progressFill');
+            const $auditTrailBody = document.getElementById('auditTrailBody');
+            const $prDetails = document.getElementById('prDetailsBody');
+            const $requestedItemsTableBody = document.getElementById('requestedItemsTableBody');
+            const $approvedItemsCard = document.getElementById('approvedItemsCard');
+            const $approvedItemsTableBody = document.getElementById('approvedItemsTableBody');
+            const $actionButtons = document.getElementById('actionButtons');
+            const $attachmentsCard = document.getElementById('attachmentsCard');
+            const $attachmentsBody = document.getElementById('attachmentsBody');
+
+            const $approveBtn = document.getElementById('approveBtn');
+            const $rejectBtn = document.getElementById('rejectBtn');
+            const $cancelBtn = document.getElementById('cancelBtn');
+            const $submitDraftBtn = document.getElementById('submitDraftBtn');
+            const $editBtn = document.getElementById('editBtn');
+            const $createRFQBtn = document.getElementById('createRFQBtn');
+            const $createRFQBtnWrapper = document.getElementById('createRFQBtnWrapper');
+
+            // ─── Edit Modal refs ────────────────────────────────────────────
+            const $editModal = document.getElementById('editModal');
+            const $closeEditModalBtn = document.getElementById('closeEditModalBtn');
+            const $cancelEditBtn = document.getElementById('cancelEditBtn');
+            const $saveEditBtn = document.getElementById('saveEditBtn');
+            const $saveEditText = document.getElementById('saveEditText');
+            const $saveEditSpinner = document.getElementById('saveEditSpinner');
+            const $editItemsBody = document.getElementById('editItemsBody');
+            const $addItemRowBtn = document.getElementById('addItemRowBtn');
+            const $prDeptSelect = document.getElementById('prDeptSelect');
+            const $prDateInput = document.getElementById('prDateInput');
+            const $prDueDateInput = document.getElementById('prDueDateInput');
+            const $prDescriptionInput = document.getElementById('prDescriptionInput');
+
+            // ─── State ──────────────────────────────────────────────────────
+            let currentRecordId = null;
+            let currentPR = null; // full record
+            let requestedItems = [];
+            let itemMasters = [];
+            let unitMasters = [];
+            let tsDept = null;
+            let tsItems = [];
+
+            // ─── Toast ──────────────────────────────────────────────────────
+            function showToast(message, type = 'success') {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className =
+                    `flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-[13px] font-medium max-w-sm toast-enter`;
+                if (type === 'success') {
+                    toast.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
+                } else {
+                    toast.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
+                }
+                toast.innerHTML = `
+                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill text-emerald-600' : 'bi-exclamation-circle-fill text-red-600'} text-[15px]"></i>
+                    <span>${esc(message)}</span>
+                    <button class="ml-auto text-gray-400 hover:text-gray-600 cursor-pointer" onclick="this.parentElement.remove()">
+                        <i class="bi bi-x text-[15px]"></i>
+                    </button>
+                `;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.classList.remove('toast-enter');
+                    toast.classList.add('toast-leave');
+                    setTimeout(() => toast.remove(), 300);
+                }, 4000);
+            }
+
+            // ─── Fetch masters ─────────────────────────────────────────────
+            async function fetchItemMasters() {
+                try {
+                    let res = await ZOHO.CREATOR.DATA.getRecords({
+                        report_name: "Items_Report",
+                        criteria: 'status == "Active"',
+                        max_records: 200
+                    });
+                    if (res.code === 3000) itemMasters = res.data;
+                } catch (err) { console.error('Failed to load items', err); }
+            }
+
+            async function fetchUnitMasters() {
+                try {
+                    let res = await ZOHO.CREATOR.DATA.getRecords({
+                        report_name: "Unit_Report",
+                        max_records: 200
+                    });
+                    if (res.code === 3000) unitMasters = res.data;
+                } catch (err) { console.error('Failed to load units', err); }
+            }
+
+            // ─── Render functions ──────────────────────────────────────────
             function renderPRDetails(rec) {
-                var prNum = rec.PR_Number || 'PR-' + rec.Requisition_Number;
+                const prNum = rec.PR_Number || 'PR-' + rec.Requisition_Number;
                 $headerPrNum.textContent = prNum;
                 $breadcrumbPrNum.textContent = prNum;
-                $headerBadge.innerHTML = getStatusBadgeHTML(rec.Status) + (rec.Current_Stage ? ' <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium tracking-wide border border-blue-200 bg-blue-50 text-blue-700"><i class="bi bi-geo-alt text-[10px]"></i>' + esc(rec.Current_Stage) + '</span>' : '');
-                $headerSub.textContent = (rec.Department || '–') + ' · Requested ' + formatDate(rec.PR_Date);
+                $headerBadge.innerHTML = getStatusBadgeHTML(rec.Status) +
+                    (rec.Current_Stage ?
+                        ' <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium tracking-wide border border-blue-200 bg-blue-50 text-blue-700"><i class="bi bi-geo-alt text-[10px]"></i>' +
+                        esc(rec.Current_Stage) + '</span>' : '');
 
-                var fields = [
+                // Fix Department display
+                const deptDisplay = getDisplayName(rec.Department);
+                $headerSub.textContent = deptDisplay + ' · Requested ' + formatDate(rec.PR_Date);
+
+                const fields = [
                     { label: 'PR Number', value: prNum },
-                    { label: 'Department', value: rec.Department },
+                    { label: 'Department', value: deptDisplay },
                     { label: 'Requester', value: getDisplayName(rec.Added_User) },
                     { label: 'PR Date', value: formatDate(rec.PR_Date) },
                     { label: 'Due Date', value: formatDate(rec.Due_Date) },
                     { label: 'Status', value: null, html: getStatusBadgeHTML(rec.Status) },
                 ];
 
-                var html = '<div class="grid grid-cols-2 gap-x-6 gap-y-0">';
+                let html = '<div class="grid grid-cols-2 gap-x-6 gap-y-0">';
                 fields.forEach(function (f) {
-                    html += '<div class="flex justify-between items-center py-2 text-xs border-b border-dashed border-gray-100">'
-                        + '<span class="text-gray-500 font-medium">' + f.label + '</span>'
-                        + (f.html ? '<span>' + f.html + '</span>' : '<span class="text-gray-900 ' + (f.bold ? 'font-bold text-[13px]' : 'font-semibold') + '">' + esc(f.value) + '</span>')
-                        + '</div>';
+                    html += '<div class="flex justify-between items-center py-2 text-xs border-b border-dashed border-gray-100">' +
+                        '<span class="text-gray-500 font-medium">' + f.label + '</span>' +
+                        (f.html ? '<span>' + f.html + '</span>' : '<span class="text-gray-900 font-semibold">' +
+                            esc(f.value) + '</span>') +
+                        '</div>';
                 });
                 html += '</div>';
 
-                if (rec.Description) {
-                    html += '<div class="mt-4 pt-3 border-t border-gray-100">'
-                        + '<div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">Description</div>'
-                        + '<div class="text-xs text-gray-700 leading-relaxed max-w-none">' + esc(rec.Description) + '</div>'
-                        + '</div>';
+                if (rec.description) {
+                    html += '<div class="mt-4 pt-3 border-t border-gray-100">' +
+                        '<div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">Description</div>' +
+                        '<div class="text-xs text-gray-700 leading-relaxed max-w-none">' + esc(rec.description) +
+                        '</div>' +
+                        '</div>';
                 }
                 $prDetails.innerHTML = html;
             }
 
             function renderTable(items, targetElement) {
                 if (!items || !items.length) {
-                    targetElement.innerHTML = '<div class="px-[18px] py-8 text-center text-gray-400 text-xs">'
-                        + '<i class="bi bi-box-seam text-xl mb-1 block"></i>No line items</div>';
+                    targetElement.innerHTML =
+                        '<div class="px-[18px] py-8 text-center text-gray-400 text-xs"><i class="bi bi-box-seam text-xl mb-1 block"></i>No line items</div>';
                     return;
                 }
 
-                var html = '<table class="w-full border-collapse text-xs">'
-                    + '<thead><tr class="bg-gray-50 border-b border-gray-200">'
-                    + '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">#</th>'
-                    + '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">Item</th>'
-                    + '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">Qty</th>'
-                    + '</tr></thead><tbody>';
+                let html = '<table class="w-full border-collapse text-xs">' +
+                    '<thead><tr class="bg-gray-50 border-b border-gray-200">' +
+                    '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">#</th>' +
+                    '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">Item</th>' +
+                    '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">Qty</th>' +
+                    '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">Due Date</th>' +
+                    '</tr></thead><tbody>';
 
                 items.forEach(function (item, i) {
-                    var rawItem = item.Item;
-                    var itemName = (rawItem && typeof rawItem === 'object') ? (rawItem.display_value || rawItem.item_name || '-') : (rawItem ? 'Item #' + rawItem : '-');
-                    var qty = item.Quantity || 0;
-                    var comment = item.Comment || '';
+                    const rawItem = item.Item;
+                    const itemName = (rawItem && typeof rawItem === 'object') ? (rawItem.display_value || rawItem
+                        .item_name || '-') : (rawItem ? 'Item #' + rawItem : '-');
+                    const qty = item.Quantity || 0;
+                    const dueDate = formatDate(item.Due_Date);
+                    const comment = item.Comment || '';
 
-                    html += '<tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">'
-                        + '<td class="px-4 py-2.5 text-gray-400 font-mono w-8">' + (i + 1) + '</td>'
-                        + '<td class="px-4 py-2.5 text-gray-900 font-medium">' + esc(itemName)
-                        + (comment ? '<div class="text-[11px] text-gray-400 font-normal mt-0.5">' + esc(comment) + '</div>' : '')
-                        + '</td>'
-                        + '<td class="px-4 py-2.5 text-gray-700 text-right tabular-nums w-24">' + esc(qty) + '</td>'
-                        + '</tr>';
+                    html += '<tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">' +
+                        '<td class="px-4 py-2.5 text-gray-400 font-mono w-8">' + (i + 1) + '</td>' +
+                        '<td class="px-4 py-2.5 text-gray-900 font-medium">' + esc(itemName) +
+                        (comment ? '<div class="text-[11px] text-gray-400 font-normal mt-0.5">' + esc(comment) +
+                            '</div>' : '') +
+                        '</td>' +
+                        '<td class="px-4 py-2.5 text-gray-700 text-right tabular-nums w-24">' + esc(qty) +
+                        '</td>' +
+                        '<td class="px-4 py-2.5 text-gray-600 text-left">' + esc(dueDate) + '</td>' +
+                        '</tr>';
                 });
 
                 html += '</tbody></table>';
@@ -457,17 +717,16 @@
             }
 
             function renderActionButtons(rec) {
-                var isRejected = rec.Status && rec.Status.toLowerCase() === 'rejected';
-                var isApproved = rec.Status && rec.Status.toLowerCase() === 'approved';
-                var isDraft = rec.Status && rec.Status.toLowerCase() === 'draft';
-                var isPRStage = rec.Current_Stage === 'Purchase Requisition' && rec.Status.toLowerCase() === 'submitted';
+                const isRejected = rec.Status && rec.Status.toLowerCase() === 'rejected';
+                const isApproved = rec.Status && rec.Status.toLowerCase() === 'approved';
+                const isDraft = rec.Status && rec.Status.toLowerCase() === 'draft';
+                const isPRStage = rec.Current_Stage === 'Purchase Requisition' && rec.Status.toLowerCase() === 'submitted';
 
-                // Reset visibility
                 $actionButtons.style.display = 'none';
                 $approveBtn.style.display = 'none';
                 $rejectBtn.style.display = 'none';
                 $submitDraftBtn.style.display = 'none';
-                
+
                 if (isDraft) {
                     $actionButtons.style.display = 'flex';
                     $submitDraftBtn.style.display = 'inline-flex';
@@ -481,7 +740,6 @@
                     $actionButtons.style.display = 'none';
                 }
 
-                // Show/Hide Top Right Edit Button Based on Draft Status
                 if (isDraft) {
                     $editBtn.classList.remove('hidden');
                 } else {
@@ -489,26 +747,25 @@
                 }
             }
 
-            // Function to render the Attachment UI
             function renderAttachments(attachmentData, recordId) {
-                if (!attachmentData) return;
-
+                if (!attachmentData) {
+                    $attachmentsCard.classList.add('hidden');
+                    return;
+                }
                 let attachments = Array.isArray(attachmentData) ? attachmentData : [attachmentData];
                 let html = '<div class="space-y-3">';
-
                 attachments.forEach(function (att) {
-                    let fullPath = (typeof att === 'object' && att !== null) ? (att.display_value || att.ID || att) : att;
+                    let fullPath = (typeof att === 'object' && att !== null) ? (att.display_value || att.ID ||
+                        att) : att;
                     let filePath = fullPath;
                     if (typeof fullPath === 'string' && fullPath.includes('filepath=')) {
                         filePath = fullPath.split('filepath=')[1].split('&')[0];
                     }
-
                     let displayName = filePath;
                     let parts = filePath.split('_');
                     if (parts.length > 1 && !isNaN(parts[0])) {
                         displayName = parts.slice(1).join('_');
                     }
-
                     html += `
                         <div class="flex items-center justify-between p-3 border border-gray-100 rounded-lg bg-white shadow-sm hover:shadow transition-shadow">
                             <div class="flex items-center gap-3">
@@ -525,31 +782,250 @@
                         </div>
                     `;
                 });
-
                 html += '</div>';
-
                 $attachmentsBody.innerHTML = html;
+                $attachmentsCard.classList.remove('hidden');
             }
 
             window.downloadAttachment = function (filePath, recordId) {
-                var config = {
-                    report_name: "Purchase_Requisition_Report",
-                    id: recordId,
-                    field_name: "Attachments",
-                    file_path: filePath
-                };
-
                 ZOHO.CREATOR.UTIL.getInitParams().then(function (response) {
                     var appOwner = response.scope;
                     var appLinkName = response.appLinkName || "npk-p2p-software";
-                    var url = `https://creatorapp.zoho.in/creator/v2.1/data/${appOwner}/${appLinkName}/report/Purchase_Requisition_Report/${recordId}/Attachments/download?filepath=${filePath}`;
+                    var url =
+                        `https://creatorapp.zoho.in/creator/v2.1/data/${appOwner}/${appLinkName}/report/Purchase_Requisition_Report/${recordId}/Attachments/download?filepath=${filePath}`;
                     window.open(url);
                 });
             };
 
-            var pendingAction = { recordId: null, status: '', movedTo: '', requestedItemsData: [] };
+            // ─── Edit Modal logic ──────────────────────────────────────────
+
+            function openEditModal(rec) {
+                // Load masters if not loaded
+                if (itemMasters.length === 0) fetchItemMasters();
+                if (unitMasters.length === 0) fetchUnitMasters();
+
+                // Populate form fields
+                $prDateInput.value = formatDateInput(rec.PR_Date);
+                $prDueDateInput.value = formatDateInput(rec.Due_Date);
+                $prDescriptionInput.value = rec.description || '';
+
+                // Set department select (TomSelect)
+                if (tsDept) tsDept.destroy();
+                tsDept = new TomSelect($prDeptSelect, {
+                    valueField: 'ID',
+                    labelField: 'Name',
+                    searchField: 'Name',
+                    options: unitMasters,
+                    maxItems: 1,
+                    placeholder: 'Select Department...',
+                    render: {
+                        option: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`,
+                        item: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`
+                    }
+                });
+                const deptId = rec.Department?.ID || rec.Department || '';
+                if (deptId) {
+                    const deptName = getDisplayName(rec.Department);
+                    // ensure option exists
+                    if (!tsDept.options[deptId]) {
+                        tsDept.addOption({ ID: String(deptId), Name: deptName });
+                    }
+                    tsDept.setValue(deptId);
+                }
+
+                // Build items rows
+                buildEditItems(rec.Requested_Items || []);
+
+                // Show modal
+                $editModal.classList.remove('hidden');
+            }
+
+            function buildEditItems(items) {
+                $editItemsBody.innerHTML = '';
+                tsItems.forEach(ts => { if (ts) ts.destroy(); });
+                tsItems = [];
+
+                if (!items || items.length === 0) {
+                    // Add one empty row
+                    addItemRow(null);
+                } else {
+                    items.forEach(item => addItemRow(item));
+                }
+            }
+
+            function addItemRow(existingItem) {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors bg-white';
+                row.dataset.rowId = Date.now() + Math.random();
+
+                const itemId = existingItem?.Item?.ID || existingItem?.Item || '';
+                const qty = existingItem?.Quantity || 1;
+                const dueDate = existingItem?.Due_Date ? formatDateInput(existingItem.Due_Date) : '';
+                const comment = existingItem?.Comment || '';
+
+                row.innerHTML = `
+                    <td class="px-3 py-2 relative">
+                        <select class="edit-item-select w-full text-xs" required></select>
+                    </td>
+                    <td class="px-3 py-2">
+                        <input type="number" class="edit-item-qty w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]" value="${esc(qty)}" min="1" required>
+                    </td>
+                    <td class="px-3 py-2">
+                        <input type="date" class="edit-item-due w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]" value="${esc(dueDate)}">
+                    </td>
+                    <td class="px-3 py-2">
+                        <input type="text" class="edit-item-comment w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]" placeholder="Optional" value="${esc(comment)}">
+                    </td>
+                    <td class="px-3 py-2 text-center">
+                        <button type="button" class="remove-item-btn text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50 cursor-pointer">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+
+                $editItemsBody.appendChild(row);
+
+                // Init TomSelect for item
+                const selectEl = row.querySelector('.edit-item-select');
+                const ts = new TomSelect(selectEl, {
+                    valueField: 'ID',
+                    labelField: 'item_name',
+                    searchField: 'item_name',
+                    options: itemMasters,
+                    maxItems: 1,
+                    placeholder: 'Search item...',
+                    render: {
+                        option: (d, e) => `<div class="font-medium">${e(d.item_name)}</div>`,
+                        item: (d, e) => `<div class="font-medium">${e(d.item_name)}</div>`
+                    }
+                });
+                if (itemId) {
+                    if (!ts.options[itemId]) {
+                        const name = existingItem?.Item?.display_value || existingItem?.Item?.item_name || 'Item #' +
+                            itemId;
+                        ts.addOption({ ID: String(itemId), item_name: name });
+                    }
+                    ts.setValue(itemId);
+                }
+                tsItems.push(ts);
+
+                // Remove button
+                row.querySelector('.remove-item-btn').addEventListener('click', function () {
+                    const rows = $editItemsBody.querySelectorAll('tr');
+                    if (rows.length === 1) {
+                        showToast('At least one item is required.', 'error');
+                        return;
+                    }
+                    // destroy TomSelect
+                    const idx = Array.from(rows).indexOf(row);
+                    if (tsItems[idx]) {
+                        tsItems[idx].destroy();
+                        tsItems.splice(idx, 1);
+                    }
+                    row.remove();
+                });
+            }
+
+            function closeEditModal() {
+                $editModal.classList.add('hidden');
+                // Cleanup TomSelect
+                if (tsDept) {
+                    tsDept.destroy();
+                    tsDept = null;
+                }
+                tsItems.forEach(ts => { if (ts) ts.destroy(); });
+                tsItems = [];
+            }
+
+            async function submitEditPR(e) {
+                e.preventDefault();
+                // Validate
+                const dept = tsDept ? tsDept.getValue() : '';
+                if (!dept) {
+                    showToast('Please select a Department.', 'error');
+                    return;
+                }
+                const prDate = $prDateInput.value;
+                const dueDate = $prDueDateInput.value;
+                if (!prDate || !dueDate) {
+                    showToast('Please fill in all required date fields.', 'error');
+                    return;
+                }
+
+                // Collect items
+                const rows = $editItemsBody.querySelectorAll('tr');
+                const itemsData = [];
+                let valid = true;
+                rows.forEach(row => {
+                    const itemSelect = row.querySelector('.edit-item-select');
+                    const itemId = itemSelect ? itemSelect.value : '';
+                    const qtyInput = row.querySelector('.edit-item-qty');
+                    const qty = parseInt(qtyInput.value, 10) || 0;
+                    const due = row.querySelector('.edit-item-due').value;
+                    const comment = row.querySelector('.edit-item-comment').value;
+
+                    if (!itemId) {
+                        valid = false;
+                        showToast('Please select an item for every row.', 'error');
+                        return;
+                    }
+                    if (qty < 1) {
+                        valid = false;
+                        showToast('Quantity must be at least 1.', 'error');
+                        return;
+                    }
+                    itemsData.push({
+                        Item: itemId,
+                        Quantity: qty,
+                        Due_Date: due ? dayjs(due).format('DD-MMM-YYYY') : '',
+                        Comment: comment
+                    });
+                });
+                if (!valid) return;
+
+                // Build payload
+                const payload = {
+                    data: {
+                        Department: dept,
+                        PR_Date: dayjs(prDate).format('DD-MMM-YYYY'),
+                        Due_Date: dayjs(dueDate).format('DD-MMM-YYYY'),
+                        description: $prDescriptionInput.value,
+                        Requested_Items: itemsData
+                    }
+                };
+
+                // Disable save button
+                $saveEditBtn.disabled = true;
+                $saveEditText.classList.add('hidden');
+                $saveEditSpinner.classList.remove('hidden');
+
+                try {
+                    const res = await ZOHO.CREATOR.DATA.updateRecordById({
+                        report_name: "Purchase_Requisition_Report",
+                        id: currentRecordId,
+                        payload: payload
+                    });
+                    if (res.code === 3000) {
+                        showToast('PR updated successfully!', 'success');
+                        closeEditModal();
+                        fetchPRDetail(currentRecordId);
+                    } else {
+                        throw new Error(res.message || 'Failed to update PR.');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast(err.message || 'Update failed.', 'error');
+                } finally {
+                    $saveEditBtn.disabled = false;
+                    $saveEditText.classList.remove('hidden');
+                    $saveEditSpinner.classList.add('hidden');
+                }
+            }
+
+            // ─── Main fetch ────────────────────────────────────────────────
 
             function fetchPRDetail(recordId) {
+                currentRecordId = recordId;
                 $loading.classList.remove('hidden');
                 $error.classList.add('hidden');
                 $main.classList.add('hidden');
@@ -566,8 +1042,8 @@
                         id: recordId
                     })
                 ]).then(function (responses) {
-                    var apiRes = responses[0];
-                    var recordByIdRes = responses[1];
+                    const apiRes = responses[0];
+                    const recordByIdRes = responses[1];
 
                     if (!apiRes || !apiRes.result || apiRes.result.length === 0) {
                         $loading.classList.add('hidden');
@@ -575,28 +1051,27 @@
                         return;
                     }
 
-                    var rec = apiRes.result[0];
-                    pendingAction.recordId = recordId;
-                    pendingAction.requestedItemsData = rec.Requested_Items || [];
+                    const rec = apiRes.result[0];
+                    currentPR = rec;
+                    requestedItems = rec.Requested_Items || [];
 
                     renderPRDetails(rec);
                     renderActionButtons(rec);
 
-                    // Render Attachments using getRecordById response which includes file paths
-                    var attachments = recordByIdRes && recordByIdRes.data && recordByIdRes.data.Attachments
-                        ? recordByIdRes.data.Attachments
-                        : rec.Attachments;
+                    // Attachments
+                    const attachments = recordByIdRes && recordByIdRes.data && recordByIdRes.data.Attachments ?
+                        recordByIdRes.data.Attachments :
+                        rec.Attachments;
                     if (attachments) {
-                        $attachmentsCard.classList.remove('hidden');
-                        renderAttachments(attachments, pendingAction.recordId);
+                        renderAttachments(attachments, recordId);
                     } else {
                         $attachmentsCard.classList.add('hidden');
                     }
 
-                    // Always render Requested Items
-                    renderTable(pendingAction.requestedItemsData, $requestedItemsTableBody);
+                    // Requested Items
+                    renderTable(requestedItems, $requestedItemsTableBody);
 
-                    // Conditionally display Approved Items
+                    // Approved Items (if any)
                     if (rec.Items && rec.Items.length > 0) {
                         $approvedItemsCard.classList.remove('hidden');
                         renderTable(rec.Items, $approvedItemsTableBody);
@@ -604,8 +1079,8 @@
                         $approvedItemsCard.classList.add('hidden');
                     }
 
-                    // ── Integration of standardized P2PWorkflowUtils ──
-                    var actions = (rec.PR_Actions && rec.PR_Actions.length) ? rec.PR_Actions : [];
+                    // Progress & Audit
+                    const actions = (rec.PR_Actions && rec.PR_Actions.length) ? rec.PR_Actions : [];
                     if (typeof P2PWorkflowUtils !== 'undefined') {
                         P2PWorkflowUtils.renderProgress(actions, rec.Current_Stage, $progressContainer, $progressFill);
                         P2PWorkflowUtils.renderAuditTrail(actions, $auditTrailBody);
@@ -616,77 +1091,35 @@
                     $loading.classList.add('hidden');
                     $main.classList.remove('hidden');
 
-                    let rfqRequested = rec.Request_For_Quotation === "Yes" || false;
-                    $approveBtn.querySelector('span').textContent = rfqRequested ? "Approve & Submit For RFQ" : "Approve & Submit";
+                    // Bind action buttons
+                    const rfqRequested = rec.Request_For_Quotation === "Yes" || false;
+                    $approveBtn.querySelector('span').textContent = rfqRequested ?
+                        "Approve & Submit For RFQ" :
+                        "Approve & Submit";
 
                     $approveBtn.onclick = function () {
-                        openActionModal("Approve PR", "Approved", "Request For Quotation", "bg-emerald-600", "hover:bg-emerald-700");
+                        openActionModal("Approve PR", "Approved", "Request For Quotation", "bg-emerald-600",
+                            "hover:bg-emerald-700");
                     };
-
                     $rejectBtn.onclick = function () {
-                        openActionModal("Reject PR", "Rejected", "Request For Quotation", "bg-red-600", "hover:bg-red-700");
+                        openActionModal("Reject PR", "Rejected", "Request For Quotation", "bg-red-600",
+                            "hover:bg-red-700");
                     };
-
-                    // New: Submit Draft Action
                     $submitDraftBtn.onclick = function () {
-                        $submitDraftBtn.disabled = true;
-                        $submitDraftBtn.innerHTML = '<div class="btn-spinner mr-1"></div> Submitting...';
-
-                        var updatePrConfig = {
-                            report_name: "Purchase_Requisition_Report",
-                            id: pendingAction.recordId,
-                            payload: {
-                                data: {
-                                    "Status": "Submitted"
-                                }
-                            }
-                        };
-
-                        ZOHO.CREATOR.DATA.updateRecordById(updatePrConfig).then(function (updateResponse) {
-                            if (updateResponse.code === 3000) {
-                                var prActionConfig = {
-                                    form_name: "PR_Action",
-                                    payload: {
-                                        "data": {
-                                            "PR_Number": pendingAction.recordId,
-                                            "Status": "Submitted",
-                                            "Moved_To": "Purchase Requisition",
-                                            "Comment": "Submitted for approval"
-                                        }
-                                    }
-                                };
-                                return ZOHO.CREATOR.DATA.addRecords(prActionConfig);
-                            } else {
-                                throw new Error("Failed to update PR status.");
-                            }
-                        }).then(function (actionResponse) {
-                            if (actionResponse.code === 3000) {
-                                loadPrDetails();
-                            } else {
-                                throw new Error("Failed to log PR action.");
-                            }
-                        }).catch(function (err) {
-                            console.error("API Error: ", err);
-                            alert("An error occurred while submitting. Please try again.");
-                            $submitDraftBtn.disabled = false;
-                            $submitDraftBtn.innerHTML = '<i class="bi bi-send"></i> <span class="btn-text">Submit Requisition</span>';
-                        });
+                        submitDraft();
                     };
-
-                    // Edit Native Record
-                    $editBtn.onclick = function() {
-                        ZOHO.CREATOR.UTIL.navigateParentURL({
-                            action: 'open',
-                            window: 'same',
-                            url: '#Form:Purchase_Requisition?recLinkID=' + pendingAction.recordId + '&viewLinkName=Purchase_Requisition_Report'
-                        });
-                    };
-
                     $cancelBtn.onclick = function () {
-                        ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', window: 'same', url: '#Page:PR_Approval' });
+                        ZOHO.CREATOR.UTIL.navigateParentURL({
+                            action: 'open', window: 'same',
+                            url: '#Page:PR_Approval'
+                        });
+                    };
+                    $editBtn.onclick = function () {
+                        openEditModal(rec);
                     };
 
-                    var isInProgress = rec.Status && rec.Status.toLowerCase() === 'in progress';
+                    // Create RFQ button
+                    const isInProgress = rec.Status && rec.Status.toLowerCase() === 'in progress';
                     if (isInProgress) {
                         $createRFQBtnWrapper.classList.remove('hidden');
                     } else {
@@ -696,9 +1129,10 @@
                         ZOHO.CREATOR.UTIL.navigateParentURL({
                             action: 'open',
                             window: 'same',
-                            url: '#Page:Request_For_Quotations?prId=' + pendingAction.recordId + '&createPr=true'
+                            url: '#Page:Request_For_Quotations?prId=' + recordId + '&createPr=true'
                         });
                     };
+
                 }).catch(function (err) {
                     console.error('Error loading PR:', err);
                     $loading.classList.add('hidden');
@@ -706,18 +1140,52 @@
                 });
             }
 
-            function loadPrDetails() {
-                ZOHO.CREATOR.UTIL.getQueryParams().then(function (params) {
-                    var recordId = params && params.recordId ? params.recordId : null;
-                    if (!recordId) {
-                        $loading.classList.add('hidden');
-                        $error.classList.remove('hidden');
-                        return;
-                    }
-                    fetchPRDetail(recordId);
-                });
+            function submitDraft() {
+                $submitDraftBtn.disabled = true;
+                $submitDraftBtn.innerHTML = '<div class="btn-spinner mr-1"></div> Submitting...';
+
+                const updatePrConfig = {
+                    report_name: "Purchase_Requisition_Report",
+                    id: currentRecordId,
+                    payload: { data: { "Status": "Submitted" } }
+                };
+
+                ZOHO.CREATOR.DATA.updateRecordById(updatePrConfig)
+                    .then(function (updateResponse) {
+                        if (updateResponse.code === 3000) {
+                            const prActionConfig = {
+                                form_name: "PR_Action",
+                                payload: {
+                                    "data": {
+                                        "PR_Number": currentRecordId,
+                                        "Status": "Submitted",
+                                        "Moved_To": "Purchase Requisition",
+                                        "Comment": "Submitted for approval"
+                                    }
+                                }
+                            };
+                            return ZOHO.CREATOR.DATA.addRecords(prActionConfig);
+                        } else {
+                            throw new Error("Failed to update PR status.");
+                        }
+                    })
+                    .then(function (actionResponse) {
+                        if (actionResponse.code === 3000) {
+                            fetchPRDetail(currentRecordId);
+                        } else {
+                            throw new Error("Failed to log PR action.");
+                        }
+                    })
+                    .catch(function (err) {
+                        console.error("API Error: ", err);
+                        showToast('An error occurred while submitting. Please try again.', 'error');
+                        $submitDraftBtn.disabled = false;
+                        $submitDraftBtn.innerHTML =
+                            '<i class="bi bi-send"></i> <span class="btn-text">Submit Requisition</span>';
+                    });
             }
-            loadPrDetails();
+
+            // ─── Action Modal (same as before) ────────────────────────────
 
             const $actionModal = document.getElementById('actionModal');
             const $modalTitle = document.getElementById('modalTitle');
@@ -729,32 +1197,41 @@
             const $approvalItemsWrapper = document.getElementById('approvalItemsWrapper');
             const $approvalItemsList = document.getElementById('approvalItemsList');
 
+            let pendingAction = { recordId: null, status: '', movedTo: '', requestedItemsData: [] };
+
             function openActionModal(title, status, movedTo, btnBgClass, btnHoverClass) {
                 $modalTitle.textContent = title;
                 $actionComment.value = '';
                 pendingAction.status = status;
                 pendingAction.movedTo = movedTo;
+                pendingAction.recordId = currentRecordId;
+                pendingAction.requestedItemsData = requestedItems;
 
                 $confirmActionBtn.disabled = false;
                 $confirmActionBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 $confirmActionText.textContent = title.split(' ')[0];
-                $confirmActionBtn.className = 'px-4 py-2 rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer shadow-sm flex items-center gap-1.5 ' + btnBgClass + ' ' + btnHoverClass;
+                $confirmActionBtn.className =
+                    'px-4 py-2 rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer shadow-sm flex items-center gap-1.5 ' +
+                    btnBgClass + ' ' + btnHoverClass;
 
-                // Render Item Adjustments only if Approving
                 if (status === 'Approved' && pendingAction.requestedItemsData.length > 0) {
                     $approvalItemsWrapper.classList.remove('hidden');
-
-                    var listHtml = '';
+                    let listHtml = '';
                     pendingAction.requestedItemsData.forEach(function (item, index) {
-                        var rawItem = item.Item;
-                        var itemName = (rawItem && typeof rawItem === 'object') ? (rawItem.display_value || rawItem.item_name || '-') : ('Item #' + rawItem);
-                        var reqQty = item.Quantity || 0;
+                        const rawItem = item.Item;
+                        const itemName = (rawItem && typeof rawItem === 'object') ? (rawItem.display_value ||
+                            rawItem.item_name || '-') : ('Item #' + rawItem);
+                        const reqQty = item.Quantity || 0;
 
-                        listHtml += '<div class="approve-item-row p-3 border-b border-gray-100 last:border-0" data-index="' + index + '">' +
+                        listHtml +=
+                            '<div class="approve-item-row p-3 border-b border-gray-100 last:border-0" data-index="' +
+                            index + '">' +
                             '<div class="flex items-center justify-between">' +
                             '<div class="flex-1 min-w-0 pr-4">' +
-                            '<div class="text-[13px] font-medium text-gray-900 truncate mb-0.5">' + esc(itemName) + '</div>' +
-                            '<div class="text-[11px] text-gray-500">Requested Qty: <span class="font-semibold">' + esc(reqQty) + '</span></div>' +
+                            '<div class="text-[13px] font-medium text-gray-900 truncate mb-0.5">' + esc(
+                                itemName) + '</div>' +
+                            '<div class="text-[11px] text-gray-500">Requested Qty: <span class="font-semibold">' +
+                            esc(reqQty) + '</span></div>' +
                             '</div>' +
                             '<div class="w-24 shrink-0 relative">' +
                             '<label class="absolute -top-1 left-2 bg-white px-1 text-[9px] font-semibold text-gray-400 uppercase">Qty</label>' +
@@ -763,34 +1240,37 @@
                             '</div>' +
                             '</div>' +
                             '<div class="qty-warning hidden mt-1.5 text-[11px] text-orange-400 font-medium text-right flex justify-end items-center gap-1">' +
-                            '<i class="bi bi-exclamation-triangle"></i> Exceeding requested qty (' + esc(reqQty) + ')' +
+                            '<i class="bi bi-exclamation-triangle"></i> Exceeding requested qty (' + esc(reqQty) +
+                            ')' +
                             '</div>' +
                             '</div>';
                     });
                     $approvalItemsList.innerHTML = listHtml;
 
-                    // Bind dynamic warning and logic
-                    var inputs = $approvalItemsList.querySelectorAll('.approve-qty-input');
+                    // Bind warnings
+                    const inputs = $approvalItemsList.querySelectorAll('.approve-qty-input');
                     inputs.forEach(function (input) {
                         input.addEventListener('input', function () {
-                            var val = parseInt(this.value, 10) || 0;
-                            var max = parseInt(this.getAttribute('max'), 10) || 0;
-                            var warning = this.closest('.approve-item-row').querySelector('.qty-warning');
-
-                            // Visual Warnings
+                            const val = parseInt(this.value, 10) || 0;
+                            const max = parseInt(this.getAttribute('max'), 10) || 0;
+                            const warning = this.closest('.approve-item-row').querySelector(
+                                '.qty-warning');
                             if (val > max) {
                                 warning.classList.remove('hidden');
-                                this.classList.add('border-red-400', 'focus:border-red-500', 'focus:ring-red-500/20');
-                                this.classList.remove('border-gray-300', 'focus:border-[#1B5CA8]', 'focus:ring-[#1B5CA8]/20');
+                                this.classList.add('border-red-400', 'focus:border-red-500',
+                                    'focus:ring-red-500/20');
+                                this.classList.remove('border-gray-300', 'focus:border-[#1B5CA8]',
+                                    'focus:ring-[#1B5CA8]/20');
                             } else {
                                 warning.classList.add('hidden');
-                                this.classList.remove('border-red-400', 'focus:border-red-500', 'focus:ring-red-500/20');
-                                this.classList.add('border-gray-300', 'focus:border-[#1B5CA8]', 'focus:ring-[#1B5CA8]/20');
+                                this.classList.remove('border-red-400', 'focus:border-red-500',
+                                    'focus:ring-red-500/20');
+                                this.classList.add('border-gray-300', 'focus:border-[#1B5CA8]',
+                                    'focus:ring-[#1B5CA8]/20');
                             }
                             $confirmActionBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                         });
                     });
-
                 } else {
                     $approvalItemsWrapper.classList.add('hidden');
                     $approvalItemsList.innerHTML = '';
@@ -803,134 +1283,160 @@
                 $actionModal.classList.add('hidden');
             }
 
-            $cancelActionBtn.onclick = closeActionModal;
-            $closeModalBtn.onclick = closeActionModal;
+            if ($cancelActionBtn)
+                $cancelActionBtn.onclick = closeActionModal;
+            if ($closeModalBtn)
+                $closeModalBtn.onclick = closeActionModal;
+            if ($confirmActionBtn) {
+                $confirmActionBtn.onclick = function () {
+                    const commentVal = $actionComment.value.trim();
+                    $confirmActionBtn.disabled = true;
+                    $confirmActionBtn.innerHTML = '<div class="btn-spinner mr-1"></div> Submitting...';
 
-            $confirmActionBtn.onclick = function () {
-                var commentVal = $actionComment.value.trim();
-                $confirmActionBtn.disabled = true;
-                $confirmActionBtn.innerHTML = '<div class="btn-spinner mr-1"></div> Submitting...';
+                    if (pendingAction.status === 'Approved') {
+                        const finalApprovedItems = [];
+                        const itemRows = document.querySelectorAll('.approve-item-row');
+                        let isPartiallyApproved = false;
 
-                // If user is Approving, we must first update the PR with the revised Approved Items grid.
-                if (pendingAction.status === 'Approved') {
-                    var finalApprovedItems = [];
-                    var itemRows = document.querySelectorAll('.approve-item-row');
-                    var isPartiallyApproved = false;
+                        itemRows.forEach(function (row) {
+                            const index = row.getAttribute('data-index');
+                            const originalItem = pendingAction.requestedItemsData[index];
+                            const inputEl = row.querySelector('.approve-qty-input');
+                            const approvedQty = parseInt(inputEl.value, 10) || 0;
+                            const originalQty = parseInt(originalItem.Quantity, 10) || 0;
 
-                    itemRows.forEach(function (row) {
-                        var index = row.getAttribute('data-index');
-                        var originalItem = pendingAction.requestedItemsData[index];
-                        var inputEl = row.querySelector('.approve-qty-input');
-                        var approvedQty = parseInt(inputEl.value, 10) || 0;
-                        var originalQty = parseInt(originalItem.Quantity, 10) || 0;
-
-                        // Flag partial approvals
-                        if (approvedQty < originalQty) {
-                            isPartiallyApproved = true;
-                        }
-
-                        if (approvedQty > 0) {
-                            var rawItem = originalItem.Item;
-                            var itemId = typeof rawItem === 'object' ? rawItem.ID : rawItem;
-
-                            var payloadItem = {
-                                "Item": itemId,
-                                "Quantity": approvedQty
-                            };
-
-                            if (originalItem.Due_Date && originalItem.Due_Date.trim() !== '' && originalItem.Due_Date !== '-') {
-                                payloadItem["Due_Date"] = dayjs(originalItem.Due_Date).format("DD-MMM-YYYY")
-                            }
-                            if (originalItem.Comment && originalItem.Comment.trim() !== '' && originalItem.Comment !== '-') {
-                                payloadItem["Comment"] = originalItem.Comment;
+                            if (approvedQty < originalQty) {
+                                isPartiallyApproved = true;
                             }
 
-                            finalApprovedItems.push(payloadItem);
-                        }
-                    });
+                            if (approvedQty > 0) {
+                                const rawItem = originalItem.Item;
+                                const itemId = typeof rawItem === 'object' ? rawItem.ID : rawItem;
 
-                    // Update the final status based on logic
-                    var itemApprovalStatus = isPartiallyApproved ? "Partially Approved" : "Approved";
-
-                    var prActionConfig = {
-                        form_name: "PR_Action",
-                        payload: {
-                            "data": {
-                                "PR_Number": pendingAction.recordId,
-                                "Status": "Approved",
-                                "Moved_To": "Purchase Requisition",
-                                "Comment": commentVal
+                                const payloadItem = {
+                                    "Item": itemId,
+                                    "Quantity": approvedQty
+                                };
+                                if (originalItem.Due_Date && originalItem.Due_Date.trim() !== '' && originalItem
+                                    .Due_Date !== '-') {
+                                    payloadItem["Due_Date"] = dayjs(originalItem.Due_Date).format("DD-MMM-YYYY");
+                                }
+                                if (originalItem.Comment && originalItem.Comment.trim() !== '' && originalItem
+                                    .Comment !== '-') {
+                                    payloadItem["Comment"] = originalItem.Comment;
+                                }
+                                finalApprovedItems.push(payloadItem);
                             }
-                        }
-                    };
+                        });
 
-                    var updatePrConfig = {
-                        report_name: "Purchase_Requisition_Report",
-                        id: pendingAction.recordId,
-                        payload: {
-                            data: {
-                                "Status": "In Progress",
-                                "Items": finalApprovedItems,
-                                "Items_Approval_Status": itemApprovalStatus,
+                        const itemApprovalStatus = isPartiallyApproved ? "Partially Approved" : "Approved";
+
+                        const prActionConfig = {
+                            form_name: "PR_Action",
+                            payload: {
+                                "data": {
+                                    "PR_Number": pendingAction.recordId,
+                                    "Status": "Approved",
+                                    "Moved_To": "Purchase Requisition",
+                                    "Comment": commentVal
+                                }
                             }
-                        }
-                    };
+                        };
 
-                    // 1. Update the items grid
-                    ZOHO.CREATOR.DATA.updateRecordById(updatePrConfig).then(function (updateResponse) {
-                        if (updateResponse.code === 3000) {
-                            // 2. Add the PR Action upon successful update
-                            return ZOHO.CREATOR.DATA.addRecords(prActionConfig);
-                        } else {
-                            throw new Error("Failed to update approved items");
-                        }
-                    }).then(function (actionResponse) {
-                        if (actionResponse.code === 3000) {
-                            closeActionModal();
-                            loadPrDetails();
-                        } else {
-                            throw new Error("Failed to add PR action");
-                        }
-                    }).catch(function (err) {
-                        console.error("API Error: ", err);
-                        alert("An error occurred while approving. Please try again.");
-                        $confirmActionBtn.disabled = false;
-                        $confirmActionText.textContent = "Approve";
-                    });
-                } else {
-                    // For rejections, just create the PR_Action directly
-                    var rejectActionConfig = {
-                        form_name: "PR_Action",
-                        payload: {
-                            "data": {
-                                "PR_Number": pendingAction.recordId,
-                                "Status": pendingAction.status,
-                                "Moved_To": pendingAction.movedTo,
-                                "Comment": commentVal
+                        const updatePrConfig = {
+                            report_name: "Purchase_Requisition_Report",
+                            id: pendingAction.recordId,
+                            payload: {
+                                data: {
+                                    "Status": "In Progress",
+                                    "Items": finalApprovedItems,
+                                    "Items_Approval_Status": itemApprovalStatus,
+                                }
                             }
-                        }
-                    };
+                        };
 
-                    ZOHO.CREATOR.DATA.addRecords(rejectActionConfig).then(function (response) {
-                        if (response.code === 3000) {
-                            closeActionModal();
-                            loadPrDetails();
-                        } else {
-                            alert("Failed to process rejection. Please try again.");
-                            $confirmActionBtn.disabled = false;
-                            $confirmActionText.textContent = "Reject";
-                        }
-                    }).catch(function (err) {
-                        console.error("API Error: ", err);
-                        alert("An error occurred while submitting.");
-                        $confirmActionBtn.disabled = false;
-                        $confirmActionText.textContent = "Reject";
-                    });
-                }
-            };
+                        ZOHO.CREATOR.DATA.updateRecordById(updatePrConfig)
+                            .then(function (updateResponse) {
+                                if (updateResponse.code === 3000) {
+                                    return ZOHO.CREATOR.DATA.addRecords(prActionConfig);
+                                } else {
+                                    throw new Error("Failed to update approved items");
+                                }
+                            })
+                            .then(function (actionResponse) {
+                                if (actionResponse.code === 3000) {
+                                    closeActionModal();
+                                    fetchPRDetail(pendingAction.recordId);
+                                } else {
+                                    throw new Error("Failed to add PR action");
+                                }
+                            })
+                            .catch(function (err) {
+                                console.error("API Error: ", err);
+                                showToast('An error occurred while approving. Please try again.', 'error');
+                                $confirmActionBtn.disabled = false;
+                                $confirmActionText.textContent = "Approve";
+                            });
+                    } else {
+                        // Reject
+                        const rejectActionConfig = {
+                            form_name: "PR_Action",
+                            payload: {
+                                "data": {
+                                    "PR_Number": pendingAction.recordId,
+                                    "Status": pendingAction.status,
+                                    "Moved_To": pendingAction.movedTo,
+                                    "Comment": commentVal
+                                }
+                            }
+                        };
+
+                        ZOHO.CREATOR.DATA.addRecords(rejectActionConfig)
+                            .then(function (response) {
+                                if (response.code === 3000) {
+                                    closeActionModal();
+                                    fetchPRDetail(pendingAction.recordId);
+                                } else {
+                                    showToast('Failed to process rejection. Please try again.', 'error');
+                                    $confirmActionBtn.disabled = false;
+                                    $confirmActionText.textContent = "Reject";
+                                }
+                            })
+                            .catch(function (err) {
+                                console.error("API Error: ", err);
+                                showToast('An error occurred while submitting.', 'error');
+                                $confirmActionBtn.disabled = false;
+                                $confirmActionText.textContent = "Reject";
+                            });
+                    }
+                };
+            }
+            // ─── Event listeners for Edit Modal ───────────────────────────
+            $closeEditModalBtn.onclick = closeEditModal;
+            $cancelEditBtn.onclick = closeEditModal;
+            $addItemRowBtn.onclick = function () { addItemRow(null); };
+            document.getElementById('editPrForm').addEventListener('submit', submitEditPR);
+
+            // ─── Initial load ──────────────────────────────────────────────
+            function loadPrDetails() {
+                ZOHO.CREATOR.UTIL.getQueryParams().then(function (params) {
+                    const recordId = params && params.recordId ? params.recordId : null;
+                    if (!recordId) {
+                        $loading.classList.add('hidden');
+                        $error.classList.remove('hidden');
+                        return;
+                    }
+                    // Pre-fetch masters
+                    fetchItemMasters();
+                    fetchUnitMasters();
+                    fetchPRDetail(recordId);
+                });
+            }
+            loadPrDetails();
 
         })();
     </script>
+
 </body>
 
 </html>

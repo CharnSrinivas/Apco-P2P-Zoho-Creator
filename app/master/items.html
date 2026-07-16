@@ -51,7 +51,7 @@
     }
 
     /* Ensure TomSelect dropdown appended to body renders above modals */
-    body > .ts-dropdown {
+    body>.ts-dropdown {
       z-index: 9999 !important;
     }
   </style>
@@ -250,7 +250,8 @@
           <div class="mb-5">
             <div class="flex justify-between items-center mb-2.5">
               <label class="block text-[13px] font-bold text-gray-700">Vendor Rates</label>
-              <button type="button" @click="addRateRow()" class="text-[11px] text-[#1B5CA8] font-semibold hover:bg-[#EBF3FC] px-2 py-1 rounded border border-[#1B5CA8]/20 transition-colors">
+              <button type="button" @click="addRateRow()"
+                class="text-[11px] text-[#1B5CA8] font-semibold hover:bg-[#EBF3FC] px-2 py-1 rounded border border-[#1B5CA8]/20 transition-colors">
                 <i class="bi bi-plus-lg"></i> Add Rate
               </button>
             </div>
@@ -258,15 +259,18 @@
               <table class="w-full">
                 <thead class="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th class="px-3 py-2 text-left text-[11px] font-bold text-gray-500 w-[50%]">Vendor <span class="text-red-500">*</span></th>
-                    <th class="px-3 py-2 text-left text-[11px] font-bold text-gray-500">Unit Price <span class="text-red-500">*</span></th>
+                    <th class="px-3 py-2 text-left text-[11px] font-bold text-gray-500 w-[50%]">Vendor <span
+                        class="text-red-500">*</span></th>
+                    <th class="px-3 py-2 text-left text-[11px] font-bold text-gray-500">Unit Price <span
+                        class="text-red-500">*</span></th>
                     <th class="px-3 py-2 text-left text-[11px] font-bold text-gray-500 w-[90px]">Selected</th>
                     <th class="px-3 py-2 text-center text-[11px] font-bold text-gray-500 w-[40px]"></th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr x-show="form.Rates.length === 0">
-                    <td colspan="4" class="px-3 py-5 text-center text-gray-400 text-[12px] bg-white">No rates added yet.</td>
+                    <td colspan="4" class="px-3 py-5 text-center text-gray-400 text-[12px] bg-white">No rates added yet.
+                    </td>
                   </tr>
                   <template x-for="(rate, index) in form.Rates" :key="rate._uid">
                     <tr class="border-b border-gray-100 last:border-0 bg-white">
@@ -278,13 +282,16 @@
                           class="w-full py-1.5 px-2 border border-gray-300 rounded text-xs focus:border-[#1B5CA8] outline-none">
                       </td>
                       <td class="px-3 py-2.5">
-                        <select x-model="rate.Selected" class="w-full py-1.5 px-2 border border-gray-300 rounded text-xs focus:border-[#1B5CA8] outline-none bg-white">
+                        <select x-model="rate.Selected"
+                          class="w-full py-1.5 px-2 border border-gray-300 rounded text-xs focus:border-[#1B5CA8] outline-none bg-white">
                           <option value="No">No</option>
                           <option value="Yes">Yes</option>
                         </select>
                       </td>
                       <td class="px-3 py-2.5 text-center">
-                        <button type="button" @click="removeRateRow(index)" class="text-gray-400 hover:text-red-500 transition-colors p-1"><i class="bi bi-trash"></i></button>
+                        <button type="button" @click="removeRateRow(index)"
+                          class="text-gray-400 hover:text-red-500 transition-colors p-1"><i
+                            class="bi bi-trash"></i></button>
                       </td>
                     </tr>
                   </template>
@@ -807,13 +814,23 @@
           }
 
           this.isSubmitting = true;
-          const cleanForm = JSON.parse(JSON.stringify(this.form));
-          // Clean up the Rates subform array before submission
-          cleanForm.Rates = cleanForm.Rates.map(r => {
+          const cleanRates = this.form.Rates.map(r => {
             const cleanRate = { Vendor: r.Vendor, Unit_Price: r.Unit_Price, Selected: r.Selected };
             if (r.ID) cleanRate.ID = r.ID;
             return cleanRate;
           });
+          const cleanForm = {
+            item_name: this.form.item_name,
+            description: this.form.description,
+            unit_price: this.form.unit_price,
+            unit_of_measure: this.form.unit_of_measure,
+            Vendor: this.form.Vendor,
+            Item_Category: this.form.Item_Category,
+            GST_Rate: this.form.GST_Rate,
+            HSN_SAC: this.form.HSN_SAC,
+            status: this.form.status,
+            Rates: cleanRates,
+          };
           const payload = { data: cleanForm };
           const request = this.isEdit
             ? ZOHO.CREATOR.DATA.updateRecordById({

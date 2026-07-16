@@ -2,1066 +2,1593 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PO Receiving Dashboard</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PO Listing & Creation</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
-    rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+        rel="stylesheet" />
 
-  <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js">
+        </script>
+    <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js">
+    </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js">
+    </script>
 
-  <style>
-    [x-cloak] {
-      display: none !important;
-    }
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js">
+    </script>
 
-    /* Modal styles */
-    .po-modal-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 50;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
 
-    .po-modal-bg {
-      position: absolute;
-      inset: 0;
-      background: rgba(17, 24, 39, 0.4);
-    }
+        .po-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
 
-    .po-modal-box {
-      position: relative;
-      z-index: 1;
-      background: #fff;
-      border-radius: 11px;
-      width: 100%;
-      max-width: 600px;
-      overflow: hidden;
-      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
-    }
+        .po-modal-bg {
+            position: absolute;
+            inset: 0;
+            background: rgba(17, 24, 39, 0.4);
+            animation: fadeIn 0.15s ease-out;
+        }
 
-    /* Pills & Sticky cells */
-    .pill-active {
-      color: #1B5CA8 !important;
-      background: #fff !important;
-      font-weight: 600 !important;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-    }
+        .po-modal-box {
+            position: relative;
+            z-index: 1;
+            background: #fff;
+            border-radius: 11px;
+            width: 100%;
+            overflow: hidden;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+            animation: slideUp 0.2s ease-out;
+        }
 
-    .sticky-action-cell {
-      position: sticky;
-      right: 0;
-      z-index: 2;
-      box-shadow: -4px 0 8px -2px rgba(0, 0, 0, 0.06);
-    }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
 
-    thead .sticky-action-cell {
-      z-index: 3;
-    }
+            to {
+                opacity: 1;
+            }
+        }
 
-    /* Sorting */
-    th[data-sort] {
-      cursor: pointer;
-      user-select: none;
-      transition: background 0.15s;
-    }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
 
-    th[data-sort]:hover {
-      background: #e9ecf1;
-    }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    .sort-indicator {
-      display: inline-block;
-      width: 14px;
-      text-align: center;
-      font-size: 10px;
-      color: #9ca3af;
-      margin-left: 2px;
-      vertical-align: middle;
-    }
+        .pill-active {
+            color: #1B5CA8 !important;
+            background: #fff !important;
+            font-weight: 600 !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+        }
 
-    th[data-sort].sort-active .sort-indicator {
-      color: #1B5CA8;
-    }
+        .sticky-action-cell {
+            position: sticky;
+            right: 0;
+            z-index: 2;
+            box-shadow: -4px 0 8px -2px rgba(0, 0, 0, 0.06);
+        }
 
-    /* Loaders */
-    .po-spinner {
-      border: 2.5px solid #e5e7eb;
-      border-top-color: #1B5CA8;
-      border-radius: 50%;
-      width: 28px;
-      height: 28px;
-      animation: spin 0.7s linear infinite;
-    }
+        thead .sticky-action-cell {
+            z-index: 3;
+        }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
+        th[data-sort] {
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s;
+        }
 
-    /* Tom Select overrides */
-    .ts-control {
-      border: 1px solid #e5e7eb !important;
-      border-radius: 0.5rem !important;
-      font-size: 0.8125rem !important;
-      padding: 0.5rem 0.75rem !important;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
-      font-family: inherit;
-      background-color: #f9fafb !important;
-      transition: all 0.2s ease-in-out;
-    }
+        th[data-sort]:hover {
+            background: #e9ecf1;
+        }
 
-    .ts-control.focus {
-      border-color: #1B5CA8 !important;
-      background-color: #ffffff !important;
-      box-shadow: 0 0 0 3px rgba(27, 92, 168, 0.15) !important;
-    }
+        .sort-indicator {
+            display: inline-block;
+            width: 14px;
+            text-align: center;
+            font-size: 10px;
+            color: #9ca3af;
+            margin-left: 2px;
+            vertical-align: middle;
+        }
 
-    .ts-dropdown {
-      border-radius: 0.5rem !important;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-      border: 1px solid #f3f4f6 !important;
-      padding: 0.35rem !important;
-      margin-top: 4px !important;
-      font-size: 0.8125rem !important;
-    }
+        th[data-sort].sort-active .sort-indicator {
+            color: #1B5CA8;
+        }
 
-    .ts-dropdown .option {
-      border-radius: 0.375rem !important;
-      padding: 0.5rem 0.75rem !important;
-      transition: all 0.15s ease;
-      cursor: pointer;
-    }
+        .po-spinner {
+            border: 2.5px solid #e5e7eb;
+            border-top-color: #1B5CA8;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            animation: spin 0.7s linear infinite;
+        }
 
-    .ts-dropdown .active {
-      background-color: #f3f4f6 !important;
-      color: #111827 !important;
-    }
+        .draft-spinner {
+            border: 2px solid #e5e7eb;
+            border-top-color: #6b7280;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            animation: spin 0.7s linear infinite;
+        }
 
-    .ts-dropdown .option:hover {
-      background-color: #e5e7eb !important;
-    }
-  </style>
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .ts-control {
+            border: 1px solid #e5e7eb !important;
+            border-radius: 0.5rem !important;
+            font-size: 0.8125rem !important;
+            padding: 0.5rem 0.75rem !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+            font-family: inherit;
+            background-color: #f9fafb !important;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .ts-control.focus {
+            border-color: #1B5CA8 !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(27, 92, 168, 0.15) !important;
+        }
+
+        .ts-dropdown {
+            border-radius: 0.5rem !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+            border: 1px solid #f3f4f6 !important;
+            padding: 0.35rem !important;
+            margin-top: 4px !important;
+            font-size: 0.8125rem !important;
+        }
+
+        .ts-dropdown .option {
+            border-radius: 0.375rem !important;
+            padding: 0.5rem 0.75rem !important;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .ts-dropdown .active {
+            background-color: #f3f4f6 !important;
+            color: #111827 !important;
+        }
+
+        .ts-dropdown .option:hover {
+            background-color: #e5e7eb !important;
+        }
+
+        .grid-input {
+            width: 100%;
+            padding: 0.375rem 0.5rem;
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            outline: none;
+            transition: all 0.2s;
+            height: 32px;
+        }
+
+        .grid-input:focus {
+            background-color: #ffffff;
+            border-color: #1B5CA8;
+            box-shadow: 0 0 0 3px rgba(27, 92, 168, 0.10);
+        }
+
+        .grid-input:disabled {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            cursor: not-allowed;
+        }
+
+        .grid-select .ts-control {
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.75rem !important;
+            min-height: 32px !important;
+            border-radius: 0.375rem !important;
+        }
+
+        .modal-scroll {
+            max-height: 78vh;
+            overflow-y: auto;
+            padding: 1.25rem;
+        }
+
+        .modal-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .modal-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+
+        .modal-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .modal-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .po-badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.15rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .po-badge-status .dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .po-badge-draft {
+            background: #f3f4f6;
+            color: #4b5563;
+            border-color: #e5e7eb;
+        }
+
+        .po-badge-draft .dot {
+            background: #9ca3af;
+        }
+
+        .po-badge-submitted {
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #fcd34d;
+        }
+
+        .po-badge-submitted .dot {
+            background: #f59e0b;
+        }
+
+        .po-badge-approved {
+            background: #d1fae5;
+            color: #065f46;
+            border-color: #6ee7b7;
+        }
+
+        .po-badge-approved .dot {
+            background: #10b981;
+        }
+
+        .po-badge-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fca5a5;
+        }
+
+        .po-badge-rejected .dot {
+            background: #ef4444;
+        }
+
+        .po-badge-cancelled {
+            background: #f1f5f9;
+            color: #475569;
+            border-color: #cbd5e1;
+        }
+
+        .po-badge-cancelled .dot {
+            background: #94a3b8;
+        }
+
+        .stat-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem 0.75rem 1.25rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transform: translateY(-1px);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #6b7280;
+            margin-bottom: 0.2rem;
+        }
+
+        .stat-card .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .stat-card .stat-sub {
+            font-size: 0.65rem;
+            color: #9ca3af;
+            margin-top: 0.2rem;
+        }
+
+        .stat-total::before {
+            background: #1B5CA8;
+        }
+
+        .stat-total .stat-value {
+            color: #1B5CA8;
+        }
+
+        .stat-draft::before {
+            background: #6b7280;
+        }
+
+        .stat-draft .stat-value {
+            color: #6b7280;
+        }
+
+        .stat-submitted::before {
+            background: #f59e0b;
+        }
+
+        .stat-submitted .stat-value {
+            color: #f59e0b;
+        }
+
+        .stat-approved::before {
+            background: #10b981;
+        }
+
+        .stat-approved .stat-value {
+            color: #10b981;
+        }
+
+        .stat-rejected::before {
+            background: #ef4444;
+        }
+
+        .stat-rejected .stat-value {
+            color: #ef4444;
+        }
+
+        .stat-cancelled::before {
+            background: #94a3b8;
+        }
+
+        .stat-cancelled .stat-value {
+            color: #64748b;
+        }
+    </style>
 </head>
 
-<body class="bg-gray-50 p-6">
-  <div id="app" x-data="poWidget()"
-    class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-6xl mx-auto" x-cloak>
+<body class="bg-gray-50 p-6 font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased">
+    <div id="app" x-data="poApp()" x-init="init()" x-cloak class="max-w-6xl mx-auto">
 
-    <div class="grid grid-cols-4 gap-2.5 mb-4">
-      <div
-        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-[#1B5CA8]">
-        <div class="text-[11px] font-medium text-gray-500 uppercase tracking-wide mb-1.5">Total POs</div>
-        <div class="text-[25px] font-bold leading-none text-[#1B5CA8]" x-text="stats.total"></div>
-      </div>
-      <div
-        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-amber-500">
-        <div class="text-[11px] font-medium text-gray-500 uppercase tracking-wide mb-1.5">Pending / Partial</div>
-        <div class="text-[25px] font-bold leading-none text-amber-500" x-text="stats.pending"></div>
-      </div>
-      <div
-        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-emerald-600">
-        <div class="text-[11px] font-medium text-gray-500 uppercase tracking-wide mb-1.5">Fully Received</div>
-        <div class="text-[25px] font-bold leading-none text-emerald-600" x-text="stats.received"></div>
-      </div>
-      <div
-        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-red-600">
-        <div class="text-[11px] font-medium text-gray-500 uppercase tracking-wide mb-1.5">Rejected</div>
-        <div class="text-[25px] font-bold leading-none text-red-600" x-text="stats.rejected"></div>
-      </div>
-    </div>
-
-    <div class="flex items-center justify-between mt-[18px] mb-2">
-      <span class="text-[13.5px] font-medium text-gray-900">Purchase Orders (Incoming)</span>
-    </div>
-
-    <div class="flex items-center justify-between gap-2.5 mb-2 flex-wrap">
-      <div class="flex bg-gray-100 rounded-full p-[3px] gap-[2px]">
-        <button @click="setFilter('all')"
-          :class="filter === 'all' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
-          class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">
-          All (<span x-text="stats.total"></span>)
-        </button>
-        <button @click="setFilter('pending')"
-          :class="filter === 'pending' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
-          class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">
-          Partially Received (<span x-text="stats.pending"></span>)
-        </button>
-        <button @click="setFilter('received')"
-          :class="filter === 'received' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
-          class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">
-          Fully Received (<span x-text="stats.received"></span>)
-        </button>
-        <button @click="setFilter('rejected')"
-          :class="filter === 'rejected' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
-          class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">
-          Rejected (<span x-text="stats.rejected"></span>)
-        </button>
-      </div>
-
-      <div class="flex gap-2 items-center">
-        <div class="relative">
-          <i
-            class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px] pointer-events-none"></i>
-          <input x-model="search" type="text" placeholder="Search PO #, PR Ref..."
-            class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[220px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10">
+        <!-- ===== STATS ===== -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 mb-4">
+            <div class="stat-card stat-total">
+                <div class="stat-label">Total</div>
+                <div class="stat-value" x-text="stats.total">–</div>
+                <div class="stat-sub">All POs</div>
+            </div>
+            <div class="stat-card stat-draft">
+                <div class="stat-label">Draft</div>
+                <div class="stat-value" x-text="stats.draft">–</div>
+                <div class="stat-sub">In progress</div>
+            </div>
+            <div class="stat-card stat-submitted">
+                <div class="stat-label">Submitted</div>
+                <div class="stat-value" x-text="stats.submitted">–</div>
+                <div class="stat-sub">Awaiting approval</div>
+            </div>
+            <div class="stat-card stat-approved">
+                <div class="stat-label">Approved</div>
+                <div class="stat-value" x-text="stats.approved">–</div>
+                <div class="stat-sub">Ready to send</div>
+            </div>
+            <div class="stat-card stat-rejected">
+                <div class="stat-label">Rejected</div>
+                <div class="stat-value" x-text="stats.rejected">–</div>
+                <div class="stat-sub">Declined</div>
+            </div>
+            <div class="stat-card stat-cancelled">
+                <div class="stat-label">Cancelled</div>
+                <div class="stat-value" x-text="stats.cancelled">–</div>
+                <div class="stat-sub">Voided</div>
+            </div>
         </div>
-        <button @click="openCreateModal()"
-          class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-all shadow-sm">
-          <i class="bi bi-plus-lg"></i> Create PO
-        </button>
-      </div>
-    </div>
 
-    <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
-      <table class="w-full border-collapse" style="min-width:850px">
-        <thead>
-          <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
-            <template x-for="col in ['po_number', 'pr_ref', 'order_date', 'delivery_date', 'amount', 'status']"
-              :key="col">
-              <th @click="toggleSort(col)" data-sort
-                class="px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase text-left whitespace-nowrap"
-                :class="[sortCol === col ? 'sort-active' : '', col === 'amount' ? 'text-right' : '']">
-                <span
-                  x-text="{po_number: 'PO #', pr_ref: 'PR Ref', order_date: 'Order Date', delivery_date: 'Delivery Date', amount: 'Amount', status: 'Status'}[col]"></span>
-                <span class="sort-indicator" x-text="sortCol === col ? (sortDir === 'asc' ? '▲' : '▼') : ''"></span>
-              </th>
-            </template>
-            <th
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase text-left whitespace-nowrap bg-gray-50 sticky-action-cell">
-              Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr x-show="isLoading">
-            <td colspan="7" class="px-3 py-12 text-center">
-              <div class="flex flex-col items-center gap-3">
-                <div class="po-spinner"></div>
-                <div class="text-sm text-gray-400 font-medium">Loading Purchase Orders…</div>
-              </div>
-            </td>
-          </tr>
+        <!-- ===== HEADER ===== -->
+        <div class="flex items-center justify-between mt-[18px] mb-2">
+            <span class="text-[13.5px] font-medium text-gray-900">Purchase Orders</span>
+        </div>
 
-          <tr x-show="!isLoading && paginatedRecords.length === 0">
-            <td colspan="7" class="px-3 py-12 text-center">
-              <div class="text-gray-400">
-                <i class="bi bi-clipboard-x text-3xl mb-2 block"></i>
-                <div class="text-sm font-medium text-gray-500">No POs found</div>
-              </div>
-            </td>
-          </tr>
-
-          <template x-for="rec in paginatedRecords" :key="rec.ID">
-            <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors duration-150 group">
-              <td class="px-3 py-[9px] whitespace-nowrap"><span
-                  class="font-semibold text-[#1B5CA8] font-mono text-[11px]" x-text="rec.PO_Ref_Number"></span></td>
-              <td class="px-3 py-[9px] whitespace-nowrap font-medium text-gray-600 text-[11px]"
-                x-text="rec.purchase_requisition_id || '–'"></td>
-              <td class="px-3 py-[9px] whitespace-nowrap text-[11px] text-gray-500" x-text="formatDate(rec.order_date)">
-              </td>
-              <td class="px-3 py-[9px] whitespace-nowrap text-[11px] text-gray-500"
-                x-text="formatDate(rec.delivery_date)"></td>
-              <td
-                class="px-3 py-[9px] whitespace-nowrap font-semibold text-gray-900 text-right tabular-nums text-[12px]"
-                x-text="formatINR(rec.Total_Amount)"></td>
-              <td class="px-3 py-[9px] whitespace-nowrap">
-                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold border"
-                  :class="getStatusStyle(rec).classes">
-                  <span class="w-[5px] h-[5px] rounded-full shrink-0" :class="getStatusStyle(rec).dot"></span>
-                  <span x-text="rec.Status || 'Pending'"></span>
-                </span>
-              </td>
-              <td class="px-3 py-[9px] whitespace-nowrap bg-white group-hover:bg-[#EBF3FC] sticky-action-cell">
-                <div class="flex items-center gap-1.5">
-                  <button
-                    @click="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:PO_Detailed?recordId='+rec.ID,window:'same'})"
-                    class="inline-flex items-center gap-1 px-2 py-1 rounded bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 text-[11px] font-medium transition-colors">
-                    <i class="bi bi-eye"></i> View
-                  </button>
-                  <template x-if="['Pending', 'Submitted', 'Partially Received'].includes(rec.Status)">
-                    <button @click="openGrnModal(rec)"
-                      class="inline-flex items-center gap-1 px-2 py-1 rounded bg-[#1B5CA8] text-white border border-[#1B5CA8] hover:bg-[#14457e] text-[11px] font-medium transition-colors">
-                      <i class="bi bi-box-seam"></i> Receive
+        <!-- ===== TOOLBAR ===== -->
+        <div class="flex items-center justify-between gap-2.5 mb-2 flex-wrap">
+            <div class="flex bg-gray-100 rounded-full p-[3px] gap-[2px]">
+                <template x-for="tab in filterTabs" :key="tab.key">
+                    <button @click="setFilter(tab.key)" type="button"
+                        class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150"
+                        :class="currentFilter === tab.key ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'">
+                        <span x-text="tab.label"></span> (<span x-text="stats[tab.key]"></span>)
                     </button>
-                  </template>
+                </template>
+            </div>
+
+            <div class="flex gap-2 items-center">
+                <div class="relative">
+                    <i
+                        class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px] pointer-events-none"></i>
+                    <input x-model="searchInput" @input="onSearchInput()"
+                        class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[200px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10"
+                        type="text" placeholder="Search by PO #, Dept…" />
                 </div>
-              </td>
-            </tr>
-          </template>
-        </tbody>
-      </table>
-
-      <div x-show="!isLoading && totalPages > 0"
-        class="flex items-center justify-between px-[13px] py-[9px] border-t border-gray-200 bg-gray-50 text-xs text-gray-500">
-        <span>Showing <span x-text="(page - 1) * perPage + 1"></span>–<span
-            x-text="Math.min(page * perPage, filteredRecords.length)"></span> of <span
-            x-text="filteredRecords.length"></span> records</span>
-        <div class="flex gap-1">
-          <button @click="page > 1 ? page-- : null" :disabled="page <= 1"
-            class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 hover:border-[#1B5CA8] hover:text-[#1B5CA8]">
-            <i class="bi bi-chevron-left"></i>
-          </button>
-          <template x-for="p in getPagesArray()" :key="p">
-            <button @click="typeof p === 'number' ? page = p : null"
-              :class="page === p ? 'border-[#1B5CA8] bg-[#1B5CA8] text-white' : (typeof p === 'number' ? 'border-gray-300 bg-white hover:border-[#1B5CA8] hover:text-[#1B5CA8]' : 'border-transparent bg-transparent text-gray-400 cursor-default')"
-              class="min-w-[27px] h-[27px] px-1 border rounded inline-flex items-center justify-center transition-colors">
-              <span x-text="p"></span>
-            </button>
-          </template>
-          <button @click="page < totalPages ? page++ : null" :disabled="page >= totalPages"
-            class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 hover:border-[#1B5CA8] hover:text-[#1B5CA8]">
-            <i class="bi bi-chevron-right"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div x-show="isModalOpen" style="display: none;" class="po-modal-overlay active">
-      <div class="po-modal-bg" x-show="isModalOpen" x-transition.opacity @click="closeModal('po')"></div>
-      <div class="po-modal-box max-w-4xl" style="max-height: 90vh; overflow-y: auto;" x-show="isModalOpen" x-transition>
-        <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
-          <h3 class="text-[15px] font-bold text-gray-800">Create Purchase Order</h3>
-          <button @click="closeModal('po')" class="text-gray-400 hover:text-gray-700 transition-colors"><i
-              class="bi bi-x-lg text-lg"></i></button>
+                <button @click="openCreateModal()"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-all shadow-sm">
+                    <i class="bi bi-plus-lg"></i> Create PO
+                </button>
+            </div>
         </div>
 
-        <form @submit.prevent="submitPO" class="p-5">
-          <div class="grid grid-cols-2 gap-4 mb-5">
-            <div>
-              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Department / Unit <span
-                  class="text-red-500">*</span></label>
-              <select id="poDept" class="w-full text-xs" required></select>
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Purchase
-                Requisition</label>
-              <select id="poPrRef" class="w-full text-xs"></select>
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Order Date <span
-                  class="text-red-500">*</span></label>
-              <input type="date" x-model="poForm.orderDate" required
-                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Delivery Date <span
-                  class="text-red-500">*</span></label>
-              <input type="date" x-model="poForm.deliveryDate" :min="poForm.orderDate" required
-                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
-            </div>
-          </div>
-
-          <div class="mb-5 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
-            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-              <span class="text-xs font-semibold text-gray-700 tracking-wide">Items <span
-                  class="text-red-500">*</span></span>
-              <button type="button" @click="addItemRow('po')"
-                class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+
-                Add Item</button>
-            </div>
-            <div class="overflow-x-auto" style="overflow:visible;">
-              <table class="w-full border-collapse min-w-[650px]">
-                <thead class="bg-white border-b border-gray-200">
-                  <tr>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[35%]">Item</th>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[15%]">Qty</th>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[20%]">Amount (₹)</th>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left">Comment</th>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-10"></th>
-                  </tr>
+        <!-- ===== TABLE ===== -->
+        <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
+            <table class="w-full border-collapse" style="min-width:900px">
+                <colgroup>
+                    <col style="width:100px">
+                    <col style="width:130px">
+                    <col style="width:130px">
+                    <col style="width:100px">
+                    <col style="width:100px">
+                    <col style="width:110px">
+                    <col style="width:120px">
+                    <col style="width:90px">
+                </colgroup>
+                <thead>
+                    <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
+                        <template x-for="col in sortableColumns" :key="col.key">
+                            <th @click="handleSortClick(col.key)"
+                                class="px-3 py-2 text-[11px] font-semibold text-gray-500 tracking-wide whitespace-nowrap"
+                                :class="[col.align === 'center' ? 'text-center' : 'text-left', sortColumn === col.key ? 'sort-active' : '']">
+                                <span x-text="col.label"></span>
+                                <span class="sort-indicator"
+                                    x-text="sortColumn === col.key ? (sortDirection === 'asc' ? '▲' : '▼') : ''"></span>
+                            </th>
+                        </template>
+                        <th
+                            class="px-3 py-2 text-[11px] font-semibold text-gray-500 tracking-wide text-left whitespace-nowrap bg-gray-50 sticky-action-cell">
+                            Actions
+                        </th>
+                    </tr>
                 </thead>
                 <tbody>
-                  <template x-for="(item, index) in poForm.items" :key="item.uid">
-                    <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors bg-white">
-                      <td class="px-3 py-2 relative">
-                        <select x-init="initItemSelect($el, item, 'po')" class="w-full text-xs" required></select>
-                      </td>
-                      <td class="px-3 py-2">
-                        <input type="number" x-model.number="item.quantity"
-                          @input="if(item.unitPrice) item.amount = Number((item.quantity * item.unitPrice).toFixed(2))"
-                          required min="1"
-                          class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
-                      </td>
-                      <td class="px-3 py-2">
-                        <input type="number" x-model.number="item.amount" required min="0" step="0.01"
-                          class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
-                      </td>
-                      <td class="px-3 py-2">
-                        <input type="text" x-model="item.comment" placeholder="Optional"
-                          class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
-                      </td>
-                      <td class="px-3 py-2 text-center">
-                        <button type="button" @click="removeItemRow(index, 'po')"
-                          class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50"><i
-                            class="bi bi-trash"></i></button>
-                      </td>
+                    <tr x-show="isLoading">
+                        <td colspan="8" class="px-3 py-12 text-center">
+                            <div class="flex flex-col items-center gap-3">
+                                <div class="po-spinner"></div>
+                                <div class="text-sm text-gray-400 font-medium">Loading POs…</div>
+                            </div>
+                        </td>
                     </tr>
-                  </template>
+                    <tr x-show="!isLoading && pagedRecords.length === 0">
+                        <td colspan="8" class="px-3 py-12 text-center">
+                            <div class="text-gray-400">
+                                <i class="bi bi-clipboard-x text-3xl mb-2 block"></i>
+                                <div class="text-sm font-medium text-gray-500">No records found</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <template x-for="rec in pagedRecords" :key="rec.ID">
+                        <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors duration-150 group">
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap">
+                                <span class="font-semibold text-[#1B5CA8] font-mono text-[11px]"
+                                    x-text="rec._poRef"></span>
+                            </td>
+                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900"
+                                x-text="rec._departmentName"></td>
+                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[12px]"
+                                x-text="rec._vendorName"></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[11px] text-gray-500"
+                                x-text="rec._poDateFormatted"></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[11px] text-gray-500"
+                                x-text="rec._deliveryDateFormatted"></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap">
+                                <span class="po-badge-status" :class="rec._statusClass">
+                                    <span class="dot"></span>
+                                    <span x-text="rec._statusLabel"></span>
+                                </span>
+                            </td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap font-semibold text-gray-800 text-[12px]"
+                                x-text="rec._totalFormatted"></td>
+                            <td
+                                class="px-3 py-[9px] align-middle whitespace-nowrap bg-white group-hover:bg-[#EBF3FC] sticky-action-cell">
+                                <button @click="viewPO(rec.ID)"
+                                    class="inline-flex items-center gap-[3px] px-2 py-[3px] rounded bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 text-[11px] font-medium transition-colors">
+                                    <i class="bi bi-box-arrow-up-right"></i> View
+                                </button>
+                            </td>
+                        </tr>
+                    </template>
                 </tbody>
-              </table>
+            </table>
+
+            <!-- Pagination -->
+            <div x-show="filteredRecords.length > 0"
+                class="flex items-center justify-between px-[13px] py-[9px] border-t border-gray-200 bg-gray-50 text-xs text-gray-500">
+                <span x-text="paginationInfoText"></span>
+                <div class="flex gap-1">
+                    <button @click="goToPage(currentPage - 1)" :disabled="currentPage <= 1"
+                        class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors"
+                        :class="currentPage <= 1 ? 'opacity-40 cursor-not-allowed' : 'hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]'">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <template x-for="pg in pageButtons" :key="pg.key">
+                        <button @click="pg.type === 'page' && goToPage(pg.value)" :disabled="pg.type === 'ellipsis'"
+                            class="min-w-[27px] h-[27px] px-1 rounded inline-flex items-center justify-center transition-colors"
+                            :class="pg.type === 'ellipsis' ? 'border-0 text-gray-400 text-xs cursor-default' : (pg.value === currentPage ? 'border border-[#1B5CA8] bg-[#1B5CA8] text-white font-semibold' : 'border border-gray-300 bg-white text-gray-600 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]')"
+                            x-text="pg.type === 'ellipsis' ? '…' : pg.value"></button>
+                    </template>
+                    <button @click="goToPage(currentPage + 1)" :disabled="currentPage >= totalPages"
+                        class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors"
+                        :class="currentPage >= totalPages ? 'opacity-40 cursor-not-allowed' : 'hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]'">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
             </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4 mb-5 border-t border-gray-100 pt-4">
-            <div>
-              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Remarks</label>
-              <textarea x-model="poForm.remarks" rows="3"
-                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all shadow-sm"></textarea>
-            </div>
-            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-col justify-center gap-3">
-              <div class="flex items-center justify-between">
-                <label class="text-[12px] font-semibold text-gray-600">Discount (₹)</label>
-                <input type="number" x-model.number="poForm.discount" min="0" step="0.01"
-                  class="w-24 py-1 px-2 border border-gray-300 rounded text-right text-sm focus:outline-none focus:border-[#1B5CA8]">
-              </div>
-              <div class="flex items-center justify-between border-t border-gray-200 pt-2">
-                <label class="text-[14px] font-bold text-gray-800">Total Amount</label>
-                <div class="text-lg font-bold text-[#1B5CA8]" x-text="formatINR(calculatedTotal)"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex justify-end gap-2 border-t border-gray-100 pt-4">
-            <button type="button" @click="closeModal('po')"
-              class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
-            <button type="submit" :disabled="isSubmitting"
-              class="inline-flex items-center justify-center min-w-[90px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70">
-              <span x-show="!isSubmitting">Submit PO</span>
-              <div x-show="isSubmitting" class="po-spinner"
-                style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-
-    <div x-show="isGrnModalOpen" style="display: none;" class="po-modal-overlay active">
-      <div class="po-modal-bg" x-show="isGrnModalOpen" x-transition.opacity @click="closeModal('grn')"></div>
-      <div class="po-modal-box max-w-4xl" style="max-height: 90vh; overflow-y: auto;" x-show="isGrnModalOpen"
-        x-transition>
-
-        <div x-show="isLoadingGrnDetails"
-          class="absolute inset-0 bg-white/80 z-10 flex flex-col items-center justify-center gap-3">
-          <div class="po-spinner"></div>
-          <span class="text-xs font-semibold text-gray-500">Fetching PO Details...</span>
         </div>
 
-        <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
-          <h3 class="text-[15px] font-bold text-gray-800">Receive Goods (GRN)</h3>
-          <button @click="closeModal('grn')" class="text-gray-400 hover:text-gray-700 transition-colors"><i
-              class="bi bi-x-lg text-lg"></i></button>
+        <!-- ============================================================= -->
+        <!-- CREATE PO MODAL                                               -->
+        <!-- ============================================================= -->
+        <div class="po-modal-overlay" :class="{ active: showModal }" x-show="showModal" x-cloak>
+            <div class="po-modal-bg" @click="closeModal()"></div>
+            <div class="po-modal-box max-w-6xl" style="max-height:94vh;">
+                <!-- Header -->
+                <div
+                    class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50 sticky top-0 z-20">
+                    <h3 class="text-[15px] font-bold text-gray-800">Create Purchase Order</h3>
+                    <button @click="closeModal()" class="text-gray-400 hover:text-gray-700 transition-colors">
+                        <i class="bi bi-x-lg text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-scroll">
+                    <form @submit.prevent="submitPO()">
+
+                        <!-- PR Selection (driver) -->
+                        <div class="mb-5">
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
+                                Purchase Requisition <span class="text-red-500">*</span>
+                                <span class="text-gray-400 font-normal ml-1">(Approved PRs ready for PO)</span>
+                            </label>
+                            <select x-ref="prSelect" class="w-full text-xs" placeholder="Search PR Number…"></select>
+                        </div>
+
+                        <!-- PO Details -->
+                        <div class="grid grid-cols-2 gap-4 mb-5">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
+                                    Department / Unit
+                                    <span x-show="form.prLocked"
+                                        class="ml-1 text-[10px] font-normal text-[#1B5CA8] bg-[#1B5CA8]/10 px-1.5 py-0.5 rounded-full">Auto-filled</span>
+                                </label>
+                                <select x-ref="deptSelect" class="w-full text-xs" :disabled="form.prLocked"></select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
+                                    Vendor
+                                    <span x-show="form.prLocked"
+                                        class="ml-1 text-[10px] font-normal text-[#1B5CA8] bg-[#1B5CA8]/10 px-1.5 py-0.5 rounded-full">Auto-filled</span>
+                                </label>
+                                <select x-ref="vendorSelect" class="w-full text-xs" :disabled="form.prLocked"></select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PO
+                                    Date <span class="text-red-500">*</span></label>
+                                <input type="date" x-model="form.poDate" required :min="todayStr"
+                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm" />
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Delivery
+                                    Date <span class="text-red-500">*</span></label>
+                                <input type="date" x-model="form.deliveryDate" required :min="todayStr"
+                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm" />
+                            </div>
+                        </div>
+
+                        <!-- Items Grid -->
+                        <div class="mb-5 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
+                            <div
+                                class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                                <span class="text-xs font-semibold text-gray-700 tracking-wide">Items <span
+                                        class="text-red-500">*</span></span>
+                                <span class="text-[10px] text-gray-400" x-show="form.prLocked">Auto-filled from
+                                    PR</span>
+                            </div>
+                            <div class="overflow-x-auto" style="overflow:visible;">
+                                <table class="w-full border-collapse min-w-[650px]">
+                                    <thead class="bg-white border-b border-gray-200">
+                                        <tr>
+                                            <th
+                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[28%]">
+                                                Item</th>
+                                            <th
+                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[12%]">
+                                                Rate</th>
+                                            <th
+                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[12%]">
+                                                Qty</th>
+                                            <th
+                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[15%]">
+                                                Amount</th>
+                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left">
+                                                Comment</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-if="form.items.length === 0">
+                                            <tr>
+                                                <td colspan="5"
+                                                    class="px-3 py-6 text-center text-xs text-gray-400 italic">No items.
+                                                    Select a PR to auto-fill.</td>
+                                            </tr>
+                                        </template>
+                                        <template x-for="(item, idx) in form.items" :key="item.uid">
+                                            <tr
+                                                class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors bg-white">
+                                                <td class="px-3 py-2">
+                                                    <div class="text-xs font-medium text-gray-700 truncate max-w-[180px]"
+                                                        x-text="item._itemName || '–'"></div>
+                                                    <input type="hidden" x-model="item.Item" />
+                                                </td>
+                                                <td class="px-3 py-2">
+                                                    <input type="number" step="any" min="0" x-model.number="item.Rate"
+                                                        disabled
+                                                        class="grid-input bg-gray-100 text-gray-600 cursor-not-allowed" />
+                                                </td>
+                                                <td class="px-3 py-2">
+                                                    <input type="number" step="any" min="0"
+                                                        x-model.number="item.Quantity" disabled
+                                                        class="grid-input bg-gray-100 text-gray-600 cursor-not-allowed" />
+                                                </td>
+                                                <td class="px-3 py-2">
+                                                    <input type="text" :value="formatINR(item.Amount)" disabled
+                                                        class="grid-input bg-gray-100 text-[#1B5CA8] font-semibold cursor-not-allowed" />
+                                                </td>
+                                                <td class="px-3 py-2">
+                                                    <input type="text" x-model="item.Comment" placeholder="Optional"
+                                                        class="grid-input" />
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Totals -->
+                        <div class="grid grid-cols-3 gap-4 mb-5">
+                            <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                <label class="block text-[10px] font-semibold text-gray-500 tracking-wide mb-1">Sub
+                                    Total</label>
+                                <input type="text" :value="formatINR(form.subTotal)" disabled
+                                    class="w-full py-1.5 px-3 bg-white border border-gray-200 rounded-md text-[13px] font-semibold text-gray-700 cursor-not-allowed" />
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                <label
+                                    class="block text-[10px] font-semibold text-gray-500 tracking-wide mb-1">Discount</label>
+                                <input type="number" step="any" min="0" x-model.number="form.discount"
+                                    @input="calcTotals()"
+                                    class="w-full py-1.5 px-3 bg-white border border-gray-200 rounded-md text-[13px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10" />
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                <label class="block text-[10px] font-semibold text-gray-500 tracking-wide mb-1">Total
+                                    Amount</label>
+                                <input type="text" :value="formatINR(form.totalAmount)" disabled
+                                    class="w-full py-1.5 px-3 bg-[#EBF3FC] border border-[#1B5CA8]/30 rounded-md text-[13px] font-bold text-[#1B5CA8] cursor-not-allowed" />
+                            </div>
+                        </div>
+
+                        <!-- Notes & Terms -->
+                        <div class="grid grid-cols-2 gap-4 mb-5">
+                            <div>
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Notes</label>
+                                <textarea x-model="form.notes" rows="2"
+                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Terms
+                                    &amp; Conditions</label>
+                                <textarea x-model="form.terms" rows="2"
+                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Attachments -->
+                        <div class="mb-5">
+                            <label
+                                class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Attachments</label>
+                            <input type="file" x-ref="fileInput" multiple
+                                class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-[#EBF3FC] file:text-[#1B5CA8] hover:file:bg-[#d8e8fa] transition-colors cursor-pointer border border-gray-200 rounded-lg bg-gray-50 py-1.5 px-2" />
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex justify-end gap-2 border-t border-gray-100 pt-4 mt-2">
+                            <button type="button" @click="closeModal()"
+                                class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button type="submit" @click="submitAction = 'Draft'" :disabled="submitting"
+                                class="inline-flex items-center justify-center min-w-[100px] px-4 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors shadow-sm">
+                                <div x-show="submitting && submitAction === 'Draft'" class="draft-spinner"></div>
+                                <span x-show="!(submitting && submitAction === 'Draft')">Save as Draft</span>
+                            </button>
+                            <button type="submit" @click="submitAction = 'Submitted'" :disabled="submitting"
+                                class="inline-flex items-center justify-center min-w-[120px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm">
+                                <div x-show="submitting && submitAction === 'Submitted'" class="po-spinner"
+                                    style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
+                                <span x-show="!(submitting && submitAction === 'Submitted')">Submit for Approval</span>
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
         </div>
 
-        <form @submit.prevent="submitGRN" class="p-5">
-          <div class="grid grid-cols-2 gap-4 mb-5">
-            <div>
-              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PO Ref Number</label>
-              <input type="text" x-model="grnForm.poRefNum" disabled
-                class="w-full py-2 px-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] text-gray-500 font-mono">
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PR Ref Number</label>
-              <input type="text" x-model="grnForm.prRefNum" disabled
-                class="w-full py-2 px-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] text-gray-500 font-mono">
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Order Date <span
-                  class="text-red-500">*</span></label>
-              <input type="date" x-model="grnForm.orderDate" required
-                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Delivery Date <span
-                  class="text-red-500">*</span></label>
-              <input type="date" x-model="grnForm.deliveryDate" required
-                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
-            </div>
-          </div>
-
-          <div class="mb-5 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
-            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-              <span class="text-xs font-semibold text-gray-700 tracking-wide">Received Items <span
-                  class="text-red-500">*</span></span>
-              <button type="button" @click="addItemRow('grn')"
-                class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+
-                Add Item</button>
-            </div>
-            <div class="overflow-x-auto" style="overflow:visible;">
-              <table class="w-full border-collapse min-w-[650px]">
-                <thead class="bg-white border-b border-gray-200">
-                  <tr>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[35%]">Item</th>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[15%]">Qty</th>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[20%]">Amount (₹)</th>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left">Comment</th>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-10"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <template x-for="(item, index) in grnForm.items" :key="item.uid">
-                    <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors bg-white">
-                      <td class="px-3 py-2 relative">
-                        <select disabled x-init="initItemSelect($el, item, 'grn')"
-                          class="w-full text-xs cursor-not-allowed" required></select>
-                      </td>
-                      <td class="px-3 py-2">
-                        <input type="number" x-model.number="item.quantity"
-                          @input="item.amount = Number((item.quantity * item.unitPrice).toFixed(2))"
-                          :max="item.maxQuantity" required min="1"
-                          class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
-                      </td>
-                      <td class="px-3 py-2">
-                        <input type="number" x-model.number="item.amount" disabled
-                          class="w-full py-1.5 px-2.5 bg-gray-100 border border-gray-200 rounded-md text-[13px] text-gray-500 font-semibold cursor-not-allowed">
-                      </td>
-                      <td class="px-3 py-2">
-                        <input type="text" x-model="item.comment" placeholder="Optional"
-                          class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
-                      </td>
-                      <td class="px-3 py-2 text-center">
-                        <button type="button" @click="removeItemRow(index, 'grn')"
-                          class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50"><i
-                            class="bi bi-trash"></i></button>
-                      </td>
-                    </tr>
-                  </template>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4 mb-5 border-t border-gray-100 pt-4">
-            <div>
-              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Remarks / Additional
-                Details</label>
-              <textarea x-model="grnForm.remarks" rows="3"
-                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all shadow-sm"></textarea>
-            </div>
-            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-col justify-center gap-3">
-              <div class="flex items-center justify-between">
-                <label class="text-[12px] font-semibold text-gray-600">Discount (₹)</label>
-                <input type="number" x-model.number="grnForm.discount" min="0" step="0.01"
-                  class="w-24 py-1 px-2 border border-gray-300 rounded text-right text-sm focus:outline-none focus:border-[#1B5CA8]">
-              </div>
-              <div class="flex items-center justify-between border-t border-gray-200 pt-2">
-                <label class="text-[14px] font-bold text-gray-800">Total Amount</label>
-                <div class="text-lg font-bold text-[#1B5CA8]" x-text="formatINR(calculatedGrnTotal)"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex justify-end gap-2 border-t border-gray-100 pt-4">
-            <button type="button" @click="closeModal('grn')"
-              class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
-            <button type="submit" :disabled="isGrnSubmitting || isLoadingGrnDetails"
-              class="inline-flex items-center justify-center min-w-[100px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70">
-              <span x-show="!isGrnSubmitting">Submit GRN</span>
-              <div x-show="isGrnSubmitting" class="po-spinner"
-                style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
-            </button>
-          </div>
-        </form>
-      </div>
     </div>
 
+    <script>
+        document.addEventListener('alpine:init', () => {
 
-  </div>
-
-  <script>
-    document.addEventListener('alpine:init', () => {
-      const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3500, timerProgressBar: true, customClass: { popup: 'font-[Lato] text-sm' } });
-
-      Alpine.data('poWidget', () => ({
-        REPORT_NAME: 'Purchase_Order_Report',
-        ITEMS_REPORT_NAME: 'Items_Report',
-        UNIT_REPORT_NAME: 'Unit_Report',
-        PR_REPORT_NAME: 'Purchase_Requisition_Report',
-
-        allRecords: [], itemMasters: [], unitMasters: [],
-        filter: 'all', search: '', isLoading: true,
-        sortCol: 'order_date', sortDir: 'desc',
-        page: 1, perPage: 10,
-        stats: { total: '-', pending: '-', received: '-', rejected: '-' },
-
-        isModalOpen: false, isSubmitting: false,
-        isGrnModalOpen: false, isGrnSubmitting: false, isLoadingGrnDetails: false,
-
-        poForm: { dept: '', prRefId: '', prRefText: '', orderDate: dayjs().format('YYYY-MM-DD'), deliveryDate: '', remarks: '', discount: 0, items: [] },
-        grnForm: { poId: '', poRefNum: '', prId: '', prRefNum: '', orderDate: '', deliveryDate: '', remarks: '', discount: 0, items: [] },
-
-        tsInstances: { dept: null, pr: null, poItems: [], grnItems: [] },
-
-        init() {
-          this.fetchRecords();
-          this.fetchItemMasters();
-          this.fetchUnitMasters();
-
-          this.$watch('search', Alpine.debounce(() => { this.page = 1; this.fetchRecords(); }, 400));
-          this.$watch('filter', () => { this.page = 1; this.fetchRecords(); });
-        },
-
-        // --- Computed Properties ---
-        get calculatedTotal() {
-          const subtotal = this.poForm.items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-          const disc = parseFloat(this.poForm.discount) || 0;
-          return Math.max(0, subtotal - disc);
-        },
-        get calculatedGrnTotal() {
-          const subtotal = this.grnForm.items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-          const disc = parseFloat(this.grnForm.discount) || 0;
-          return Math.max(0, subtotal - disc);
-        },
-
-        get filteredRecords() {
-          return [...this.allRecords].sort((a, b) => {
-            let va = this.getSortValue(a, this.sortCol), vb = this.getSortValue(b, this.sortCol);
-            let cmp = (typeof va === 'number' && typeof vb === 'number') ? va - vb : String(va).localeCompare(String(vb));
-            return this.sortDir === 'asc' ? cmp : -cmp;
-          });
-        },
-        get paginatedRecords() {
-          const start = (this.page - 1) * this.perPage;
-          return this.filteredRecords.slice(start, start + this.perPage);
-        },
-        get totalPages() {
-          return Math.max(1, Math.ceil(this.filteredRecords.length / this.perPage));
-        },
-
-        // --- Data Fetching ---
-        buildCriteria() {
-          let criteria = [];
-          if (this.search.trim()) {
-            let q = this.search.trim().replace(/'/g, "\\'");
-            criteria.push(`(PO_Ref_Number.contains("${q}") || purchase_requisition_id.contains("${q}") || Status.contains("${q}"))`);
-          }
-          if (this.filter === 'pending') criteria.push('(Status == "Pending" || Status == "Partially Received" || Status == "Submitted")');
-          else if (this.filter === 'received') criteria.push('(Status == "Fully Received")');
-          else if (this.filter === 'rejected') criteria.push('(Status == "Rejected")');
-          return criteria.join(' && ');
-        },
-
-        async fetchRecords() {
-          this.isLoading = true;
-          this.allRecords = [];
-          try {
-            let accumulated = [], cursor = null;
-            let crit = this.buildCriteria();
-            do {
-              let config = { report_name: this.REPORT_NAME, max_records: 200 };
-              if (crit) config.criteria = crit;
-              if (cursor) config.record_cursor = cursor;
-
-              let res = await ZOHO.CREATOR.DATA.getRecords(config);
-              if (res && res.code === 3000 && res.data) {
-                accumulated = accumulated.concat(res.data);
-                cursor = res.data.length >= 200 ? res.record_cursor : null;
-              } else { cursor = null; }
-            } while (cursor);
-            this.allRecords = accumulated;
-          } catch (err) { } finally {
-            this.isLoading = false;
-            this.computeStats();
-          }
-        },
-
-        async computeStats() {
-          let q = this.search.trim().replace(/'/g, "\\'");
-          let searchCrit = q ? `(PO_Ref_Number.contains("${q}") || purchase_requisition_id.contains("${q}"))` : '';
-          const build = (statusCrit) => [searchCrit, statusCrit].filter(Boolean).join(' && ');
-
-          const map = [
-            { key: 'total', crit: build('') },
-            { key: 'pending', crit: build('(Status == "Pending" || Status == "Partially Received" || Status == "Submitted")') },
-            { key: 'received', crit: build('(Status == "Fully Received")') },
-            { key: 'rejected', crit: build('(Status == "Rejected")') }
-          ];
-
-          for (let m of map) {
-            try {
-              let config = { report_name: this.REPORT_NAME };
-              if (m.crit) config.criteria = m.crit;
-              let res = await ZOHO.CREATOR.DATA.getRecordCount(config);
-              this.stats[m.key] = res.result ? res.result.records_count : 0;
-            } catch (e) { this.stats[m.key] = 0; }
-          }
-        },
-
-        async fetchItemMasters() {
-          try {
-            let res = await ZOHO.CREATOR.DATA.getRecords({ report_name: this.ITEMS_REPORT_NAME, criteria: 'status == "Active"', max_records: 200 });
-            if (res.code === 3000) this.itemMasters = res.data;
-          } catch (err) { }
-        },
-        async fetchUnitMasters() {
-          try {
-            let res = await ZOHO.CREATOR.DATA.getRecords({ report_name: this.UNIT_REPORT_NAME, max_records: 200 });
-            if (res.code === 3000) this.unitMasters = res.data;
-          } catch (err) { }
-        },
-
-        // --- Helpers ---
-        setFilter(f) { this.filter = f; },
-        toggleSort(col) {
-          if (this.sortCol === col) this.sortDir = this.sortDir === 'desc' ? 'asc' : 'desc';
-          else { this.sortCol = col; this.sortDir = col.includes('date') ? 'desc' : 'asc'; }
-          this.page = 1;
-        },
-        formatINR(amount) {
-          if (amount == null || isNaN(amount)) return '₹ 0';
-          let num = parseFloat(amount).toFixed(0);
-          if (num.length > 3) num = num.slice(0, -3).replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + num.slice(-3);
-          return '₹ ' + num;
-        },
-        formatDate(dateStr) {
-          if (!dateStr) return '–';
-          const d = dayjs(dateStr, ["DD-MMM-YYYY", "YYYY-MM-DD"]);
-          return d.isValid() ? d.format('DD MMM YYYY') : dateStr;
-        },
-        getStatusStyle(rec) {
-          const st = (rec.Status || '').toLowerCase();
-          if (st === 'fully received') return { classes: 'border-emerald-200 bg-emerald-50 text-emerald-800', dot: 'bg-emerald-600' };
-          if (st === 'partially received') return { classes: 'border-cyan-200 bg-cyan-50 text-cyan-800', dot: 'bg-cyan-500' };
-          if (st === 'rejected') return { classes: 'border-red-200 bg-red-50 text-red-800', dot: 'bg-red-600' };
-          return { classes: 'border-amber-200 bg-amber-50 text-amber-800', dot: 'bg-amber-500' };
-        },
-        getSortValue(rec, col) {
-          switch (col) {
-            case 'po_number': return parseInt((rec.PO_Ref_Number || '').match(/\d+$/)?.[0] || 0, 10);
-            case 'pr_ref': return (rec.purchase_requisition_id || '').toLowerCase();
-            case 'amount': return parseFloat(String(rec.Total_Amount).replace(/[,\s]/g, '')) || 0;
-            case 'order_date': return rec.order_date ? dayjs(rec.order_date, ["DD-MMM-YYYY", "YYYY-MM-DD"]).valueOf() : 0;
-            case 'delivery_date': return rec.delivery_date ? dayjs(rec.delivery_date, ["DD-MMM-YYYY", "YYYY-MM-DD"]).valueOf() : 0;
-            case 'status': return (rec.Status || '').toLowerCase();
-            default: return '';
-          }
-        },
-        getPagesArray() {
-          let pages = [];
-          for (let p = 1; p <= this.totalPages; p++) {
-            if (p <= 2 || p === this.totalPages || (p >= this.page - 1 && p <= this.page + 1)) pages.push(p);
-          }
-          pages = [...new Set(pages)].sort((a, b) => a - b);
-          let finalPages = [];
-          for (let i = 0; i < pages.length; i++) {
-            if (i > 0 && pages[i] - pages[i - 1] > 1) finalPages.push('…');
-            finalPages.push(pages[i]);
-          }
-          return finalPages;
-        },
-
-        // --- Shared Item Functions ---
-        addItemRow(type) {
-          const arr = type === 'po' ? this.poForm.items : this.grnForm.items;
-          arr.push({ uid: Date.now() + Math.random(), id: '', quantity: 1, amount: 0, comment: '' });
-        },
-        removeItemRow(index, type) {
-          const arr = type === 'po' ? this.poForm.items : this.grnForm.items;
-          const tsArr = type === 'po' ? this.tsInstances.poItems : this.tsInstances.grnItems;
-          arr.splice(index, 1);
-          if (tsArr[index]) { tsArr[index].destroy(); tsArr.splice(index, 1); }
-        },
-        initItemSelect(el, itemRef, type) {
-          let ts = new TomSelect(el, {
-            valueField: 'ID', labelField: 'item_name', searchField: 'item_name', options: this.itemMasters, maxItems: 1, placeholder: 'Search item...',
-            onChange: (val) => {
-              itemRef.id = val;
-              let selectedItem = this.itemMasters.find(m => m.ID === val);
-              if (selectedItem) {
-                itemRef.unitPrice = parseFloat(selectedItem.unit_price) || 0;
-                if (itemRef.quantity) {
-                  itemRef.amount = Number((itemRef.quantity * itemRef.unitPrice).toFixed(2));
-                }
-              }
-            }
-          });
-          if (itemRef.id) {
-            if (!ts.options[itemRef.id]) ts.addOption({ ID: String(itemRef.id), item_name: itemRef.tempName || 'Item #' + itemRef.id });
-            ts.setValue(itemRef.id);
-          }
-          if (type === 'po') this.tsInstances.poItems.push(ts);
-          else this.tsInstances.grnItems.push(ts);
-        },
-
-        // --- PO Create Logic ---
-        openCreateModal() {
-          this.poForm = { dept: '', prRefId: '', prRefText: '', orderDate: dayjs().format('YYYY-MM-DD'), deliveryDate: '', remarks: '', discount: 0, items: [] };
-          this.isModalOpen = true;
-          this.$nextTick(() => { this.initDeptSelect(); this.initPrSelect(); this.addItemRow('po'); });
-        },
-        closeModal(type) {
-          if (type === 'po') {
-            this.isModalOpen = false;
-            if (this.tsInstances.dept) this.tsInstances.dept.destroy();
-            if (this.tsInstances.pr) this.tsInstances.pr.destroy();
-            this.tsInstances.poItems.forEach(ts => ts && ts.destroy());
-            this.tsInstances.poItems = [];
-          } else {
-            this.isGrnModalOpen = false;
-            this.tsInstances.grnItems.forEach(ts => ts && ts.destroy());
-            this.tsInstances.grnItems = [];
-          }
-        },
-        initDeptSelect() {
-          this.tsInstances.dept = new TomSelect(document.getElementById('poDept'), {
-            valueField: 'ID', labelField: 'Name', searchField: 'Name', options: this.unitMasters, maxItems: 1, placeholder: 'Select Department...',
-            onChange: (val) => { this.poForm.dept = val; }
-          });
-        },
-        initPrSelect() {
-          this.tsInstances.pr = new TomSelect(document.getElementById('poPrRef'), {
-            valueField: 'ID', labelField: 'PR_Number', searchField: ['PR_Number', 'Requisition_Number'], maxItems: 1, placeholder: 'Search PR...', loadThrottle: 350,
-            onChange: (val) => {
-              this.poForm.prRefId = val;
-              if (val && this.tsInstances.pr.options[val]) {
-                this.poForm.prRefText = this.tsInstances.pr.options[val].PR_Number || this.tsInstances.pr.options[val].Requisition_Number;
-                this.fetchPRDetailsForPO(val);
-              }
-            },
-            load: (query, callback) => {
-              if (!query.length) return callback();
-              ZOHO.CREATOR.DATA.getRecords({ report_name: this.PR_REPORT_NAME, criteria: `(PR_Number.contains("${query.replace(/'/g, "\\'")}") || Requisition_Number.contains("${query.replace(/'/g, "\\'")}") )` })
-                .then(res => callback(res.code === 3000 ? res.data : [])).catch(() => callback());
-            }
-          });
-        },
-        async fetchPRDetailsForPO(prId) {
-          Toast.fire({ icon: 'info', title: 'Fetching PR items...' });
-          try {
-            let res = await ZOHO.CREATOR.DATA.invokeCustomApi({
-              api_name: "Dev__Fetch_PR_Details", http_method: "GET", query_params: 'recId=' + prId,
-            });
-            if (res && res.result && res.result.length > 0) {
-              const prData = res.result[0];
-              const items = prData.Items || [];
-
-              // Auto-set Date Fields if present in PR API response
-              if (prData.PR_Date) this.poForm.orderDate = dayjs(prData.PR_Date, ["DD-MMM-YYYY", "YYYY-MM-DD"]).format('YYYY-MM-DD');
-              if (prData.Due_Date) this.poForm.deliveryDate = dayjs(prData.Due_Date, ["DD-MMM-YYYY", "YYYY-MM-DD"]).format('YYYY-MM-DD');
-
-              this.tsInstances.poItems.forEach(ts => ts && ts.destroy());
-              this.tsInstances.poItems = [];
-              this.poForm.items = [];
-
-              if (items.length === 0) { this.addItemRow('po'); Toast.fire({ icon: 'warning', title: 'No items in PR' }); return; }
-              items.forEach(prItem => {
-                this.poForm.items.push({
-                  uid: Date.now() + Math.random(), id: prItem.Item.ID, tempName: prItem.Item.item_name,
-                  quantity: prItem.Quantity || 1, amount: 0, comment: ''
-                });
-              });
-              Toast.fire({ icon: 'success', title: 'Items loaded from PR' });
-            }
-          } catch (err) { Toast.fire({ icon: 'error', title: 'Failed to fetch PR details' }); }
-        },
-        async submitPO() {
-          if (!this.poForm.dept) { Toast.fire({ icon: 'error', title: 'Department is required.' }); return; }
-          if (this.poForm.items.length === 0 || this.poForm.items.some(i => !i.id)) { Toast.fire({ icon: 'error', title: 'Please select valid items.' }); return; }
-
-          this.isSubmitting = true;
-          try {
-            const payloadData = {
-              Department: this.poForm.dept,
-              order_date: dayjs(this.poForm.orderDate).format('DD-MMM-YYYY'),
-              delivery_date: dayjs(this.poForm.deliveryDate).format('DD-MMM-YYYY'),
-              Status: "Pending",
-              Discount: this.poForm.discount || 0,
-              Total_Amount: this.calculatedTotal,
-              Remarks: this.poForm.remarks,
-              Items: this.poForm.items.map(i => ({ Item: i.id, Quantity: i.quantity, Amount: i.amount, Comment: i.comment }))
-            };
-            if (this.poForm.prRefId) {
-              payloadData.Purchase_Requisition = this.poForm.prRefId;
-              payloadData.purchase_requisition_id = this.poForm.prRefText;
-            }
-
-            let res = await ZOHO.CREATOR.DATA.addRecords({ form_name: "Purchase_Order", payload: { data: payloadData } });
-            if (res.code === 3000) {
-              Toast.fire({ icon: 'success', title: 'Purchase Order Created!' });
-              this.closeModal('po');
-              this.search = '';
-              this.fetchRecords();
-            } else { throw new Error(res.message); }
-          } catch (err) {
-            Toast.fire({ icon: 'error', title: err.message || 'Submission failed.' });
-          } finally { this.isSubmitting = false; }
-        },
-
-
-        async openGrnModal(rec) {
-          this.isGrnModalOpen = true;
-          this.isLoadingGrnDetails = true;
-
-          // Initial map based on list view data (ensures safety if items fail to load)
-          this.grnForm = {
-            poId: rec.ID, poRefNum: rec.PO_Ref_Number || '',
-            prId: rec.Purchase_Requisition?.ID || '', prRefNum: rec.purchase_requisition_id || '',
-            orderDate: dayjs().format('YYYY-MM-DD'),
-            deliveryDate: dayjs().format('YYYY-MM-DD'),
-            remarks: '', discount: rec.Discount || 0, items: []
-          };
-
-          try {
-            // Fetch full PO record using the Custom API
-            let poRes = await ZOHO.CREATOR.DATA.invokeCustomApi({
-              api_name: "Fetch_Po_Details",
-              http_method: "GET",
-              query_params: 'recId=' + rec.ID,
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3500,
+                timerProgressBar: true,
+                customClass: { popup: 'font-[Lato] text-sm' }
             });
 
-            if (poRes && poRes.result && poRes.result.length > 0) {
-              let poData = poRes.result[0];
-              let poItems = poData.Items || [];
+            Alpine.data('poApp', () => ({
+                // ── Report / Form names ──
+                REPORT_NAME: 'Purchase_Order_Report',
+                FORM_NAME: 'Purchase_Order',
+                PR_REPORT_NAME: 'Purchase_Requisition_Report',
+                QC_REPORT_NAME: 'Quote_Comparison_Report',
+                UNIT_REPORT_NAME: 'Unit_Report',
+                VENDOR_REPORT_NAME: 'Vendor_Report',
+                ITEMS_REPORT_NAME: 'Items_Report',
 
-              if (typeof poItems === 'string') {
-                try { poItems = JSON.parse(poItems); } catch (e) { poItems = []; }
-              }
+                // ── State ──
+                allRecords: [],
+                filteredRecords: [],
+                isLoading: true,
+                currentFilter: 'all',
+                currentPage: 1,
+                perPage: 10,
+                searchQuery: '',
+                searchInput: '',
+                searchTimer: null,
+                sortColumn: 'po_date',
+                sortDirection: 'desc',
 
-              if (poData.order_date) this.grnForm.orderDate = dayjs(poData.order_date, ["DD-MMM-YYYY", "YYYY-MM-DD"]).format('YYYY-MM-DD');
-              if (poData.delivery_date) this.grnForm.deliveryDate = dayjs(poData.delivery_date, ["DD-MMM-YYYY", "YYYY-MM-DD"]).format('YYYY-MM-DD');
-              if (poData.Discount) this.grnForm.discount = parseFloat(poData.Discount) || 0;
+                stats: { all: '–', draft: '–', submitted: '–', approved: '–', rejected: '–', cancelled: '–' },
 
-              // --- NEW LOGIC: Calculate previously received quantities ---
-              let receivedQtyMap = {};
-              let grnRefs = rec.GRN_GRN_Ref_Number || [];
+                filterTabs: [
+                    { key: 'all', label: 'All' },
+                    { key: 'draft', label: 'Draft' },
+                    { key: 'submitted', label: 'Submitted' },
+                    { key: 'approved', label: 'Approved' },
+                    { key: 'rejected', label: 'Rejected' },
+                    { key: 'cancelled', label: 'Cancelled' }
+                ],
 
-              if (grnRefs.length > 0) {
-                // Fetch all linked GRNs in parallel
-                let grnPromises = grnRefs.map(grn =>
-                  ZOHO.CREATOR.DATA.invokeCustomApi({
-                    api_name: "Fetch_GRN_Details",
-                    http_method: "GET",
-                    query_params: 'recId=' + grn.ID,
-                  }).catch(() => null) // Prevent one failed GRN fetch from breaking the whole process
-                );
+                sortableColumns: [
+                    { key: 'po_ref', label: 'PO #', align: 'left' },
+                    { key: 'department', label: 'Department', align: 'left' },
+                    { key: 'vendor', label: 'Vendor', align: 'left' },
+                    { key: 'po_date', label: 'PO Date', align: 'left' },
+                    { key: 'delivery_date', label: 'Delivery Date', align: 'left' },
+                    { key: 'status', label: 'Status', align: 'left' },
+                    { key: 'total', label: 'Total Amount', align: 'left' }
+                ],
 
-                let grnResponses = await Promise.all(grnPromises);
+                // ── Modal ──
+                showModal: false,
+                submitting: false,
+                submitAction: 'Submitted',
+                todayStr: new Date().toISOString().split('T')[0],
 
-                // Tally up the received quantities per item ID
-                grnResponses.forEach(res => {
-                  if (res && res.result && res.result.length > 0) {
-                    let grnData = res.result[0];
-                    let gItems = grnData.Items || [];
-                    if (typeof gItems === 'string') {
-                      try { gItems = JSON.parse(gItems); } catch (e) { gItems = []; }
+                // TomSelect refs
+                tsPr: null,
+                tsDept: null,
+                tsVendor: null,
+
+                // ── Form ──
+                form: {
+                    prRef: '',
+                    prLocked: false,
+                    department: '',
+                    vendor: '',
+                    poDate: '',
+                    deliveryDate: '',
+                    notes: '',
+                    terms: '',
+                    items: [],
+                    subTotal: 0,
+                    discount: 0,
+                    totalAmount: 0,
+                    // stored for submission
+                    _prId: '',
+                    _qcId: '',
+                },
+
+                // ── Computed ──
+                get totalPages() {
+                    return Math.max(1, Math.ceil(this.filteredRecords.length / this.perPage));
+                },
+
+                get pagedRecords() {
+                    const start = (this.currentPage - 1) * this.perPage;
+                    return this.filteredRecords.slice(start, start + this.perPage);
+                },
+
+                get paginationInfoText() {
+                    const total = this.filteredRecords.length;
+                    if (total === 0) return 'Showing 0 records';
+                    const start = (this.currentPage - 1) * this.perPage + 1;
+                    const end = Math.min(this.currentPage * this.perPage, total);
+                    return `Showing ${start}–${end} of ${total} records`;
+                },
+
+                get pageButtons() {
+                    const total = this.totalPages,
+                        cur = this.currentPage;
+                    let pages = [];
+                    for (let p = 1; p <= total; p++) {
+                        if (p <= 2 || p === total || (p >= cur - 1 && p <= cur + 1)) pages.push(p);
                     }
-                    gItems.forEach(gItem => {
-                      let itemID = String(gItem.Item?.ID || gItem.Item);
-                      let qty = parseFloat(gItem.Quantity) || 0;
-                      receivedQtyMap[itemID] = (receivedQtyMap[itemID] || 0) + qty;
+                    pages = [...new Set(pages)].sort((a, b) => a - b);
+                    const btns = [];
+                    for (let i = 0; i < pages.length; i++) {
+                        if (i > 0 && pages[i] - pages[i - 1] > 1) btns.push({ type: 'ellipsis', key: 'e' + pages[i] });
+                        btns.push({ type: 'page', key: 'p' + pages[i], value: pages[i] });
+                    }
+                    return btns;
+                },
+
+                // ── INIT ──
+                init() {
+                    this.fetchRecords();
+                    this.$watch('searchInput', Alpine.debounce(() => {
+                        this.searchQuery = this.searchInput.trim();
+                        this.currentPage = 1;
+                        this.fetchRecords();
+                    }, 400));
+
+                    // Auto-open if query param says so
+                    ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
+                        const shouldCreate = String(params.createPo || '').toLowerCase() === 'true';
+                        if (shouldCreate) {
+                            setTimeout(() => this.openCreateModal(), 300);
+                        }
+                    }).catch(() => { });
+                },
+
+                // ── DATA FETCHING ──
+                buildCriteria() {
+                    const parts = [];
+                    if (this.searchQuery) {
+                        const q = this.searchQuery.replace(/'/g, "\\'");
+                        parts.push(`(PO_Ref_Number.contains("${q}") || Department.Name.contains("${q}") || Vendor.Display_Name.contains("${q}"))`);
+                    }
+                    if (this.currentFilter !== 'all') {
+                        const statusMap = {
+                            draft: 'Status == "Draft"',
+                            submitted: 'Status == "Submitted"',
+                            approved: 'Status == "Approved"',
+                            rejected: 'Status == "Rejected"',
+                            cancelled: 'Status == "Cancelled"'
+                        };
+                        if (statusMap[this.currentFilter]) parts.push(statusMap[this.currentFilter]);
+                    }
+                    return parts.join(' && ');
+                },
+
+                async fetchRecords() {
+                    this.isLoading = true;
+                    try {
+                        let acc = [],
+                            cursor = null;
+                        const crit = this.buildCriteria();
+                        do {
+                            const config = { report_name: this.REPORT_NAME, max_records: 200, field_config: 'all' };
+                            if (crit) config.criteria = crit;
+                            if (cursor) config.record_cursor = cursor;
+                            const res = await ZOHO.CREATOR.DATA.getRecords(config);
+                            if (res.code === 3000 && res.data) {
+                                acc = acc.concat(res.data);
+                                cursor = res.data.length >= 200 ? res.record_cursor : null;
+                            } else { cursor = null; }
+                        } while (cursor);
+                        this.allRecords = acc.map(r => this.decorateRecord(r));
+                        this.applySortAndRender();
+                        this.computeStats();
+                    } catch (e) {
+                        this.allRecords = [];
+                        this.filteredRecords = [];
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                decorateRecord(rec) {
+                    rec._poRef = rec.PO_Ref_Number || rec.PO_Number || '–';
+                    rec._departmentName = rec.Department?.Name || rec['Department.Name'] || rec.Department || '–';
+                    rec._vendorName = rec.Vendor?.Display_Name || rec.Vendor?.Name || rec.Vendor || '–';
+                    rec._poDateFormatted = this.formatDate(rec.PO_Date);
+                    rec._deliveryDateFormatted = this.formatDate(rec.delivery_date);
+                    const status = rec.Status || 'Draft';
+                    rec._statusLabel = status;
+                    rec._statusClass = this.getStatusClass(status);
+                    rec._totalFormatted = this.formatINR(rec.Total_Amount);
+                    return rec;
+                },
+
+                getStatusClass(status) {
+                    const map = {
+                        'Draft': 'po-badge-draft',
+                        'Submitted': 'po-badge-submitted',
+                        'Approved': 'po-badge-approved',
+                        'Rejected': 'po-badge-rejected',
+                        'Cancelled': 'po-badge-cancelled'
+                    };
+                    return map[status] || 'po-badge-draft';
+                },
+
+                applySortAndRender() {
+                    const col = this.sortColumn,
+                        dir = this.sortDirection;
+                    this.allRecords.sort((a, b) => {
+                        let va = this.getSortValue(a, col),
+                            vb = this.getSortValue(b, col);
+                        let cmp = 0;
+                        if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+                        else {
+                            va = String(va).toLowerCase();
+                            vb = String(vb).toLowerCase();
+                            cmp = va < vb ? -1 : va > vb ? 1 : 0;
+                        }
+                        return dir === 'asc' ? cmp : -cmp;
                     });
-                  }
-                });
-              }
+                    this.filteredRecords = this.allRecords;
+                },
 
-              // Clear previous instances securely
-              this.tsInstances.grnItems.forEach(ts => ts && ts.destroy());
-              this.tsInstances.grnItems = [];
-              this.grnForm.items = [];
+                getSortValue(rec, col) {
+                    switch (col) {
+                        case 'po_ref':
+                            const ref = rec.PO_Ref_Number || rec.PO_Number || '';
+                            const m = ref.match(/(\d+)$/);
+                            return m ? parseInt(m[1], 10) : ref.toLowerCase();
+                        case 'department':
+                            return rec._departmentName || '';
+                        case 'vendor':
+                            return rec._vendorName || '';
+                        case 'po_date':
+                            return rec.PO_Date ? dayjs(rec.PO_Date).valueOf() : 0;
+                        case 'delivery_date':
+                            return rec.delivery_date ? dayjs(rec.delivery_date).valueOf() : 0;
+                        case 'status':
+                            return rec.Status || 'Draft';
+                        case 'total':
+                            return parseFloat(rec.Total_Amount) || 0;
+                        default:
+                            return '';
+                    }
+                },
 
-              // --- Populate items with remaining quantities ---
-              if (poItems.length > 0) {
-                poItems.forEach(poItem => {
-                  let extractedId = String(poItem.Item?.ID || poItem.Item);
-                  let extractedName = poItem.Item?.item_name || poItem.Item?.display_value || 'Item';
+                handleSortClick(col) {
+                    if (this.sortColumn === col) {
+                        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        this.sortColumn = col;
+                        this.sortDirection = (col === 'po_date' || col === 'delivery_date' || col === 'total') ? 'desc' :
+                            'asc';
+                    }
+                    this.currentPage = 1;
+                    this.applySortAndRender();
+                },
 
-                  let originalQty = parseFloat(poItem.Quantity) || 1;
-                  let originalAmount = parseFloat(poItem.Amount) || 0;
-                  let receivedQty = receivedQtyMap[extractedId] || 0;
-                  let remainingQty = originalQty - receivedQty;
+                setFilter(key) {
+                    this.currentFilter = key;
+                    this.currentPage = 1;
+                    this.fetchRecords();
+                },
 
-                  // Only add the item to the GRN form if there is a pending quantity
-                  if (remainingQty > 0) {
-                    // Proportionally adjust the default amount for the remaining quantity
-                    let unitPrice = originalQty > 0 ? originalAmount / originalQty : 0;
-                    let remainingAmount = Number((unitPrice * remainingQty).toFixed(2));
+                onSearchInput() {
+                    clearTimeout(this.searchTimer);
+                    this.searchTimer = setTimeout(() => {
+                        this.searchQuery = this.searchInput.trim();
+                        this.currentPage = 1;
+                        this.fetchRecords();
+                    }, 400);
+                },
 
-                    this.grnForm.items.push({
-                      uid: Date.now() + Math.random(),
-                      id: extractedId,
-                      tempName: extractedName,
-                      quantity: remainingQty,
-                      maxQuantity: remainingQty, // Caps the input so they can't over-receive
-                      unitPrice: unitPrice,      // Stores the price for on-the-fly math
-                      amount: remainingAmount,
-                      comment: poItem.Comment || ''
+                goToPage(page) {
+                    this.currentPage = Math.max(1, Math.min(page, this.totalPages));
+                },
+
+                // ── STATS ──
+                async computeStats() {
+                    const q = this.searchQuery.replace(/'/g, "\\'");
+                    const searchCrit = q ? `(PO_Ref_Number.contains("${q}") || Department.Name.contains("${q}") || Vendor.Display_Name.contains("${q}"))` :
+                        '';
+                    const build = (sc) => [searchCrit, sc].filter(Boolean).join(' && ');
+                    const map = [
+                        { key: 'all', crit: build('') },
+                        { key: 'draft', crit: build('Status == "Draft"') },
+                        { key: 'submitted', crit: build('Status == "Submitted"') },
+                        { key: 'approved', crit: build('Status == "Approved"') },
+                        { key: 'rejected', crit: build('Status == "Rejected"') },
+                        { key: 'cancelled', crit: build('Status == "Cancelled"') }
+                    ];
+                    for (const m of map) {
+                        const config = { report_name: this.REPORT_NAME };
+                        if (m.crit) config.criteria = m.crit;
+                        try {
+                            const res = await ZOHO.CREATOR.DATA.getRecordCount(config);
+                            this.stats[m.key] = res.result ? res.result.records_count : 0;
+                        } catch (e) { this.stats[m.key] = 0; }
+                    }
+                },
+
+                // ── HELPERS ──
+                formatDate(d) {
+                    if (!d) return '–';
+                    const parsed = dayjs(d);
+                    return parsed.isValid() ? parsed.format('DD MMM YYYY') : d;
+                },
+
+                formatINR(val) {
+                    if (val == null || isNaN(val) || val === '') return '–';
+                    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 })
+                        .format(val);
+                },
+
+                // ── VIEW PO ──
+                viewPO(id) {
+                    ZOHO.CREATOR.UTIL.navigateParentURL({
+                        action: 'open',
+                        url: '#Page:Purchase_Order_Detailed?recordId=' + id,
+                        window: 'same'
                     });
-                  }
-                });
-              }
+                },
 
-              // Fallback if somehow all items calculate to 0 but the PO isn't marked "Fully Received"
-              if (this.grnForm.items.length === 0) {
-                Toast.fire({ icon: 'info', title: 'All items appear to be fully received.' });
-                this.addItemRow('grn');
-              }
+                // ── MODAL ──
+                openCreateModal() {
+                    this.form = {
+                        prRef: '',
+                        prLocked: false,
+                        department: '',
+                        vendor: '',
+                        poDate: this.todayStr,
+                        deliveryDate: '',
+                        notes: '',
+                        terms: '',
+                        items: [],
+                        subTotal: 0,
+                        discount: 0,
+                        totalAmount: 0,
+                        _prId: '',
+                        _qcId: ''
+                    };
+                    this.submitting = false;
+                    this.submitAction = 'Submitted';
+                    if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+                    this.showModal = true;
 
-            } else {
-              throw new Error("No PO data returned from API.");
-            }
-          } catch (e) {
-            console.error("Failed to load full PO context:", e);
-            Toast.fire({ icon: 'warning', title: 'Could not fetch full PO/GRN items. Added a blank row.' });
-            if (this.grnForm.items.length === 0) this.addItemRow('grn');
-          } finally {
-            this.isLoadingGrnDetails = false;
-          }
-        },
+                    this.$nextTick(() => {
+                        this.initPrSelect();
+                        this.initDeptSelect();
+                        this.initVendorSelect();
+                    });
+                },
 
-        async submitGRN() {
-          if (this.grnForm.items.length === 0 || this.grnForm.items.some(i => !i.id)) { Toast.fire({ icon: 'error', title: 'Please select valid items.' }); return; }
+                closeModal() {
+                    this.showModal = false;
+                    if (this.tsPr) {
+                        this.tsPr.destroy();
+                        this.tsPr = null;
+                    }
+                    if (this.tsDept) {
+                        this.tsDept.destroy();
+                        this.tsDept = null;
+                    }
+                    if (this.tsVendor) {
+                        this.tsVendor.destroy();
+                        this.tsVendor = null;
+                    }
+                },
 
-          this.isGrnSubmitting = true;
-          try {
-            const payloadData = {
-              order_date: dayjs(this.grnForm.orderDate).format('DD-MMM-YYYY'),
-              delivery_date: dayjs(this.grnForm.deliveryDate).format('DD-MMM-YYYY'),
-              status: "Submitted",
-              PO_Reference: this.grnForm.poId,
-              PO_Ref_Number: this.grnForm.poRefNum,
-              Discount: this.grnForm.discount || 0,
-              Total_Amount: this.calculatedGrnTotal,
-              Remarks: this.grnForm.remarks,
-              Items: this.grnForm.items.map(i => ({ Item: i.id, Quantity: i.quantity, Amount: i.amount, Comment: i.comment }))
-            };
+                // ── TOMSELECT: PR ──
+                initPrSelect() {
+                    this.tsPr = new TomSelect(this.$refs.prSelect, {
+                        valueField: 'ID',
+                        labelField: 'PR_Number',
+                        searchField: ['PR_Number', 'Requisition_Number'],
+                        maxItems: 1,
+                        placeholder: 'Search PR Number…',
+                        loadThrottle: 350,
+                        onChange: (val) => {
+                            this.form._prId = val;
+                            if (val) {
+                                this.fetchPRAndQC(val);
+                            } else {
+                                this.form.prLocked = false;
+                                this.form.department = '';
+                                this.form.vendor = '';
+                                this.form.poDate = this.todayStr;
+                                this.form.deliveryDate = '';
+                                this.form.items = [];
+                                this.form.subTotal = 0;
+                                this.form.totalAmount = 0;
+                                if (this.tsDept) {
+                                    this.tsDept.enable();
+                                    this.tsDept.clear(true);
+                                }
+                                if (this.tsVendor) {
+                                    this.tsVendor.enable();
+                                    this.tsVendor.clear(true);
+                                }
+                            }
+                        },
+                        load: (query, callback) => {
+                            if (!query.length) return callback();
+                            const q = query.replace(/'/g, "\\'");
+                            // PRs that are In Progress and at Quote Comparison stage, and don't have a PO yet
+                            // Also exclude PRs that already have a PO linked
+                            ZOHO.CREATOR.DATA.getRecords({
+                                report_name: this.PR_REPORT_NAME,
+                                criteria: `(PR_Number.contains("${q}") && Status == "In Progress")`
+                            }).then(res => {
+                                const data = (res.code === 3000 && res.data) ? res.data : [];
+                                // Filter out PRs that already have a PO
+                                // We'll check this by looking for PO records with Purchase_Requisition = PR.ID
+                                // But we can't do that in the load callback efficiently, so we'll filter later
+                                // For now, just return all matching PRs and we'll filter in onChange
+                                callback(data);
+                            }).catch(() => callback());
+                        },
+                        render: {
+                            option: (d, e) =>
+                                `<div class="font-mono font-medium">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>`,
+                            item: (d, e) =>
+                                `<div class="font-mono">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>`
+                        }
+                    });
+                },
 
-            // Safely push PR if it exists
-            if (this.grnForm.prId) {
-              payloadData.PR_Reference = this.grnForm.prId;
-              payloadData.PR_Ref_Number = this.grnForm.prRefNum;
-            }
+                initDeptSelect() {
+                    this.tsDept = new TomSelect(this.$refs.deptSelect, {
+                        valueField: 'ID',
+                        labelField: 'Name',
+                        searchField: 'Name',
+                        maxItems: 1,
+                        placeholder: 'Select Department…',
+                        render: {
+                            option: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`,
+                            item: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`
+                        }
+                    });
+                    // Load departments
+                    ZOHO.CREATOR.DATA.getRecords({ report_name: this.UNIT_REPORT_NAME, max_records: 200 })
+                        .then(res => {
+                            if (res.code === 3000 && res.data) {
+                                this.tsDept.addOption(res.data);
+                                this.tsDept.refreshOptions(false);
+                            }
+                        });
+                },
 
-            let res = await ZOHO.CREATOR.DATA.addRecords({ form_name: "GRN", payload: { data: payloadData } });
-            if (res.code === 3000) {
-              Toast.fire({ icon: 'success', title: 'GRN Submitted Successfully!' });
-              this.closeModal('grn');
-              this.fetchRecords(); // Refresh the PO Dashboard to reflect backend workflow updates automatically
-            } else { throw new Error(res.message); }
-          } catch (err) {
-            Toast.fire({ icon: 'error', title: err.message || 'GRN Submission failed.' });
-          } finally { this.isGrnSubmitting = false; }
-        }
-      }));
-    });
-  </script>
+                initVendorSelect() {
+                    this.tsVendor = new TomSelect(this.$refs.vendorSelect, {
+                        valueField: 'ID',
+                        labelField: 'Display_Name',
+                        searchField: ['Display_Name', 'Company_Name'],
+                        maxItems: 1,
+                        placeholder: 'Select Vendor…',
+                        render: {
+                            option: (d, e) => `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>`,
+                            item: (d, e) => `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>`
+                        }
+                    });
+                    ZOHO.CREATOR.DATA.getRecords({ report_name: this.VENDOR_REPORT_NAME, max_records: 200 })
+                        .then(res => {
+                            if (res.code === 3000 && res.data) {
+                                this.tsVendor.addOption(res.data);
+                                this.tsVendor.refreshOptions(false);
+                            }
+                        });
+                },
+
+                // ── FETCH PR + QC ──
+                async fetchPRAndQC(prId) {
+                    Toast.fire({ icon: 'info', title: 'Fetching PR & QC details…' });
+                    try {
+                        // 1. Fetch PR details
+                        const prRes = await ZOHO.CREATOR.DATA.invokeCustomApi({
+                            api_name: 'Dev__Fetch_PR_Details',
+                            http_method: 'GET',
+                            query_params: 'recId=' + prId
+                        });
+
+                        if (!prRes || !prRes.result || prRes.result.length === 0) {
+                            Toast.fire({ icon: 'error', title: 'PR not found.' });
+                            return;
+                        }
+
+                        const pr = prRes.result[0];
+                        const prNumber = pr.PR_Number || pr.Requisition_Number || '';
+
+                        // Update PR TomSelect label
+                        if (this.tsPr && this.tsPr.options[prId]) {
+                            this.tsPr.updateOption(prId, {
+                                ID: String(prId),
+                                PR_Number: prNumber,
+                                Requisition_Number: pr.Requisition_Number || ''
+                            });
+                        }
+
+                        // ── Department ──
+                        const dept = pr.Department_Unit || pr.Department;
+                        const deptId = dept?.ID || dept?.id || '';
+                        const deptName = dept?.Name || dept?.display_value || dept?.zc_display_value || '';
+                        if (deptId && this.tsDept) {
+                            if (!this.tsDept.options[deptId]) {
+                                this.tsDept.addOption({ ID: String(deptId), Name: deptName });
+                            }
+                            this.tsDept.setValue(deptId, true);
+                            this.tsDept.disable();
+                            this.form.department = deptId;
+                        } else if (deptName) {
+                            const matched = this.tsDept.options ? Object.values(this.tsDept.options).find(o => o.Name ===
+                                deptName) : null;
+                            if (matched) {
+                                this.tsDept.setValue(matched.ID, true);
+                                this.tsDept.disable();
+                                this.form.department = matched.ID;
+                            }
+                        }
+
+                        // ── Dates ──
+                        const prDate = pr.PR_Date || pr.Date;
+                        if (prDate) {
+                            const d = dayjs(prDate);
+                            if (d.isValid()) this.form.poDate = d.format('YYYY-MM-DD');
+                        }
+                        const dueDate = pr.Due_Date;
+                        if (dueDate) {
+                            const d = dayjs(dueDate);
+                            if (d.isValid()) this.form.deliveryDate = d.format('YYYY-MM-DD');
+                        }
+
+                        // ── Items from PR ──
+                        const requestedItems = pr.Requested_Items || [];
+                        this.form.items = [];
+                        const itemMap = {};
+
+                        requestedItems.forEach((ri, idx) => {
+                            const itemId = ri.Item?.ID || ri.Item?.id || '';
+                            const itemName = ri.Item?.item_name || ri.Item?.display_value || ri.Item || 'Item ' + (idx +
+                                1);
+                            const qty = parseFloat(ri.Quantity) || 0;
+                            const unit = ri.Unit || '';
+                            const comment = ri.Comment || '';
+                            const uid = Date.now() + Math.random() + idx;
+                            const row = {
+                                uid,
+                                Item: itemId,
+                                _itemName: itemName,
+                                Unit: unit,
+                                Quantity: qty,
+                                Rate: 0,
+                                Amount: 0,
+                                Comment: comment,
+                                _originalIndex: idx
+                            };
+                            this.form.items.push(row);
+                            if (itemId) itemMap[itemId] = row;
+                        });
+
+                        // ── 2. Find QC linked to this PR ──
+                        const qcRes = await ZOHO.CREATOR.DATA.getRecords({
+                            report_name: this.QC_REPORT_NAME,
+                            criteria: `PR_Ref == ${prId}`,
+                            max_records: 1
+                        });
+
+                        let qc = null;
+                        if (qcRes.code === 3000 && qcRes.data && qcRes.data.length > 0) {
+                            qc = qcRes.data[0];
+                            this.form._qcId = qc.ID;
+
+                            // ── Vendor from QC ──
+                            const vendor = qc.Finalized_Vendor || qc.Vendor || qc.Vendor_Name;
+                            const vendorId = vendor?.ID || vendor?.id || '';
+                            const vendorName = vendor?.Display_Name || vendor?.Name || vendor?.display_value || vendor;
+                            if (vendorId && this.tsVendor) {
+                                if (!this.tsVendor.options[vendorId]) {
+                                    this.tsVendor.addOption({ ID: String(vendorId), Display_Name: vendorName || 'Vendor' });
+                                }
+                                this.tsVendor.setValue(vendorId, true);
+                                this.tsVendor.disable();
+                                this.form.vendor = vendorId;
+                            } else if (vendorName) {
+                                const matched = this.tsVendor.options ? Object.values(this.tsVendor.options).find(o => o
+                                    .Display_Name === vendorName) : null;
+                                if (matched) {
+                                    this.tsVendor.setValue(matched.ID, true);
+                                    this.tsVendor.disable();
+                                    this.form.vendor = matched.ID;
+                                }
+                            }
+
+                            // ── Rates from QC QuoteLines ──
+                            const qcLines = qc.Quotation_Comparison_Statement || qc.QuoteLines || [];
+                            qcLines.forEach(line => {
+                                const lineItemId = line.Items?.[0]?.ID || line.Items_Master?.ID || line.Item?.ID ||
+                                    line.Item || '';
+                                const lineItemName = line.Items?.[0]?.item_name || line.Items_Master?.item_name ||
+                                    line.Item?.item_name || '';
+                                const rate = parseFloat(line.Negotiated_Rate) || parseFloat(line.Basic_Rate) || 0;
+                                const landed = parseFloat(line.Landed_Rate) || 0;
+
+                                // Find matching item in our items list
+                                let matchedRow = null;
+                                if (lineItemId && itemMap[lineItemId]) {
+                                    matchedRow = itemMap[lineItemId];
+                                } else if (lineItemName) {
+                                    // Try to match by name
+                                    for (const key in itemMap) {
+                                        if (itemMap[key]._itemName.toLowerCase() === lineItemName.toLowerCase()) {
+                                            matchedRow = itemMap[key];
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if (matchedRow) {
+                                    matchedRow.Rate = rate || landed;
+                                    matchedRow.Amount = (matchedRow.Rate || 0) * (matchedRow.Quantity || 0);
+                                }
+                            });
+
+                            // For any items without a rate, try to find from QC by item name
+                            this.form.items.forEach(row => {
+                                if (!row.Rate || row.Rate === 0) {
+                                    // Try to find in QC lines by item name
+                                    qcLines.forEach(line => {
+                                        const lineItemName = line.Items?.[0]?.item_name || line
+                                            .Items_Master?.item_name || line.Item?.item_name || '';
+                                        if (lineItemName && row._itemName.toLowerCase() === lineItemName
+                                            .toLowerCase()) {
+                                            const rate = parseFloat(line.Negotiated_Rate) || parseFloat(
+                                                line.Basic_Rate) || 0;
+                                            if (rate > 0) {
+                                                row.Rate = rate;
+                                                row.Amount = rate * (row.Quantity || 0);
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+
+                            this.form.prLocked = true;
+                            this.calcTotals();
+                            Toast.fire({ icon: 'success', title: `PR & QC loaded — ${this.form.items.length} item(s)` });
+
+                        } else {
+                            // No QC found — still lock PR fields but no vendor/rates
+                            this.form.prLocked = true;
+                            this.form._qcId = '';
+                            this.calcTotals();
+                            Toast.fire({ icon: 'warning', title: 'PR loaded, but no QC found. Please fill vendor & rates manually.' });
+                        }
+
+                    } catch (err) {
+                        console.error('fetchPRAndQC error', err);
+                        Toast.fire({ icon: 'error', title: 'Failed to load PR details' });
+                    }
+                },
+
+                // ── CALCULATE TOTALS ──
+                calcTotals() {
+                    let subTotal = 0;
+                    this.form.items.forEach(item => {
+                        const rate = parseFloat(item.Rate) || 0;
+                        const qty = parseFloat(item.Quantity) || 0;
+                        item.Amount = rate * qty;
+                        subTotal += item.Amount;
+                    });
+                    this.form.subTotal = subTotal;
+                    const discount = parseFloat(this.form.discount) || 0;
+                    this.form.totalAmount = Math.max(0, subTotal - discount);
+                },
+
+                // ── SUBMIT PO ──
+                async submitPO() {
+                    // Validate
+                    if (!this.form._prId) {
+                        Toast.fire({ icon: 'error', title: 'Please select a Purchase Requisition.' });
+                        return;
+                    }
+                    if (!this.form.department) {
+                        Toast.fire({ icon: 'error', title: 'Department is required.' });
+                        return;
+                    }
+                    if (!this.form.vendor) {
+                        Toast.fire({ icon: 'error', title: 'Vendor is required.' });
+                        return;
+                    }
+                    if (!this.form.poDate) {
+                        Toast.fire({ icon: 'error', title: 'PO Date is required.' });
+                        return;
+                    }
+                    if (!this.form.deliveryDate) {
+                        Toast.fire({ icon: 'error', title: 'Delivery Date is required.' });
+                        return;
+                    }
+                    if (this.form.items.length === 0) {
+                        Toast.fire({ icon: 'error', title: 'At least one item is required.' });
+                        return;
+                    }
+                    // Check each item has a rate
+                    let hasMissingRate = false;
+                    this.form.items.forEach(item => {
+                        if (!item.Rate || item.Rate <= 0) hasMissingRate = true;
+                    });
+                    if (hasMissingRate) {
+                        Toast.fire({ icon: 'warning', title: 'Some items have no rate. Please fill manually.' });
+                        return;
+                    }
+
+                    this.submitting = true;
+
+                    try {
+                        const status = this.submitAction === 'Draft' ? 'Draft' : 'Submitted';
+
+                        // Build items grid
+                        const itemsGrid = this.form.items.map(item => ({
+                            Item: item.Item ? [item.Item] : [],
+                            Rate: parseFloat(item.Rate) || 0,
+                            Quantity: parseFloat(item.Quantity) || 0,
+                            Amount: parseFloat(item.Amount) || 0,
+                            Comment: item.Comment || ''
+                        }));
+
+                        const payload = {
+                            data: {
+                                Department: this.form.department,
+                                Vendor: this.form.vendor,
+                                PO_Date: this.formatDateForZoho(this.form.poDate),
+                                delivery_date: this.formatDateForZoho(this.form.deliveryDate),
+                                Status: status,
+                                Notes: this.form.notes || '',
+                                Terms_Conditions: this.form.terms || '',
+                                Sub_Total: this.form.subTotal,
+                                Discount: parseFloat(this.form.discount) || 0,
+                                Total_Amount: this.form.totalAmount,
+                                Purchase_Requisition: this.form._prId,
+                                Quote_Comparison: this.form._qcId || '',
+                                Items: itemsGrid,
+                                CGST: 0,
+                                SGST: 0,
+                                IGST: 0,
+                                purchase_requisition_id: this.form._prId
+                            }
+                        };
+
+                        const res = await ZOHO.CREATOR.DATA.addRecords({ form_name: this.FORM_NAME, payload });
+
+                        if (res.code === 3000 && res.data) {
+                            const newId = res.data.ID;
+
+                            // Upload files
+                            const files = this.$refs.fileInput?.files || [];
+                            if (files.length > 0) {
+                                const uploads = Array.from(files).map(f =>
+                                    ZOHO.CREATOR.FILE.uploadFile({
+                                        report_name: this.REPORT_NAME,
+                                        field_name: 'Attachments',
+                                        file: f,
+                                        id: newId
+                                    })
+                                );
+                                await Promise.all(uploads);
+                            }
+
+                            const msg = status === 'Draft' ? 'PO saved as Draft!' : 'PO submitted for approval!';
+                            Toast.fire({ icon: 'success', title: msg });
+                            this.closeModal();
+                            this.searchInput = '';
+                            this.searchQuery = '';
+                            this.fetchRecords();
+                        } else {
+                            throw new Error(res.message || 'Creation failed.');
+                        }
+                    } catch (err) {
+                        Toast.fire({ icon: 'error', title: err.message || 'Submission failed.' });
+                    } finally {
+                        this.submitting = false;
+                    }
+                },
+
+                formatDateForZoho(dateStr) {
+                    if (!dateStr) return '';
+                    const d = dayjs(dateStr);
+                    return d.isValid() ? d.format('DD-MMM-YYYY') : dateStr;
+                }
+
+            }));
+        });
+    </script>
 </body>
 
 </html>
