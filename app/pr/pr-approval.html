@@ -2,1185 +2,1207 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PR Approval & Creation</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PR Approval & Creation</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
-    rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+        rel="stylesheet">
 
-  <script
-    src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js"></script>
-  <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js"></script>
+    <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
-  <style>
-    /* ── Modal overlay ── */
-    .pr-modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 50;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    <style>
+        /* ── Modal overlay ── */
+        .pr-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
 
-    .pr-modal-overlay.active {
-      display: flex;
-    }
+        .pr-modal-overlay.active {
+            display: flex;
+        }
 
-    .pr-modal-bg {
-      position: absolute;
-      inset: 0;
-      background: rgba(17, 24, 39, 0.4);
-      animation: fadeIn 0.15s ease-out;
-    }
+        .pr-modal-bg {
+            position: absolute;
+            inset: 0;
+            background: rgba(17, 24, 39, 0.4);
+            animation: fadeIn 0.15s ease-out;
+        }
 
-    .pr-modal-box {
-      position: relative;
-      z-index: 1;
-      background: #fff;
-      border-radius: 11px;
-      width: 100%;
-      max-width: 440px;
-      overflow: hidden;
-      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
-      animation: slideUp 0.2s ease-out;
-    }
+        .pr-modal-box {
+            position: relative;
+            z-index: 1;
+            background: #fff;
+            border-radius: 11px;
+            width: 100%;
+            max-width: 440px;
+            overflow: hidden;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+            animation: slideUp 0.2s ease-out;
+        }
 
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
 
-      to {
-        opacity: 1;
-      }
-    }
+            to {
+                opacity: 1;
+            }
+        }
 
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(16px);
-      }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
 
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    /* ── Loading skeleton pulse ── */
-    .skeleton-pulse {
-      background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: 4px;
-    }
+        /* ── Loading skeleton pulse ── */
+        .skeleton-pulse {
+            background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+        }
 
-    @keyframes shimmer {
-      0% {
-        background-position: 200% 0;
-      }
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
 
-      100% {
-        background-position: -200% 0;
-      }
-    }
+            100% {
+                background-position: -200% 0;
+            }
+        }
 
-    /* ── Pill active state ── */
-    .pill-active {
-      color: #1B5CA8 !important;
-      background: #fff !important;
-      font-weight: 600 !important;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-    }
+        /* ── Pill active state ── */
+        .pill-active {
+            color: #1B5CA8 !important;
+            background: #fff !important;
+            font-weight: 600 !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+        }
 
-    /* ── Sticky Actions column ── */
-    .sticky-action-cell {
-      position: sticky;
-      right: 0;
-      z-index: 2;
-      box-shadow: -4px 0 8px -2px rgba(0, 0, 0, 0.06);
-    }
+        /* ── Sticky Actions column ── */
+        .sticky-action-cell {
+            position: sticky;
+            right: 0;
+            z-index: 2;
+            box-shadow: -4px 0 8px -2px rgba(0, 0, 0, 0.06);
+        }
 
-    thead .sticky-action-cell {
-      z-index: 3;
-    }
+        thead .sticky-action-cell {
+            z-index: 3;
+        }
 
-    /* ── Sortable headers ── */
-    th[data-sort] {
-      cursor: pointer;
-      user-select: none;
-      transition: background 0.15s;
-    }
+        /* ── Sortable headers ── */
+        th[data-sort] {
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s;
+        }
 
-    th[data-sort]:hover {
-      background: #e9ecf1;
-    }
+        th[data-sort]:hover {
+            background: #e9ecf1;
+        }
 
-    .sort-indicator {
-      display: inline-block;
-      width: 14px;
-      text-align: center;
-      font-size: 10px;
-      color: #9ca3af;
-      margin-left: 2px;
-      vertical-align: middle;
-    }
+        .sort-indicator {
+            display: inline-block;
+            width: 14px;
+            text-align: center;
+            font-size: 10px;
+            color: #9ca3af;
+            margin-left: 2px;
+            vertical-align: middle;
+        }
 
-    th[data-sort].sort-active .sort-indicator {
-      color: #1B5CA8;
-    }
+        th[data-sort].sort-active .sort-indicator {
+            color: #1B5CA8;
+        }
 
-    /* ── Spinner ── */
-    .pr-spinner {
-      border: 2.5px solid #e5e7eb;
-      border-top-color: #1B5CA8;
-      border-radius: 50%;
-      width: 28px;
-      height: 28px;
-      animation: spin 0.7s linear infinite;
-    }
-    
-    /* ── Draft Spinner ── */
-    .draft-spinner {
-      border: 2px solid #e5e7eb;
-      border-top-color: #6b7280;
-      border-radius: 50%;
-      width: 14px;
-      height: 14px;
-      animation: spin 0.7s linear infinite;
-    }
+        /* ── Spinner ── */
+        .pr-spinner {
+            border: 2.5px solid #e5e7eb;
+            border-top-color: #1B5CA8;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            animation: spin 0.7s linear infinite;
+        }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
+        /* ── Draft Spinner ── */
+        .draft-spinner {
+            border: 2px solid #e5e7eb;
+            border-top-color: #6b7280;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            animation: spin 0.7s linear infinite;
+        }
 
-    /* ── Tom Select overrides to match Tailwind design ── */
-    .ts-control {
-      border: 1px solid #e5e7eb !important;
-      border-radius: 0.5rem !important;
-      font-size: 0.8125rem !important;
-      padding: 0.5rem 0.75rem !important;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
-      font-family: inherit;
-      background-color: #f9fafb !important;
-      transition: all 0.2s ease-in-out;
-    }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
-    .ts-control.focus {
-      border-color: #1B5CA8 !important;
-      background-color: #ffffff !important;
-      box-shadow: 0 0 0 3px rgba(27, 92, 168, 0.15) !important;
-    }
+        /* ── Tom Select overrides to match Tailwind design ── */
+        .ts-control {
+            border: 1px solid #e5e7eb !important;
+            border-radius: 0.5rem !important;
+            font-size: 0.8125rem !important;
+            padding: 0.5rem 0.75rem !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+            font-family: inherit;
+            background-color: #f9fafb !important;
+            transition: all 0.2s ease-in-out;
+        }
 
-    .ts-dropdown {
-      border-radius: 0.5rem !important;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-      border: 1px solid #f3f4f6 !important;
-      padding: 0.35rem !important;
-      margin-top: 4px !important;
-      font-size: 0.8125rem !important;
-    }
+        .ts-control.focus {
+            border-color: #1B5CA8 !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(27, 92, 168, 0.15) !important;
+        }
 
-    .ts-dropdown .option {
-      border-radius: 0.375rem !important;
-      padding: 0.5rem 0.75rem !important;
-      transition: all 0.15s ease;
-      cursor: pointer;
-    }
+        .ts-dropdown {
+            border-radius: 0.5rem !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+            border: 1px solid #f3f4f6 !important;
+            padding: 0.35rem !important;
+            margin-top: 4px !important;
+            font-size: 0.8125rem !important;
+        }
 
-    .ts-dropdown .active {
-      background-color: #f3f4f6 !important;
-      color: #111827 !important;
-    }
+        .ts-dropdown .option {
+            border-radius: 0.375rem !important;
+            padding: 0.5rem 0.75rem !important;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
 
-    .ts-dropdown .option:hover {
-      background-color: #e5e7eb !important;
-    }
-  </style>
-  <style>
-    [x-cloak] {
-      display: none !important;
-    }
-  </style>
+        .ts-dropdown .active {
+            background-color: #f3f4f6 !important;
+            color: #111827 !important;
+        }
+
+        .ts-dropdown .option:hover {
+            background-color: #e5e7eb !important;
+        }
+    </style>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50 p-6">
-  <div id="app" x-data="prApp()" x-init="init()" x-cloak
-    class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-6xl mx-auto">
-    <div class="grid grid-cols-5 gap-2.5 mb-4">
-      <div
-        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-[#1B5CA8]">
-        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Total</div>
-        <div class="text-[25px] font-bold leading-none text-[#1B5CA8]" x-text="stats.all">–</div>
-        <div class="text-[11px] text-gray-400 mt-1.5">All purchase requests</div>
-      </div>
-      <div
-        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-amber-500">
-        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Pending</div>
-        <div class="text-[25px] font-bold leading-none text-amber-500" x-text="stats.pending">–</div>
-        <div class="text-[11px] text-gray-400 mt-1.5">Awaiting action</div>
-      </div>
-      <div
-        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-blue-500">
-        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">In Progress</div>
-        <div class="text-[25px] font-bold leading-none text-blue-500" x-text="stats.in_progress">–</div>
-        <div class="text-[11px] text-gray-400 mt-1.5">Being processed</div>
-      </div>
-      <div
-        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-emerald-600">
-        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Completed</div>
-        <div class="text-[25px] font-bold leading-none text-emerald-600" x-text="stats.completed">–</div>
-        <div class="text-[11px] text-gray-400 mt-1.5">Payment done</div>
-      </div>
-      <div
-        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-red-600">
-        <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Rejected</div>
-        <div class="text-[25px] font-bold leading-none text-red-600" x-text="stats.rejected">–</div>
-        <div class="text-[11px] text-gray-400 mt-1.5">Declined</div>
-      </div>
-    </div>
-
-    <div class="flex items-center justify-between mt-[18px] mb-2">
-      <span class="text-[13.5px] font-medium text-gray-900">Purchase Requests</span>
-    </div>
-
-    <div class="flex items-center justify-between gap-2.5 mb-2 flex-wrap">
-      <div class="flex bg-gray-100 rounded-full p-[3px] gap-[2px]">
-        <template x-for="tab in filterTabs" :key="tab.key">
-          <button @click="setFilter(tab.key)" type="button"
-            class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150"
-            :class="currentFilter === tab.key ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'">
-            <span x-text="tab.label"></span> (<span x-text="stats[tab.key]"></span>)</button>
-        </template>
-      </div>
-
-      <div class="flex gap-2 items-center">
-        <div class="relative">
-          <i class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px] pointer-events-none"
-            aria-hidden="true"></i>
-          <input x-model="searchInputValue" @input="onSearchInput()"
-            class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[190px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10"
-            type="text" placeholder="Search by PR #, title…">
+    <div id="app" x-data="prApp()" x-init="init()" x-cloak
+        class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-6xl mx-auto">
+        <div class="grid grid-cols-5 gap-2.5 mb-4">
+            <div
+                class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-[#1B5CA8]">
+                <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Total</div>
+                <div class="text-[25px] font-bold leading-none text-[#1B5CA8]" x-text="stats.all">–</div>
+                <div class="text-[11px] text-gray-400 mt-1.5">All purchase requests</div>
+            </div>
+            <div
+                class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-amber-500">
+                <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Pending</div>
+                <div class="text-[25px] font-bold leading-none text-amber-500" x-text="stats.pending">–</div>
+                <div class="text-[11px] text-gray-400 mt-1.5">Awaiting action</div>
+            </div>
+            <div
+                class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-blue-500">
+                <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">In Progress</div>
+                <div class="text-[25px] font-bold leading-none text-blue-500" x-text="stats.in_progress">–</div>
+                <div class="text-[11px] text-gray-400 mt-1.5">Being processed</div>
+            </div>
+            <div
+                class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-emerald-600">
+                <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Completed</div>
+                <div class="text-[25px] font-bold leading-none text-emerald-600" x-text="stats.completed">–</div>
+                <div class="text-[11px] text-gray-400 mt-1.5">Payment done</div>
+            </div>
+            <div
+                class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-red-600">
+                <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Rejected</div>
+                <div class="text-[25px] font-bold leading-none text-red-600" x-text="stats.rejected">–</div>
+                <div class="text-[11px] text-gray-400 mt-1.5">Declined</div>
+            </div>
         </div>
-        <button @click="openCreateModal()"
-          class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-all shadow-sm">
-          <i class="bi bi-plus-lg"></i> Create PR
-        </button>
-      </div>
-    </div>
 
-    <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
-      <table class="w-full border-collapse" style="min-width:804px">
-        <colgroup>
-          <col style="width:120px">
-          <col style="width:108px">
-          <col style="width:108px">
-          <col style="width:90px">
-          <col style="width:90px">
-          <col style="width:90px">
-          <col style="width:108px">
-          <col style="width:130px">
-          <col style="width:90px">
-          <col style="width:auto">
-        </colgroup>
-        <thead>
-          <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
-            <template x-for="col in sortableColumns" :key="col.key">
-              <th @click="handleSortClick(col.key)"
-                class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide whitespace-nowrap"
-                :class="[col.align === 'center' ? 'text-center' : 'text-left', sortColumn === col.key ? 'sort-active' : '']">
-                <span x-text="col.label"></span><span class="sort-indicator"
-                  x-text="sortColumn === col.key ? (sortDirection === 'asc' ? '▲' : '▼') : ''"></span>
-              </th>
-            </template>
-            <th
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap bg-gray-50 sticky-action-cell">
-              Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <template x-if="isLoading">
-            <tr>
-              <td colspan="9" class="px-3 py-12 text-center">
-                <div class="flex flex-col items-center gap-3">
-                  <div class="pr-spinner"></div>
-                  <div class="text-sm text-gray-400 font-medium">Loading purchase requests…</div>
+        <div class="flex items-center justify-between mt-[18px] mb-2">
+            <span class="text-[13.5px] font-medium text-gray-900">Purchase Requests</span>
+        </div>
+
+        <div class="flex items-center justify-between gap-2.5 mb-2 flex-wrap">
+            <div class="flex bg-gray-100 rounded-full p-[3px] gap-[2px]">
+                <template x-for="tab in filterTabs" :key="tab.key">
+                    <button @click="setFilter(tab.key)" type="button"
+                        class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150"
+                        :class="currentFilter === tab.key ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'">
+                        <span x-text="tab.label"></span> (<span x-text="stats[tab.key]"></span>)</button>
+                </template>
+            </div>
+
+            <div class="flex gap-2 items-center">
+                <div class="relative">
+                    <i class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px] pointer-events-none"
+                        aria-hidden="true"></i>
+                    <input x-model="searchInputValue" @input="onSearchInput()"
+                        class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[190px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10"
+                        type="text" placeholder="Search by PR #, title…">
                 </div>
-              </td>
-            </tr>
-          </template>
-          <template x-if="!isLoading && pagedRecords.length === 0">
-            <tr>
-              <td colspan="9" class="px-3 py-12 text-center">
-                <div class="text-gray-400">
-                  <i class="bi bi-clipboard-x text-3xl mb-2 block"></i>
-                  <div class="text-sm font-medium text-gray-500">No records found</div>
-                </div>
-              </td>
-            </tr>
-          </template>
-          <template x-for="rec in pagedRecords" :key="rec.ID">
-            <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors duration-150 group">
-              <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap"><span
-                  class="font-semibold text-[#1B5CA8] font-mono text-[11px]" x-text="rec._prNumber"></span></td>
-              <td
-                class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900"
-                x-text="rec.Department.Name || '–'"></td>
-              <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[12px]"
-                x-text="rec._requesterName"></td>
-              <td
-                class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-gray-500"
-                x-text="rec._dateFormatted"></td>
-              <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap">
-                <span
-                  class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap border"
-                  :class="[rec._stageBadge.border, rec._stageBadge.bg, rec._stageBadge.text]">
-                  <span class="w-[5px] h-[5px] rounded-full shrink-0" :class="rec._stageBadge.dot"></span><span
-                    x-text="rec._stageBadge.label"></span>
-                </span>
-              </td>
-              <td class="px-3 py-[9px] align-middle whitespace-nowrap text-center relative overflow-visible">
-                <template x-if="rec._rfqList.length > 0">
-                  <div class="group inline-block relative">
-                    <span
-                      class="inline-flex items-center justify-center font-medium text-[11px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded cursor-default border border-indigo-100 transition-colors group-hover:bg-indigo-100">
-                      Yes <span class="bg-indigo-600 text-white text-[9px] px-1.5 py-[1px] rounded-full ml-1 font-bold"
-                        x-text="rec._rfqList.length"></span>
-                    </span>
-                    <div
-                      class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-[100] min-w-[140px] bg-white border border-gray-200 rounded-lg shadow-xl py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 before:content-[''] before:absolute before:-bottom-2 before:left-0 before:w-full before:h-2 after:content-[''] after:absolute after:-bottom-1.5 after:left-1/2 after:-translate-x-1/2 after:border-4 after:border-transparent after:border-t-white">
-                      <div
-                        class="text-[10px] font-bold text-gray-400 uppercase px-3 py-1 mb-1 border-b border-gray-100">
-                        Linked RFQs</div>
-                      <div class="max-h-[160px] overflow-y-auto">
-                        <template x-for="rfq in rec._rfqList" :key="rfq.ID || rfq.zc_display_value">
-                          <button @click="openRfq(rfq.ID)"
-                            class="block w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 transition-colors whitespace-nowrap">
-                            <i class="bi bi-file-earmark-text mr-1 text-indigo-500"></i> <span
-                              x-text="rfq.zc_display_value || '–'"></span></button>
+                <button @click="openCreateModal()"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-all shadow-sm">
+                    <i class="bi bi-plus-lg"></i> Create PR
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
+            <table class="w-full border-collapse" style="min-width:804px">
+                <colgroup>
+                    <col style="width:120px">
+                    <col style="width:108px">
+                    <col style="width:108px">
+                    <col style="width:90px">
+                    <col style="width:90px">
+                    <col style="width:90px">
+                    <col style="width:108px">
+                    <col style="width:130px">
+                    <col style="width:90px">
+                    <col style="width:auto">
+                </colgroup>
+                <thead>
+                    <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
+                        <template x-for="col in sortableColumns" :key="col.key">
+                            <th @click="handleSortClick(col.key)"
+                                class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide whitespace-nowrap"
+                                :class="[col.align === 'center' ? 'text-center' : 'text-left', sortColumn === col.key ? 'sort-active' : '']">
+                                <span x-text="col.label"></span><span class="sort-indicator"
+                                    x-text="sortColumn === col.key ? (sortDirection === 'asc' ? '▲' : '▼') : ''"></span>
+                            </th>
                         </template>
-                      </div>
-                    </div>
-                  </div>
-                </template>
-                <template x-if="rec._rfqList.length === 0">
-                  <span class="inline-flex items-center justify-center font-medium text-[11px]"
-                    :class="rec.Request_For_Quotation === 'Yes' ? 'text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded' : 'text-gray-500'"
-                    x-text="rec.Request_For_Quotation || 'No'"></span>
-                </template>
-              </td>
-              <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap">
-                <span
-                  class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap border"
-                  :class="[rec._statusBadge.border, rec._statusBadge.bg, rec._statusBadge.text]">
-                  <span class="w-[5px] h-[5px] rounded-full shrink-0" :class="rec._statusBadge.dot"></span><span
-                    x-text="rec._statusLabel"></span>
-                </span>
-              </td>
-              <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap">
-                <span
-                  class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap border"
-                  :class="[rec._itemApprovalBadge.border, rec._itemApprovalBadge.bg, rec._itemApprovalBadge.text]">
-                  <span class="w-[5px] h-[5px] rounded-full shrink-0" :class="rec._itemApprovalBadge.dot"></span><span
-                    x-text="rec._itemApproval"></span>
-                </span>
-              </td>
-              <td
-                class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap bg-white group-hover:bg-[#EBF3FC] sticky-action-cell">
-                <div class="flex items-center gap-1.5">
-                  <button @click="openPr(rec.ID)"
-                    class="inline-flex items-center gap-[3px] px-2 py-[3px] rounded bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 text-[11px] font-medium transition-colors"><i
-                      class="bi bi-box-arrow-up-right"></i> View</button>
-                </div>
-              </td>
-            </tr>
-          </template>
-        </tbody>
-      </table>
-
-      <div x-show="filteredRecords.length > 0"
-        class="flex items-center justify-between px-[13px] py-[9px] border-t border-gray-200 bg-gray-50 text-xs text-gray-500">
-        <span x-text="paginationInfoText"></span>
-        <div class="flex gap-1">
-          <button @click="goToPage(currentPage - 1)" :disabled="currentPage <= 1"
-            class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors"
-            :class="currentPage <= 1 ? 'opacity-40 cursor-not-allowed' : 'hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]'">
-            <i class="bi bi-chevron-left"></i>
-          </button>
-          <template x-for="pg in pageButtons" :key="pg.key">
-            <button type="button" @click="pg.type === 'page' && goToPage(pg.value)" :disabled="pg.type === 'ellipsis'"
-              class="min-w-[27px] h-[27px] px-1 rounded inline-flex items-center justify-center transition-colors"
-              :class="pg.type === 'ellipsis' ? 'border-0 text-gray-400 text-xs cursor-default' : (pg.value === currentPage ? 'border border-[#1B5CA8] bg-[#1B5CA8] text-white font-semibold' : 'border border-gray-300 bg-white text-gray-600 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]')"
-              x-text="pg.type === 'ellipsis' ? '…' : pg.value"></button>
-          </template>
-          <button @click="goToPage(currentPage + 1)" :disabled="currentPage >= totalPages"
-            class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors"
-            :class="currentPage >= totalPages ? 'opacity-40 cursor-not-allowed' : 'hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]'">
-            <i class="bi bi-chevron-right"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div class="pr-modal-overlay" :class="{ active: showModal }">
-      <div class="pr-modal-bg" @click="closeModal()"></div>
-      <div class="pr-modal-box max-w-5xl" style="max-height: 90vh; overflow-y: auto;">
-        <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
-          <h3 class="text-[15px] font-bold text-gray-800">New Purchase Requisition</h3>
-          <button @click="closeModal()" class="text-gray-400 hover:text-gray-700 transition-colors"><i
-              class="bi bi-x-lg text-lg"></i></button>
-        </div>
-
-        <form @submit.prevent="submitNewPR()" class="p-5">
-          <div class="grid grid-cols-2 gap-4 mb-5">
-            <div>
-              <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Unit / Department
-                <span class="text-red-500">*</span></label>
-              <select x-ref="prUnit" required class="w-full text-xs ts-unit-select"
-                placeholder="Select Unit..."></select>
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Due Date <span
-                  class="text-red-500">*</span></label>
-              <input type="date" x-ref="prDueDate" x-model="prDueDate" :min="todayStr" required
-                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
-            </div>
-          </div>
-          <div class="mb-5 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
-            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-              <span class="text-xs font-semibold text-gray-700  tracking-wide">Items <span
-                  class="text-red-500">*</span></span>
-              <button type="button" @click="addGridRow()"
-                class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+
-                Add Item</button>
-            </div>
-            <div class="overflow-x-auto" style="overflow:visible;">
-              <table class="w-full border-collapse min-w-[600px]">
-                <thead class="bg-white border-b border-gray-200">
-                  <tr>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[35%]">Item</th>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[12%]">Unit</th>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[12%]">Qty</th>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[20%]">Due Date</th>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left">Comment</th>
-                    <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-center w-10"></th>
-                  </tr>
-                </thead>
-                <tbody class="bg-white">
-                  <template x-for="row in itemRows" :key="row.id">
-                    <tr class="border-b border-gray-100 last:border-0 item-row hover:bg-gray-50/50 transition-colors">
-                      <td class="px-3 py-2 relative">
-                        <select x-init="$nextTick(() => initItemSelect($el, row))" required
-                          class="w-full text-xs ts-item-select" placeholder="Search item..."></select>
-                      </td>
-                      <td class="px-3 py-2"><input type="text" x-model="row.unit" readonly placeholder="Unit"
-                          class="w-full py-1.5 px-2.5 bg-gray-100 border border-gray-200 rounded-md text-[13px] text-gray-500 focus:outline-none shadow-sm cursor-not-allowed">
-                      </td>
-                      <td class="px-3 py-2"><input type="number" required min="1" x-model.number="row.quantity"
-                          class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
-                      </td>
-                      <td class="px-3 py-2"><input type="date" required x-model="row.dueDate"
-                          class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
-                      </td>
-                      <td class="px-3 py-2"><input type="text" x-model="row.comment" placeholder="Optional"
-                          class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
-                      </td>
-                      <td class="px-3 py-2 text-center">
-                        <button type="button" @click="removeGridRow(row.id)"
-                          class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50"><i
-                            class="bi bi-trash"></i></button>
-                      </td>
+                        <th
+                            class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap bg-gray-50 sticky-action-cell">
+                            Actions</th>
                     </tr>
-                  </template>
+                </thead>
+                <tbody>
+                    <template x-if="isLoading">
+                        <tr>
+                            <td colspan="9" class="px-3 py-12 text-center">
+                                <div class="flex flex-col items-center gap-3">
+                                    <div class="pr-spinner"></div>
+                                    <div class="text-sm text-gray-400 font-medium">Loading purchase requests…</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
+                    <template x-if="!isLoading && pagedRecords.length === 0">
+                        <tr>
+                            <td colspan="9" class="px-3 py-12 text-center">
+                                <div class="text-gray-400">
+                                    <i class="bi bi-clipboard-x text-3xl mb-2 block"></i>
+                                    <div class="text-sm font-medium text-gray-500">No records found</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
+                    <template x-for="rec in pagedRecords" :key="rec.ID">
+                        <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors duration-150 group">
+                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap"><span
+                                    class="font-semibold text-[#1B5CA8] font-mono text-[11px]"
+                                    x-text="rec._prNumber"></span></td>
+                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900"
+                                x-text="rec.Department.Name || '–'"></td>
+                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[12px]"
+                                x-text="rec._requesterName"></td>
+                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-gray-500"
+                                x-text="rec._dateFormatted"></td>
+                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap">
+                                <span
+                                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap border"
+                                    :class="[rec._stageBadge.border, rec._stageBadge.bg, rec._stageBadge.text]">
+                                    <span class="w-[5px] h-[5px] rounded-full shrink-0"
+                                        :class="rec._stageBadge.dot"></span><span x-text="rec._stageBadge.label"></span>
+                                </span>
+                            </td>
+                            <td
+                                class="px-3 py-[9px] align-middle whitespace-nowrap text-center relative overflow-visible">
+                                <template x-if="rec._rfqList.length > 0">
+                                    <div class="group inline-block relative">
+                                        <span
+                                            class="inline-flex items-center justify-center font-medium text-[11px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded cursor-default border border-indigo-100 transition-colors group-hover:bg-indigo-100">
+                                            Yes <span
+                                                class="bg-indigo-600 text-white text-[9px] px-1.5 py-[1px] rounded-full ml-1 font-bold"
+                                                x-text="rec._rfqList.length"></span>
+                                        </span>
+                                        <div
+                                            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-[100] min-w-[140px] bg-white border border-gray-200 rounded-lg shadow-xl py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 before:content-[''] before:absolute before:-bottom-2 before:left-0 before:w-full before:h-2 after:content-[''] after:absolute after:-bottom-1.5 after:left-1/2 after:-translate-x-1/2 after:border-4 after:border-transparent after:border-t-white">
+                                            <div
+                                                class="text-[10px] font-bold text-gray-400 uppercase px-3 py-1 mb-1 border-b border-gray-100">
+                                                Linked RFQs</div>
+                                            <div class="max-h-[160px] overflow-y-auto">
+                                                <template x-for="rfq in rec._rfqList"
+                                                    :key="rfq.ID || rfq.zc_display_value">
+                                                    <button @click="openRfq(rfq.ID)"
+                                                        class="block w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 transition-colors whitespace-nowrap">
+                                                        <i class="bi bi-file-earmark-text mr-1 text-indigo-500"></i>
+                                                        <span x-text="rfq.zc_display_value || '–'"></span></button>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template x-if="rec._rfqList.length === 0">
+                                    <span class="inline-flex items-center justify-center font-medium text-[11px]"
+                                        :class="rec.Request_For_Quotation === 'Yes' ? 'text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded' : 'text-gray-500'"
+                                        x-text="rec.Request_For_Quotation || 'No'"></span>
+                                </template>
+                            </td>
+                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap">
+                                <span
+                                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap border"
+                                    :class="[rec._statusBadge.border, rec._statusBadge.bg, rec._statusBadge.text]">
+                                    <span class="w-[5px] h-[5px] rounded-full shrink-0"
+                                        :class="rec._statusBadge.dot"></span><span x-text="rec._statusLabel"></span>
+                                </span>
+                            </td>
+                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap">
+                                <span
+                                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap border"
+                                    :class="[rec._itemApprovalBadge.border, rec._itemApprovalBadge.bg, rec._itemApprovalBadge.text]">
+                                    <span class="w-[5px] h-[5px] rounded-full shrink-0"
+                                        :class="rec._itemApprovalBadge.dot"></span><span
+                                        x-text="rec._itemApproval"></span>
+                                </span>
+                            </td>
+                            <td
+                                class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap bg-white group-hover:bg-[#EBF3FC] sticky-action-cell">
+                                <div class="flex items-center gap-1.5">
+                                    <button @click="openPr(rec.ID)"
+                                        class="inline-flex items-center gap-[3px] px-2 py-[3px] rounded bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 text-[11px] font-medium transition-colors"><i
+                                            class="bi bi-box-arrow-up-right"></i> View</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
                 </tbody>
-              </table>
-            </div>
-          </div>
+            </table>
 
-          <div class="">
-            <div class="mb-3" :class="{ hidden: !rfqVisible }">
-              <div class="flex items-center justify-between mb-1.5 ">
-                <label class="block text-[11px] font-semibold text-gray-500  tracking-wide">Request For
-                  Quotation</label>
-                <span
-                  class="text-[10.5px] text-amber-700 font-medium bg-amber-50 px-2 py-0.5 rounded border border-amber-200 shadow-sm"
-                  :class="{ hidden: !rfqMessage }" x-html="rfqMessage"></span>
-              </div>
-              <div class="flex items-center gap-4">
-                <label class="flex items-center gap-1.5 cursor-pointer">
-                  <input type="radio" name="Request_For_Quotation" value="No" x-model="rfqChoice"
-                    class="w-3.5 h-3.5 text-[#1B5CA8] focus:ring-[#1B5CA8]">
-                  <span class="text-[13px] text-gray-700">No</span>
-                </label>
-                <label class="flex items-center gap-1.5 cursor-pointer">
-                  <input type="radio" name="Request_For_Quotation" value="Yes" x-model="rfqChoice"
-                    class="w-3.5 h-3.5 text-[#1B5CA8] focus:ring-[#1B5CA8]">
-                  <span class="text-[13px] text-gray-700">Yes</span>
-                </label>
-              </div>
+            <div x-show="filteredRecords.length > 0"
+                class="flex items-center justify-between px-[13px] py-[9px] border-t border-gray-200 bg-gray-50 text-xs text-gray-500">
+                <span x-text="paginationInfoText"></span>
+                <div class="flex gap-1">
+                    <button @click="goToPage(currentPage - 1)" :disabled="currentPage <= 1"
+                        class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors"
+                        :class="currentPage <= 1 ? 'opacity-40 cursor-not-allowed' : 'hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]'">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <template x-for="pg in pageButtons" :key="pg.key">
+                        <button type="button" @click="pg.type === 'page' && goToPage(pg.value)"
+                            :disabled="pg.type === 'ellipsis'"
+                            class="min-w-[27px] h-[27px] px-1 rounded inline-flex items-center justify-center transition-colors"
+                            :class="pg.type === 'ellipsis' ? 'border-0 text-gray-400 text-xs cursor-default' : (pg.value === currentPage ? 'border border-[#1B5CA8] bg-[#1B5CA8] text-white font-semibold' : 'border border-gray-300 bg-white text-gray-600 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]')"
+                            x-text="pg.type === 'ellipsis' ? '…' : pg.value"></button>
+                    </template>
+                    <button @click="goToPage(currentPage + 1)" :disabled="currentPage >= totalPages"
+                        class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors"
+                        :class="currentPage >= totalPages ? 'opacity-40 cursor-not-allowed' : 'hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]'">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
             </div>
-            <div class="mb-3">
-              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Attachments</label>
-              <input type="file" x-ref="prFiles" multiple
-                class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-[#EBF3FC] file:text-[#1B5CA8] hover:file:bg-[#d8e8fa] transition-colors cursor-pointer border border-gray-200 rounded-lg bg-gray-50 py-1.5 px-2">
+        </div>
+
+        <div class="pr-modal-overlay" :class="{ active: showModal }">
+            <div class="pr-modal-bg" @click="closeModal()"></div>
+            <div class="pr-modal-box max-w-5xl" style="max-height: 90vh; overflow-y: auto;">
+                <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
+                    <h3 class="text-[15px] font-bold text-gray-800">New Purchase Requisition</h3>
+                    <button @click="closeModal()" class="text-gray-400 hover:text-gray-700 transition-colors"><i
+                            class="bi bi-x-lg text-lg"></i></button>
+                </div>
+
+                <form @submit.prevent="submitNewPR()" class="p-5">
+                    <div class="grid grid-cols-2 gap-4 mb-5">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Unit /
+                                Department
+                                <span class="text-red-500">*</span></label>
+                            <select x-ref="prUnit" required class="w-full text-xs ts-unit-select"
+                                placeholder="Select Unit..."></select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Due Date
+                                <span class="text-red-500">*</span></label>
+                            <input type="date" x-ref="prDueDate" x-model="prDueDate" :min="todayStr" required
+                                class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
+                        </div>
+                    </div>
+                    <div class="mb-5 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
+                        <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                            <span class="text-xs font-semibold text-gray-700  tracking-wide">Items <span
+                                    class="text-red-500">*</span></span>
+                            <button type="button" @click="addGridRow()"
+                                class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+
+                                Add Item</button>
+                        </div>
+                        <div class="overflow-x-auto" style="overflow:visible;">
+                            <table class="w-full border-collapse min-w-[600px]">
+                                <thead class="bg-white border-b border-gray-200">
+                                    <tr>
+                                        <th
+                                            class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[35%]">
+                                            Item</th>
+                                        <th
+                                            class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[12%]">
+                                            Unit</th>
+                                        <th
+                                            class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[12%]">
+                                            Qty</th>
+                                        <th
+                                            class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left w-[20%]">
+                                            Due Date</th>
+                                        <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-left">
+                                            Comment</th>
+                                        <th
+                                            class="px-3 py-2.5 text-[10px] font-semibold text-gray-500  text-center w-10">
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white">
+                                    <template x-for="row in itemRows" :key="row.id">
+                                        <tr
+                                            class="border-b border-gray-100 last:border-0 item-row hover:bg-gray-50/50 transition-colors">
+                                            <td class="px-3 py-2 relative">
+                                                <select x-init="$nextTick(() => initItemSelect($el, row))" required
+                                                    class="w-full text-xs ts-item-select"
+                                                    placeholder="Search item..."></select>
+                                            </td>
+                                            <td class="px-3 py-2"><input type="text" x-model="row.unit" readonly
+                                                    placeholder="Unit"
+                                                    class="w-full py-1.5 px-2.5 bg-gray-100 border border-gray-200 rounded-md text-[13px] text-gray-500 focus:outline-none shadow-sm cursor-not-allowed">
+                                            </td>
+                                            <td class="px-3 py-2"><input type="number" required min="1"
+                                                    x-model.number="row.quantity"
+                                                    class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
+                                            </td>
+                                            <td class="px-3 py-2"><input type="date" required x-model="row.dueDate"
+                                                    class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
+                                            </td>
+                                            <td class="px-3 py-2"><input type="text" x-model="row.comment"
+                                                    placeholder="Optional"
+                                                    class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
+                                            </td>
+                                            <td class="px-3 py-2 text-center">
+                                                <button type="button" @click="removeGridRow(row.id)"
+                                                    class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50"><i
+                                                        class="bi bi-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="">
+                        <div class="mb-3" :class="{ hidden: !rfqVisible }">
+                            <div class="flex items-center justify-between mb-1.5 ">
+                                <label class="block text-[11px] font-semibold text-gray-500  tracking-wide">Request For
+                                    Quotation</label>
+                                <span
+                                    class="text-[10.5px] text-amber-700 font-medium bg-amber-50 px-2 py-0.5 rounded border border-amber-200 shadow-sm"
+                                    :class="{ hidden: !rfqMessage }" x-html="rfqMessage"></span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <label class="flex items-center gap-1.5 cursor-pointer">
+                                    <input type="radio" name="Request_For_Quotation" value="No" x-model="rfqChoice"
+                                        class="w-3.5 h-3.5 text-[#1B5CA8] focus:ring-[#1B5CA8]">
+                                    <span class="text-[13px] text-gray-700">No</span>
+                                </label>
+                                <label class="flex items-center gap-1.5 cursor-pointer">
+                                    <input type="radio" name="Request_For_Quotation" value="Yes" x-model="rfqChoice"
+                                        class="w-3.5 h-3.5 text-[#1B5CA8] focus:ring-[#1B5CA8]">
+                                    <span class="text-[13px] text-gray-700">Yes</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label
+                                class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Attachments</label>
+                            <input type="file" x-ref="prFiles" multiple
+                                class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-[#EBF3FC] file:text-[#1B5CA8] hover:file:bg-[#d8e8fa] transition-colors cursor-pointer border border-gray-200 rounded-lg bg-gray-50 py-1.5 px-2">
+                        </div>
+                        <label
+                            class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Description</label>
+                        <textarea x-model="prDescription" rows="2"
+                            class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-2 border-t border-gray-100 pt-4 mt-2">
+                        <button type="button" @click="closeModal()"
+                            class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
+
+                        <!-- Save as Draft -->
+                        <button type="submit" @click="submitType = 'Draft'" :disabled="submitting"
+                            class="inline-flex items-center justify-center min-w-[110px] px-4 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors shadow-sm">
+                            <div x-show="submitting && submitType === 'Draft'" class="draft-spinner"></div>
+                            <span x-show="!(submitting && submitType === 'Draft')">Save as Draft</span>
+                        </button>
+
+                        <!-- Submit Requisition -->
+                        <button type="submit" @click="submitType = 'Submitted'" :disabled="submitting"
+                            class="inline-flex items-center justify-center min-w-[130px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm">
+                            <div x-show="submitting && submitType === 'Submitted'" class="pr-spinner"
+                                style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
+                            <span x-show="!(submitting && submitType === 'Submitted')">Submit Requisition</span>
+                        </button>
+                    </div>
+                </form>
             </div>
-            <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Description</label>
-            <textarea x-model="prDescription" rows="2"
-              class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></textarea>
-          </div>
-
-          <div class="flex justify-end gap-2 border-t border-gray-100 pt-4 mt-2">
-            <button type="button" @click="closeModal()"
-              class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
-
-            <!-- Save as Draft -->
-            <button type="submit" @click="submitType = 'Draft'" :disabled="submitting"
-              class="inline-flex items-center justify-center min-w-[110px] px-4 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors shadow-sm">
-              <div x-show="submitting && submitType === 'Draft'" class="draft-spinner"></div>
-              <span x-show="!(submitting && submitType === 'Draft')">Save as Draft</span>
-            </button>
-            
-            <!-- Submit Requisition -->
-            <button type="submit" @click="submitType = 'Submitted'" :disabled="submitting"
-              class="inline-flex items-center justify-center min-w-[130px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm">
-              <div x-show="submitting && submitType === 'Submitted'" class="pr-spinner"
-                style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
-              <span x-show="!(submitting && submitType === 'Submitted')">Submit Requisition</span>
-            </button>
-          </div>
-        </form>
-      </div>
+        </div>
     </div>
-  </div>
 </body>
 
 <script>
-  'use strict';
+    'use strict';
 
-  const REPORT_NAME = 'Purchase_Requisition_Report';
-  const ITEMS_REPORT_NAME = 'Items_Report';
-  const DEPARTMENTS_REPORT_NAME = 'Unit_Report';
-  const PER_PAGE = 10;
-  const FETCH_BATCH_SIZE = 200;
+    const REPORT_NAME = 'Purchase_Requisition_Report';
+    const ITEMS_REPORT_NAME = 'Items_Report';
+    const DEPARTMENTS_REPORT_NAME = 'Unit_Report';
+    const PER_PAGE = 10;
+    const FETCH_BATCH_SIZE = 200;
 
-  // Configured SweetAlert2 to replace the manual CSS toast notification logic
-  const Toast = Swal.mixin({
-    toast: true, position: 'top-end', showConfirmButton: false, timer: 3500, timerProgressBar: true,
-    customClass: { popup: 'font-[Lato] text-sm' }
-  });
+    // Configured SweetAlert2 to replace the manual CSS toast notification logic
+    const Toast = Swal.mixin({
+        toast: true, position: 'top-end', showConfirmButton: false, timer: 3500, timerProgressBar: true,
+        customClass: { popup: 'font-[Lato] text-sm' }
+    });
 
-  function showToast(message, type) {
-    Toast.fire({ icon: type, title: message });
-  }
-
-  // Replaced complex Date manual logic with Day.js
-  function formatDate(dateStr) {
-    if (!dateStr) return '–';
-    const d = dayjs(dateStr);
-    return d.isValid() ? d.format('DD MMM YYYY') : dateStr;
-  }
-
-  // Replaced complex Date formatting with Day.js
-  function formatZohoDateSubmission(dateString) {
-    if (!dateString) return "";
-    const d = dayjs(dateString);
-    return d.isValid() ? d.format('DD-MMM-YYYY') : dateString;
-  }
-
-  function normalizeStatus(rec) {
-    if (!rec) return 'pending';
-    if (rec.Status && rec.Status.toLowerCase() === 'draft') return 'draft';
-    if (rec.Status && rec.Status.toLowerCase() === 'rejected') return 'rejected';
-    if (rec.Status && rec.Status.toLowerCase() === 'completed') return 'completed';
-    if (rec.Status && rec.Status.toLowerCase() === 'in progress') return 'in_progress'
-    var stage = rec.Current_Stage;
-    if (!stage || stage === 'Purchase Requisition') return 'pending';
-    // Payment stage = fully Completed; intermediate stages = In Progress
-    if (stage === 'Payment') return 'completed';
-    if (['Request For Quotation', 'Quote Comparison', 'Purchase Order', 'GRN', 'Bill'].includes(stage))
-      return 'in_progress';
-    return 'pending';
-  }
-
-  function getStatusBadge(rec, norm) {
-    const stageLabel = rec.Current_Stage || 'Purchase Requisition';
-    const map = {
-      draft: { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400', label: 'Draft' },
-      pending: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500', label: stageLabel },
-      in_progress: { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500', label: stageLabel },
-      completed: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600', label: stageLabel },
-      rejected: { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600', label: 'Rejected' },
-    };
-    return map[norm] || map.pending;
-  }
-
-  function getStatusColors(norm) {
-    if (norm === 'draft') return { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400' };
-    if (norm === 'completed') return { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' };
-    if (norm === 'in_progress') return { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500' };
-    if (norm === 'rejected') return { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600' };
-    return { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' };
-  }
-
-  function getItemApprovalColors(itemApproval) {
-    if (itemApproval === 'Completed') return { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' };
-    if (itemApproval === 'Rejected') return { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600' };
-    if (itemApproval === 'Partially Completed') return { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' };
-    return { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400' };
-  }
-
-  function parseRfqList(rec) {
-    let raw = rec.Request_For_Quotation_RFQ_Ref_Number;
-    if (!raw) return [];
-    if (typeof raw === 'string') {
-      const trimmed = raw.trim();
-      if (!trimmed) return [];
-      try {
-        raw = JSON.parse(trimmed);
-      } catch (e) {
-        return [];
-      }
+    function showToast(message, type) {
+        Toast.fire({ icon: type, title: message });
     }
-    if (!Array.isArray(raw)) raw = [raw];
-    return raw.filter(item => item && typeof item === 'object');
-  }
 
-  function getSortValue(rec, col) {
-    switch (col) {
-      case 'pr_number':
-        var prVal = (rec.PR_Number || rec.Requisition_Number || '').toString();
-        var numMatch = prVal.match(/(\d+)\s*$/);
-        return numMatch ? parseInt(numMatch[1], 10) : prVal.toLowerCase();
-      case 'unit': return (rec.Unit || '').toString().toLowerCase();
-      case 'date':
-        return rec.PR_Date ? dayjs(rec.PR_Date).valueOf() : 0;
-      case 'stage': return (rec.Current_Stage || '').toString().toLowerCase();
-      case 'status': return normalizeStatus(rec);
-      case 'item_approval': return (rec.Items_Approval_Status || '').toString().toLowerCase();
-      default: return '';
+    // Replaced complex Date manual logic with Day.js
+    function formatDate(dateStr) {
+        if (!dateStr) return '–';
+        const d = dayjs(dateStr);
+        return d.isValid() ? d.format('DD MMM YYYY') : dateStr;
     }
-  }
 
-  function buildStatusCriteria(filter) {
-    if (!filter || filter === 'all') return '';
-    if (filter === 'pending') return '(Current_Stage == "Purchase Requisition" && Status != "Rejected" && Status != "Draft")';
-    if (filter === 'in_progress') return '((Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill") && Status != "Rejected")';
-    if (filter === 'completed') return '(Current_Stage == "Payment" && Status != "Rejected")';
-    if (filter === 'rejected') return '(Status == "Rejected")';
-    return '';
-  }
-
-  function fetchAllRecords(criteria) {
-    var accumulated = [];
-    function fetchBatch(cursor) {
-      var config = { report_name: REPORT_NAME, max_records: FETCH_BATCH_SIZE };
-      if (criteria) config.criteria = criteria;
-      if (cursor) config.record_cursor = cursor;
-
-      return ZOHO.CREATOR.DATA.getRecords(config).then(function (response) {
-        if (response.code === 3000 && response.data && response.data.length > 0) {
-          accumulated = accumulated.concat(response.data);
-          if (response.data.length >= FETCH_BATCH_SIZE && response.record_cursor) return fetchBatch(response.record_cursor);
-        }
-        return accumulated;
-      });
+    // Replaced complex Date formatting with Day.js
+    function formatZohoDateSubmission(dateString) {
+        if (!dateString) return "";
+        const d = dayjs(dateString);
+        return d.isValid() ? d.format('DD-MMM-YYYY') : dateString;
     }
-    return fetchBatch(null);
-  }
 
-  let rowIdCounter = 0;
+    function normalizeStatus(rec) {
+        if (!rec) return 'pending';
+        if (rec.Status && rec.Status.toLowerCase() === 'draft') return 'draft';
+        if (rec.Status && rec.Status.toLowerCase() === 'rejected') return 'rejected';
+        if (rec.Status && rec.Status.toLowerCase() === 'completed') return 'completed';
+        if (rec.Status && rec.Status.toLowerCase() === 'in progress') return 'in_progress'
+        var stage = rec.Current_Stage;
+        if (!stage || stage === 'Purchase Requisition') return 'pending';
+        // Payment stage = fully Completed; intermediate stages = In Progress
+        if (stage === 'Payment') return 'completed';
+        if (['Request For Quotation', 'Quote Comparison', 'Purchase Order', 'GRN', 'Bill'].includes(stage))
+            return 'in_progress';
+        return 'pending';
+    }
 
-  function prApp() {
-    return {
-      // ── stats ──
-      stats: { all: '–', pending: '–', in_progress: '–', completed: '–', rejected: '–' },
-      filterTabs: [
-        { key: 'all', label: 'All' },
-        { key: 'pending', label: 'Submitted' },
-        { key: 'in_progress', label: 'In Progress' },
-        { key: 'completed', label: 'Completed' },
-        { key: 'rejected', label: 'Rejected' }
-      ],
-      sortableColumns: [
-        { key: 'pr_number', label: 'PR #', align: 'left' },
-        { key: 'unit', label: 'Unit', align: 'left' },
-        { key: 'requester', label: 'Requester', align: 'left' },
-        { key: 'date', label: 'Date', align: 'left' },
-        { key: 'stage', label: 'Stage', align: 'left' },
-        { key: 'rfq', label: 'RFQ', align: 'center' },
-        { key: 'status', label: 'Status', align: 'left' },
-        { key: 'item_approval', label: 'Item Approval', align: 'left' }
-      ],
-
-      // ── data ──
-      allRecords: [],
-      filteredRecords: [],
-      itemMasters: [],
-      departmentMasters: [],
-      currentFilter: 'all',
-      currentPage: 1,
-      searchQuery: '',
-      searchInputValue: '',
-      searchTimer: null,
-      isLoading: true,
-      sortColumn: 'date',
-      sortDirection: 'desc',
-
-      // ── modal / create-PR state ──
-      showModal: false,
-      itemRows: [],
-      rowTomSelects: {},
-      unitTomSelect: null,
-      prDueDate: '',
-      prDescription: '',
-      rfqVisible: false,
-      rfqMessage: '',
-      rfqChoice: 'No',
-      submitting: false,
-      submitType: 'Submitted', // 'Draft' or 'Submitted'
-      todayStr: new Date().toISOString().split('T')[0],
-
-      init() {
-        this.fetchRecords();
-        this.fetchItemMasters();
-        this.fetchDepartmentMasters();
-      },
-
-      get totalPages() {
-        return Math.max(1, Math.ceil(this.filteredRecords.length / PER_PAGE));
-      },
-
-      get pagedRecords() {
-        var startIdx = (this.currentPage - 1) * PER_PAGE, endIdx = startIdx + PER_PAGE;
-        return this.filteredRecords.slice(startIdx, endIdx);
-      },
-
-      get paginationInfoText() {
-        const totalRecs = this.filteredRecords.length;
-        if (totalRecs === 0) return 'Showing 0 records';
-        const start = (this.currentPage - 1) * PER_PAGE + 1, end = Math.min(this.currentPage * PER_PAGE, totalRecs);
-        return `Showing ${start}–${end} of ${totalRecs} records`;
-      },
-
-      get pageButtons() {
-        const totalPages = this.totalPages, currentPage = this.currentPage;
-        var pages = [];
-        for (var pg = 1; pg <= totalPages; pg++) {
-          if (pg <= 2 || pg === totalPages || (pg >= currentPage - 1 && pg <= currentPage + 1)) pages.push(pg);
-        }
-        pages = pages.filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b);
-
-        var btns = [];
-        for (var i = 0; i < pages.length; i++) {
-          if (i > 0 && pages[i] - pages[i - 1] > 1) btns.push({ type: 'ellipsis', key: 'e' + pages[i] });
-          btns.push({ type: 'page', key: 'p' + pages[i], value: pages[i] });
-        }
-        return btns;
-      },
-
-      // ════════════════════════════════════════════
-      //  RECORD DECORATION
-      // ════════════════════════════════════════════
-
-      decorateRecord(rec) {
-        const norm = normalizeStatus(rec);
-        rec._prNumber = rec.PR_Number || ('PR-' + rec.Requisition_Number);
-        rec._requesterName = (rec.Added_User && rec.Added_User.display_value) ? rec.Added_User.display_value : (rec.Added_User || '–');
-        rec._dateFormatted = formatDate(rec.PR_Date);
-        rec._stageBadge = getStatusBadge(rec, norm);
-        rec._statusBadge = getStatusColors(norm);
-        
-        let label = 'Submitted';
-        if (norm === 'draft') label = 'Draft';
-        if (norm === 'in_progress') label = 'In Progress';
-        if (norm === 'completed') label = 'Completed';
-        if (norm === 'rejected') label = 'Rejected';
-        
-        rec._statusLabel = label;
-        
-        const itemApproval = rec.Items_Approval_Status || '-';
-        rec._itemApproval = itemApproval;
-        rec._itemApprovalBadge = getItemApprovalColors(itemApproval);
-        rec._rfqList = parseRfqList(rec);
-        return rec;
-      },
-
-      // ════════════════════════════════════════════
-      //  DATA FETCHING & SORTING
-      // ════════════════════════════════════════════
-
-      fetchDepartmentMasters() {
-        ZOHO.CREATOR.DATA.getRecords({ report_name: DEPARTMENTS_REPORT_NAME, max_records: 200 })
-          .then((response) => {
-            if (response.code === 3000 && response.data) {
-              this.departmentMasters = response.data;
-              if (this.unitTomSelect) {
-                this.unitTomSelect.addOption(this.departmentMasters);
-                this.unitTomSelect.refreshOptions(false);
-              }
-            }
-          }).catch(err => console.error('Failed to load department masters:', err));
-      },
-
-      fetchItemMasters() {
-        ZOHO.CREATOR.DATA.getRecords({ report_name: ITEMS_REPORT_NAME, criteria: 'status == "Active"', max_records: 200 })
-          .then((response) => {
-            if (response.code === 3000 && response.data) {
-              this.itemMasters = response.data;
-              // Update any already-rendered Tom Select dropdowns in the modal
-              Object.values(this.rowTomSelects).forEach(ts => { ts.addOption(this.itemMasters); ts.refreshOptions(false); });
-            }
-          }).catch(err => console.error('Failed to load item masters:', err));
-      },
-
-      fetchRecords() {
-        this.isLoading = true;
-
-        var q = this.searchQuery.replace(/'/g, "\\'");
-        var searchCrit = this.searchQuery ? `PR_Number.startsWith("${q}")` : '';
-        var statusCrit = buildStatusCriteria(this.currentFilter);
-        var criteria = [searchCrit, statusCrit].filter(Boolean).join(' && ');
-
-        fetchAllRecords(criteria).then((records) => {
-          this.allRecords = records.map(r => this.decorateRecord(r));
-          this.isLoading = false;
-          this.currentPage = 1;
-          this.applySortAndRender();
-          this.computeStats();
-        }).catch((err) => {
-          this.isLoading = false;
-          this.allRecords = [];
-          this.filteredRecords = [];
-        });
-      },
-
-      applySortAndRender() {
-        const col = this.sortColumn, dir = this.sortDirection;
-        this.allRecords.sort(function (a, b) {
-          var va = getSortValue(a, col), vb = getSortValue(b, col), cmp = 0;
-          if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
-          else { va = String(va); vb = String(vb); cmp = va < vb ? -1 : va > vb ? 1 : 0; }
-          return dir === 'asc' ? cmp : -cmp;
-        });
-        this.filteredRecords = this.allRecords;
-      },
-
-      handleSortClick(col) {
-        if (this.sortColumn === col) this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-        else { this.sortColumn = col; this.sortDirection = (col === 'date' || col === 'amount') ? 'desc' : 'asc'; }
-        this.currentPage = 1;
-        this.applySortAndRender();
-      },
-
-      setFilter(filter) {
-        this.currentFilter = filter;
-        this.currentPage = 1;
-        this.fetchRecords();
-      },
-
-      onSearchInput() {
-        clearTimeout(this.searchTimer);
-        const value = this.searchInputValue;
-        this.searchTimer = setTimeout(() => {
-          this.searchQuery = value.trim();
-          this.currentPage = 1;
-          this.fetchRecords();
-        }, 400);
-      },
-
-      goToPage(page) {
-        this.currentPage = Math.max(1, Math.min(page, this.totalPages));
-        this.$nextTick(() => {
-          const table = this.$root.querySelector('table');
-          if (table) table.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-      },
-
-      // ════════════════════════════════════════════
-      //  STATS & COUNTS
-      // ════════════════════════════════════════════
-
-      computeStats() {
-        var q = this.searchQuery.replace(/'/g, "\\'");
-        var searchCrit = this.searchQuery ? `( PR_Number=("${q}") || Requisition_Number=("${q}") )` : '';
-
-        function combineCriteria(statusCrit) {
-          var parts = [];
-          if (searchCrit) parts.push(searchCrit);
-          if (statusCrit) parts.push(statusCrit);
-          return parts.join(' && ');
-        }
-
-        const counts = [
-          { key: 'all', crit: combineCriteria('') },
-          { key: 'pending', crit: combineCriteria('(Current_Stage == "Purchase Requisition" && Status != "Rejected" && Status != "Draft")') },
-          { key: 'in_progress', crit: combineCriteria('((Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill") && Status != "Rejected")') },
-          { key: 'completed', crit: combineCriteria('(Current_Stage == "Payment" && Status != "Rejected")') },
-          { key: 'rejected', crit: combineCriteria('(Status == "Rejected")') }
-        ];
-
-        counts.forEach((c) => {
-          var config = { report_name: REPORT_NAME };
-          if (c.crit) config.criteria = c.crit;
-          ZOHO.CREATOR.DATA.getRecordCount(config).then((response) => {
-            var count = response.result ? response.result.records_count : 0;
-            this.stats[c.key] = count;
-          });
-        });
-      },
-
-      // ════════════════════════════════════════════
-      //  ACTIONS COLUMN
-      // ════════════════════════════════════════════
-
-      openRfq(id) {
-        ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', url: '#Page:RFQ_Detailed?recordId=' + id, window: 'same' });
-      },
-
-      openPr(id) {
-        ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', url: '#Page:PR_Detailed?recordId=' + id, window: 'same' });
-      },
-
-      // ════════════════════════════════════════════
-      //  PR CREATION SYSTEM & ITEMS DROPDOWN
-      // ════════════════════════════════════════════
-
-      openCreateModal() {
-        this.rowTomSelects = {};
-        this.itemRows = [];
-        this.prDueDate = '';
-        this.prDescription = '';
-        this.rfqVisible = false;
-        this.rfqMessage = '';
-        this.rfqChoice = 'No';
-        this.submitting = false;
-        this.submitType = 'Submitted';
-        this.showModal = true;
-
-        this.$nextTick(() => {
-          const unitSelectEl = this.$refs.prUnit;
-          this.unitTomSelect = new TomSelect(unitSelectEl, {
-            valueField: 'ID',
-            labelField: 'Name',
-            searchField: 'Name',
-            options: this.departmentMasters,
-            create: true,
-            maxItems: 1,
-            placeholder: 'Select Unit...'
-          });
-          this.addGridRow(); // Add first empty row by default
-        });
-      },
-
-      closeModal() {
-        // Destroy Tom Select instances on close to prevent memory leaks
-        Object.values(this.rowTomSelects).forEach(ts => ts.destroy());
-        this.rowTomSelects = {};
-        if (this.unitTomSelect) {
-          this.unitTomSelect.destroy();
-          this.unitTomSelect = null;
-        }
-        this.showModal = false;
-      },
-
-      addGridRow() {
-        this.itemRows.push({
-          id: ++rowIdCounter,
-          unit: '',
-          quantity: '',
-          dueDate: this.prDueDate || '',
-          comment: ''
-        });
-      },
-
-      removeGridRow(id) {
-        const ts = this.rowTomSelects[id];
-        if (ts) { ts.destroy(); delete this.rowTomSelects[id]; }
-        this.itemRows = this.itemRows.filter(r => r.id !== id);
-        this.checkItemsInGRN();
-      },
-
-      initItemSelect(selectEl, row) {
-        // Initialize Tom Select on the new row for fully-featured autocomplete
-        const ts = new TomSelect(selectEl, {
-          valueField: 'ID',
-          labelField: 'item_name',
-          searchField: 'item_name',
-          options: this.itemMasters,
-          create: false,
-          maxItems: 1,
-          placeholder: 'Search item...',
-          render: {
-            option: function (data, escape) { return '<div class="font-medium">' + escape(data.item_name) + '</div>'; },
-            item: function (data, escape) { return '<div class="font-medium">' + escape(data.item_name) + '</div>'; }
-          },
-          onChange: (value) => {
-            const selectedItem = this.itemMasters.find(i => i.ID === value);
-            row.unit = selectedItem ? (selectedItem.unit_of_measure || '') : '';
-            row._itemId = value;
-            row._itemName = selectedItem ? selectedItem.item_name : 'Unknown Item';
-            this.checkItemsInGRN();
-          }
-        });
-        this.rowTomSelects[row.id] = ts;
-      },
-
-      checkItemsInGRN() {
-        const itemsToCheck = this.itemRows
-          .filter(row => row._itemId)
-          .map(row => ({ id: row._itemId, name: row._itemName || 'Unknown Item' }));
-
-        if (itemsToCheck.length === 0) {
-          this.rfqVisible = false;
-          this.rfqChoice = 'No';
-          return;
-        }
-
-        const checks = itemsToCheck.map(item => {
-          return ZOHO.CREATOR.DATA.invokeCustomApi({
-            api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_RFQ_DETAILS,
-            http_method: "POST",
-            payload: {
-              itemIds: item.id
-            }
-          }).then(function (response) {
-            try {
-              let resultArr = response.data || response.result || response;
-              if (typeof resultArr === 'string') resultArr = JSON.parse(resultArr);
-              if (resultArr.response) resultArr = resultArr.response;
-
-              if (Array.isArray(resultArr) && resultArr.length === 0) {
-                return item.name;
-              }
-              return null;
-            } catch (e) {
-              console.error("Error parsing GRN response", e);
-              return null;
-            }
-          }).catch(err => {
-            console.error("GRN check failed", err);
-            return null;
-          });
-        });
-
-        Promise.all(checks).then((results) => {
-          const notFinalized = results.filter(name => name !== null);
-          if (notFinalized.length > 0) {
-            this.rfqChoice = 'No';
-            this.rfqMessage = "No goods received for the following item(s): <strong>" + notFinalized.join(", ") + "</strong>";
-          } else {
-            this.rfqVisible = false;
-            this.rfqChoice = 'No';
-            this.rfqMessage = '';
-          }
-        });
-      },
-
-      submitNewPR() {
-        this.submitting = true;
-
-        if (this.itemRows.length === 0) {
-          showToast('Please add at least one item.', 'error');
-          this.submitting = false;
-          return;
-        }
-
-        const itemsCollection = [];
-        let validationError = false;
-
-        this.itemRows.forEach(row => {
-          const itemId = row._itemId;
-          if (!itemId) validationError = true;
-
-          itemsCollection.push({
-            "Item": itemId,
-            "Quantity": parseInt(row.quantity, 10),
-            "Due_Date": formatZohoDateSubmission(row.dueDate),
-            "Comment": row.comment || ""
-          });
-        });
-
-        if (validationError) {
-          showToast('Please select a valid item from the dropdown for all rows.', 'error');
-          this.submitting = false;
-          return;
-        }
-
-        const finalStatus = this.submitType === 'Draft' ? 'Draft' : 'Submitted';
-
-        const payload = {
-          "data": {
-            "Department": this.unitTomSelect ? this.unitTomSelect.getValue() : '',
-            "PR_Date": formatZohoDateSubmission(new Date().toISOString().split('T')[0]),
-            "Due_Date": formatZohoDateSubmission(this.prDueDate),
-            "Status": finalStatus,
-            "Items_Approval_Status": "Pending",
-            "Current_Stage": "Purchase Requisition",
-            "description": this.prDescription,
-            "Request_For_Quotation": this.rfqChoice || "No",
-            "Requested_Items": itemsCollection
-          }
+    function getStatusBadge(rec, norm) {
+        const stageLabel = rec.Current_Stage || 'Purchase Requisition';
+        const map = {
+            draft: { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400', label: 'Draft' },
+            pending: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500', label: stageLabel },
+            in_progress: { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500', label: stageLabel },
+            completed: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600', label: stageLabel },
+            rejected: { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600', label: 'Rejected' },
         };
+        return map[norm] || map.pending;
+    }
 
-        ZOHO.CREATOR.DATA.addRecords({ form_name: "Purchase_Requisition", payload }).then((response) => {
-          if (response.code === 3000 && response.data) {
-            const newRecordId = response.data.ID;
-            const files = this.$refs.prFiles ? this.$refs.prFiles.files : [];
+    function getStatusColors(norm) {
+        if (norm === 'draft') return { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400' };
+        if (norm === 'completed') return { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' };
+        if (norm === 'in_progress') return { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500' };
+        if (norm === 'rejected') return { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600' };
+        return { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' };
+    }
 
-            if (files.length > 0) {
-              const uploadPromises = Array.from(files).map(file => {
-                return ZOHO.CREATOR.FILE.uploadFile({ report_name: REPORT_NAME, field_name: "Attachments", file: file, id: newRecordId });
-              });
+    function getItemApprovalColors(itemApproval) {
+        if (itemApproval === 'Completed') return { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' };
+        if (itemApproval === 'Rejected') return { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600' };
+        if (itemApproval === 'Partially Completed') return { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' };
+        return { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400' };
+    }
 
-              Promise.all(uploadPromises)
-                .then(() => this.completeSubmission())
-                .catch(err => { console.error("File upload failed", err); this.completeSubmission(); });
-            } else {
-              this.completeSubmission();
+    function parseRfqList(rec) {
+        let raw = rec.Request_For_Quotation_RFQ_Ref_Number;
+        if (!raw) return [];
+        if (typeof raw === 'string') {
+            const trimmed = raw.trim();
+            if (!trimmed) return [];
+            try {
+                raw = JSON.parse(trimmed);
+            } catch (e) {
+                return [];
             }
-          } else {
-            this.submitting = false;
-            showToast('Failed to create PR: ' + (response.message || 'Error'), 'error');
-          }
-        }).catch((err) => {
-          this.submitting = false;
-          showToast('Submission error. Check console.', 'error');
-          console.error(err);
-        });
-      },
-
-      completeSubmission() {
-        this.closeModal();
-        
-        let toastMessage = 'Purchase Requisition submitted successfully!';
-        if (this.submitType === 'Draft') {
-           toastMessage = 'Purchase Requisition saved as draft!';
         }
-        
-        showToast(toastMessage, 'success');
-        this.searchQuery = '';
-        this.searchInputValue = '';
-        this.fetchRecords();
-      }
-    };
-  }
+        if (!Array.isArray(raw)) raw = [raw];
+        return raw.filter(item => item && typeof item === 'object');
+    }
+
+    function getSortValue(rec, col) {
+        switch (col) {
+            case 'pr_number':
+                var prVal = (rec.PR_Number || rec.Requisition_Number || '').toString();
+                var numMatch = prVal.match(/(\d+)\s*$/);
+                return numMatch ? parseInt(numMatch[1], 10) : prVal.toLowerCase();
+            case 'unit': return (rec.Unit || '').toString().toLowerCase();
+            case 'date':
+                return rec.PR_Date ? dayjs(rec.PR_Date).valueOf() : 0;
+            case 'stage': return (rec.Current_Stage || '').toString().toLowerCase();
+            case 'status': return normalizeStatus(rec);
+            case 'item_approval': return (rec.Items_Approval_Status || '').toString().toLowerCase();
+            default: return '';
+        }
+    }
+
+    function buildStatusCriteria(filter) {
+        if (!filter || filter === 'all') return '';
+        if (filter === 'pending') return '(Current_Stage == "Purchase Requisition" && Status != "Rejected" && Status != "Draft")';
+        if (filter === 'in_progress') return '((Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill") && Status != "Rejected")';
+        if (filter === 'completed') return '(Current_Stage == "Payment" && Status != "Rejected")';
+        if (filter === 'rejected') return '(Status == "Rejected")';
+        return '';
+    }
+
+    function fetchAllRecords(criteria) {
+        var accumulated = [];
+        function fetchBatch(cursor) {
+            var config = { report_name: REPORT_NAME, max_records: FETCH_BATCH_SIZE };
+            if (criteria) config.criteria = criteria;
+            if (cursor) config.record_cursor = cursor;
+
+            return ZOHO.CREATOR.DATA.getRecords(config).then(function (response) {
+                if (response.code === 3000 && response.data && response.data.length > 0) {
+                    accumulated = accumulated.concat(response.data);
+                    if (response.data.length >= FETCH_BATCH_SIZE && response.record_cursor) return fetchBatch(response.record_cursor);
+                }
+                return accumulated;
+            });
+        }
+        return fetchBatch(null);
+    }
+
+    let rowIdCounter = 0;
+
+    function prApp() {
+        return {
+            // ── stats ──
+            stats: { all: '–', pending: '–', in_progress: '–', completed: '–', rejected: '–' },
+            filterTabs: [
+                { key: 'all', label: 'All' },
+                { key: 'pending', label: 'Submitted' },
+                { key: 'in_progress', label: 'In Progress' },
+                { key: 'completed', label: 'Completed' },
+                { key: 'rejected', label: 'Rejected' }
+            ],
+            sortableColumns: [
+                { key: 'pr_number', label: 'PR #', align: 'left' },
+                { key: 'unit', label: 'Unit', align: 'left' },
+                { key: 'requester', label: 'Requester', align: 'left' },
+                { key: 'date', label: 'Date', align: 'left' },
+                { key: 'stage', label: 'Stage', align: 'left' },
+                { key: 'rfq', label: 'RFQ', align: 'center' },
+                { key: 'status', label: 'Status', align: 'left' },
+                { key: 'item_approval', label: 'Item Approval', align: 'left' }
+            ],
+
+            // ── data ──
+            allRecords: [],
+            filteredRecords: [],
+            itemMasters: [],
+            departmentMasters: [],
+            currentFilter: 'all',
+            currentPage: 1,
+            searchQuery: '',
+            searchInputValue: '',
+            searchTimer: null,
+            isLoading: true,
+            sortColumn: 'date',
+            sortDirection: 'desc',
+
+            // ── modal / create-PR state ──
+            showModal: false,
+            itemRows: [],
+            rowTomSelects: {},
+            unitTomSelect: null,
+            prDueDate: '',
+            prDescription: '',
+            rfqVisible: false,
+            rfqMessage: '',
+            rfqChoice: 'No',
+            submitting: false,
+            submitType: 'Submitted', // 'Draft' or 'Submitted'
+            todayStr: new Date().toISOString().split('T')[0],
+
+            init() {
+                this.fetchRecords();
+                this.fetchItemMasters();
+                this.fetchDepartmentMasters();
+            },
+
+            get totalPages() {
+                return Math.max(1, Math.ceil(this.filteredRecords.length / PER_PAGE));
+            },
+
+            get pagedRecords() {
+                var startIdx = (this.currentPage - 1) * PER_PAGE, endIdx = startIdx + PER_PAGE;
+                return this.filteredRecords.slice(startIdx, endIdx);
+            },
+
+            get paginationInfoText() {
+                const totalRecs = this.filteredRecords.length;
+                if (totalRecs === 0) return 'Showing 0 records';
+                const start = (this.currentPage - 1) * PER_PAGE + 1, end = Math.min(this.currentPage * PER_PAGE, totalRecs);
+                return `Showing ${start}–${end} of ${totalRecs} records`;
+            },
+
+            get pageButtons() {
+                const totalPages = this.totalPages, currentPage = this.currentPage;
+                var pages = [];
+                for (var pg = 1; pg <= totalPages; pg++) {
+                    if (pg <= 2 || pg === totalPages || (pg >= currentPage - 1 && pg <= currentPage + 1)) pages.push(pg);
+                }
+                pages = pages.filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b);
+
+                var btns = [];
+                for (var i = 0; i < pages.length; i++) {
+                    if (i > 0 && pages[i] - pages[i - 1] > 1) btns.push({ type: 'ellipsis', key: 'e' + pages[i] });
+                    btns.push({ type: 'page', key: 'p' + pages[i], value: pages[i] });
+                }
+                return btns;
+            },
+
+            // ════════════════════════════════════════════
+            //  RECORD DECORATION
+            // ════════════════════════════════════════════
+
+            decorateRecord(rec) {
+                const norm = normalizeStatus(rec);
+                rec._prNumber = rec.PR_Number || ('PR-' + rec.Requisition_Number);
+                rec._requesterName = (rec.Added_User && rec.Added_User.display_value) ? rec.Added_User.display_value : (rec.Added_User || '–');
+                rec._dateFormatted = formatDate(rec.PR_Date);
+                rec._stageBadge = getStatusBadge(rec, norm);
+                rec._statusBadge = getStatusColors(norm);
+
+                let label = 'Submitted';
+                if (norm === 'draft') label = 'Draft';
+                if (norm === 'in_progress') label = 'In Progress';
+                if (norm === 'completed') label = 'Completed';
+                if (norm === 'rejected') label = 'Rejected';
+
+                rec._statusLabel = label;
+
+                const itemApproval = rec.Items_Approval_Status || '-';
+                rec._itemApproval = itemApproval;
+                rec._itemApprovalBadge = getItemApprovalColors(itemApproval);
+                rec._rfqList = parseRfqList(rec);
+                return rec;
+            },
+
+            // ════════════════════════════════════════════
+            //  DATA FETCHING & SORTING
+            // ════════════════════════════════════════════
+
+            fetchDepartmentMasters() {
+                ZOHO.CREATOR.DATA.getRecords({ report_name: DEPARTMENTS_REPORT_NAME, max_records: 200 })
+                    .then((response) => {
+                        if (response.code === 3000 && response.data) {
+                            this.departmentMasters = response.data;
+                            if (this.unitTomSelect) {
+                                this.unitTomSelect.addOption(this.departmentMasters);
+                                this.unitTomSelect.refreshOptions(false);
+                            }
+                        }
+                    }).catch(err => console.error('Failed to load department masters:', err));
+            },
+
+            fetchItemMasters() {
+                ZOHO.CREATOR.DATA.getRecords({ report_name: ITEMS_REPORT_NAME, criteria: 'status == "Active"', max_records: 200 })
+                    .then((response) => {
+                        if (response.code === 3000 && response.data) {
+                            this.itemMasters = response.data;
+                            // Update any already-rendered Tom Select dropdowns in the modal
+                            Object.values(this.rowTomSelects).forEach(ts => { ts.addOption(this.itemMasters); ts.refreshOptions(false); });
+                        }
+                    }).catch(err => console.error('Failed to load item masters:', err));
+            },
+
+            fetchRecords() {
+                this.isLoading = true;
+
+                var q = this.searchQuery.replace(/'/g, "\\'");
+                var searchCrit = this.searchQuery ? `PR_Number.startsWith("${q}")` : '';
+                var statusCrit = buildStatusCriteria(this.currentFilter);
+                var criteria = [searchCrit, statusCrit].filter(Boolean).join(' && ');
+
+                fetchAllRecords(criteria).then((records) => {
+                    this.allRecords = records.map(r => this.decorateRecord(r));
+                    this.isLoading = false;
+                    this.currentPage = 1;
+                    this.applySortAndRender();
+                    this.computeStats();
+                }).catch((err) => {
+                    this.isLoading = false;
+                    this.allRecords = [];
+                    this.filteredRecords = [];
+                });
+            },
+
+            applySortAndRender() {
+                const col = this.sortColumn, dir = this.sortDirection;
+                this.allRecords.sort(function (a, b) {
+                    var va = getSortValue(a, col), vb = getSortValue(b, col), cmp = 0;
+                    if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+                    else { va = String(va); vb = String(vb); cmp = va < vb ? -1 : va > vb ? 1 : 0; }
+                    return dir === 'asc' ? cmp : -cmp;
+                });
+                this.filteredRecords = this.allRecords;
+            },
+
+            handleSortClick(col) {
+                if (this.sortColumn === col) this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+                else { this.sortColumn = col; this.sortDirection = (col === 'date' || col === 'amount') ? 'desc' : 'asc'; }
+                this.currentPage = 1;
+                this.applySortAndRender();
+            },
+
+            setFilter(filter) {
+                this.currentFilter = filter;
+                this.currentPage = 1;
+                this.fetchRecords();
+            },
+
+            onSearchInput() {
+                clearTimeout(this.searchTimer);
+                const value = this.searchInputValue;
+                this.searchTimer = setTimeout(() => {
+                    this.searchQuery = value.trim();
+                    this.currentPage = 1;
+                    this.fetchRecords();
+                }, 400);
+            },
+
+            goToPage(page) {
+                this.currentPage = Math.max(1, Math.min(page, this.totalPages));
+                this.$nextTick(() => {
+                    const table = this.$root.querySelector('table');
+                    if (table) table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+            },
+
+            // ════════════════════════════════════════════
+            //  STATS & COUNTS
+            // ════════════════════════════════════════════
+
+            computeStats() {
+                var q = this.searchQuery.replace(/'/g, "\\'");
+                var searchCrit = this.searchQuery ? `( PR_Number=("${q}") || Requisition_Number=("${q}") )` : '';
+
+                function combineCriteria(statusCrit) {
+                    var parts = [];
+                    if (searchCrit) parts.push(searchCrit);
+                    if (statusCrit) parts.push(statusCrit);
+                    return parts.join(' && ');
+                }
+
+                const counts = [
+                    { key: 'all', crit: combineCriteria('') },
+                    { key: 'pending', crit: combineCriteria('(Current_Stage == "Purchase Requisition" && Status != "Rejected" && Status != "Draft")') },
+                    { key: 'in_progress', crit: combineCriteria('((Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill") && Status != "Rejected")') },
+                    { key: 'completed', crit: combineCriteria('(Current_Stage == "Payment" && Status != "Rejected")') },
+                    { key: 'rejected', crit: combineCriteria('(Status == "Rejected")') }
+                ];
+
+                counts.forEach((c) => {
+                    var config = { report_name: REPORT_NAME };
+                    if (c.crit) config.criteria = c.crit;
+                    ZOHO.CREATOR.DATA.getRecordCount(config).then((response) => {
+                        var count = response.result ? response.result.records_count : 0;
+                        this.stats[c.key] = count;
+                    });
+                });
+            },
+
+            // ════════════════════════════════════════════
+            //  ACTIONS COLUMN
+            // ════════════════════════════════════════════
+
+            openRfq(id) {
+                ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', url: '#Page:RFQ_Detailed?recordId=' + id, window: 'same' });
+            },
+
+            openPr(id) {
+                ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', url: '#Page:PR_Detailed?recordId=' + id, window: 'same' });
+            },
+
+            // ════════════════════════════════════════════
+            //  PR CREATION SYSTEM & ITEMS DROPDOWN
+            // ════════════════════════════════════════════
+
+            openCreateModal() {
+                this.rowTomSelects = {};
+                this.itemRows = [];
+                this.prDueDate = '';
+                this.prDescription = '';
+                this.rfqVisible = false;
+                this.rfqMessage = '';
+                this.rfqChoice = 'No';
+                this.submitting = false;
+                this.submitType = 'Submitted';
+                this.showModal = true;
+
+                this.$nextTick(() => {
+                    const unitSelectEl = this.$refs.prUnit;
+                    this.unitTomSelect = new TomSelect(unitSelectEl, {
+                        valueField: 'ID',
+                        labelField: 'Name',
+                        searchField: 'Name',
+                        options: this.departmentMasters,
+                        maxItems: 1,
+                        placeholder: 'Select Unit...'
+                    });
+                    this.addGridRow(); // Add first empty row by default
+                });
+            },
+
+            closeModal() {
+                // Destroy Tom Select instances on close to prevent memory leaks
+                Object.values(this.rowTomSelects).forEach(ts => ts.destroy());
+                this.rowTomSelects = {};
+                if (this.unitTomSelect) {
+                    this.unitTomSelect.destroy();
+                    this.unitTomSelect = null;
+                }
+                this.showModal = false;
+            },
+
+            addGridRow() {
+                this.itemRows.push({
+                    id: ++rowIdCounter,
+                    unit: '',
+                    quantity: '',
+                    dueDate: this.prDueDate || '',
+                    comment: ''
+                });
+            },
+
+            removeGridRow(id) {
+                const ts = this.rowTomSelects[id];
+                if (ts) { ts.destroy(); delete this.rowTomSelects[id]; }
+                this.itemRows = this.itemRows.filter(r => r.id !== id);
+                this.checkItemsInGRN();
+            },
+
+            initItemSelect(selectEl, row) {
+                // Initialize Tom Select on the new row for fully-featured autocomplete
+                const ts = new TomSelect(selectEl, {
+                    valueField: 'ID',
+                    labelField: 'item_name',
+                    searchField: 'item_name',
+                    options: this.itemMasters,
+                    create: false,
+                    maxItems: 1,
+                    placeholder: 'Search item...',
+                    render: {
+                        option: function (data, escape) { return '<div class="font-medium">' + escape(data.item_name) + '</div>'; },
+                        item: function (data, escape) { return '<div class="font-medium">' + escape(data.item_name) + '</div>'; }
+                    },
+                    onChange: (value) => {
+                        const selectedItem = this.itemMasters.find(i => i.ID === value);
+                        row.unit = selectedItem ? (selectedItem.unit_of_measure || '') : '';
+                        row._itemId = value;
+                        row._itemName = selectedItem ? selectedItem.item_name : 'Unknown Item';
+                        this.checkItemsInGRN();
+                    }
+                });
+                this.rowTomSelects[row.id] = ts;
+            },
+
+            checkItemsInGRN() {
+                const itemsToCheck = this.itemRows
+                    .filter(row => row._itemId)
+                    .map(row => ({ id: row._itemId, name: row._itemName || 'Unknown Item' }));
+
+                if (itemsToCheck.length === 0) {
+                    this.rfqVisible = false;
+                    this.rfqChoice = 'No';
+                    return;
+                }
+
+                const checks = itemsToCheck.map(item => {
+                    return ZOHO.CREATOR.DATA.invokeCustomApi({
+                        api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_RFQ_DETAILS,
+                        http_method: "POST",
+                        payload: {
+                            itemIds: item.id
+                        }
+                    }).then(function (response) {
+                        try {
+                            let resultArr = response.data || response.result || response;
+                            if (typeof resultArr === 'string') resultArr = JSON.parse(resultArr);
+                            if (resultArr.response) resultArr = resultArr.response;
+
+                            if (Array.isArray(resultArr) && resultArr.length === 0) {
+                                return item.name;
+                            }
+                            return null;
+                        } catch (e) {
+                            console.error("Error parsing GRN response", e);
+                            return null;
+                        }
+                    }).catch(err => {
+                        console.error("GRN check failed", err);
+                        return null;
+                    });
+                });
+
+                Promise.all(checks).then((results) => {
+                    const notFinalized = results.filter(name => name !== null);
+                    if (notFinalized.length > 0) {
+                        this.rfqChoice = 'No';
+                        this.rfqMessage = "No goods received for the following item(s): <strong>" + notFinalized.join(", ") + "</strong>";
+                    } else {
+                        this.rfqVisible = false;
+                        this.rfqChoice = 'No';
+                        this.rfqMessage = '';
+                    }
+                });
+            },
+
+            submitNewPR() {
+                this.submitting = true;
+
+                if (this.itemRows.length === 0) {
+                    showToast('Please add at least one item.', 'error');
+                    this.submitting = false;
+                    return;
+                }
+
+                const itemsCollection = [];
+                let validationError = false;
+
+                this.itemRows.forEach(row => {
+                    const itemId = row._itemId;
+                    if (!itemId) validationError = true;
+
+                    itemsCollection.push({
+                        "Item": itemId,
+                        "Quantity": parseInt(row.quantity, 10),
+                        "Due_Date": formatZohoDateSubmission(row.dueDate),
+                        "Comment": row.comment || ""
+                    });
+                });
+
+                if (validationError) {
+                    showToast('Please select a valid item from the dropdown for all rows.', 'error');
+                    this.submitting = false;
+                    return;
+                }
+
+                const finalStatus = this.submitType === 'Draft' ? 'Draft' : 'Submitted';
+
+                const payload = {
+                    "data": {
+                        "Department": this.unitTomSelect ? this.unitTomSelect.getValue() : '',
+                        "PR_Date": formatZohoDateSubmission(new Date().toISOString().split('T')[0]),
+                        "Due_Date": formatZohoDateSubmission(this.prDueDate),
+                        "Status": finalStatus,
+                        "Items_Approval_Status": "Pending",
+                        "Current_Stage": "Purchase Requisition",
+                        "description": this.prDescription,
+                        "Request_For_Quotation": this.rfqChoice || "No",
+                        "Requested_Items": itemsCollection
+                    }
+                };
+
+                ZOHO.CREATOR.DATA.addRecords({ form_name: "Purchase_Requisition", payload }).then((response) => {
+                    if (response.code === 3000 && response.data) {
+                        const newRecordId = response.data.ID;
+                        const files = this.$refs.prFiles ? this.$refs.prFiles.files : [];
+
+                        if (files.length > 0) {
+                            const uploadPromises = Array.from(files).map(file => {
+                                return ZOHO.CREATOR.FILE.uploadFile({ report_name: REPORT_NAME, field_name: "Attachments", file: file, id: newRecordId });
+                            });
+
+                            Promise.all(uploadPromises)
+                                .then(() => this.completeSubmission())
+                                .catch(err => { console.error("File upload failed", err); this.completeSubmission(); });
+                        } else {
+                            this.completeSubmission();
+                        }
+                    } else {
+                        this.submitting = false;
+                        showToast('Failed to create PR: ' + (response.message || 'Error'), 'error');
+                    }
+                }).catch((err) => {
+                    this.submitting = false;
+                    showToast('Submission error. Check console.', 'error');
+                    console.error(err);
+                });
+            },
+
+            completeSubmission() {
+                this.closeModal();
+
+                let toastMessage = 'Purchase Requisition submitted successfully!';
+                if (this.submitType === 'Draft') {
+                    toastMessage = 'Purchase Requisition saved as draft!';
+                }
+
+                showToast(toastMessage, 'success');
+                this.searchQuery = '';
+                this.searchInputValue = '';
+                this.fetchRecords();
+            }
+        };
+    }
 </script>
 
 </html>

@@ -280,7 +280,7 @@
           const cleanForm = JSON.parse(JSON.stringify(this.form));
           const payload = { data: cleanForm };
           const request = this.isEdit
-            ? ZOHO.CREATOR.DATA.updateRecords({ report_name: 'Unit_Report', payload: { criteria: `ID=${this.editId}`, data: this.form } })
+            ? ZOHO.CREATOR.DATA.updateRecords({ report_name: 'Unit_Report', payload: { criteria: `ID=${this.editId}`, data: JSON.parse(JSON.stringify(this.form)) } })
             : ZOHO.CREATOR.DATA.addRecords({ form_name: 'Unit', payload });
 
           request.then(res => {
