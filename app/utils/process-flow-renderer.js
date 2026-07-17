@@ -35,6 +35,7 @@ const P2PWorkflowUtils = {
 		FETCH_QC_DETAILS: "Dev__Fetch_Vendor_Comparison_Details",
 		SEND_RFQ_EMAIL_TO_VENDOR: "Dev__Send_RFQ_Email_To_Vendor",
 		CHECK_ITEM_IN_GRN: "Dev__Check_Vendor_Requirement_For_Item",
+		FETCH_PO_DETAILS: "Dev__Fetch_PO_Details",
 	},
 	// Helper: Map Creator Stage Strings to Step Keys
 	stageToStepKey: function (stage) {
