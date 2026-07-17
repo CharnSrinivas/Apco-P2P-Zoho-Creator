@@ -5,18 +5,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GRN Detail</title>
-    <script src="https://cdn.tailwindcss.com"></script>
 
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
     <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+
+    <!-- Shared Workflow Script for Audit Trail & Progress -->
+    <script
+        src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
         rel="stylesheet">
+
     <style>
-        /* ── Loading spinner ── */
+        [x-cloak] {
+            display: none !important;
+        }
+
+        .btn-spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            animation: spin 0.7s linear infinite;
+        }
+
         .grn-spinner {
             border: 2.5px solid #e5e7eb;
             border-top-color: #1B5CA8;
@@ -32,7 +52,6 @@
             }
         }
 
-        /* ── Progress stepper connector ── */
         .step-connector {
             position: absolute;
             top: 14px;
@@ -48,25 +67,9 @@
             top: 0;
             left: 0;
             height: 100%;
-            background: #1B5CA8;
             transition: width 0.6s ease;
         }
 
-        /* ── Timeline connector ── */
-        .timeline-line {
-            position: absolute;
-            left: 15px;
-            top: 32px;
-            bottom: 0;
-            width: 2px;
-            background: #e5e7eb;
-        }
-
-        .timeline-item:last-child .timeline-line {
-            display: none;
-        }
-
-        /* ── Fade in ── */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -82,113 +85,357 @@
         .fade-in {
             animation: fadeInUp 0.35s ease-out both;
         }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(-12px) scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-12px) scale(0.96);
+            }
+        }
+
+        .toast-enter {
+            animation: toastIn 0.3s ease-out both;
+        }
+
+        .toast-leave {
+            animation: toastOut 0.25s ease-in both;
+        }
     </style>
 </head>
 
 <body class="bg-gray-50 p-6">
 
-    <div id="app" class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-6xl mx-auto">
+    <div id="app" x-data="grnWidget()" x-init="initWidget()" x-cloak
+        class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-5xl mx-auto">
 
-        <div id="loadingState" class="flex flex-col items-center justify-center py-24 gap-3">
+        <!-- Toast Notifications -->
+        <div x-show="toast.show" x-cloak
+            class="fixed top-5 right-5 z-[100] flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-[13px] font-medium max-w-sm"
+            :class="{
+                'bg-emerald-50 border-emerald-200 text-emerald-800': toast.type === 'success',
+                'bg-red-50 border-red-200 text-red-800': toast.type === 'error'
+            }" x-transition:enter="toast-enter" x-transition:leave="toast-leave">
+            <i class="bi text-[15px]"
+                :class="toast.type === 'success' ? 'bi-check-circle-fill text-emerald-600' : 'bi-exclamation-circle-fill text-red-600'"></i>
+            <span x-text="toast.message"></span>
+            <button @click="hideToast()" class="ml-auto text-gray-400 hover:text-gray-600 cursor-pointer">
+                <i class="bi bi-x text-[15px]"></i>
+            </button>
+        </div>
+
+        <!-- Action Modal -->
+        <div x-show="showModal" style="display: none;"
+            class="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm transition-opacity">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden fade-in mx-4 border border-gray-200 flex flex-col"
+                @click.away="closeModal()">
+                <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-white shrink-0">
+                    <h3 class="text-[14px] font-bold text-gray-800" x-text="modalTitle"></h3>
+                    <button @click="closeModal()"
+                        class="text-gray-400 hover:text-gray-700 cursor-pointer transition-colors">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="p-5 bg-gray-50/50">
+                    <label class="block text-xs font-semibold text-gray-700 mb-2">
+                        Comment <span class="text-gray-400 font-normal text-[11px]">(Optional)</span>
+                    </label>
+                    <textarea x-model="modalComment" rows="3"
+                        class="w-full border border-gray-300 rounded-lg p-3 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1B5CA8]/20 focus:border-[#1B5CA8] transition-all shadow-sm"
+                        placeholder="Enter your remarks here..."></textarea>
+                </div>
+                <div class="px-5 py-3.5 bg-white flex justify-end gap-2.5 border-t border-gray-100 shrink-0">
+                    <button @click="closeModal()" :disabled="isSubmitting"
+                        class="px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors cursor-pointer shadow-sm disabled:opacity-50">
+                        Cancel
+                    </button>
+                    <button @click="submitAction()" :disabled="isSubmitting"
+                        :class="modalBtnClass + ' ' + modalBtnHoverClass"
+                        class="px-4 py-2 rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer shadow-sm flex items-center gap-1.5 disabled:opacity-70">
+                        <template x-if="isSubmitting">
+                            <div class="btn-spinner mr-1"></div>
+                        </template>
+                        <span x-text="isSubmitting ? 'Submitting...' : modalBtnText"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- States -->
+        <div x-show="isLoading" class="flex flex-col items-center justify-center py-24 gap-3">
             <div class="grn-spinner"></div>
             <div class="text-sm text-gray-400 font-medium">Loading GRN details…</div>
         </div>
 
-        <div id="errorState" class="hidden text-center py-24">
+        <div x-show="hasError" class="text-center py-24">
             <i class="bi bi-alert-circle text-4xl text-red-400 mb-3 block"></i>
             <div class="text-sm font-medium text-gray-600">Failed to load GRN details</div>
-            <div class="text-xs text-gray-400 mt-1">Please check the record ID and try again.</div>
+            <div class="text-xs text-gray-400 mt-1"
+                x-text="errorMessage || 'Please check the record ID and try again.'"></div>
         </div>
 
-        <div id="mainContent" class="hidden">
-
+        <!-- Main Content -->
+        <div x-show="!isLoading && !hasError" class="fade-in">
             <div class="mb-5">
                 <nav class="flex items-center gap-1.5 text-xs mb-2.5">
                     <button
                         onclick="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',window:'same',url:'#Page:GRN_Approval'})"
-                        class=" text-[#1B5CA8] hover:text-[#14457e] font-medium transition-colors no-underline">
-                        Goods Receipts
+                        class="text-[#1B5CA8] hover:text-[#14457e] font-medium transition-colors no-underline cursor-pointer">
+                        Good Receipt Notes
                     </button>
                     <i class="bi bi-chevron-right text-[11px] text-gray-400"></i>
-                    <span class="text-gray-500 font-medium" id="breadcrumbGrnNum">–</span>
+                    <span class="text-gray-500 font-medium" x-text="grnNumber"></span>
                 </nav>
-                <div class="flex items-center gap-2.5">
-                    <h1 class="text-[17px] font-bold text-gray-900 leading-none" id="headerGrnNum">–</h1>
-                    <span id="headerBadge"></span>
-                </div>
-                <div class="text-xs text-gray-400 mt-1" id="headerSub">–</div>
-            </div>
 
-            <div class="bg-white border border-gray-200 rounded-lg p-5 mb-4 fade-in">
-                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">PR Process Progress
-                </div>
-                <div class="relative flex justify-between items-start" id="progressContainer">
-                    <div class="step-connector">
-                        <div class="step-connector-fill" id="progressFill" style="width: 0%"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-5 gap-4">
-
-                <div class="col-span-3 space-y-4">
-
-                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden fade-in">
-                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
-                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
-                                <div
-                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
-                                    <i class="bi bi-file-earmark-check"></i>
-                                </div>
-                                Receipt Details
-                            </div>
-                        </div>
-                        <div class="px-[18px] py-[15px]" id="grnDetailsBody">
-                        </div>
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                    <div class="flex items-center gap-2.5">
+                        <h1 class="text-[17px] font-bold text-gray-900 leading-none" x-text="grnNumber"></h1>
+                        <span x-html="getStatusBadge(rec.Status)"></span>
+                        <span
+                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium tracking-wide border border-blue-200 bg-blue-50 text-blue-700">
+                            <i class="bi bi-box-seam text-[10px]"></i> <span
+                                x-text="rec.Items_Status || 'Pending'"></span>
+                        </span>
                     </div>
 
-                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden fade-in">
-                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
-                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
-                                <div
-                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
-                                    <i class="bi bi-list-columns-reverse"></i>
-                                </div>
-                                Item Reconciliation (Ordered vs. Received)
-                            </div>
-                        </div>
-                        <div id="itemsTableBody" class="overflow-x-auto">
-                        </div>
-                    </div>
-
-                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden fade-in h-fit">
-                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
-                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
-                                <div
-                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-blue-50 text-blue-600">
-                                    <i class="bi bi-paperclip"></i>
-                                </div>
-                                Attachments
-                            </div>
-                        </div>
-                        <div class="px-[18px] py-[15px]" id="attachmentsBody">
-                        </div>
-                    </div>
-
-                    <div class="flex items-center gap-2.5 fade-in" id="actionButtons" style="display:none;">
-                        <button id="approveBtn"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors no-underline cursor-pointer shadow-sm">
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button x-show="canApprove" @click="approveGRN()"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white hover:bg-emerald-700 rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer">
                             <i class="bi bi-check-lg"></i> Approve
                         </button>
-                        <button id="rejectBtn"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors no-underline cursor-pointer shadow-sm">
+                        <button x-show="canApprove" @click="rejectGRN()"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-red-300 text-red-600 hover:bg-red-50 rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer">
                             <i class="bi bi-x-lg"></i> Reject
                         </button>
                     </div>
                 </div>
 
-                <div class="col-span-2">
-                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden fade-in h-full">
+                <div class="text-xs text-gray-400 mt-1">
+                    <span x-text="poRefDisplay !== 'N/A' ? `Ref: ${poRefDisplay} · ` : ''"></span>
+                    Delivered on <span x-text="formatDate(rec.delivery_date)"></span>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-lg p-5 mb-4">
+                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">Process Progress</div>
+                <div class="relative flex justify-between items-start" id="globalProgressContainer">
+                    <div class="step-connector">
+                        <div class="step-connector-fill" id="globalProgressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-5 gap-4">
+                <div class="col-span-3 space-y-4">
+                    <!-- Overview Section -->
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
+                                    <i class="bi bi-file-text"></i>
+                                </div>
+                                GRN Overview
+                            </div>
+                        </div>
+                        <div class="px-[18px] py-[15px]">
+                            <div class="grid grid-cols-2 gap-x-6 gap-y-0">
+                                <template x-for="field in detailFields" :key="field.label">
+                                    <div
+                                        class="flex justify-between items-center py-2 text-xs border-b border-dashed border-gray-100">
+                                        <span class="text-gray-500 font-medium" x-text="field.label"></span>
+                                        <template x-if="field.isHtml"><span x-html="field.value"></span></template>
+                                        <template x-if="!field.isHtml"><span
+                                                class="text-gray-900 font-semibold text-right"
+                                                x-text="field.value || '–'"></span></template>
+                                    </div>
+                                </template>
+                            </div>
+                            <div x-show="rec.Remarks" class="mt-4 pt-3 border-t border-gray-100">
+                                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                                    Remarks</div>
+                                <div class="text-xs text-gray-700 leading-relaxed max-w-none" x-text="rec.Remarks">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Line Items -->
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
+                                    <i class="bi bi-list"></i>
+                                </div>
+                                Received Items
+                            </div>
+                        </div>
+                        <div x-show="items.length === 0" class="px-[18px] py-8 text-center text-gray-400 text-xs">
+                            <i class="bi bi-box-seam text-xl mb-1 block"></i> No line items found
+                        </div>
+                        <table x-show="items.length > 0" class="w-full border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-200">
+                                    <th
+                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">
+                                        Item</th>
+                                    <th
+                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
+                                        PO Qty</th>
+                                    <th
+                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
+                                        Rec Qty</th>
+                                    <th
+                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
+                                        Rate</th>
+                                    <th
+                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
+                                        Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="(item, i) in items" :key="i">
+                                    <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                                        <td class="px-4 py-2.5 text-gray-900 font-medium">
+                                            <span x-text="getItemName(item)"></span>
+                                            <template x-if="item.Comment">
+                                                <div class="text-[11px] text-gray-400 font-normal mt-0.5"
+                                                    x-text="item.Comment"></div>
+                                            </template>
+                                        </td>
+                                        <td class="px-4 py-2.5 text-gray-600 text-right tabular-nums"
+                                            x-text="item.PO_Quantity || 0"></td>
+                                        <td class="px-4 py-2.5 text-gray-900 font-semibold text-right tabular-nums"
+                                            :class="item.Received_Quantity !== item.PO_Quantity ? 'text-orange-600' : 'text-emerald-600'"
+                                            x-text="item.Received_Quantity || 0"></td>
+                                        <td class="px-4 py-2.5 text-gray-700 text-right tabular-nums"
+                                            x-text="formatCurrency(item.Rate)"></td>
+                                        <td class="px-4 py-2.5 text-gray-700 text-right tabular-nums"
+                                            x-text="formatCurrency(item.Amount)"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Totals Section -->
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <div class="px-[18px] py-[15px]">
+                            <div class="flex justify-end">
+                                <div class="w-64 space-y-2 text-xs">
+                                    <div class="flex justify-between text-gray-600">
+                                        <span>Sub Total</span>
+                                        <span class="font-medium" x-text="formatCurrency(rec.Sub_Total)"></span>
+                                    </div>
+                                    <div class="flex justify-between text-gray-600">
+                                        <span>Discount</span>
+                                        <span class="font-medium" x-text="formatCurrency(rec.Discount)"></span>
+                                    </div>
+                                    <div class="flex justify-between text-gray-600">
+                                        <span>CGST</span>
+                                        <span class="font-medium" x-text="formatCurrency(rec.CGST)"></span>
+                                    </div>
+                                    <div class="flex justify-between text-gray-600">
+                                        <span>SGST</span>
+                                        <span class="font-medium" x-text="formatCurrency(rec.SGST)"></span>
+                                    </div>
+                                    <div class="flex justify-between text-gray-600 border-b border-gray-100 pb-2">
+                                        <span>IGST</span>
+                                        <span class="font-medium" x-text="formatCurrency(rec.IGST)"></span>
+                                    </div>
+                                    <div class="flex justify-between text-gray-900 font-bold text-[14px] pt-1">
+                                        <span>Total Amount</span>
+                                        <span x-text="formatCurrency(rec.Total_Amount)"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-span-2 space-y-4">
+                    <!-- Address Info -->
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-indigo-50 text-indigo-600">
+                                    <i class="bi bi-geo-alt"></i>
+                                </div>
+                                Location Details
+                            </div>
+                        </div>
+                        <div class="px-[18px] py-[15px] space-y-4">
+                            <div>
+                                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                                    Billing Address</div>
+                                <div class="text-xs text-gray-700 leading-relaxed"
+                                    x-html="formatAddress(rec.Billing_Address)"></div>
+                            </div>
+                            <div class="border-t border-gray-100 pt-3">
+                                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                                    Shipping Address</div>
+                                <div class="text-xs text-gray-700 leading-relaxed"
+                                    x-html="formatAddress(rec.Shipping_Address)"></div>
+                            </div>
+                            <div class="border-t border-gray-100 pt-3">
+                                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                                    Delivery Address</div>
+                                <div class="text-xs text-gray-700 leading-relaxed"
+                                    x-html="formatAddress(rec.Delivary_Address)"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attachments -->
+                    <div x-show="rec.Attachments" class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-indigo-50 text-indigo-600">
+                                    <i class="bi bi-paperclip"></i>
+                                </div>
+                                Attachments
+                            </div>
+                        </div>
+                        <div class="px-[18px] py-[15px]">
+                            <div
+                                class="flex items-center justify-between p-3 border border-gray-100 rounded-lg bg-white shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                        <i class="bi bi-file-earmark-text text-[15px]"></i>
+                                    </div>
+                                    <div class="text-xs font-semibold text-gray-800 truncate max-w-[150px]"
+                                        x-text="getAttachmentName(rec.Attachments)"></div>
+                                </div>
+                                <button @click="downloadAttachment(rec.Attachments)"
+                                    class="px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 rounded text-[11px] font-semibold transition-colors flex items-center gap-1.5 cursor-pointer">
+                                    <i class="bi bi-download"></i> Download
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Audit Trail -->
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
                         <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
                             <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
                                 <div
@@ -198,615 +445,355 @@
                                 Audit Trail
                             </div>
                         </div>
-                        <div class="px-[18px] py-[15px]" id="auditTrailBody">
-                        </div>
+                        <div class="px-[18px] py-[15px]" id="globalAuditTrail"></div>
                     </div>
                 </div>
-
             </div>
-
-
-
         </div>
-
     </div>
 
     <script>
-        (function () {
-            'use strict';
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('grnWidget', () => ({
+                isLoading: true,
+                hasError: false,
+                errorMessage: '',
+                recordId: null,
+                rec: {},
+                items: [],
+                actions: [],
 
-            // P2P Process steps
-            const PROCESS_STEPS = [
-                { key: 'purchase_requisition', label: 'Purchase Requisition', icon: 'bi-receipt' },
-                { key: 'purchase_order', label: 'Purchase Order', icon: 'bi-cart-check' },
-                { key: 'grn', label: 'GRN', icon: 'bi-box-seam' },
-                { key: 'bill', label: 'Bill', icon: 'bi-coin' },
-                { key: 'payment', label: 'Payment', icon: 'bi-cash' }
-            ];
+                // Modal
+                showModal: false,
+                modalTitle: '',
+                modalComment: '',
+                pendingStatus: '',
+                modalBtnClass: '',
+                modalBtnHoverClass: '',
+                isSubmitting: false,
 
-            // DOM refs
-            const $loading = document.getElementById('loadingState');
-            const $error = document.getElementById('errorState');
-            const $main = document.getElementById('mainContent');
-            const $headerGrnNum = document.getElementById('headerGrnNum');
-            const $headerBadge = document.getElementById('headerBadge');
-            const $headerSub = document.getElementById('headerSub');
-            const $progressContainer = document.getElementById('progressContainer');
-            const $progressFill = document.getElementById('progressFill');
-            const $grnDetails = document.getElementById('grnDetailsBody');
-            const $itemsTable = document.getElementById('itemsTableBody');
-            const $actionButtons = document.getElementById('actionButtons');
-            const $auditTrail = document.getElementById('auditTrailBody');
-            const $breadcrumbGrnNum = document.getElementById('breadcrumbGrnNum');
-            const $approveBtn = document.getElementById('approveBtn');
-            const $rejectBtn = document.getElementById('rejectBtn');
+                // Toast
+                toast: { show: false, message: '', type: 'success' },
+                toastTimer: null,
 
+                initWidget() {
+                    ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
+                        this.recordId = params?.recordId || null;
+                        if (!this.recordId) {
+                            this.hasError = true;
+                            this.isLoading = false;
+                            this.errorMessage = 'No Record ID provided in URL parameters.';
+                            return;
+                        }
+                        this.fetchData();
+                    });
+                },
 
-            // ════════════════════════════════════════════
-            //  HELPERS
-            // ════════════════════════════════════════════
+                fetchData() {
+                    this.isLoading = true;
+                    // Replace with the exact custom API name you configured for GRN Details
+                    ZOHO.CREATOR.DATA.invokeCustomApi({
+                        api_name: "Dev__Fetch_GRN_Details",
+                        http_method: "GET",
+                        content_type: "application/json",
+                        query_params: 'recId=' + this.recordId,
+                    }).then((response) => {
+                        if (!response || !response.result || response.result.length === 0) {
+                            throw new Error("No data returned");
+                        }
+                        this.rec = response.result[0];
+                        this.items = this.rec.Items || [];
 
-            function esc(str) {
-                if (str == null || str === '') return '–';
-                const div = document.createElement('div');
-                div.textContent = String(str);
-                return div.innerHTML;
-            }
+                        // Extract PR Actions for timeline rendering if nested inside PR_Reference
+                        this.actions = (this.rec.PR_Reference && this.rec.PR_Reference.PR_Actions)
+                            ? this.rec.PR_Reference.PR_Actions
+                            : [];
 
-            function formatINR(amount) {
-                if (amount == null || isNaN(amount)) return '₹ 0';
-                const num = parseFloat(amount);
-                let intPart = Math.abs(Math.round(num)).toString();
-                const sign = num < 0 ? '-' : '';
-                if (intPart.length > 3) {
-                    const last3 = intPart.slice(-3);
-                    const rest = intPart.slice(0, -3);
-                    intPart = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + last3;
-                }
-                return '₹ ' + sign + intPart;
-            }
+                        this.$nextTick(() => {
+                            if (typeof P2PWorkflowUtils !== 'undefined') {
+                                P2PWorkflowUtils.renderProgress(
+                                    this.actions,
+                                    "Purchase Order", // Display stage context
+                                    document.getElementById('globalProgressContainer'),
+                                    document.getElementById('globalProgressFill')
+                                );
+                                P2PWorkflowUtils.renderAuditTrail(
+                                    this.actions,
+                                    document.getElementById('globalAuditTrail')
+                                );
+                            }
+                        });
 
-            function formatDate(dateStr) {
-                if (!dateStr) return '–';
-                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                try {
-                    const d = new Date(dateStr);
-                    if (isNaN(d.getTime())) return dateStr;
-                    return String(d.getDate()).padStart(2, '0') + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
-                } catch (e) {
-                    return dateStr;
-                }
-            }
+                        this.isLoading = false;
+                    }).catch((err) => {
+                        console.error('API Error:', err);
+                        this.hasError = true;
+                        this.isLoading = false;
+                    });
+                },
 
-            function getDisplayName(field) {
-                if (!field) return '–';
-                if (typeof field === 'object' && field.display_value) return field.display_value;
-                if (typeof field === 'object' && field.first_name) {
-                    return ((field.first_name || '') + ' ' + (field.last_name || '')).trim() || '–';
-                }
-                return String(field);
-            }
+                get canApprove() {
+                    const status = (this.rec.Status || '').toLowerCase();
+                    return status === 'submitted';
+                },
 
-            function normalizeStatus(status) {
-                if (!status) return 'submitted';
-                const s = status.toLowerCase();
-                if (s === 'submitted' || s === 'draft') return 'submitted';
-                if (s === 'approved') return 'approved';
-                if (s === 'rejected') return 'rejected';
-                if (s === 'cancelled') return 'cancelled';
-                return 'submitted';
-            }
+                get grnNumber() {
+                    return this.rec.GRN_Ref_Number || (this.rec.GRN_Number ? 'GRN-' + this.rec.GRN_Number : '–');
+                },
 
-            function getStatusBadgeHTML(status) {
-                const norm = normalizeStatus(status);
-                const config = {
-                    submitted: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500', label: status || 'Submitted' },
-                    approved: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600', label: 'Approved' },
-                    rejected: { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600', label: 'Rejected' },
-                    cancelled: { border: 'border-gray-300', bg: 'bg-gray-100', text: 'text-gray-700', dot: 'bg-gray-500', label: 'Cancelled' },
-                };
-                const c = config[norm] || config.submitted;
-                return '<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border ' + c.border + ' ' + c.bg + ' ' + c.text + '"><span class="w-[5px] h-[5px] rounded-full ' + c.dot + ' shrink-0"></span>' + esc(c.label) + '</span>';
-            }
+                get poRefDisplay() {
+                    if (this.rec.PO_Reference && this.rec.PO_Reference.PO_Ref_Number) {
+                        return this.rec.PO_Reference.PO_Ref_Number;
+                    }
+                    return 'N/A';
+                },
 
-            function stageToStepKey(stage) {
-                if (!stage) return null;
-                const s = stage.toLowerCase().trim();
-                if (s === 'purchase requisition') return 'purchase_requisition';
-                if (s === 'purchase order') return 'purchase_order';
-                if (s === 'grn') return 'grn';
-                if (s === 'bill') return 'bill';
-                if (s === 'payment') return 'payment';
-                return null;
-            }
+                get prRefDisplay() {
+                    if (this.rec.PR_Reference && this.rec.PR_Reference.PR_Number) {
+                        return this.rec.PR_Reference.PR_Number;
+                    }
+                    return 'N/A';
+                },
 
+                get detailFields() {
+                    const vendorName = this.rec.Vendor ? (this.rec.Vendor.Display_Name || this.rec.Vendor.Company_Name || '–') : '–';
+                    return [
+                        { label: 'GRN Number', value: this.grnNumber },
+                        { label: 'PO Reference', value: this.poRefDisplay },
+                        { label: 'PR Reference', value: this.prRefDisplay },
+                        { label: 'GRN Date', value: this.formatDate(this.rec.GRN_Date) },
+                        { label: 'Delivery Date', value: this.formatDate(this.rec.delivery_date) },
+                        { label: 'Vendor', value: vendorName },
+                    ];
+                },
 
-            // ════════════════════════════════════════════
-            //  PROGRESS INDICATOR
-            // ════════════════════════════════════════════
+                getStatusBadge(status) {
+                    const s = (status || 'submitted').toLowerCase();
+                    let border = 'border-amber-200', bg = 'bg-amber-50', text = 'text-amber-800', dot = 'bg-amber-500', label = status || 'Submitted';
+                    if (s === 'approved') { border = 'border-emerald-200'; bg = 'bg-emerald-50'; text = 'text-emerald-800'; dot = 'bg-emerald-600'; label = 'Approved'; }
+                    if (s === 'rejected') { border = 'border-red-200'; bg = 'bg-red-50'; text = 'text-red-800'; dot = 'bg-red-600'; label = 'Rejected'; }
+                    if (s === 'draft') { border = 'border-gray-200'; bg = 'bg-gray-50'; text = 'text-gray-600'; dot = 'bg-gray-400'; label = 'Draft'; }
+                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border ${border} ${bg} ${text}"><span class="w-[5px] h-[5px] rounded-full ${dot} shrink-0"></span>${label}</span>`;
+                },
 
-            function renderProgress(rec, actions) {
-                var currentStageKey = stageToStepKey(rec.Current_Stage) || 'grn';
+                getItemName(itemObj) {
+                    if (!itemObj || !itemObj.Item) return '–';
+                    return itemObj.Item.item_name || itemObj.Item.display_value || `Item #${itemObj.Item}`;
+                },
 
-                var completed = {};
-                var rejectedStepKey = null;
-                completed['purchase_requisition'] = true;
-                completed['purchase_order'] = true;
-                completed['grn'] = true;
+                formatDate(dateStr) {
+                    if (!dateStr) return '–';
+                    try {
+                        const d = new Date(dateStr);
+                        if (isNaN(d.getTime())) return dateStr;
+                        const mos = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        return `${String(d.getDate()).padStart(2, '0')} ${mos[d.getMonth()]} ${d.getFullYear()}`;
+                    } catch (e) { return dateStr; }
+                },
 
-                if (actions && actions.length) {
-                    actions.forEach(function (action) {
-                        var stepKey = stageToStepKey(action.Moved_To);
-                        if (stepKey) {
-                            if (action.Status && action.Status.toLowerCase() === 'rejected') {
-                                rejectedStepKey = stepKey;
-                            } else {
-                                completed[stepKey] = true;
+                formatCurrency(amount) {
+                    if (amount === null || amount === undefined || isNaN(amount)) return '₹ 0.00';
+                    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
+                },
+
+                formatAddress(addr) {
+                    if (!addr || typeof addr !== 'object' || Object.keys(addr).length === 0) return '<span class="text-gray-400 italic">Not Provided</span>';
+                    const parts = [addr.address_line_1, addr.address_line_2, addr.district_city, addr.state_province, addr.country, addr.postal_Code];
+                    return parts.filter(p => p && p.trim() !== '').join('<br>');
+                },
+
+                getAttachmentName(att) {
+                    if (!att) return 'Document';
+                    let fullPath = typeof att === 'object' ? (att.display_value || att.ID) : att;
+                    let filePath = fullPath;
+                    if (typeof fullPath === 'string' && fullPath.includes('filepath=')) {
+                        filePath = fullPath.split('filepath=')[1].split('&')[0];
+                    }
+                    let parts = filePath.split('_');
+                    if (parts.length > 1 && !isNaN(parts[0])) return parts.slice(1).join('_');
+                    return filePath;
+                },
+
+                downloadAttachment(att) {
+                    let fullPath = typeof att === 'object' ? (att.display_value || att.ID) : att;
+                    let filePath = fullPath;
+                    if (typeof fullPath === 'string' && fullPath.includes('filepath=')) {
+                        filePath = fullPath.split('filepath=')[1].split('&')[0];
+                    }
+                    ZOHO.CREATOR.UTIL.getInitParams().then((response) => {
+                        let appOwner = response.scope;
+                        let appLinkName = response.appLinkName;
+                        let url = `https://creatorapp.zoho.in/creator/v2.1/data/${appOwner}/${appLinkName}/report/GRN_Report/${this.recordId}/Attachments/download?filepath=${filePath}`;
+                        window.open(url);
+                    });
+                },
+
+                showToast(message, type = 'success') {
+                    if (this.toastTimer) clearTimeout(this.toastTimer);
+                    this.toast = { show: true, message, type };
+                    this.toastTimer = setTimeout(() => this.hideToast(), 4000);
+                },
+                hideToast() {
+                    this.toast.show = false;
+                    if (this.toastTimer) { clearTimeout(this.toastTimer); this.toastTimer = null; }
+                },
+
+                openModal(title, status, btnBgClass, btnHoverClass) {
+                    this.modalTitle = title;
+                    this.pendingStatus = status;
+                    this.modalBtnClass = btnBgClass;
+                    this.modalBtnHoverClass = btnHoverClass;
+                    this.modalComment = '';
+                    this.showModal = true;
+                },
+
+                closeModal() {
+                    if (this.isSubmitting) return;
+                    this.showModal = false;
+                },
+
+                get modalBtnText() { return this.modalTitle ? this.modalTitle.split(' ')[0] : 'Submit'; },
+
+                async approveGRN() {
+                    // Temporarily block clicks while validating
+                    this.isSubmitting = true;
+
+                    try {
+                        let poId = (this.rec.PO_Reference && this.rec.PO_Reference.ID) ? this.rec.PO_Reference.ID : null;
+
+                        if (poId) {
+                            // 1. Fetch parent PO to validate against the real-time received quantities
+                            const poRes = await ZOHO.CREATOR.DATA.getRecordById({ report_name: "Purchase_Order_Report", id: poId });
+                            if (poRes.code !== 3000) throw new Error("Could not fetch referenced PO for validation.");
+
+                            let poData = poRes.data;
+                            let mismatchItem = null;
+
+                            // 2. Loop through GRN items and compare against PO items
+                            for (let gItem of this.items) {
+                                let poItem = poData.Items.find(p => p.Item.ID === gItem.Item.ID);
+
+                                if (poItem) {
+                                    let poQty = parseInt(poItem.Quantity || 0);
+                                    let poRecQty = parseInt(poItem.Received_Quantity || 0);
+                                    let grnRecQty = parseInt(gItem.Received_Quantity || 0);
+
+                                    // Calculate what is left to receive on the PO
+                                    let remainingQty = poQty - poRecQty;
+
+                                    // Formula: (po.Quantity - po.Received_Quantity) - grn.Received_Quantity >= 0
+                                    // If less than 0, they are receiving more than allowed
+                                    if ((remainingQty - grnRecQty) < 0) {
+                                        mismatchItem = {
+                                            name: this.getItemName(gItem),
+                                            requested: grnRecQty,
+                                            allowed: remainingQty
+                                        };
+                                        break; // Stop loop on first error
+                                    }
+                                }
+                            }
+
+                            // 3. Reject the action if over-receipt is detected
+                            if (mismatchItem) {
+                                this.showToast(`Over-receipt detected for ${mismatchItem.name}. Attempting to receive ${mismatchItem.requested}, but only ${mismatchItem.allowed} remaining on PO.`, 'error');
+                                return;
                             }
                         }
-                    });
-                }
 
-                var rejectedIdx = -1;
-                if (rejectedStepKey) {
-                    PROCESS_STEPS.forEach(function (step, i) {
-                        if (step.key === rejectedStepKey) rejectedIdx = i;
-                    });
-                }
+                        // 4. If validation passes, open the modal
+                        this.openModal("Approve GRN", "Approved", "bg-emerald-600", "hover:bg-emerald-700");
 
-                var currentIdx = 0;
-                PROCESS_STEPS.forEach(function (step, i) {
-                    if (step.key === currentStageKey) currentIdx = i;
-                });
-
-                var isRejected = (rejectedIdx !== -1);
-                var fillIdx = isRejected ? rejectedIdx : currentIdx;
-
-                var stepsHtml = '';
-                PROCESS_STEPS.forEach(function (step, i) {
-                    var isRejectedStep = (i === rejectedIdx);
-                    var isDone = isRejected ? i < rejectedIdx : i <= currentIdx;
-                    var isCurrent = (i === currentIdx) && !isRejectedStep;
-
-                    var circleClass, labelClass;
-                    if (isRejectedStep) {
-                        circleClass = 'bg-red-600 text-white border-red-600 shadow-md shadow-red-200';
-                        labelClass = 'text-red-700 font-semibold';
-                    } else if (isDone && isCurrent) {
-                        circleClass = 'bg-[#1B5CA8] text-white border-[#1B5CA8] shadow-md shadow-blue-200';
-                        labelClass = 'text-[#1B5CA8] font-semibold';
-                    } else if (isDone) {
-                        circleClass = 'bg-emerald-600 text-white border-emerald-600';
-                        labelClass = 'text-gray-700 font-medium';
-                    } else {
-                        circleClass = 'bg-white text-gray-400 border-gray-300';
-                        labelClass = 'text-gray-400';
+                    } catch (err) {
+                        console.error(err);
+                        this.showToast("Validation failed: " + (err.message || "Could not verify PO quantities."), "error");
+                    } finally {
+                        this.isSubmitting = false;
                     }
+                },
 
-                    var iconHtml;
-                    if (isRejectedStep) {
-                        iconHtml = '<i class="bi bi-x-lg text-[13px]"></i>';
-                    } else if (isDone && !isCurrent) {
-                        iconHtml = '<i class="bi bi-check-lg text-[13px]"></i>';
-                    } else {
-                        iconHtml = '<i class="bi ' + step.icon + ' text-[13px]"></i>';
-                    }
 
-                    var stepLabel = isRejectedStep ? 'Rejected' : step.label;
+                rejectGRN() {
+                    this.openModal("Reject GRN", "Rejected", "bg-red-600", "hover:bg-red-700");
+                },
 
-                    stepsHtml += '<div class="flex flex-col items-center relative z-10" style="width: ' + (100 / PROCESS_STEPS.length) + '%">'
-                        + '<div class="w-[30px] h-[30px] rounded-full border-2 flex items-center justify-center text-[13px] ' + circleClass + ' transition-all duration-300">'
-                        + iconHtml
-                        + '</div>'
-                        + '<div class="text-[10px] mt-1.5 text-center leading-tight ' + labelClass + '">'
-                        + stepLabel
-                        + '</div></div>';
-                });
-
-                var oldSteps = $progressContainer.querySelectorAll('.flex.flex-col');
-                oldSteps.forEach(function (el) { el.remove(); });
-                $progressContainer.insertAdjacentHTML('beforeend', stepsHtml);
-
-                var fillPct = (fillIdx / (PROCESS_STEPS.length - 1)) * 100;
-                $progressFill.style.width = fillPct + '%';
-                $progressFill.style.background = isRejected ? '#dc2626' : '#1B5CA8';
-            }
-
-
-            // ════════════════════════════════════════════
-            //  GRN DETAILS PANEL
-            // ════════════════════════════════════════════
-
-            function renderDetails(rec) {
-                var grnNum = rec.GRN_Ref_Number || 'GRN-' + rec.GRN_Number;
-                var poNum = rec.PO_Ref_Number || '–';
-                var prNum = rec.PR_Ref_Number || '–';
-
-                $headerGrnNum.textContent = grnNum;
-                $breadcrumbGrnNum.textContent = grnNum;
-                $headerBadge.innerHTML = getStatusBadgeHTML(rec.status || rec.Status);
-                $headerSub.textContent = 'PO: ' + poNum + ' · PR: ' + prNum + ' · Received ' + formatDate(rec.Added_Time);
-
-                var fields = [
-                    { label: 'GRN Number', value: grnNum },
-                    { label: 'PO Reference', value: poNum },
-                    { label: 'PR Reference', value: prNum },
-                    { label: 'Order Date', value: formatDate(rec.order_date) },
-                    { label: 'Delivery Date', value: formatDate(rec.delivery_date) },
-                    { label: 'Status', value: null, html: getStatusBadgeHTML(rec.status || rec.Status) },
-                    { label: 'Total Value Received', value: formatINR(rec.Total_Amount), bold: true },
-                    { label: 'Received By', value: getDisplayName(rec.Added_User) }
-                ];
-
-                var html = '<div class="grid grid-cols-2 gap-x-6 gap-y-0">';
-                fields.forEach(function (f) {
-                    html += '<div class="flex justify-between items-center py-2 text-xs border-b border-dashed border-gray-100">'
-                        + '<span class="text-gray-500 font-medium">' + f.label + '</span>';
-                    if (f.html) {
-                        html += '<span>' + f.html + '</span>';
-                    } else {
-                        html += '<span class="text-gray-900 ' + (f.bold ? 'font-bold text-[13px]' : 'font-semibold') + '">' + esc(f.value) + '</span>';
-                    }
-                    html += '</div>';
-                });
-                html += '</div>';
-
-                if (rec.Remarks) {
-                    html += '<div class="mt-4 pt-3 border-t border-gray-100">'
-                        + '<div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">Remarks</div>'
-                        + '<div class="text-xs text-gray-700 leading-relaxed prose prose-xs max-w-none">' + rec.Remarks + '</div>'
-                        + '</div>';
-                }
-
-                $grnDetails.innerHTML = html;
-            }
-
-
-            // ════════════════════════════════════════════
-            //  LINE ITEMS TABLE (RECONCILIATION)
-            // ════════════════════════════════════════════
-
-            function renderItems(rec) {
-                var grnItems = rec.Items || [];
-                var poDetails = rec.PO_Details || {};
-                var poItems = poDetails.Items || [];
-
-                if (!grnItems.length && !poItems.length) {
-                    $itemsTable.innerHTML = '<div class="px-[18px] py-8 text-center text-gray-400 text-xs">'
-                        + '<i class="bi bi-box-seam text-xl mb-1 block"></i>'
-                        + 'No line items recorded</div>';
-                    return;
-                }
-
-                // 1. Group GRN items by Item ID into a pool (force ID to string for strict matching)
-                var grnPool = {};
-                grnItems.forEach(function (gItem) {
-                    var rawGItem = gItem.Item;
-                    var gItemId = rawGItem?.ID;
-                    if (!grnPool[gItemId]) grnPool[gItemId] = [];
-                    grnPool[gItemId].push(gItem);
-                });
-                console.log({ grnPool })
-
-                var html = '<table class="w-full border-collapse text-xs whitespace-nowrap">'
-                    + '<thead><tr class="bg-gray-50 border-b border-gray-200">'
-                    + '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">#</th>'
-                    + '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left w-full">Item</th>'
-                    + '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right bg-blue-50/50 border-l border-gray-100">Ordered Qty</th>'
-                    + '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right bg-blue-50/50">Ordered Amt</th>'
-                    + '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right border-l border-gray-100">Recv. Qty</th>'
-                    + '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">Recv. Amt</th>'
-                    + '</tr></thead><tbody>';
-
-                // 2. Loop through PO Items as the structural source of truth
-                poItems.forEach(function (poItem, i) {
-                    var rawItem = poItem.Item;
-                    var itemId = rawItem ? String(rawItem.ID || rawItem.id || rawItem) : 'unknown';
-                    var itemName = '-';
-
-                    if (rawItem && typeof rawItem === 'object') {
-                        itemName = rawItem.display_value || rawItem.item_name || '-';
-                    } else if (rawItem) {
-                        itemName = 'Item #' + rawItem;
-                    }
-
-                    // Extract actuals from PO
-                    var qtyOrdered = parseFloat(poItem.Quantity) || 0;
-                    var amountOrdered = parseFloat(poItem.Amount) || 0;
-
-                    // 3. Match with a GRN item (shift it out of the array pool)
-                    var gItem = (grnPool[itemId] && grnPool[itemId].length > 0) ? grnPool[itemId].shift() : null;
-                    console.log({ gItem: grnPool[itemId] })
-                    var qtyReceived = gItem ? (parseFloat(gItem.Quantity) || 0) : 0;
-                    var amountReceived = gItem ? (parseFloat(gItem.Amount) || 0) : 0;
-                    var comment = gItem ? (gItem.Comment || '') : '';
-
-                    // Highlighting missing quantities
-                    var qtyClass = (qtyReceived < qtyOrdered) ? 'text-amber-600 font-semibold' : 'text-gray-700';
-
-                    html += '<tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">'
-                        + '<td class="px-4 py-2.5 text-gray-400 font-mono">' + (i + 1) + '</td>'
-                        + '<td class="px-4 py-2.5 text-gray-900 font-medium whitespace-normal">' + esc(itemName)
-                        // + '<div class="text-[10px] text-gray-400 font-mono mt-0.5">ID: ' + esc(itemId) + '</div>'
-                        + (comment ? '<div class="text-[11px] text-gray-500 font-normal mt-0.5">' + esc(comment) + '</div>' : '')
-                        + '</td>'
-                        + '<td class="px-4 py-2.5 text-gray-500 text-right tabular-nums bg-blue-50/30 border-l border-gray-100">' + esc(qtyOrdered) + '</td>'
-                        + '<td class="px-4 py-2.5 text-gray-500 text-right tabular-nums bg-blue-50/30">' + formatINR(amountOrdered) + '</td>'
-                        + '<td class="px-4 py-2.5 ' + qtyClass + ' text-right tabular-nums border-l border-gray-100">' + esc(qtyReceived) + '</td>'
-                        + '<td class="px-4 py-2.5 text-gray-900 font-semibold text-right tabular-nums">' + formatINR(amountReceived) + '</td>'
-                        + '</tr>';
-                });
-
-                // 4. Catch any unexpected GRN items that were not in the PO at all
-                // var extraIndex = poItems.length;
-                // Object.keys(grnPool).forEach(function (id) {
-                //     grnPool[id].forEach(function (extraGItem) {
-                //         var rawItem = extraGItem.Item;
-                //         var itemName = (rawItem && typeof rawItem === 'object') ? (rawItem.display_value || rawItem.item_name || '-') : 'Item #' + rawItem;
-                //         var qtyReceived = parseFloat(extraGItem.Quantity) || 0;
-                //         var amountReceived = parseFloat(extraGItem.Amount) || 0;
-                //         var comment = extraGItem.Comment || 'Unexpected Item (Not in PO)';
-
-                //         html += '<tr class="border-b border-gray-50 bg-red-50/20 hover:bg-red-50/40 transition-colors">'
-                //             + '<td class="px-4 py-2.5 text-gray-400 font-mono">' + (extraIndex + 1) + '</td>'
-                //             + '<td class="px-4 py-2.5 text-gray-900 font-medium whitespace-normal">' + esc(itemName)
-                //             + '<div class="text-[10px] text-gray-500 font-mono mt-0.5">ID: ' + esc(id) + '</div>'
-                //             + '<div class="text-[11px] text-red-500 font-normal mt-0.5">' + esc(comment) + '</div>'
-                //             + '</td>'
-                //             + '<td class="px-4 py-2.5 text-gray-500 text-right tabular-nums bg-blue-50/30 border-l border-gray-100">0</td>'
-                //             + '<td class="px-4 py-2.5 text-gray-500 text-right tabular-nums bg-blue-50/30">' + formatINR(0) + '</td>'
-                //             + '<td class="px-4 py-2.5 text-amber-600 font-semibold text-right tabular-nums border-l border-gray-100">' + esc(qtyReceived) + '</td>'
-                //             + '<td class="px-4 py-2.5 text-gray-900 font-semibold text-right tabular-nums">' + formatINR(amountReceived) + '</td>'
-                //             + '</tr>';
-                //         extraIndex++;
-                //     });
-                // });
-
-                // Totals calculation
-                var totalAmountOrdered = parseFloat(poDetails.Total_Amount) || 0;
-                var totalAmountReceived = parseFloat(rec.Total_Amount) || 0;
-
-                html += '<tr class="bg-gray-50 border-t border-gray-200">'
-                    + '<td colspan="2" class="px-4 py-2.5 text-right text-[11px] font-semibold text-gray-500 uppercase">Totals</td>'
-                    + '<td colspan="2" class="px-4 py-2.5 text-right font-semibold text-gray-600 text-[12px] bg-blue-50/50 border-l border-gray-100">' + formatINR(totalAmountOrdered) + '</td>'
-                    + '<td colspan="2" class="px-4 py-2.5 text-right font-bold text-gray-900 text-[13px] border-l border-gray-100">' + formatINR(totalAmountReceived) + '</td>'
-                    + '</tr></tbody></table>';
-
-                $itemsTable.innerHTML = html;
-            }
-
-            // ════════════════════════════════════════════
-            //  ACTION BUTTONS
-            // ════════════════════════════════════════════
-
-            function renderActionButtons(rec) {
-                var currentStatus = (rec.status || rec.Status || '').toLowerCase();
-                if (currentStatus === 'submitted') {
-                    $actionButtons.style.display = 'flex';
-                } else {
-                    $actionButtons.style.display = 'none';
-                }
-            }
-
-
-            // ════════════════════════════════════════════
-            //  AUDIT TRAIL
-            // ════════════════════════════════════════════
-
-            function renderAuditTrail(actions) {
-                if (!actions || actions.length === 0) {
-                    $auditTrail.innerHTML = '<div class="text-center py-8 text-gray-400">'
-                        + '<i class="bi bi-clock-history-off text-xl mb-1.5 block"></i>'
-                        + '<div class="text-xs font-medium text-gray-500">No activity recorded yet</div>'
-                        + '</div>';
-                    return;
-                }
-
-                var sorted = actions.slice().sort(function (a, b) {
-                    return (parseInt(a.ID) || 0) - (parseInt(b.ID) || 0);
-                });
-
-                var html = '<div class="space-y-0">';
-
-                sorted.forEach(function (action, i) {
-                    var status = action.Status || '–';
-                    var stage = action.Moved_To || '–';
-                    var comment = action.Comment || '';
-                    var performer = action.Performed_By || '-';
-                    var addedTime = action.Added_Time ? formatDate(action.Added_Time) : '–';
-
-                    var iconBg = 'bg-blue-50', iconColor = 'text-blue-600', iconName = 'bi-arrow-right';
-                    if (status.includes('Approved')) {
-                        iconBg = 'bg-emerald-50'; iconColor = 'text-emerald-600'; iconName = 'bi-check-lg';
-                    } else if (status === 'Rejected') {
-                        iconBg = 'bg-red-50'; iconColor = 'text-red-600'; iconName = 'bi-x-lg';
-                    }
-
-                    var stageBg = 'bg-gray-100 text-gray-600 border-gray-200';
-                    var stageKey = stageToStepKey(stage);
-                    if (stageKey === 'purchase_order') stageBg = 'bg-blue-50 text-blue-700 border-blue-200';
-                    else if (stageKey === 'grn') stageBg = 'bg-violet-50 text-violet-700 border-violet-200';
-                    else if (stageKey === 'bill') stageBg = 'bg-cyan-50 text-cyan-700 border-cyan-200';
-                    else if (stageKey === 'payment') stageBg = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-
-                    var initials = performer !== '–' && performer.length > 0 ? performer.charAt(0).toUpperCase() : '?';
-
-                    html += '<div class="timeline-item relative pl-10 pb-5">'
-                        + '<div class="timeline-line"></div>'
-                        + '<div class="absolute left-0 top-0 w-[30px] h-[30px] rounded-full ' + iconBg + ' flex items-center justify-center border-2 border-white shadow-sm z-10">'
-                        + '<i class="bi ' + iconName + ' text-[13px] ' + iconColor + '"></i>'
-                        + '</div>'
-                        + '<div class="bg-gray-50 border border-gray-200 rounded-lg px-3.5 py-3">'
-                        + '<div class="flex items-center justify-between mb-1.5">'
-                        + '<div class="flex items-center gap-2">'
-                        + '<span class="text-xs font-semibold ' + (status.includes('Approved') ? 'text-emerald-700' : status === 'Rejected' ? 'text-red-700' : 'text-gray-700') + '">' + esc(status) + '</span>'
-                        + '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border ' + stageBg + '">'
-                        + '<i class="bi bi-arrow-right text-[9px] mr-1 opacity-60"></i>' + esc(stage) + '</span>'
-                        + '</div>'
-                        + '<span class="text-[10px] text-gray-400">' + esc(addedTime) + '</span>'
-                        + '</div>'
-                        + (comment ? '<div class="text-xs text-gray-600 leading-relaxed mt-1.5 prose prose-xs max-w-none">' + comment + '</div>' : '')
-                        + '<div class="flex items-center gap-1.5 mt-2 text-[11px] text-gray-500">'
-                        + '<div class="w-[18px] h-[18px] rounded-full bg-[#1B5CA8] text-white flex items-center justify-center text-[9px] font-bold">' + initials + '</div>'
-                        + '<span class="font-medium">' + esc(performer) + '</span>'
-                        + '</div></div></div>';
-                });
-
-                html += '</div>';
-                $auditTrail.innerHTML = html;
-            }
-
-
-            // ════════════════════════════════════════════
-            //  DATA FETCHING
-            // ════════════════════════════════════════════
-
-            function fetchDetail(recordId) {
-                $loading.classList.remove('hidden');
-                $error.classList.add('hidden');
-                $main.classList.add('hidden');
-
-                ZOHO.CREATOR.DATA.invokeCustomApi({
-                    api_name: "Fetch_GRN_Details",
-                    http_method: "GET",
-                    content_type: "application/json",
-                    query_params: 'recId=' + recordId,
-                }).then(function (response) {
-                    console.log("Custom API response:", response);
-
-                    if (!response || !response.result || response.result.length === 0) {
-                        $loading.classList.add('hidden');
-                        $error.classList.remove('hidden');
-                        return;
-                    }
-
-                    var rec = response.result[0];
-
-                    renderDetails(rec);
-                    renderAttachments(rec);
-                    renderActionButtons(rec);
-
-                    $loading.classList.add('hidden');
-                    $main.classList.remove('hidden');
-
-                    // Pass the whole record to cross-reference GRN items with PO_Details items
-                    renderItems(rec);
-
-                    var actions = (rec.Actions && rec.Actions.length) ? rec.Actions : [];
-                    renderProgress(rec, actions);
-                    renderAuditTrail(actions);
-
-                    $approveBtn.onclick = function () {
-                        ZOHO.CREATOR.UTIL.navigateParentURL({
-                            action: 'open', window: 'same',
-                            url: '#Form:GRN_Action?zc_LoadIn=dialog&GRN_Number=' + recordId + '&Status=Approved&zc_SubmitVal=Approve&zc_BgClr=transparent&zc_BtnBgClr=green&zc_Header=false&zc_TextAreaHeight=40px'
-                        });
-                    };
-
-                    $rejectBtn.onclick = function () {
-                        ZOHO.CREATOR.UTIL.navigateParentURL({
-                            action: 'open', window: 'same',
-                            url: '#Form:GRN_Action?zc_LoadIn=dialog&GRN_Number=' + recordId + '&Status=Rejected&zc_SubmitVal=Reject&zc_BgClr=transparent&zc_BtnBgClr=red&zc_Header=false&zc_TextAreaHeight=40px'
-                        });
-                    };
-
-                }).catch(function (err) {
-                    console.error('Error loading GRN detail:', err);
-                    $loading.classList.add('hidden');
-                    $error.classList.remove('hidden');
-                });
-            }
-
-            // ════════════════════════════════════════════
-            //  ATTACHMENTS PANEL
-            // ════════════════════════════════════════════
-
-            const $attachmentsBody = document.getElementById('attachmentsBody');
-
-            function renderAttachments(rec) {
-                var attachments = rec.Attachments || [];
-
-                if (!attachments.length) {
-                    $attachmentsBody.innerHTML = '<div class="text-center py-6 text-gray-400">'
-                        + '<i class="bi bi-file-earmark-x text-xl mb-1.5 block"></i>'
-                        + '<div class="text-xs font-medium text-gray-500">No attachments</div>'
-                        + '</div>';
-                    return;
-                }
-
-                var html = '<div class="space-y-2">';
-
-                attachments.forEach(function (attachmentId, index) {
-                    html += '<div class="flex items-center justify-between p-2.5 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors">'
-                        + '<div class="flex items-center gap-2.5 overflow-hidden">'
-                        + '<i class="bi bi-file-earmark-text text-gray-400 text-sm"></i>'
-                        + '<span class="text-xs font-medium text-gray-700 truncate">Document_' + attachmentId + '</span>'
-                        + '</div>'
-                        + '<button onclick="downloadAttachment(\'' + rec.ID + '\', \'' + attachmentId + '\')" class="shrink-0 w-7 h-7 rounded-full bg-white border border-gray-200 flex items-center justify-center text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition-colors cursor-pointer" title="Download">'
-                        + '<i class="bi bi-download text-[11px]"></i>'
-                        + '</button>'
-                        + '</div>';
-                });
-
-                html += '</div>';
-                $attachmentsBody.innerHTML = html;
-            }
-
-            // Global function so it can be called from the inline onclick handler
-            window.downloadAttachment = function (recordId, attachmentId) {
-                var config = {
-                    report_name: "GRN_Report",
-                    id: recordId,
-                    field_name: "Attachments" // Assuming "Attachments" is the field name. Update if it is a subform field.
-                };
-
-                // Optional: Add visual feedback (like changing the icon to a spinner) here
-
-                ZOHO.CREATOR.FILE.readFile(config).then(function (response) {
-                    // Depending on the browser and Zoho SDK version, the response is often a Blob.
-                    // We convert the blob to an object URL and trigger a hidden anchor click to download it.
+                async submitAction() {
+                    this.isSubmitting = true;
                     try {
-                        var blob = new Blob([response]);
-                        var downloadUrl = window.URL.createObjectURL(blob);
+                        let poId = (this.rec.PO_Reference && this.rec.PO_Reference.ID) ? this.rec.PO_Reference.ID : null;
 
-                        var a = document.createElement('a');
-                        a.style.display = 'none';
-                        a.href = downloadUrl;
-                        a.download = "Attachment_" + attachmentId; // Fallback naming since ID is all we have
+                        if (this.pendingStatus === 'Approved' && poId) {
+                            // Fetch parent PO to calculate new quantities[cite: 1, 2]
+                            const poRes = await ZOHO.CREATOR.DATA.getRecordById({ report_name: "Purchase_Order_Report", id: poId });
+                            if (poRes.code !== 3000) throw new Error("Could not fetch referenced PO");
+                            let poData = poRes.data;
 
-                        document.body.appendChild(a);
-                        a.click();
+                            // Calculate PO items update payload
+                            let allComplete = true;
+                            let poItemsPayload = poData.Items.map(poItem => {
+                                let grnMatchedItem = this.items.find(gItem => gItem.Item.ID === poItem.Item.ID);
+                                let addedQty = grnMatchedItem ? parseInt(grnMatchedItem.Received_Quantity || 0) : 0;
+                                let currentReceived = parseInt(poItem.Received_Quantity || 0);
+                                let totalReceived = currentReceived + addedQty;
 
-                        // Cleanup
-                        window.URL.revokeObjectURL(downloadUrl);
-                        document.body.removeChild(a);
-                    } catch (e) {
-                        console.error("Failed to process file download: ", e);
-                        alert("Could not download the file. Please check console for errors.");
+                                if (totalReceived < parseInt(poItem.Quantity || 0)) {
+                                    allComplete = false;
+                                }
+
+                                return {
+                                    ID: poItem.ID,
+                                    Received_Quantity: totalReceived
+                                };
+                            });
+
+                            let newPoStatus = allComplete ? "Completely Received" : "Partially Received";
+
+                            // 1. Update PO Records (Items & Item Status)
+                            await ZOHO.CREATOR.DATA.updateRecordById({
+                                report_name: "Purchase_Order_Report",
+                                id: poId,
+                                payload: { data: { Items: poItemsPayload, Items_Status: newPoStatus } }
+                            });
+                        }
+
+                        // 2. Update GRN status
+                        const grnUpdateRes = await ZOHO.CREATOR.DATA.updateRecordById({
+                            report_name: "GRN_Report",
+                            id: this.recordId,
+                            payload: { data: { Status: this.pendingStatus } }
+                        });
+
+                        if (grnUpdateRes.code !== 3000) throw new Error(grnUpdateRes.message || 'Failed to update GRN status');
+
+                        // 3. Log Audit Trail Action[cite: 1, 2]
+                        if (this.rec.PR_Reference && this.rec.PR_Reference.ID) {
+                            await ZOHO.CREATOR.DATA.addRecords({
+                                form_name: "PR_Action",
+                                payload: {
+                                    data: {
+                                        PR_Number: this.rec.PR_Reference.ID,
+                                        Status: this.pendingStatus,
+                                        Moved_To: "GRN",
+                                        Comment: this.modalComment.trim()
+                                    }
+                                }
+                            });
+                        }
+
+                        this.showToast(`GRN successfully ${this.pendingStatus.toLowerCase()}.`, 'success');
+                        this.closeModal();
+                        setTimeout(() => { this.fetchData(); }, 1500);
+
+                    } catch (err) {
+                        console.error(err);
+                        this.showToast(err.message || "An error occurred while submitting. Please try again.", 'error');
+                    } finally {
+                        this.isSubmitting = false;
                     }
-                }).catch(function (err) {
-                    console.error("Error fetching file from Zoho API: ", err);
-                    alert("Failed to fetch attachment from server.");
-                });
-            };
-
-            // ════════════════════════════════════════════
-            //  INIT
-            // ════════════════════════════════════════════
-
-            ZOHO.CREATOR.UTIL.getQueryParams().then(function (params) {
-                var recordId = params && params.recordId ? params.recordId : null;
-                if (!recordId) {
-                    $loading.classList.add('hidden');
-                    $error.classList.remove('hidden');
-                    return;
                 }
-                fetchDetail(recordId);
-            });
-
-        })();
+            }));
+        });
     </script>
-
 </body>
 
 </html>

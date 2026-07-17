@@ -553,6 +553,9 @@
                                             class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
                                             Qty</th>
                                         <th
+                                            class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">
+                                            Received Qty</th>
+                                        <th
                                             class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right text-[#1B5CA8]">
                                             Amount</th>
                                     </tr>
@@ -572,6 +575,8 @@
                                                 x-text="formatINR(getRate(item), false)"></td>
                                             <td class="px-4 py-2.5 text-gray-600 text-right tabular-nums"
                                                 x-text="item.Quantity || 0"></td>
+                                            <td class="px-4 py-2.5 text-gray-600 text-right tabular-nums"
+                                                x-text="item.Received_Quantity ?? '–'"></td>
                                             <td class="px-4 py-2.5 text-gray-800 font-bold text-right tabular-nums"
                                                 x-text="formatINR(item.Amount, false)"></td>
                                         </tr>
@@ -613,7 +618,7 @@
                         <button x-show="isDraft"
                             @click="openActionModal('Submit Purchase Order', 'Submitted', 'bg-blue-600', 'hover:bg-blue-700')"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer shadow-sm">
-                            <i class="bi bi-send"></i> Submit PO
+                            <i class="bi bi-send"></i> Submit
                         </button>
 
                         <button x-show="isSubmitted"
@@ -750,6 +755,7 @@
 
                 initWidget() {
                     ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
+                        console.log({ params })
                         this.recordId = params?.recordId || null;
                         if (!this.recordId) {
                             this.hasError = true; this.isLoading = false;
@@ -776,8 +782,14 @@
 
                 fetchData() {
                     this.isLoading = true;
+                    console.log({
+                        api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_PO_DETAILS,
+                        http_method: "GET",
+                        content_type: "application/json",
+                        query_params: 'recId=' + this.recordId,
+                    })
                     ZOHO.CREATOR.DATA.invokeCustomApi({
-                        api_name: "Dev__Fetch_PO_Details",
+                        api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_PO_DETAILS,
                         http_method: "GET",
                         content_type: "application/json",
                         query_params: 'recId=' + this.recordId,
@@ -805,6 +817,7 @@
                         });
                         this.isLoading = false;
                     }).catch((err) => {
+                        console.error(err)
                         this.hasError = true; this.isLoading = false;
                         this.errorMessage = err.message;
                     });
@@ -912,9 +925,9 @@
                     try {
                         // 1. Update PO Status
                         const updateRes = await ZOHO.CREATOR.DATA.updateRecordById({
-                            reportName: "Purchase_Order_Report", // Fixed: SDK expects 'reportName' (camelCase)
+                            report_name: "Purchase_Order_Report",
                             id: this.recordId,
-                            data: { data: { Status: this.pendingStatus } } // Fixed: SDK expects 'data' instead of 'payload'
+                            payload: { data: { Status: this.pendingStatus } }
                         });
 
                         if (updateRes.code !== 3000) throw new Error(updateRes.message || 'Failed to update PO status');
@@ -928,25 +941,25 @@
                         // 3. Create PR Action (Audit Trail)
                         if (prId) {
                             const prActionConfig = {
-                                formName: "PR_Action",
-                                data: {
+                                form_name: "PR_Action",
+                                payload: {
                                     data: {
                                         PR_Number: prId,
-                                        Status: this.pendingStatus === 'Submitted' ? 'PO Created' : 'PO ' + this.pendingStatus,
+                                        Status: this.pendingStatus,
                                         Moved_To: "Purchase Order",
                                         Comment: (this.modalComment || '').trim()
                                     }
                                 }
                             };
-
-                            // Fixed: SDK method is singular 'addRecord' 
-                            await ZOHO.CREATOR.DATA.addRecord(prActionConfig);
+                            console.log({ prActionConfig })
+                            await ZOHO.CREATOR.DATA.addRecords(prActionConfig);
                         }
 
                         Toast.fire({ icon: 'success', title: 'Action completed successfully' });
                         this.closeActionModal();
                         this.fetchData();
                     } catch (err) {
+                        console.error(err);
                         Toast.fire({ icon: 'error', title: err.message || 'Action failed' });
                     } finally {
                         this.isSubmitting = false;

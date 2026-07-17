@@ -562,6 +562,7 @@
                     <col style="width:100px">
                     <col style="width:100px">
                     <col style="width:110px">
+                    <col style="width:110px">
                     <col style="width:120px">
                     <col style="width:90px">
                 </colgroup>
@@ -584,7 +585,7 @@
                 </thead>
                 <tbody>
                     <tr x-show="isLoading">
-                        <td colspan="8" class="px-3 py-12 text-center">
+                        <td colspan="9" class="px-3 py-12 text-center">
                             <div class="flex flex-col items-center gap-3">
                                 <div class="po-spinner"></div>
                                 <div class="text-sm text-gray-400 font-medium">Loading POs…</div>
@@ -592,7 +593,7 @@
                         </td>
                     </tr>
                     <tr x-show="!isLoading && pagedRecords.length === 0">
-                        <td colspan="8" class="px-3 py-12 text-center">
+                        <td colspan="9" class="px-3 py-12 text-center">
                             <div class="text-gray-400">
                                 <i class="bi bi-clipboard-x text-3xl mb-2 block"></i>
                                 <div class="text-sm font-medium text-gray-500">No records found</div>
@@ -619,6 +620,8 @@
                                     <span x-text="rec._statusLabel"></span>
                                 </span>
                             </td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[11px] text-gray-700"
+                                x-text="rec._itemsStatus"></td>
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap font-semibold text-gray-800 text-[12px]"
                                 x-text="rec._totalFormatted"></td>
                             <td
@@ -718,7 +721,7 @@
                                 <label
                                     class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Payment
                                     Terms <span class="text-red-500">*</span></label>
-                                <select x-ref="paymentTermsSelect" class="w-full text-xs" required>
+                                <select x-ref="paymentTermsSelect" class="w-full text-xs">
                                     <option value="">Select…</option>
                                     <option value="Advance">Advance</option>
                                     <option value="15 Days Credit">15 Days Credit</option>
@@ -729,14 +732,14 @@
                             <div>
                                 <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PO
                                     Date <span class="text-red-500">*</span></label>
-                                <input type="date" x-model="form.poDate" required :min="todayStr"
+                                <input type="date" x-model="form.poDate" :min="todayStr"
                                     class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm" />
                             </div>
                             <div>
                                 <label
                                     class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Delivery
                                     Date <span class="text-red-500">*</span></label>
-                                <input type="date" x-model="form.deliveryDate" required :min="todayStr"
+                                <input type="date" x-model="form.deliveryDate" :min="todayStr"
                                     class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm" />
                             </div>
                         </div>
@@ -1054,6 +1057,7 @@
                     { key: 'po_date', label: 'PO Date', align: 'left' },
                     { key: 'delivery_date', label: 'Delivery Date', align: 'left' },
                     { key: 'status', label: 'Status', align: 'left' },
+                    { key: 'items_status', label: 'Items Status', align: 'left' },
                     { key: 'total', label: 'Total Amount', align: 'left' }
                 ],
 
@@ -1204,6 +1208,7 @@
                     const status = rec.Status || 'Draft';
                     rec._statusLabel = status;
                     rec._statusClass = this.getStatusClass(status);
+                    rec._itemsStatus = rec.Items_Status || '–';
                     rec._totalFormatted = this.formatINR(rec.Total_Amount);
                     return rec;
                 },
@@ -1253,6 +1258,8 @@
                             return rec.delivery_date ? dayjs(rec.delivery_date).valueOf() : 0;
                         case 'status':
                             return rec.Status || 'Draft';
+                        case 'items_status':
+                            return rec._itemsStatus || '';
                         case 'total':
                             return parseFloat(rec.Total_Amount) || 0;
                         default:
@@ -1927,7 +1934,8 @@
                                 CGST: 0,
                                 SGST: 0,
                                 IGST: 0,
-                                purchase_requisition_id: this.form._prId
+                                purchase_requisition_id: this.form._prId,
+                                Items_Status: "Pending",
                             }
                         };
 

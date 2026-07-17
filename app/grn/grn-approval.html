@@ -2,475 +2,1022 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GRN Approval Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
-  <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRN Listing & Creation</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
-    rel="stylesheet">
-  <style>
-    /* ── Toast banner ── */
-    .pr-toast {
-      animation: prToastIn 0.3s ease-out, prToastOut 0.3s ease-in 4s forwards;
-    }
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+        rel="stylesheet">
+    <!-- Zoho Creator Widget SDK -->
+    <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js"></script>
 
-    @keyframes prToastIn {
-      from {
-        opacity: 0;
-        transform: translateY(-12px);
-      }
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
-    @keyframes prToastOut {
-      from {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-      to {
-        opacity: 0;
-        transform: translateY(-12px);
-      }
-    }
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
 
-    /* ── Pill active state ── */
-    .pill-active {
-      color: #1B5CA8 !important;
-      background: #fff !important;
-      font-weight: 600 !important;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-    }
+        .grn-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
 
-    /* ── Sticky Actions column ── */
-    .sticky-action-cell {
-      position: sticky;
-      right: 0;
-      z-index: 2;
-      box-shadow: -4px 0 8px -2px rgba(0, 0, 0, 0.06);
-    }
+        .grn-modal-bg {
+            position: absolute;
+            inset: 0;
+            background: rgba(17, 24, 39, 0.4);
+        }
 
-    thead .sticky-action-cell {
-      z-index: 3;
-    }
+        .grn-modal-box {
+            position: relative;
+            z-index: 1;
+            background: #fff;
+            border-radius: 11px;
+            width: 100%;
+            overflow: hidden;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+        }
 
-    /* ── Sortable headers ── */
-    th[data-sort] {
-      cursor: pointer;
-      user-select: none;
-      transition: background 0.15s;
-    }
+        .pill-active {
+            color: #1B5CA8 !important;
+            background: #fff !important;
+            font-weight: 600 !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+        }
 
-    th[data-sort]:hover {
-      background: #e9ecf1;
-    }
+        .sticky-action-cell {
+            position: sticky;
+            right: 0;
+            z-index: 2;
+            box-shadow: -4px 0 8px -2px rgba(0, 0, 0, 0.06);
+        }
 
-    .sort-indicator {
-      display: inline-block;
-      width: 14px;
-      text-align: center;
-      font-size: 10px;
-      color: #9ca3af;
-      margin-left: 2px;
-      vertical-align: middle;
-    }
+        thead .sticky-action-cell {
+            z-index: 3;
+        }
 
-    th[data-sort].sort-active .sort-indicator {
-      color: #1B5CA8;
-    }
+        th[data-sort] {
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s;
+        }
 
-    /* ── Spinner ── */
-    .grn-spinner {
-      border: 2.5px solid #e5e7eb;
-      border-top-color: #1B5CA8;
-      border-radius: 50%;
-      width: 28px;
-      height: 28px;
-      animation: spin 0.7s linear infinite;
-    }
+        th[data-sort]:hover {
+            background: #e9ecf1;
+        }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-  </style>
+        .sort-indicator {
+            display: inline-block;
+            width: 14px;
+            text-align: center;
+            font-size: 10px;
+            color: #9ca3af;
+            margin-left: 2px;
+            vertical-align: middle;
+        }
+
+        th[data-sort].sort-active .sort-indicator {
+            color: #1B5CA8;
+        }
+
+        .grn-spinner {
+            border: 2.5px solid #e5e7eb;
+            border-top-color: #1B5CA8;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .ts-control {
+            border: 1px solid #e5e7eb !important;
+            border-radius: 0.5rem !important;
+            font-size: 0.8125rem !important;
+            padding: 0.5rem 0.75rem !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+            font-family: inherit;
+            background-color: #f9fafb !important;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .ts-control.focus {
+            border-color: #1B5CA8 !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(27, 92, 168, 0.15) !important;
+        }
+
+        .ts-dropdown {
+            border-radius: 0.5rem !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+            border: 1px solid #f3f4f6 !important;
+            padding: 0.35rem !important;
+            margin-top: 4px !important;
+            font-size: 0.8125rem !important;
+        }
+
+        .ts-dropdown .option {
+            border-radius: 0.375rem !important;
+            padding: 0.5rem 0.75rem !important;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .ts-dropdown .active {
+            background-color: #f3f4f6 !important;
+            color: #111827 !important;
+        }
+
+        .ts-dropdown .option:hover {
+            background-color: #e5e7eb !important;
+        }
+
+        .grid-input {
+            width: 100%;
+            padding: 0.375rem 0.5rem;
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            outline: none;
+            transition: all 0.2s;
+            height: 32px;
+        }
+
+        .grid-input:focus {
+            background-color: #ffffff;
+            border-color: #1B5CA8;
+        }
+
+        .grid-input:disabled {
+            background-color: #f1f5f9;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+
+        .modal-scroll {
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 1.25rem;
+        }
+
+        .modal-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .modal-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+
+        .modal-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .modal-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50 p-6">
+    <div id="app" x-data="grnApp()" x-init="initApp()"
+        class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-[1400px] mx-auto" x-cloak>
 
-  <div id="app" class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-6xl mx-auto">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-5 gap-2.5 mb-4">
+            <div
+                class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-[#1B5CA8]">
+                <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Total GRNs</div>
+                <div class="text-[25px] font-bold leading-none text-[#1B5CA8]" x-text="stats.total"></div>
+                <div class="text-[11px] text-gray-400 mt-1.5">All records</div>
+            </div>
+            <div
+                class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-gray-400">
+                <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Draft</div>
+                <div class="text-[25px] font-bold leading-none text-gray-600" x-text="stats.draft"></div>
+                <div class="text-[11px] text-gray-400 mt-1.5">Draft saved</div>
+            </div>
+            <div
+                class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-amber-500">
+                <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Submitted</div>
+                <div class="text-[25px] font-bold leading-none text-amber-500" x-text="stats.submitted"></div>
+                <div class="text-[11px] text-gray-400 mt-1.5">Pending Approval</div>
+            </div>
+            <div
+                class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-emerald-600">
+                <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Approved</div>
+                <div class="text-[25px] font-bold leading-none text-emerald-600" x-text="stats.approved"></div>
+                <div class="text-[11px] text-gray-400 mt-1.5">Completed</div>
+            </div>
+            <div
+                class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-red-600">
+                <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Rejected</div>
+                <div class="text-[25px] font-bold leading-none text-red-600" x-text="stats.rejected"></div>
+                <div class="text-[11px] text-gray-400 mt-1.5">Declined</div>
+            </div>
+        </div>
 
-    <div id="toastContainer"></div>
-
-    <div class="grid grid-cols-4 gap-2.5 mb-4">
-      <div
-        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-[#1B5CA8]">
-        <div class="text-[11px] font-medium text-gray-500 uppercase tracking-wide mb-1.5">Total GRNs</div>
-        <div class="text-[25px] font-bold leading-none text-[#1B5CA8]" id="statTotal">–</div>
-      </div>
-      <div
-        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-amber-500">
-        <div class="text-[11px] font-medium text-gray-500 uppercase tracking-wide mb-1.5">Pending (Submitted)</div>
-        <div class="text-[25px] font-bold leading-none text-amber-500" id="statPending">–</div>
-      </div>
-      <div
-        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-emerald-600">
-        <div class="text-[11px] font-medium text-gray-500 uppercase tracking-wide mb-1.5">Approved</div>
-        <div class="text-[25px] font-bold leading-none text-emerald-600" id="statApproved">–</div>
-      </div>
-      <div
-        class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-red-600">
-        <div class="text-[11px] font-medium text-gray-500 uppercase tracking-wide mb-1.5">Rejected</div>
-        <div class="text-[25px] font-bold leading-none text-red-600" id="statRejected">–</div>
-      </div>
-    </div>
-
-    <div class="flex items-center justify-between mt-[18px] mb-2">
-      <span class="text-[13.5px] font-medium text-gray-900">Goods Receipt Notes (Approvals)</span>
-    </div>
-
-    <div class="flex items-center justify-between gap-2.5 mb-2 flex-wrap">
-      <div class="flex bg-gray-100 rounded-full p-[3px] gap-[2px]" id="filterTabs">
-        <button data-filter="all"
-          class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150 pill-active">All (<span
-            id="tabAll">0</span>)</button>
-        <button data-filter="Submitted"
-          class="px-3 py-1 text-xs font-medium text-gray-600 rounded-full hover:bg-white hover:text-[#1B5CA8] transition-all duration-150">Pending
-          (<span id="tabPending">0</span>)</button>
-        <button data-filter="Approved"
-          class="px-3 py-1 text-xs font-medium text-gray-600 rounded-full hover:bg-white hover:text-[#1B5CA8] transition-all duration-150">Approved
-          (<span id="tabApproved">0</span>)</button>
-        <button data-filter="Rejected"
-          class="px-3 py-1 text-xs font-medium text-gray-600 rounded-full hover:bg-white hover:text-[#1B5CA8] transition-all duration-150">Rejected
-          (<span id="tabRejected">0</span>)</button>
-      </div>
-
-      <div class="relative">
-        <i class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px]"></i>
-        <input id="searchInput"
-          class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[230px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10"
-          type="text" placeholder="Search GRN #, PO Ref...">
-      </div>
-    </div>
-
-    <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
-      <table class="w-full border-collapse" style="min-width:850px">
-        <thead>
-          <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
-            <th data-sort="grn_number"
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase text-left whitespace-nowrap">GRN #<span
-                class="sort-indicator"></span></th>
-            <th data-sort="po_ref"
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase text-left whitespace-nowrap">PO
-              Ref<span class="sort-indicator"></span></th>
-            <th data-sort="pr_ref"
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase text-left whitespace-nowrap">PR
-              Ref<span class="sort-indicator"></span></th>
-            <th data-sort="delivery_date"
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase text-left whitespace-nowrap">Delivery
-              Date<span class="sort-indicator"></span></th>
-            <th data-sort="amount"
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase text-right whitespace-nowrap">
-              Amount<span class="sort-indicator"></span></th>
-            <th data-sort="status"
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase text-left whitespace-nowrap">
-              Status<span class="sort-indicator"></span></th>
-            <th
-              class="px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase text-left whitespace-nowrap bg-gray-50 sticky-action-cell">
-              Actions</th>
-          </tr>
-        </thead>
-        <tbody id="grnTableBody">
-          <tr>
-            <td colspan="7" class="px-3 py-12 text-center">
-              <div class="flex flex-col items-center gap-3">
-                <div class="grn-spinner"></div>
-                <div class="text-sm text-gray-400 font-medium">Loading Goods Receipts…</div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div id="paginationContainer"
-        class="flex items-center justify-between px-[13px] py-[9px] border-t border-gray-200 bg-gray-50 text-xs text-gray-500"
-        style="display:none;">
-        <span id="paginationInfo">Showing 0 records</span>
-        <div class="flex gap-1" id="paginationButtons"></div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    (function () {
-      'use strict';
-      // Update this report name to match your actual GRN report link name in Zoho Creator
-      const REPORT_NAME = 'GRN_Report';
-      const PER_PAGE = 10;
-      const FETCH_BATCH_SIZE = 200;
-
-      let allRecords = [], filteredRecords = [];
-      let currentFilter = 'all', currentPage = 1, searchQuery = '';
-      let sortColumn = 'delivery_date', sortDirection = 'desc';
-
-      const $tableBody = document.getElementById('grnTableBody');
-      const $pagination = document.getElementById('paginationContainer');
-      const $pagInfo = document.getElementById('paginationInfo');
-      const $pagButtons = document.getElementById('paginationButtons');
-
-      // Helpers
-      function formatINR(amount) {
-        if (amount == null || isNaN(amount)) return '₹ 0';
-        const num = parseFloat(amount);
-        let intPart = num.toFixed(0);
-        if (intPart.length > 3) {
-          intPart = intPart.slice(0, -3).replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + intPart.slice(-3);
-        }
-        return '₹ ' + intPart;
-      }
-
-      function formatDate(dateStr) {
-        if (!dateStr) return '–';
-        try {
-          const d = new Date(dateStr);
-          if (isNaN(d.getTime())) return dateStr;
-          const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-          return String(d.getDate()).padStart(2, '0') + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
-        } catch (e) { return dateStr; }
-      }
-
-      function esc(str) {
-        return str ? String(str).replace(/[&<>'"]/g,
-          tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])) : '–';
-      }
-
-      function getStatus(rec) {
-        return rec.status || rec.Status || 'Submitted';
-      }
-
-      // Get sortable values tailored for GRN fields
-      function getSortValue(rec, col) {
-        switch (col) {
-          case 'grn_number': return parseInt((rec.GRN_Ref_Number || '').match(/\d+$/)?.[0] || 0, 10);
-          case 'po_ref': return (rec.PO_Ref_Number || '').toLowerCase();
-          case 'pr_ref': return (rec.PR_Ref_Number || '').toLowerCase();
-          case 'amount': return parseFloat(String(rec.Total_Amount).replace(/[,\s]/g, '')) || 0;
-          case 'delivery_date': return rec.delivery_date ? new Date(rec.delivery_date).getTime() : 0;
-          case 'status': return getStatus(rec).toLowerCase();
-          default: return '';
-        }
-      }
-
-      // Criteria Builders
-      function buildSearchCriteria() {
-        if (!searchQuery) return '';
-        const q = searchQuery.replace(/'/g, "\\'");
-        // Account for both lowercase 'status' or uppercase 'Status' based on typical schema
-        return `GRN_Ref_Number=("${q}") || PO_Ref_Number=("${q}") || status=("${q}")`;
-      }
-
-      function buildStatusCriteria(filter) {
-        if (filter === 'Submitted') return '(status == "Submitted")';
-        if (filter === 'Approved') return '(status == "Approved")';
-        if (filter === 'Rejected') return '(status == "Rejected")';
-        return '';
-      }
-
-      function buildFullCriteria(statusFilter) {
-        const parts = [buildSearchCriteria(), buildStatusCriteria(statusFilter)].filter(Boolean);
-        return parts.join(' && ');
-      }
-
-      // Backend Counts
-      function computeStats() {
-        const searchCrit = buildSearchCriteria();
-        const combine = (crit) => [searchCrit, crit].filter(Boolean).join(' && ');
-
-        const fetchCount = (crit, el1, el2) => {
-          const config = { report_name: REPORT_NAME };
-          if (crit) config.criteria = crit;
-          ZOHO.CREATOR.DATA.getRecordCount(config).then(res => {
-            const count = res.result ? res.result.records_count : 0;
-            document.getElementById(el1).textContent = count;
-            document.getElementById(el2).textContent = count;
-          }).catch(() => {
-            // Fallback to 0 if API errors (e.g. invalid report name)
-            document.getElementById(el1).textContent = 0;
-            document.getElementById(el2).textContent = 0;
-          });
-        };
-
-        fetchCount('', 'statTotal', 'tabAll');
-        fetchCount('(status == "Submitted")', 'statPending', 'tabPending');
-        fetchCount('(status == "Approved")', 'statApproved', 'tabApproved');
-        fetchCount('(status == "Rejected")', 'statRejected', 'tabRejected');
-      }
-
-      // Multi-fetch pagination logic
-      function fetchAllRecords(criteria) {
-        let accumulated = [];
-        function fetchBatch(cursor) {
-          const config = { report_name: REPORT_NAME, max_records: FETCH_BATCH_SIZE };
-          if (criteria) config.criteria = criteria;
-          if (cursor) config.record_cursor = cursor;
-          return ZOHO.CREATOR.DATA.getRecords(config).then(res => {
-            if (res.code === 3000 && res.data && res.data.length > 0) {
-              accumulated = accumulated.concat(res.data);
-              if (res.data.length >= FETCH_BATCH_SIZE && res.record_cursor) {
-                return fetchBatch(res.record_cursor);
-              }
-            }
-            return accumulated;
-          }).catch(err => {
-            console.error("Error fetching GRN records:", err);
-            return accumulated;
-          });
-        }
-        return fetchBatch(null);
-      }
-
-      function fetchRecords() {
-        $tableBody.innerHTML = `<tr><td colspan="7" class="px-3 py-12 text-center"><div class="grn-spinner mx-auto mb-3"></div><div class="text-sm text-gray-400">Loading...</div></td></tr>`;
-        fetchAllRecords(buildFullCriteria(currentFilter)).then(records => {
-          allRecords = records;
-          currentPage = 1;
-          applySortAndRender();
-          computeStats();
-        });
-      }
-
-      // Sorting
-      function applySortAndRender() {
-        allRecords.sort((a, b) => {
-          let va = getSortValue(a, sortColumn), vb = getSortValue(b, sortColumn);
-          let cmp = (typeof va === 'number' && typeof vb === 'number') ? va - vb : String(va).localeCompare(String(vb));
-          return sortDirection === 'asc' ? cmp : -cmp;
-        });
-        filteredRecords = allRecords;
-
-        document.querySelectorAll('th[data-sort]').forEach(th => {
-          const isAct = th.getAttribute('data-sort') === sortColumn;
-          th.classList.toggle('sort-active', isAct);
-          th.querySelector('.sort-indicator').textContent = isAct ? (sortDirection === 'asc' ? '▲' : '▼') : '';
-        });
-
-        renderTable();
-        renderPagination();
-      }
-
-      // Rendering Table
-      function renderTable() {
-        if (filteredRecords.length === 0) {
-          $tableBody.innerHTML = `<tr><td colspan="7" class="px-3 py-12 text-center text-gray-400"><i class="bi bi-clipboard-x text-3xl mb-2 block"></i><div>No GRNs found</div></td></tr>`;
-          return;
-        }
-
-        const startIdx = (currentPage - 1) * PER_PAGE;
-        const pageRecords = filteredRecords.slice(startIdx, startIdx + PER_PAGE);
-        let html = '';
-
-        pageRecords.forEach(rec => {
-          const status = getStatus(rec);
-          const isPending = status.toLowerCase() === 'submitted';
-
-          let badgeCfg = { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' }; // Pending/Submitted
-          if (status === 'Approved') badgeCfg = { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' };
-          if (status === 'Rejected') badgeCfg = { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600' };
-
-          html += `
-          <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors duration-150 group">
-            <td class="px-3 py-[9px] whitespace-nowrap"><span class="font-semibold text-[#1B5CA8] font-mono text-[11px]">${esc(rec.GRN_Ref_Number || rec.GRN_Number)}</span></td>
-            <td class="px-3 py-[9px] whitespace-nowrap font-medium text-gray-600 text-[11px]">${esc(rec.PO_Ref_Number)}</td>
-            <td class="px-3 py-[9px] whitespace-nowrap font-medium text-gray-500 text-[11px]">${esc(rec.PR_Ref_Number)}</td>
-            <td class="px-3 py-[9px] whitespace-nowrap text-[11px] text-gray-500">${formatDate(rec.delivery_date)}</td>
-            <td class="px-3 py-[9px] whitespace-nowrap font-semibold text-gray-900 text-right tabular-nums text-[12px]">${formatINR(rec.Total_Amount)}</td>
-            <td class="px-3 py-[9px] whitespace-nowrap">
-              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold border ${badgeCfg.border} ${badgeCfg.bg} ${badgeCfg.text}">
-                <span class="w-[5px] h-[5px] rounded-full ${badgeCfg.dot}"></span>${esc(status)}
-              </span>
-            </td>
-            <td class="px-3 py-[9px] whitespace-nowrap bg-white group-hover:bg-[#EBF3FC] sticky-action-cell">
-              <div class="flex items-center gap-1.5">
-                <button onclick="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:GRN_Detailed?recordId=${rec.ID}',window:'same'})"
-                  class="inline-flex items-center gap-1 px-2 py-1 rounded bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 text-[11px] font-medium">
-                  <i class="bi bi-eye"></i> View
+        <!-- Toolbar -->
+        <div class="flex items-center justify-between mt-[18px] mb-2">
+            <span class="text-[13.5px] font-medium text-gray-900">Good Receipt Notes (GRN)</span>
+        </div>
+        <div class="flex items-center justify-between gap-2.5 mb-2 flex-wrap">
+            <div class="flex bg-gray-100 rounded-full p-[3px] gap-[2px]">
+                <button @click="setFilter('all')"
+                    :class="filter === 'all' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
+                    class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">All (<span
+                        x-text="stats.total"></span>)</button>
+                <button @click="setFilter('submitted')"
+                    :class="filter === 'submitted' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
+                    class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Submitted (<span
+                        x-text="stats.submitted"></span>)</button>
+                <button @click="setFilter('approved')"
+                    :class="filter === 'approved' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
+                    class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Approved (<span
+                        x-text="stats.approved"></span>)</button>
+                <button @click="setFilter('rejected')"
+                    :class="filter === 'rejected' ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'"
+                    class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150">Rejected (<span
+                        x-text="stats.rejected"></span>)</button>
+            </div>
+            <div class="flex gap-2 items-center">
+                <div class="relative">
+                    <i
+                        class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px] pointer-events-none"></i>
+                    <input x-model="searchQuery" type="text" placeholder="Search GRN #, PO Ref..."
+                        class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[230px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10">
+                </div>
+                <button @click="openModal()"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-all shadow-sm">
+                    <i class="bi bi-plus-lg"></i> Create GRN
                 </button>
-                ${isPending ? `
-                <button onclick="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:GRN_Detailed?recordId=${rec.ID}',window:'same'})"
-                  class="inline-flex items-center gap-1 px-2 py-1 rounded bg-[#1B5CA8] text-white border border-[#1B5CA8] hover:bg-[#14457e] text-[11px] font-medium">
-                  <i class="bi bi-ui-checks"></i> Review
-                </button>` : ``}
-              </div>
-            </td>
-          </tr>`;
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
+            <table class="w-full border-collapse" style="min-width:1050px">
+                <colgroup>
+                    <col style="width:120px">
+                    <col style="width:120px">
+                    <col style="width:110px">
+                    <col style="width:120px">
+                    <col style="width:120px">
+                    <col style="width:140px">
+                    <col style="width:110px">
+                    <col style="width:90px">
+                </colgroup>
+                <thead>
+                    <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
+                        <template
+                            x-for="col in ['grn_no', 'po_ref', 'pr_ref', 'date', 'Status', 'items_status', 'total_amount']"
+                            :key="col">
+                            <th @click="toggleSort(col)" data-sort
+                                class="px-3 py-2 text-[11px] font-semibold text-gray-500 tracking-wide text-left whitespace-nowrap"
+                                :class="sortCol === col ? 'sort-active' : ''">
+                                <span
+                                    x-text="{grn_no: 'GRN #', po_ref: 'PO Ref', pr_ref: 'PR Ref', date: 'GRN Date', Status: 'Status', items_status: 'Items Status', total_amount: 'Total Amount'}[col]"></span>
+                                <span class="sort-indicator"
+                                    x-text="sortCol === col ? (sortDir === 'asc' ? '▲' : '▼') : ''"></span>
+                            </th>
+                        </template>
+                        <th
+                            class="px-3 py-2 text-[11px] font-semibold text-gray-500 tracking-wide text-left whitespace-nowrap bg-gray-50 sticky-action-cell">
+                            Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr x-show="isLoading" x-cloak>
+                        <td colspan="8" class="px-3 py-12 text-center">
+                            <div class="flex flex-col items-center gap-3">
+                                <div class="grn-spinner"></div>
+                                <div class="text-sm text-gray-400 font-medium">Loading GRNs…</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr x-show="!isLoading && paginatedRecords.length === 0" x-cloak>
+                        <td colspan="8" class="px-3 py-12 text-center">
+                            <div class="text-gray-400"><i class="bi bi-clipboard-x text-3xl mb-2 block"></i>
+                                <div class="text-sm font-medium text-gray-500">No records found</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <template x-for="rec in paginatedRecords" :key="rec.ID">
+                        <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors duration-150 group">
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap"><span
+                                    class="font-semibold text-[#1B5CA8] font-mono text-[11px]"
+                                    x-text="rec.GRN_Ref_Number || rec.GRN_Number || '–'"></span></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap font-mono text-[11px] font-semibold"
+                                x-text="rec.PO_Reference?.zc_display_value || rec.PO_Reference?.PO_Ref_Number || '–'">
+                            </td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap font-mono text-[11px] font-semibold text-gray-600"
+                                x-text="rec.PR_Reference?.zc_display_value || rec.PR_Reference?.PR_Number || '–'">
+                            </td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[11px] text-gray-500"
+                                x-text="formatDate(rec.GRN_Date)"></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap">
+                                <span
+                                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap border"
+                                    :class="getStatusStyle(rec.Status).classes">
+                                    <span class="w-[5px] h-[5px] rounded-full shrink-0"
+                                        :class="getStatusStyle(rec.Status).dot"></span>
+                                    <span x-text="rec.Status || 'Submitted'"></span>
+                                </span>
+                            </td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap">
+                                <span
+                                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide whitespace-nowrap border"
+                                    :class="getItemsStatusStyle(rec.Items_Status).classes">
+                                    <span x-text="rec.Items_Status || '–'"></span>
+                                </span>
+                            </td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[12px] font-medium text-gray-700"
+                                x-text="formatINR(rec.Total_Amount)"></td>
+                            <td
+                                class="px-3 py-[9px] align-middle whitespace-nowrap bg-white group-hover:bg-[#EBF3FC] sticky-action-cell">
+                                <button
+                                    @click="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:GRN_Detailed?recordId='+rec.ID,window:'same'})"
+                                    class="inline-flex items-center gap-[3px] px-2 py-[3px] rounded bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 text-[11px] font-medium transition-colors"><i
+                                        class="bi bi-box-arrow-up-right"></i> View</button>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+
+            <div x-show="!isLoading && totalPages > 0"
+                class="flex items-center justify-between px-[13px] py-[9px] border-t border-gray-200 bg-gray-50 text-xs text-gray-500"
+                x-cloak>
+                <span>Showing <span x-text="(page - 1) * perPage + 1"></span>–<span
+                        x-text="Math.min(page * perPage, filteredRecords.length)"></span> of <span
+                        x-text="filteredRecords.length"></span> records</span>
+                <div class="flex gap-1">
+                    <button @click="page > 1 ? page-- : null" :disabled="page <= 1"
+                        class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]"><i
+                            class="bi bi-chevron-left"></i></button>
+                    <template x-for="p in getPagesArray()" :key="p">
+                        <button @click="typeof p === 'number' ? page = p : null"
+                            :class="page === p ? 'border-[#1B5CA8] bg-[#1B5CA8] text-white font-semibold' : (typeof p === 'number' ? 'border-gray-300 bg-white text-gray-600 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]' : 'border-transparent bg-transparent text-gray-400 cursor-default')"
+                            class="min-w-[27px] h-[27px] px-1 border rounded inline-flex items-center justify-center transition-colors"><span
+                                x-text="p"></span></button>
+                    </template>
+                    <button @click="page < totalPages ? page++ : null" :disabled="page >= totalPages"
+                        class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors disabled:opacity-40 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]"><i
+                            class="bi bi-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- MODAL: Create GRN                                            -->
+        <!-- ============================================================ -->
+        <div x-show="isModalOpen" style="display: none;" class="grn-modal-overlay active">
+            <div class="grn-modal-bg" x-show="isModalOpen" x-transition.opacity @click="closeModal()"></div>
+            <div class="grn-modal-box max-w-6xl" style="max-height: 94vh;" x-show="isModalOpen" x-transition>
+
+                <!-- Header -->
+                <div
+                    class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50 sticky top-0 z-20">
+                    <h3 class="text-[15px] font-bold text-gray-800">New Good Receipt Note (GRN)</h3>
+                    <button @click="closeModal()" type="button"
+                        class="text-gray-400 hover:text-gray-700 transition-colors"><i
+                            class="bi bi-x-lg text-lg"></i></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-scroll">
+                    <form @submit.prevent="submitForm">
+
+                        <!-- References Section -->
+                        <h4 class="text-xs font-bold text-[#1B5CA8] tracking-wide mb-3 border-b border-gray-100 pb-1">
+                            Purchase Order Reference</h4>
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PO
+                                    Reference <span class="text-red-500">*</span></label>
+                                <select x-ref="poSelect" required class="w-full text-xs"
+                                    placeholder="Search PO Number to Auto-Fill..."></select>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="flex-1">
+                                    <label
+                                        class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">GRN
+                                        Date <span class="text-red-500">*</span></label>
+                                    <input type="date" required x-model="form.GRN_Date"
+                                        class="w-full py-1.5 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
+                                </div>
+                                <div class="flex-1">
+                                    <label
+                                        class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Delivery
+                                        Date <span class="text-red-500">*</span></label>
+                                    <input type="date" required x-model="form.Delivery_Date"
+                                        class="w-full py-1.5 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Info Overviews (Readonly Display) -->
+                        <div x-show="form.PO_Reference"
+                            class="grid grid-cols-3 gap-4 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200 text-xs">
+                            <div><span class="block font-semibold text-gray-400 mb-1">Vendor</span><span
+                                    class="font-medium text-gray-800" x-text="meta.vendorName || '–'"></span></div>
+                            <div><span class="block font-semibold text-gray-400 mb-1">PR Reference</span><span
+                                    class="font-medium text-gray-800" x-text="meta.prRefName || '–'"></span></div>
+                            <div><span class="block font-semibold text-gray-400 mb-1">QC Reference</span><span
+                                    class="font-medium text-gray-800" x-text="meta.qcRefName || '–'"></span></div>
+                        </div>
+
+                        <!-- Items Grid -->
+                        <div class="mb-6 border border-gray-200 rounded-lg overflow-hidden">
+                            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                                <span class="text-xs font-semibold text-gray-700 tracking-wide">Received Items <span
+                                        class="text-red-500">*</span></span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full border-collapse">
+                                    <thead class="bg-white border-b border-gray-200">
+                                        <tr>
+                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[25%]">Item Name</th>
+                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right w-[12%]">Rate (₹)</th>
+                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right w-[10%]">PO Qty</th>
+                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right w-[10%]">Pending</th>
+                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right w-[13%]">Recv. Qty</th>
+                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right w-[12%]">Amount (₹)</th>
+                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[18%]">Comment</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr x-show="form.Items.length === 0">
+                                            <td colspan="7" class="px-3 py-6 text-center text-xs text-gray-400 italic">
+                                                Select a PO Reference to view and receive items.</td>
+                                        </tr>
+                                        <template x-for="(item, idx) in form.Items" :key="idx">
+                                            <tr class="border-b border-gray-100 bg-white">
+                                                <td class="px-2 py-2">
+                                                    <input disabled :value="item.ItemName" type="text"
+                                                        class="grid-input bg-gray-100 text-gray-600 font-medium cursor-not-allowed">
+                                                </td>
+                                                <td class="px-2 py-2 text-right">
+                                                    <input disabled :value="formatINR(item.Rate)" type="text"
+                                                        class="grid-input text-right bg-gray-100 cursor-not-allowed">
+                                                </td>
+                                                <td class="px-2 py-2 text-right">
+                                                    <input disabled :value="item.PO_Quantity + ' ' + (item.Unit||'')"
+                                                        type="text"
+                                                        class="grid-input text-right bg-gray-100 cursor-not-allowed">
+                                                </td>
+                                                <!-- NEW COLUMN: PENDING QTY -->
+                                                <td class="px-2 py-2 text-right">
+                                                    <input disabled :value="item.Max_Allowed + ' ' + (item.Unit||'')"
+                                                        type="text"
+                                                        class="grid-input text-right bg-gray-100 font-semibold cursor-not-allowed">
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <div class="relative">
+                                                        <!-- VALIDATION: Max set to Max_Allowed (Pending Qty) -->
+                                                        <input x-model.number="item.Received_Quantity"
+                                                            @input="validateQuantity(idx)" type="number" min="0"
+                                                            :max="item.Max_Allowed" step="any" required
+                                                            class="grid-input text-right font-bold text-[#1B5CA8] focus:bg-white focus:border-[#1B5CA8] focus:ring-[2px] focus:ring-[#1B5CA8]/20 transition-all">
+                                                    </div>
+                                                </td>
+                                                <td class="px-2 py-2 text-right">
+                                                    <input disabled :value="formatINR(item.Amount)" type="text"
+                                                        class="grid-input text-right font-bold bg-gray-50 cursor-not-allowed">
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <input x-model="item.Comment" type="text" class="grid-input"
+                                                        placeholder="Remarks...">
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Totals & Extra Details -->
+                        <div class="flex flex-wrap md:flex-nowrap gap-6 mb-4">
+
+                            <!-- Left: Extra Details -->
+                            <div class="w-full md:w-1/2 flex flex-col gap-4">
+                                <div>
+                                    <label
+                                        class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Remarks
+                                        / Notes</label>
+                                    <textarea x-model="form.Remarks" rows="3"
+                                        class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all"></textarea>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Attachments</label>
+                                    <input type="file" x-ref="grnFiles" multiple
+                                        class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-[#EBF3FC] file:text-[#1B5CA8] hover:file:bg-[#d8e8fa] transition-colors cursor-pointer border border-gray-200 rounded-lg bg-gray-50 py-1.5 px-2">
+                                </div>
+                            </div>
+
+                            <!-- Right: Totals Grid -->
+                            <div class="w-full md:w-1/2 bg-gray-50 rounded-lg border border-gray-200 p-4">
+                                <h4
+                                    class="text-xs font-bold text-gray-600 tracking-wide mb-3 border-b border-gray-200 pb-2">
+                                    Financial Summary</h4>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs text-gray-500 font-medium">Sub Total</span>
+                                    <span class="text-sm font-semibold text-gray-700"
+                                        x-text="formatINR(form.Sub_Total)"></span>
+                                </div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs text-gray-500 font-medium">Discount (From PO)</span>
+                                    <span class="text-sm font-medium text-red-500"
+                                        x-text="'- ' + formatINR(form.Discount)"></span>
+                                </div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs text-gray-500 font-medium">CGST</span>
+                                    <span class="text-sm font-medium text-gray-600"
+                                        x-text="formatINR(form.CGST)"></span>
+                                </div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs text-gray-500 font-medium">SGST</span>
+                                    <span class="text-sm font-medium text-gray-600"
+                                        x-text="formatINR(form.SGST)"></span>
+                                </div>
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-xs text-gray-500 font-medium">IGST</span>
+                                    <span class="text-sm font-medium text-gray-600"
+                                        x-text="formatINR(form.IGST)"></span>
+                                </div>
+                                <div class="flex justify-between items-center pt-2 border-t border-gray-200">
+                                    <span class="text-sm font-bold text-gray-800">Total Amount</span>
+                                    <span class="text-lg font-bold text-[#1B5CA8]"
+                                        x-text="formatINR(form.Total_Amount)"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div
+                            class="flex justify-end gap-2 border-t border-gray-200 pt-4 bg-white sticky bottom-0 z-20 pb-1">
+                            <button type="button" @click="closeModal()"
+                                class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button type="button" @click="submitGrn('Submitted')" :disabled="isSubmitting"
+                                class="inline-flex items-center justify-center min-w-[90px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70">
+                                <span x-show="!isSubmitting">Submit GRN</span>
+                                <div x-show="isSubmitting" class="grn-spinner"
+                                    style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            const Toast = Swal.mixin({
+                toast: true, position: 'top-end', showConfirmButton: false, timer: 3500, timerProgressBar: true,
+                customClass: { popup: 'font-[Lato] text-sm' }
+            });
+
+            Alpine.data('grnApp', () => ({
+                REPORT_NAME: 'GRN_Report',
+                PO_REPORT_NAME: 'Purchase_Order_Report',
+
+                allRecords: [],
+                filter: 'all',
+                searchQuery: '',
+                isLoading: true,
+                sortCol: 'date',
+                sortDir: 'desc',
+                page: 1,
+                perPage: 10,
+                stats: { total: '-', draft: '-', submitted: '-', approved: '-', rejected: '-' },
+
+                isModalOpen: false,
+                isSubmitting: false,
+                tsInstances: { po: null },
+
+                // Form Model
+                form: {
+                    PO_Reference: '', PR_Reference: '', Quote_Comparison: '', Vendor: '',
+                    GRN_Date: dayjs().format('YYYY-MM-DD'),
+                    Delivery_Date: '',
+                    Remarks: '',
+                    Sub_Total: 0, Discount: 0, CGST: 0, SGST: 0, IGST: 0, Total_Amount: 0,
+                    Items: [],
+                    Billing_Address: {}, Shipping_Address: {}, Delivary_Address: {}
+                },
+
+                // UI Metadata not pushed directly
+                meta: { vendorName: '', prRefName: '', qcRefName: '' },
+
+                initApp() {
+                    this.fetchRecords();
+
+                    this.$watch('searchQuery', Alpine.debounce(() => {
+                        this.page = 1; this.fetchRecords();
+                    }, 400));
+                    this.$watch('filter', () => {
+                        this.page = 1; this.fetchRecords();
+                    });
+                },
+
+                // --- DATA FETCHING & LISTING LOGIC ---
+                buildCriteria() {
+                    let criteria = [];
+                    if (this.searchQuery.trim()) {
+                        let q = this.searchQuery.trim().replace(/'/g, "\\'");
+                        criteria.push(`(GRN_Ref_Number.contains("${q}") || PO_Reference.PO_Ref_Number.contains("${q}"))`);
+                    }
+                    if (this.filter === 'draft') criteria.push('(Status == "Draft")');
+                    if (this.filter === 'submitted') criteria.push('(Status == "Submitted")');
+                    if (this.filter === 'approved') criteria.push('(Status == "Approved")');
+                    if (this.filter === 'rejected') criteria.push('(Status == "Rejected")');
+                    return criteria.join(' && ');
+                },
+
+                async fetchRecords() {
+                    this.isLoading = true;
+                    try {
+                        let accumulated = [];
+                        let cursor = null;
+                        let crit = this.buildCriteria();
+
+                        do {
+                            let config = { report_name: this.REPORT_NAME, max_records: 200, field_config: 'all' };
+                            if (crit) config.criteria = crit;
+                            if (cursor) config.record_cursor = cursor;
+
+                            let res = await ZOHO.CREATOR.DATA.getRecords(config);
+                            if (res.code === 3000 && res.data) {
+                                accumulated = accumulated.concat(res.data);
+                                cursor = res.data.length >= 200 ? res.record_cursor : null;
+                            } else { cursor = null; }
+                        } while (cursor);
+
+                        this.allRecords = accumulated;
+                        this.computeStats();
+                    } catch (err) {
+                        console.error('Fetch error', err);
+                        this.allRecords = [];
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                async computeStats() {
+                    let q = this.searchQuery.trim().replace(/'/g, "\\'");
+                    let baseCrit = q ? `(GRN_Ref_Number.contains("${q}") || PO_Reference.PO_Ref_Number.contains("${q}"))` : '';
+                    const build = (st) => [baseCrit, st].filter(Boolean).join(' && ');
+
+                    const map = [
+                        { key: 'total', crit: build('') },
+                        { key: 'draft', crit: build('(Status == "Draft")') },
+                        { key: 'submitted', crit: build('(Status == "Submitted")') },
+                        { key: 'approved', crit: build('(Status == "Approved")') },
+                        { key: 'rejected', crit: build('(Status == "Rejected")') }
+                    ];
+
+                    for (let m of map) {
+                        let config = { report_name: this.REPORT_NAME };
+                        if (m.crit) config.criteria = m.crit;
+                        try {
+                            let res = await ZOHO.CREATOR.DATA.getRecordCount(config);
+                            this.stats[m.key] = res.result ? res.result.records_count : 0;
+                        } catch (e) { this.stats[m.key] = 0; }
+                    }
+                },
+
+                get filteredRecords() {
+                    console.log(this.allRecords)
+                    let recs = [...this.allRecords];
+                    return recs.sort((a, b) => {
+                        let va = this.getSortValue(a, this.sortCol);
+                        let vb = this.getSortValue(b, this.sortCol);
+                        let cmp = 0;
+                        if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+                        else { va = String(va).toLowerCase(); vb = String(vb).toLowerCase(); cmp = va < vb ? -1 : va > vb ? 1 : 0; }
+                        return this.sortDir === 'asc' ? cmp : -cmp;
+                    });
+                },
+
+                get paginatedRecords() {
+                    const start = (this.page - 1) * this.perPage;
+                    return this.filteredRecords.slice(start, start + this.perPage);
+                },
+
+                get totalPages() { return Math.max(1, Math.ceil(this.filteredRecords.length / this.perPage)); },
+
+                getSortValue(rec, col) {
+                    switch (col) {
+                        case 'grn_no': return (rec.GRN_Ref_Number || rec.GRN_Number || '').toString();
+                        case 'po_ref': return (rec.PO_Reference?.zc_display_value || '').toString();
+                        case 'pr_ref': return (rec.PR_Reference?.zc_display_value || '').toString();
+                        case 'date': return rec.GRN_Date ? dayjs(rec.GRN_Date).valueOf() : 0;
+                        case 'status': return (rec.Status || '').toString();
+                        case 'items_status': return (rec.Items_Status || '').toString();
+                        case 'total_amount': return parseFloat(rec.Total_Amount) || 0;
+                        default: return '';
+                    }
+                },
+
+                toggleSort(col) {
+                    if (this.sortCol === col) this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+                    else { this.sortCol = col; this.sortDir = (col === 'date' || col === 'total_amount') ? 'desc' : 'asc'; }
+                    this.page = 1;
+                },
+
+                // --- UI Helpers ---
+                setFilter(f) { this.filter = f; },
+                formatDate(dateStr) { return (!dateStr || dateStr === '–') ? '–' : (dayjs(dateStr).isValid() ? dayjs(dateStr).format('DD MMM YYYY') : dateStr); },
+                formatINR(val) { return isNaN(val) ? '₹ 0.00' : new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(val); },
+
+                getStatusStyle(status) {
+                    const st = (status || '').toLowerCase();
+                    if (st === 'approved') return { classes: 'border-emerald-200 bg-emerald-50 text-emerald-800', dot: 'bg-emerald-600' };
+                    if (st === 'rejected') return { classes: 'border-red-200 bg-red-50 text-red-800', dot: 'bg-red-600' };
+                    if (st === 'draft') return { classes: 'border-gray-200 bg-gray-50 text-gray-600', dot: 'bg-gray-400' };
+                    return { classes: 'border-amber-200 bg-amber-50 text-amber-800', dot: 'bg-amber-500' };
+                },
+                getItemsStatusStyle(status) {
+                    const st = (status || '').toLowerCase();
+                    if (st === 'completely received') return { classes: 'border-emerald-200 bg-emerald-50 text-emerald-800' };
+                    if (st === 'partially received') return { classes: 'border-blue-200 bg-blue-50 text-blue-800' };
+                    return { classes: 'border-gray-200 bg-gray-50 text-gray-600' }; // Not Received
+                },
+                getPagesArray() {
+                    let pages = [];
+                    for (let p = 1; p <= this.totalPages; p++) {
+                        if (p <= 2 || p === this.totalPages || (p >= this.page - 1 && p <= this.page + 1)) pages.push(p);
+                    }
+                    pages = [...new Set(pages)].sort((a, b) => a - b);
+                    let finalPages = [];
+                    for (let i = 0; i < pages.length; i++) {
+                        if (i > 0 && pages[i] - pages[i - 1] > 1) finalPages.push('…');
+                        finalPages.push(pages[i]);
+                    }
+                    return finalPages;
+                },
+
+                // --- MODAL & FORM LOGIC ---
+                openModal() {
+                    this.form = {
+                        PO_Reference: '', PR_Reference: '', Quote_Comparison: '', Vendor: '',
+                        GRN_Date: dayjs().format('YYYY-MM-DD'), Delivery_Date: '', Remarks: '',
+                        Sub_Total: 0, Discount: 0, CGST: 0, SGST: 0, IGST: 0, Total_Amount: 0,
+                        Items: [], Billing_Address: {}, Shipping_Address: {}, Delivary_Address: {}
+                    };
+                    this.meta = { vendorName: '', prRefName: '', qcRefName: '' };
+                    this.isModalOpen = true;
+
+                    this.$nextTick(() => { this.initPoSelect(); });
+                },
+                closeModal() {
+                    this.isModalOpen = false;
+                    if (this.tsInstances.po) this.tsInstances.po.destroy();
+                },
+
+                initPoSelect() {
+                    this.tsInstances.po = new TomSelect(this.$refs.poSelect, {
+                        valueField: 'ID', labelField: 'PO_Ref_Number', searchField: ['PO_Ref_Number', 'PO_Number'],
+                        maxItems: 1, placeholder: 'Search PO to populate details...', loadThrottle: 400,
+                        onChange: (val) => {
+                            this.form.PO_Reference = val;
+                            if (val) this.fetchPoDetails(val);
+                            else this.resetFormExceptPO();
+                        },
+                        load: (query, callback) => {
+                            if (!query.length) return callback();
+                            var q = query.replace(/'/g, "\\'");
+                            ZOHO.CREATOR.DATA.getRecords({
+                                report_name: this.PO_REPORT_NAME,
+                                criteria: `(PO_Ref_Number.contains("${q}") && (Status == "Approved") && (Items_Status ="Pending" || Items_Status == "Partially Received"))`
+                            }).then(res => callback(res.code === 3000 ? res.data : [])).catch(() => callback());
+                        }
+                    });
+                },
+
+                resetFormExceptPO() {
+                    const poRef = this.form.PO_Reference;
+                    this.form = {
+                        PO_Reference: poRef, PR_Reference: '', Quote_Comparison: '', Vendor: '',
+                        GRN_Date: dayjs().format('YYYY-MM-DD'), Delivery_Date: '', Remarks: '',
+                        Sub_Total: 0, Discount: 0, CGST: 0, SGST: 0, IGST: 0, Total_Amount: 0,
+                        Items: [], Billing_Address: {}, Shipping_Address: {}, Delivary_Address: {}
+                    };
+                    this.meta = { vendorName: '', prRefName: '', qcRefName: '' };
+                },
+
+                async fetchPoDetails(poId) {
+                    Toast.fire({ icon: 'info', title: 'Fetching PO Details...' });
+                    try {
+                        let res = await ZOHO.CREATOR.DATA.invokeCustomApi({
+                            api_name: "Dev__Fetch_PO_Details", http_method: "GET",
+                            query_params: 'recId=' + poId
+                        });
+
+                        // Parse mock/API response shape matching provided snippet
+                        let data = res.result && res.result.length > 0 ? res.result[0] : null;
+                        if (typeof res.response !== 'undefined') data = res.response[0] || data; // handle varied response wrapper
+
+                        if (!data) throw new Error("No data returned for PO");
+
+                        // Extract References
+                        const prId = (data.PR && data.PR.ID) ? data.PR.ID : (data.PR_id || '');
+                        const qcId = (data.Quote_Comparison) ? data.Quote_Comparison : '';
+
+                        this.form.PR_Reference = prId;
+                        this.form.Quote_Comparison = qcId;
+                        this.form.Vendor = data.Vendor?.ID || '';
+                        this.form.Delivery_Date = data.delivery_date ? dayjs(data.delivery_date).format('YYYY-MM-DD') : '';
+
+                        // Display Metadata
+                        this.meta.vendorName = data.Vendor?.Display_Name || '–';
+                        this.meta.prRefName = data.PR?.PR_Number || '–'; // based on payload snippet
+                        this.meta.qcRefName = 'QC-' + (qcId || '–'); // Optional formatting
+
+                        // Financials
+                        this.form.Discount = data.Discount || 0;
+                        this.form.CGST = data.CGST || 0;
+                        this.form.SGST = data.SGST || 0;
+                        this.form.IGST = data.IGST || 0;
+
+                        // Addresses (if necessary for payload mapping)
+                        this.form.Billing_Address = data.Billing_Address || {};
+                        this.form.Shipping_Address = data.Shipping_Address || {};
+                        this.form.Delivary_Address = data.Delivary_Address || {};
+
+                        // Items Map: Calculate Max_Allowed (Pending Qty) dynamically based on API returned 'Received_Quantity'
+                        if (data.Items && Array.isArray(data.Items)) {
+                            this.form.Items = data.Items.map(i => {
+                                const rate = parseFloat(i.Item?.unit_price) || 0;
+                                const poQty = parseFloat(i.Quantity) || 0;
+                                const alreadyReceived = parseFloat(i.Received_Quantity) || 0;
+                                const maxAllowed = Math.max(0, poQty - alreadyReceived);
+
+                                return {
+                                    Item: i.Item?.ID || '',
+                                    ItemName: i.Item?.item_name || 'Unknown Item',
+                                    Unit: i.Item?.unit_of_measure || '',
+                                    Rate: rate,
+                                    PO_Quantity: poQty,
+                                    Already_Received: alreadyReceived,
+                                    Max_Allowed: maxAllowed,
+                                    Received_Quantity: 0, // Force user to fill out
+                                    Amount: 0,
+                                    Comment: ''
+                                };
+                            });
+                        }
+                        this.recalculateFinancials();
+                        Toast.fire({ icon: 'success', title: 'PO details loaded successfully' });
+                    } catch (e) {
+                        console.error("PO Load Error", e);
+                        Toast.fire({ icon: 'error', title: 'Failed to parse PO Details' });
+                    }
+                },
+
+                // Validation ensures user strictly receives up to the max calculated limit
+                validateQuantity(idx) {
+                    let item = this.form.Items[idx];
+                    if (item.Received_Quantity < 0) item.Received_Quantity = 0;
+                    if (item.Received_Quantity > item.Max_Allowed) item.Received_Quantity = item.Max_Allowed;
+                    item.Amount = item.Received_Quantity * item.Rate;
+                    this.recalculateFinancials();
+                },
+
+                recalculateFinancials() {
+                    let subTotal = 0;
+                    this.form.Items.forEach(i => { subTotal += (i.Amount || 0); });
+                    this.form.Sub_Total = subTotal;
+
+                    let total = subTotal - parseFloat(this.form.Discount || 0) +
+                        parseFloat(this.form.CGST || 0) +
+                        parseFloat(this.form.SGST || 0) +
+                        parseFloat(this.form.IGST || 0);
+
+                    this.form.Total_Amount = total > 0 ? total : 0;
+                },
+
+                async submitGrn(saveStatus) {
+                    // Check items validities
+                    if (this.form.Items.length === 0) {
+                        return Toast.fire({ icon: 'error', title: 'No items to receive' });
+                    }
+
+                    let totalCurrentReceived = 0;
+                    let totalMaxAllowed = 0;
+                    let mappedItems = [];
+
+                    this.form.Items.forEach(i => {
+                        totalCurrentReceived += parseFloat(i.Received_Quantity || 0);
+                        totalMaxAllowed += parseFloat(i.Max_Allowed || 0);
+
+                        mappedItems.push({
+                            Item: i.Item,
+                            Rate: i.Rate,
+                            PO_Quantity: i.PO_Quantity,
+                            Received_Quantity: i.Received_Quantity || 0,
+                            Amount: i.Amount,
+                            Comment: i.Comment || ''
+                        });
+                    });
+
+                    if (saveStatus !== 'Draft' && totalCurrentReceived === 0) {
+                        return Toast.fire({ icon: 'error', title: 'At least one item must have Received Quantity > 0' });
+                    }
+
+                    // Compute Items Status based on what was *pending*
+                    let itemsStatus = "Not Received";
+                    if (totalCurrentReceived > 0) {
+                        itemsStatus = (totalCurrentReceived >= totalMaxAllowed) ? "Completely Received" : "Partially Received";
+                    }
+
+                    this.isSubmitting = true;
+                    try {
+                        const payload = {
+                            data: {
+                                Status: saveStatus,
+                                Items_Status: itemsStatus,
+                                delivery_date: dayjs(this.form.Delivery_Date).format('DD-MMM-YYYY'),
+                                GRN_Date: dayjs(this.form.GRN_Date).format('DD-MMM-YYYY'),
+                                Vendor: this.form.Vendor,
+                                Billing_Address: this.form.Billing_Address,
+                                Shipping_Address: this.form.Shipping_Address,
+                                Delivary_Address: this.form.Delivary_Address,
+                                Items: mappedItems,
+                                Sub_Total: this.form.Sub_Total,
+                                Discount: this.form.Discount,
+                                CGST: this.form.CGST,
+                                SGST: this.form.SGST,
+                                IGST: this.form.IGST,
+                                Total_Amount: this.form.Total_Amount,
+                                Remarks: this.form.Remarks,
+                                PR_Reference: this.form.PR_Reference,
+                                Quote_Comparison: this.form.Quote_Comparison,
+                                PO_Reference: this.form.PO_Reference
+                            }
+                        };
+
+                        let res = await ZOHO.CREATOR.DATA.addRecords({ form_name: "GRN", payload: JSON.parse(JSON.stringify(payload)) });
+
+                        if (res.code === 3000 && res.data) {
+                            const newRecordId = res.data.ID;
+                            const files = this.$refs.grnFiles ? this.$refs.grnFiles.files : [];
+
+                            // Handle file uploads natively via ZC API
+                            if (files.length > 0) {
+                                const uploadPromises = Array.from(files).map(file => {
+                                    return ZOHO.CREATOR.FILE.uploadFile({ report_name: this.REPORT_NAME, field_name: "Attachments", file: file, id: newRecordId });
+                                });
+                                await Promise.allSettled(uploadPromises);
+                            }
+
+                            Toast.fire({ icon: 'success', title: `GRN ${saveStatus} successfully!` });
+                            this.closeModal();
+                            this.searchQuery = '';
+                            this.fetchRecords();
+                        } else {
+                            throw new Error(res.message || 'Submission failed');
+                        }
+                    } catch (err) {
+                        Toast.fire({ icon: 'error', title: err.message || 'Failed to submit GRN' });
+                    } finally {
+                        this.isSubmitting = false;
+                    }
+                }
+            }));
         });
-        $tableBody.innerHTML = html;
-      }
-
-      // Pagination render logic
-      function renderPagination() {
-        const total = filteredRecords.length, totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
-        if (total === 0) { $pagination.style.display = 'none'; return; }
-
-        $pagination.style.display = 'flex';
-        $pagInfo.textContent = `Showing ${(currentPage - 1) * PER_PAGE + 1}–${Math.min(currentPage * PER_PAGE, total)} of ${total}`;
-
-        let btns = `<button onclick="window._grnDash.go(${currentPage - 1})" class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 disabled:opacity-40" ${currentPage <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left"></i></button>`;
-        for (let p = 1; p <= totalPages; p++) {
-          if (p <= 2 || p === totalPages || Math.abs(p - currentPage) <= 1) {
-            btns += `<button onclick="window._grnDash.go(${p})" class="min-w-[27px] h-[27px] border rounded text-xs ${p === currentPage ? 'border-[#1B5CA8] bg-[#1B5CA8] text-white' : 'border-gray-300 bg-white hover:bg-gray-50'}">${p}</button>`;
-          } else if (p === 3 || p === totalPages - 1) {
-            btns += `<span class="px-1 text-gray-400">…</span>`;
-          }
-        }
-        btns += `<button onclick="window._grnDash.go(${currentPage + 1})" class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 disabled:opacity-40" ${currentPage >= totalPages ? 'disabled' : ''}><i class="bi bi-chevron-right"></i></button>`;
-
-        // Remove duplicate ellipses generated by simple loop
-        $pagButtons.innerHTML = btns.replace(/(<span[^>]*>…<\/span>)+/g, '<span class="px-1 text-gray-400 text-xs">…</span>');
-      }
-
-      // Event Listeners
-      document.getElementById('filterTabs').addEventListener('click', e => {
-        const btn = e.target.closest('button[data-filter]');
-        if (btn) {
-          currentFilter = btn.dataset.filter;
-          document.querySelectorAll('#filterTabs button').forEach(b => b.className = 'px-3 py-1 text-xs font-medium text-gray-600 rounded-full hover:bg-white hover:text-[#1B5CA8] transition-all duration-150');
-          btn.className = 'px-3 py-1 text-xs font-medium rounded-full transition-all duration-150 pill-active';
-          fetchRecords();
-        }
-      });
-
-      document.querySelectorAll('th[data-sort]').forEach(th => th.addEventListener('click', function () {
-        const col = this.dataset.sort;
-        sortDirection = (sortColumn === col && sortDirection === 'desc') ? 'asc' : 'desc';
-        sortColumn = col;
-        applySortAndRender();
-      }));
-
-      let timer;
-      document.getElementById('searchInput').addEventListener('input', e => {
-        clearTimeout(timer);
-        timer = setTimeout(() => { searchQuery = e.target.value.trim(); fetchRecords(); }, 400);
-      });
-
-      window._grnDash = { go: p => { currentPage = Math.max(1, Math.min(p, Math.ceil(filteredRecords.length / PER_PAGE))); renderTable(); renderPagination(); } };
-
-      document.addEventListener("DOMContentLoaded", fetchRecords);
-    })();
-  </script>
+    </script>
 </body>
 
 </html>
