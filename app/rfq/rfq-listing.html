@@ -229,7 +229,7 @@
             class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px] pointer-events-none"></i>
           <input x-model="search"
             class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[190px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10"
-            type="text" placeholder="Search by RFQ #, Dept…">
+            type="text" placeholder="Search by RFQ #, Unit...">
         </div>
         <button @click="openCreateModal()"
           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-all shadow-sm">
@@ -252,14 +252,13 @@
         </colgroup>
         <thead>
           <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
-            <template
-              x-for="col in ['rfq_number', 'department', 'pr_ref', 'requester', 'req_date', 'due_date', 'status']"
+            <template x-for="col in ['rfq_number', 'unit', 'pr_ref', 'requester', 'req_date', 'due_date', 'status']"
               :key="col">
               <th @click="toggleSort(col)" data-sort
                 class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap"
                 :class="sortCol === col ? 'sort-active' : ''">
                 <span
-                  x-text="{rfq_number: 'RFQ #', department: 'Department', pr_ref: 'PR Ref', requester: 'Requester', req_date: 'Request Date', due_date: 'Due Date', status: 'Status'}[col]"></span>
+                  x-text="{rfq_number: 'RFQ #', unit: 'Unit', pr_ref: 'PR Ref', requester: 'Requester', req_date: 'Request Date', due_date: 'Due Date', status: 'Status'}[col]"></span>
                 <span class="sort-indicator" x-text="sortCol === col ? (sortDir === 'asc' ? '▲' : '▼') : ''"></span>
               </th>
             </template>
@@ -296,7 +295,7 @@
               </td>
               <td
                 class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900"
-                x-text="rec['Department_Unit.Name'] || '–'"></td>
+                x-text="rec['Unit.Name'] || '–'"></td>
               <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap"
                 :title="Array.isArray(rec.PR_Refs) && rec.PR_Refs.length > 0 ? rec.PR_Refs.map(pr => pr.zc_display_value || pr.PR_Number || 'PR').join(', ') : ''">
                 <template x-if="Array.isArray(rec.PR_Refs) && rec.PR_Refs.length > 0">
@@ -409,14 +408,13 @@
           </div>
 
           <div class="grid grid-cols-2 gap-4 mb-5">
-            <!-- Department — locked (read-only) when a PR is selected -->
             <div>
               <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
-                Department / Unit
+                Unit
                 <span x-show="rfqForm.prLocked"
                   class="ml-1 text-[10px] font-normal text-[#1B5CA8] bg-[#1B5CA8]/10 px-1.5 py-0.5 rounded-full">Auto-filled</span>
               </label>
-              <select id="rfqDept" class="w-full text-xs"></select>
+              <select id="rfqUnit" class="w-full text-xs"></select>
             </div>
             <div>
               <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Request Date
@@ -545,10 +543,10 @@
         isSubmitting: false,
         todayDate: dayjs().format('YYYY-MM-DD'),
 
-        rfqForm: { dept: '', reqDate: '', dueDate: '', prRef: '', prLocked: false, purpose: '', items: [] },
+        rfqForm: { unit: '', reqDate: '', dueDate: '', prRef: '', prLocked: false, purpose: '', items: [] },
 
         // TS instances manager
-        tsInstances: { dept: null, pr: null, items: [], vendorItems: [] },
+        tsInstances: { unit: null, pr: null, items: [], vendorItems: [] },
 
         // Holds a PR ID passed via query params so openCreateModal can pre-load it
         pendingPrId: null,
@@ -615,7 +613,7 @@
 
           if (this.search.trim()) {
             let q = this.search.trim().replace(/'/g, "\\'");
-            criteria.push(`(Department_Unit.contains("${q}") || RFQ_Ref_Number.contains("${q}"))`);
+            criteria.push(`(Unit.contains("${q}") || RFQ_Ref_Number.contains("${q}"))`);
           }
 
           if (this.filter === 'pending') criteria.push('(Status == "Submitted" || Status == "Draft")');
@@ -658,7 +656,7 @@
 
         async computeStats() {
           let q = this.search.trim().replace(/'/g, "\\'");
-          let searchCrit = q ? `(Department_Unit.contains("${q}") || RFQ_Ref_Number.contains("${q}"))` : '';
+          let searchCrit = q ? `(Unit.contains("${q}") || RFQ_Ref_Number.contains("${q}"))` : '';
 
           const build = (statusCrit) => [searchCrit, statusCrit].filter(Boolean).join(' && ');
 
@@ -792,7 +790,7 @@
               var refVal = (rec.RFQ_Ref_Number || rec.RFQ_Number || '').toString();
               var numMatch = refVal.match(/(\d+)\s*$/);
               return numMatch ? parseInt(numMatch[1], 10) : refVal.toLowerCase();
-            case 'department': return (rec['Department_Unit.Name'] || '').toString();
+            case 'unit': return (rec['Unit.Name'] || '').toString();
             case 'pr_ref': return (Array.isArray(rec.PR_Refs) ? rec.PR_Refs.map(pr => pr.zc_display_value || pr.PR_Number || '').join(', ') : '').toString();
             case 'req_date': return rec.Request_Date ? dayjs(rec.Request_Date).valueOf() : 0;
             case 'due_date': return rec.Due_Date ? dayjs(rec.Due_Date).valueOf() : 0;
@@ -818,7 +816,7 @@
         // --- Form & Modal Logic ---
         openCreateModal(prId = null) {
           this.rfqForm = {
-            dept: '', reqDate: this.todayDate, dueDate: '', prRef: '', prLocked: false, purpose: '',
+            unit: '', reqDate: this.todayDate, dueDate: '', prRef: '', prLocked: false, purpose: '',
             items: []
           };
           this.isModalOpen = true;
@@ -826,7 +824,7 @@
           this.fetchVendorMasters();
 
           this.$nextTick(() => {
-            this.initDeptSelect();
+            this.initUnitSelect();
             this.initPrSelect();
 
             if (prId) {
@@ -852,7 +850,7 @@
 
         closeModal() {
           this.isModalOpen = false;
-          if (this.tsInstances.dept) this.tsInstances.dept.destroy();
+          if (this.tsInstances.unit) this.tsInstances.unit.destroy();
           if (this.tsInstances.pr) this.tsInstances.pr.destroy();
           this.tsInstances.items.forEach(ts => ts && ts.destroy());
           this.tsInstances.items = [];
@@ -878,11 +876,11 @@
         },
 
         // TomSelect Initializers for Modal
-        initDeptSelect() {
-          this.tsInstances.dept = new TomSelect(document.getElementById('rfqDept'), {
+        initUnitSelect() {
+          this.tsInstances.unit = new TomSelect(document.getElementById('rfqUnit'), {
             valueField: 'ID', labelField: 'Name', searchField: 'Name',
-            options: this.unitMasters, maxItems: 1, placeholder: 'Select Department...',
-            onChange: (val) => { this.rfqForm.dept = val; },
+            options: this.unitMasters, maxItems: 1, placeholder: 'Select Unit...',
+            onChange: (val) => { this.rfqForm.unit = val; },
             render: {
               option: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`,
               item: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`
@@ -903,10 +901,10 @@
                 this.rfqForm.prLocked = false;
                 this.rfqForm.reqDate = this.todayDate;
                 this.rfqForm.dueDate = '';
-                this.rfqForm.dept = '';
-                if (this.tsInstances.dept) {
-                  this.tsInstances.dept.enable();
-                  this.tsInstances.dept.clear(true);
+                this.rfqForm.unit = '';
+                if (this.tsInstances.unit) {
+                  this.tsInstances.unit.enable();
+                  this.tsInstances.unit.clear(true);
                 }
               }
             },
@@ -1020,25 +1018,25 @@
                 });
               }
 
-              const dept = pr.Department_Unit || pr.Department;
-              const deptId = (dept && typeof dept === 'object') ? (dept.ID || dept.id || '') : '';
-              const deptName = (dept && typeof dept === 'object') ? (dept.Name || dept.zc_display_value || dept.display_value || '') : (dept || '');
+              const unit = pr.Unit;
+              const unitId = (unit && typeof unit === 'object') ? (unit.ID || unit.id || '') : '';
+              const unitName = (unit && typeof unit === 'object') ? (unit.Name || unit.zc_display_value || unit.display_value || '') : (unit || '');
 
-              if (deptId && this.tsInstances.dept) {
+              if (unitId && this.tsInstances.unit) {
                 // Make sure the option exists in TomSelect before setting it
-                if (!this.tsInstances.dept.options[deptId]) {
-                  this.tsInstances.dept.addOption({ ID: String(deptId), Name: deptName });
+                if (!this.tsInstances.unit.options[unitId]) {
+                  this.tsInstances.unit.addOption({ ID: String(unitId), Name: unitName });
                 }
-                this.tsInstances.dept.setValue(deptId, true);
-                this.rfqForm.dept = deptId;
-              } else if (deptName) {
+                this.tsInstances.unit.setValue(unitId, true);
+                this.rfqForm.unit = unitId;
+              } else if (unitName) {
                 // Fall back: match by name in the unitMasters list
                 const matched = this.unitMasters.find(u =>
-                  (u.Name || '').toLowerCase() === deptName.toLowerCase()
+                  (u.Name || '').toLowerCase() === unitName.toLowerCase()
                 );
-                if (matched && this.tsInstances.dept) {
-                  this.tsInstances.dept.setValue(matched.ID, true);
-                  this.rfqForm.dept = matched.ID;
+                if (matched && this.tsInstances.unit) {
+                  this.tsInstances.unit.setValue(matched.ID, true);
+                  this.rfqForm.unit = matched.ID;
                 }
               }
 
@@ -1054,9 +1052,8 @@
                 if (parsed.isValid()) this.rfqForm.dueDate = parsed.format('YYYY-MM-DD');
               }
 
-              // Lock department & date fields so user can't accidentally override them
               this.rfqForm.prLocked = true;
-              if (this.tsInstances.dept) this.tsInstances.dept.disable();
+              if (this.tsInstances.unit) this.tsInstances.unit.disable();
 
               // ── 3. Auto-fill Line Items ──────────────────────────────────────────
               this.tsInstances.items.forEach(ts => ts && ts.destroy());
@@ -1119,7 +1116,7 @@
           try {
             const payload = {
               data: {
-                Department_Unit: this.rfqForm.dept,
+                Unit: this.rfqForm.unit,
                 Request_Date: dayjs(this.rfqForm.reqDate).format('DD-MMM-YYYY'),
                 Due_Date: dayjs(this.rfqForm.dueDate).format('DD-MMM-YYYY'),
                 Purpose: this.rfqForm.purpose,

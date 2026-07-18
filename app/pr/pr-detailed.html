@@ -264,9 +264,8 @@
                 <form id="editPrForm" class="p-5">
                     <div class="grid grid-cols-2 gap-4 mb-5">
                         <div>
-                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Department
-                                / Unit <span class="text-red-500">*</span></label>
-                            <select id="prDeptSelect" class="w-full text-xs" required></select>
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Unit<span class="text-red-500">*</span></label>
+                            <select id="prUnitSelect" class="w-full text-xs" required></select>
                         </div>
                         <div>
                             <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PR Date
@@ -618,7 +617,7 @@
             const $saveEditSpinner = document.getElementById('saveEditSpinner');
             const $editItemsBody = document.getElementById('editItemsBody');
             const $addItemRowBtn = document.getElementById('addItemRowBtn');
-            const $prDeptSelect = document.getElementById('prDeptSelect');
+            const $prUnitSelect = document.getElementById('prUnitSelect');
             const $prDateInput = document.getElementById('prDateInput');
             const $prDueDateInput = document.getElementById('prDueDateInput');
             const $prDescriptionInput = document.getElementById('prDescriptionInput');
@@ -629,7 +628,7 @@
             let requestedItems = [];
             let itemMasters = [];
             let unitMasters = [];
-            let tsDept = null;
+            let tsUnit = null;
             let tsItems = [];
 
             // ─── Toast ──────────────────────────────────────────────────────
@@ -690,13 +689,13 @@
                         ' <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium tracking-wide border border-blue-200 bg-blue-50 text-blue-700"><i class="bi bi-geo-alt text-[10px]"></i>' +
                         esc(rec.Current_Stage) + '</span>' : '');
 
-                // Fix Department display
-                const deptDisplay = getDisplayName(rec.Department);
-                $headerSub.textContent = deptDisplay + ' · Requested ' + formatDate(rec.PR_Date);
+                // Fix Unit display
+                const unitDisplay = getDisplayName(rec.Unit);
+                $headerSub.textContent = unitDisplay + ' · Requested ' + formatDate(rec.PR_Date);
 
                 const fields = [
                     { label: 'PR Number', value: prNum },
-                    { label: 'Department', value: deptDisplay },
+                    { label: 'Unit', value: unitDisplay },
                     { label: 'Requester', value: getDisplayName(rec.Added_User) },
                     { label: 'PR Date', value: formatDate(rec.PR_Date) },
                     { label: 'Due Date', value: formatDate(rec.Due_Date) },
@@ -856,27 +855,27 @@
                 $prDescriptionInput.value = rec.description || '';
 
                 // Set department select (TomSelect)
-                if (tsDept) tsDept.destroy();
-                tsDept = new TomSelect($prDeptSelect, {
+                if (tsUnit) tsUnit.destroy();
+                tsUnit = new TomSelect($prUnitSelect, {
                     valueField: 'ID',
                     labelField: 'Name',
                     searchField: 'Name',
                     options: unitMasters,
                     maxItems: 1,
-                    placeholder: 'Select Department...',
+                    placeholder: 'Select Unit...',
                     render: {
                         option: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`,
                         item: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`
                     }
                 });
-                const deptId = rec.Department?.ID || rec.Department || '';
-                if (deptId) {
-                    const deptName = getDisplayName(rec.Department);
+                const unitId = rec.Unit?.ID || rec.Unit || '';
+                if (unitId) {
+                    const unitName = getDisplayName(rec.Unit);
                     // ensure option exists
-                    if (!tsDept.options[deptId]) {
-                        tsDept.addOption({ ID: String(deptId), Name: deptName });
+                    if (!tsUnit.options[unitId]) {
+                        tsUnit.addOption({ ID: String(unitId), Name: unitName });
                     }
-                    tsDept.setValue(deptId);
+                    tsUnit.setValue(unitId);
                 }
 
                 // Build items rows
@@ -975,9 +974,9 @@
             function closeEditModal() {
                 $editModal.classList.add('hidden');
                 // Cleanup TomSelect
-                if (tsDept) {
-                    tsDept.destroy();
-                    tsDept = null;
+                if (tsUnit) {
+                    tsUnit.destroy();
+                    tsUnit = null;
                 }
                 tsItems.forEach(ts => { if (ts) ts.destroy(); });
                 tsItems = [];
@@ -986,9 +985,9 @@
             async function submitEditPR(e) {
                 e.preventDefault();
                 // Validate
-                const dept = tsDept ? tsDept.getValue() : '';
-                if (!dept) {
-                    showToast('Please select a Department.', 'error');
+                const unit = tsUnit ? tsUnit.getValue() : '';
+                if (!unit) {
+                    showToast('Please select a Unit.', 'error');
                     return;
                 }
                 const prDate = $prDateInput.value;
@@ -1032,7 +1031,7 @@
                 // Build payload
                 const payload = {
                     data: {
-                        Department: dept,
+                        Unit: unit,
                         PR_Date: dayjs(prDate).format('DD-MMM-YYYY'),
                         Due_Date: dayjs(dueDate).format('DD-MMM-YYYY'),
                         description: $prDescriptionInput.value,

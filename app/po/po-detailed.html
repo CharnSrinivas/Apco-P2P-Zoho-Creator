@@ -230,9 +230,9 @@
                         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             <div>
                                 <label
-                                    class=" cursor-not-allowed block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Department
-                                    / Unit <span class="text-red-500">*</span></label>
-                                <select disabled x-ref="deptSelect" class="w-full cursor-not-allowed"></select>
+                                    class=" cursor-not-allowed block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Unit<span
+                                        class="text-red-500">*</span></label>
+                                <select disabled x-ref="unitSelect" class="w-full cursor-not-allowed"></select>
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Vendor
@@ -742,7 +742,7 @@
                 isEditModalOpen: false,
                 isUpdatingRecord: false,
                 editForm: {
-                    Department: '', PO_Date: '', delivery_date: '', Payment_Terms: '',
+                    Unit: '', PO_Date: '', delivery_date: '', Payment_Terms: '',
                     Vendor: '', Notes: '', Terms_Conditions: '', Items: [],
                     Sub_Total: 0, Discount: 0, CGST: 0, SGST: 0, IGST: 0, Total_Amount: 0
                 },
@@ -751,7 +751,7 @@
                 unitMasters: [],
                 itemMasters: [],
                 vendorMasters: [],
-                tsInstances: { dept: null, vendor: null, items: [] },
+                tsInstances: { unit: null, vendor: null, items: [] },
 
                 initWidget() {
                     ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
@@ -843,25 +843,25 @@
 
                 get detailFields() {
                     // Fix applied for dynamic object/array payload parsing
-                    let deptName = '–';
-                    if (this.rec.Department) {
-                        if (Array.isArray(this.rec.Department) && this.rec.Department.length) {
-                            deptName = this.rec.Department[0].display_value || this.rec.Department[0].Name || '–';
+                    let unitName = '–';
+                    if (this.rec.Unit) {
+                        if (Array.isArray(this.rec.Unit) && this.rec.Unit.length) {
+                            unitName = this.rec.Unit[0].display_value || this.rec.Unit[0].Name || '–';
                         } else {
-                            deptName = this.rec.Department.Name || this.rec.Department.display_value || '–';
+                            unitName = this.rec.Unit.Name || this.rec.Unit.display_value || '–';
                         }
                     }
 
                     const prText = this.prRefDisplay;
                     const prId = this.prRefId;
-                    const prHtml = (prId && prText !== '–') 
-                        ? `<a href="#Page:PR_Detailed?recordId=${prId}" target="_parent" class="text-[#1B5CA8] hover:underline font-mono">${prText}</a>` 
+                    const prHtml = (prId && prText !== '–')
+                        ? `<a href="#Page:PR_Detailed?recordId=${prId}" target="_parent" class="text-[#1B5CA8] hover:underline font-mono">${prText}</a>`
                         : `<span class="text-gray-900 font-semibold">${prText}</span>`;
 
                     return [
                         { label: 'PO Reference', value: this.poRefNumber },
                         { label: 'PR Reference', value: prHtml, isHtml: true },
-                        { label: 'Department', value: deptName },
+                        { label: 'Unit', value: unitName },
                         { label: 'PO Date', value: this.formatDate(this.rec.PO_Date) },
                         { label: 'Delivery Date', value: this.formatDate(this.rec.delivery_date) },
                         { label: 'Payment Terms', value: this.rec.Payment_Terms || '–' }
@@ -978,25 +978,25 @@
 
                 // ─── Edit Modal ───
                 openEditModal() {
-                    if (this.tsInstances.dept) this.tsInstances.dept.destroy();
+                    if (this.tsInstances.unit) this.tsInstances.unit.destroy();
                     if (this.tsInstances.vendor) this.tsInstances.vendor.destroy();
                     this.tsInstances.items.forEach(ts => ts && ts.destroy());
                     this.tsInstances.items = [];
 
-                    // Fixed Department parsing logic for edit form
-                    let deptId = '';
-                    if (this.rec.Department) {
-                        if (Array.isArray(this.rec.Department) && this.rec.Department.length) {
-                            deptId = this.rec.Department[0].ID || this.rec.Department[0];
+                    // Fixed Unit parsing logic for edit form
+                    let unitId = '';
+                    if (this.rec.Unit) {
+                        if (Array.isArray(this.rec.Unit) && this.rec.Unit.length) {
+                            unitId = this.rec.Unit[0].ID || this.rec.Unit[0];
                         } else {
-                            deptId = this.rec.Department.ID || this.rec.Department;
+                            unitId = this.rec.Unit.ID || this.rec.Unit;
                         }
                     }
 
                     const vendId = this.rec.Vendor ? (this.rec.Vendor.ID || this.rec.Vendor) : '';
 
                     this.editForm = {
-                        Department: deptId,
+                        Unit: unitId,
                         Vendor: vendId,
                         PO_Date: this.rec.PO_Date ? dayjs(this.rec.PO_Date).format('YYYY-MM-DD') : '',
                         delivery_date: this.rec.delivery_date ? dayjs(this.rec.delivery_date).format('YYYY-MM-DD') : '',
@@ -1031,7 +1031,7 @@
 
                     this.isEditModalOpen = true;
                     this.$nextTick(() => {
-                        this.initDeptSelect();
+                        this.initUnitSelect();
                         this.initVendorSelect();
                     });
                 },
@@ -1052,23 +1052,23 @@
                     this.calculateTotals();
                 },
 
-                initDeptSelect() {
-                    this.tsInstances.dept = new TomSelect(this.$refs.deptSelect, {
+                initUnitSelect() {
+                    this.tsInstances.unit = new TomSelect(this.$refs.unitSelect, {
                         valueField: 'ID', labelField: 'Name', searchField: 'Name', options: this.unitMasters, maxItems: 1, placeholder: 'Select...',
-                        onChange: val => this.editForm.Department = val
+                        onChange: val => this.editForm.Unit = val
                     });
 
-                    if (this.editForm.Department) {
-                        if (!this.tsInstances.dept.options[this.editForm.Department] && this.rec.Department) {
-                            let dName = 'Dept';
-                            if (Array.isArray(this.rec.Department) && this.rec.Department.length) {
-                                dName = this.rec.Department[0].Name || this.rec.Department[0].display_value;
-                            } else if (this.rec.Department) {
-                                dName = this.rec.Department.Name || this.rec.Department.display_value;
+                    if (this.editForm.Unit) {
+                        if (!this.tsInstances.unit.options[this.editForm.Unit] && this.rec.Unit) {
+                            let dName = 'Unit';
+                            if (Array.isArray(this.rec.Unit) && this.rec.Unit.length) {
+                                dName = this.rec.Unit[0].Name || this.rec.Unit[0].display_value;
+                            } else if (this.rec.Unit) {
+                                dName = this.rec.Unit.Name || this.rec.Unit.display_value;
                             }
-                            this.tsInstances.dept.addOption({ ID: String(this.editForm.Department), Name: dName });
+                            this.tsInstances.unit.addOption({ ID: String(this.editForm.Unit), Name: dName });
                         }
-                        this.tsInstances.dept.setValue(this.editForm.Department);
+                        this.tsInstances.unit.setValue(this.editForm.Unit);
                     }
                 },
 
@@ -1115,7 +1115,7 @@
 
                 async submitEdit() {
                     // Manual Javascript Validation avoids browser conflict with TomSelect
-                    if (!this.editForm.Department || !this.editForm.Vendor || this.editForm.Items.length === 0 || this.editForm.Items.some(i => !i.id)) {
+                    if (!this.editForm.Unit || !this.editForm.Vendor || this.editForm.Items.length === 0 || this.editForm.Items.some(i => !i.id)) {
                         Toast.fire({ icon: 'error', title: 'Please complete all required fields and item lookups.' });
                         return;
                     }
@@ -1124,7 +1124,7 @@
                     try {
                         const payload = {
                             data: {
-                                Department: this.editForm.Department,
+                                Unit: this.editForm.Unit,
                                 Vendor: this.editForm.Vendor,
                                 PO_Date: dayjs(this.editForm.PO_Date).format('DD-MMM-YYYY'),
                                 delivery_date: dayjs(this.editForm.delivery_date).format('DD-MMM-YYYY'),

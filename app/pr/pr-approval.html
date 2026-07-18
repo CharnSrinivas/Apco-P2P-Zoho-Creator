@@ -342,7 +342,7 @@
                                     class="font-semibold text-[#1B5CA8] font-mono text-[11px]"
                                     x-text="rec._prNumber"></span></td>
                             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900"
-                                x-text="rec.Department.Name || '–'"></td>
+                                x-text="rec.Unit.Name || '–'"></td>
                             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[12px]"
                                 x-text="rec._requesterName"></td>
                             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-gray-500"
@@ -456,7 +456,7 @@
                     <div class="grid grid-cols-2 gap-4 mb-5">
                         <div>
                             <label class="block text-[11px] font-semibold text-gray-500  tracking-wide mb-1.5">Unit /
-                                Department
+                                Unit
                                 <span class="text-red-500">*</span></label>
                             <select x-ref="prUnit" required class="w-full text-xs ts-unit-select"
                                 placeholder="Select Unit..."></select>
@@ -599,7 +599,7 @@
 
     const REPORT_NAME = 'Purchase_Requisition_Report';
     const ITEMS_REPORT_NAME = 'Items_Report';
-    const DEPARTMENTS_REPORT_NAME = 'Unit_Report';
+    const UNITS_REPORT_NAME = 'Unit_Report';
     const PER_PAGE = 10;
     const FETCH_BATCH_SIZE = 200;
 
@@ -756,7 +756,7 @@
             allRecords: [],
             filteredRecords: [],
             itemMasters: [],
-            departmentMasters: [],
+            unitMasters: [],
             currentFilter: 'all',
             currentPage: 1,
             searchQuery: '',
@@ -783,7 +783,7 @@
             init() {
                 this.fetchRecords();
                 this.fetchItemMasters();
-                this.fetchDepartmentMasters();
+                this.fetchUnitMasters();
             },
 
             get totalPages() {
@@ -849,17 +849,17 @@
             //  DATA FETCHING & SORTING
             // ════════════════════════════════════════════
 
-            fetchDepartmentMasters() {
-                ZOHO.CREATOR.DATA.getRecords({ report_name: DEPARTMENTS_REPORT_NAME, max_records: 200 })
+            fetchUnitMasters() {
+                ZOHO.CREATOR.DATA.getRecords({ report_name: UNITS_REPORT_NAME, max_records: 200 })
                     .then((response) => {
                         if (response.code === 3000 && response.data) {
-                            this.departmentMasters = response.data;
+                            this.unitMasters = response.data;
                             if (this.unitTomSelect) {
-                                this.unitTomSelect.addOption(this.departmentMasters);
+                                this.unitTomSelect.addOption(this.unitMasters);
                                 this.unitTomSelect.refreshOptions(false);
                             }
                         }
-                    }).catch(err => console.error('Failed to load department masters:', err));
+                    }).catch(err => console.error('Failed to load unit masters:', err));
             },
 
             fetchItemMasters() {
@@ -1003,7 +1003,7 @@
                         valueField: 'ID',
                         labelField: 'Name',
                         searchField: 'Name',
-                        options: this.departmentMasters,
+                        options: this.unitMasters,
                         maxItems: 1,
                         placeholder: 'Select Unit...'
                     });
@@ -1149,7 +1149,7 @@
 
                 const payload = {
                     "data": {
-                        "Department": this.unitTomSelect ? this.unitTomSelect.getValue() : '',
+                        "Unit": this.unitTomSelect ? this.unitTomSelect.getValue() : '',
                         "PR_Date": formatZohoDateSubmission(new Date().toISOString().split('T')[0]),
                         "Due_Date": formatZohoDateSubmission(this.prDueDate),
                         "Status": finalStatus,

@@ -307,9 +307,8 @@
                 <form @submit.prevent="submitEditRFQ" class="p-5">
                     <div class="grid grid-cols-2 gap-4 mb-5">
                         <div>
-                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Department
-                                / Unit</label>
-                            <select id="rfqDept" class="w-full text-xs"></select>
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Unit</label>
+                            <select id="rfqUnit" class="w-full text-xs"></select>
                         </div>
                         <div>
                             <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Request
@@ -714,13 +713,13 @@
                 // Edit Modal
                 isEditModalOpen: false,
                 isSubmittingEdit: false,
-                rfqForm: { dept: '', reqDate: '', dueDate: '', prRef: '', purpose: '', items: [] },
+                rfqForm: { unit: '', reqDate: '', dueDate: '', prRef: '', purpose: '', items: [] },
 
                 // Masters
                 unitMasters: [],
                 itemMasters: [],
                 vendorMasters: [],
-                tsInstances: { dept: null, pr: null, items: [], vendorItems: [] },
+                tsInstances: { unit: null, pr: null, items: [], vendorItems: [] },
 
                 ITEMS_REPORT_NAME: 'Items_Report',
                 UNIT_REPORT_NAME: 'Unit_Report',
@@ -847,7 +846,7 @@
 
                 // ===== EDIT MODAL =====
                 openEditModal() {
-                    if (this.tsInstances.dept) this.tsInstances.dept.destroy();
+                    if (this.tsInstances.unit) this.tsInstances.unit.destroy();
                     if (this.tsInstances.pr) this.tsInstances.pr.destroy();
                     this.tsInstances.items.forEach(ts => ts && ts.destroy());
                     this.tsInstances.items = [];
@@ -855,7 +854,7 @@
                     this.tsInstances.vendorItems = [];
 
                     this.rfqForm = {
-                        dept: this.rec.Department_Unit?.ID || this.rec.Department_Unit || '',
+                        unit: this.rec.Unit?.ID || this.rec.Unit || '',
                         reqDate: this.rec.Request_Date ? dayjs(this.rec.Request_Date).format('YYYY-MM-DD') : '',
                         dueDate: this.rec.Due_Date ? dayjs(this.rec.Due_Date).format('YYYY-MM-DD') : '',
                         prRef: (this.rec.PR_Refs && this.rec.PR_Refs.length > 0) ? this.rec.PR_Refs[0].ID : '',
@@ -893,14 +892,14 @@
 
                     this.isEditModalOpen = true;
                     this.$nextTick(() => {
-                        this.initDeptSelect();
+                        this.initUnitSelect();
                         this.initPrSelect();
                     });
                 },
 
                 closeEditModal() {
                     this.isEditModalOpen = false;
-                    if (this.tsInstances.dept) this.tsInstances.dept.destroy();
+                    if (this.tsInstances.unit) this.tsInstances.unit.destroy();
                     if (this.tsInstances.pr) this.tsInstances.pr.destroy();
                     this.tsInstances.items.forEach(ts => ts && ts.destroy());
                     this.tsInstances.items = [];
@@ -927,28 +926,28 @@
                     }
                 },
 
-                initDeptSelect() {
-                    this.tsInstances.dept = new TomSelect(document.getElementById('rfqDept'), {
+                initUnitSelect() {
+                    this.tsInstances.unit = new TomSelect(document.getElementById('rfqUnit'), {
                         valueField: 'ID',
                         labelField: 'Name',
                         searchField: 'Name',
                         options: this.unitMasters,
                         maxItems: 1,
-                        placeholder: 'Select Department...',
-                        onChange: (val) => { this.rfqForm.dept = val; },
+                        placeholder: 'Select Unit...',
+                        onChange: (val) => { this.rfqForm.unit = val; },
                         render: {
                             option: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`,
                             item: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`
                         }
                     });
-                    if (this.rfqForm.dept) {
-                        if (!this.tsInstances.dept.options[this.rfqForm.dept] && this.rec.Department_Unit) {
-                            this.tsInstances.dept.addOption({
-                                ID: String(this.rfqForm.dept),
-                                Name: this.rec.Department_Unit.display_value || 'Dept'
+                    if (this.rfqForm.unit) {
+                        if (!this.tsInstances.unit.options[this.rfqForm.unit] && this.rec.Unit) {
+                            this.tsInstances.unit.addOption({
+                                ID: String(this.rfqForm.unit),
+                                Name: this.rec.Unit.display_value || 'Unit'
                             });
                         }
-                        this.tsInstances.dept.setValue(this.rfqForm.dept);
+                        this.tsInstances.unit.setValue(this.rfqForm.unit);
                     }
                 },
 
@@ -1068,7 +1067,7 @@
                     try {
                         const payload = {
                             data: {
-                                Department_Unit: this.rfqForm.dept,
+                                Unit: this.rfqForm.unit,
                                 Request_Date: dayjs(this.rfqForm.reqDate).format('DD-MMM-YYYY'),
                                 Due_Date: dayjs(this.rfqForm.dueDate).format('DD-MMM-YYYY'),
                                 Purpose: this.rfqForm.purpose,

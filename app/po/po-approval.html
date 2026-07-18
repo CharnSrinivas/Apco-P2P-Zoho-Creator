@@ -543,7 +543,7 @@
                         class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px] pointer-events-none"></i>
                     <input x-model="searchInput" @input="onSearchInput()"
                         class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[200px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10"
-                        type="text" placeholder="Search by PO #, Dept…" />
+                        type="text" placeholder="Search by PO #, Unit…" />
                 </div>
                 <button @click="openCreateModal()"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-all shadow-sm">
@@ -610,8 +610,8 @@
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap">
                                 <template x-if="rec._prId">
                                     <a :href="'#Page:PR_Detailed?recordId=' + rec._prId" target="_parent"
-                                       class="font-semibold text-[#1B5CA8] hover:underline font-mono text-[11px]"
-                                       x-text="rec._prRef"></a>
+                                        class="font-semibold text-[#1B5CA8] hover:underline font-mono text-[11px]"
+                                        x-text="rec._prRef"></a>
                                 </template>
                                 <template x-if="!rec._prId">
                                     <span class="font-semibold text-gray-700 font-mono text-[11px]"
@@ -619,7 +619,7 @@
                                 </template>
                             </td>
                             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900"
-                                x-text="rec._departmentName"></td>
+                                x-text="rec._unitName"></td>
                             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[12px]"
                                 x-text="rec._vendorName"></td>
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[11px] text-gray-500"
@@ -633,9 +633,9 @@
                                 </span>
                             </td>
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border"
-                                    :class="getItemsStatusStyle(rec._itemsStatus)"
-                                    x-text="rec._itemsStatus"></span>
+                                <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border"
+                                    :class="getItemsStatusStyle(rec._itemsStatus)" x-text="rec._itemsStatus"></span>
                             </td>
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap font-semibold text-gray-800 text-[12px]"
                                 x-text="rec._totalFormatted"></td>
@@ -718,11 +718,11 @@
                         <div class="grid grid-cols-3 gap-4 mb-5">
                             <div>
                                 <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
-                                    Department / Unit
+                                    Unit
                                     <span x-show="form.prLocked"
                                         class="ml-1 text-[10px] font-normal text-[#1B5CA8] bg-[#1B5CA8]/10 px-1.5 py-0.5 rounded-full">Auto</span>
                                 </label>
-                                <select x-ref="deptSelect" class="w-full text-xs" :disabled="form.prLocked"></select>
+                                <select x-ref="unitSelect" class="w-full text-xs" :disabled="form.prLocked"></select>
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
@@ -1068,7 +1068,7 @@
                 sortableColumns: [
                     { key: 'po_ref', label: 'PO #', align: 'left' },
                     { key: 'pr_ref', label: 'PR Ref', align: 'left' },
-                    { key: 'department', label: 'Department', align: 'left' },
+                    { key: 'unit', label: 'Unit', align: 'left' },
                     { key: 'vendor', label: 'Vendor', align: 'left' },
                     { key: 'po_date', label: 'PO Date', align: 'left' },
                     { key: 'delivery_date', label: 'Delivery Date', align: 'left' },
@@ -1086,7 +1086,7 @@
                 // TomSelect refs
                 tsPr: null,
                 tsQc: null,
-                tsDept: null,
+                tsUnit: null,
                 tsVendor: null,
                 tsPaymentTerms: null,
 
@@ -1098,7 +1098,7 @@
                     prRef: '',
                     prLocked: false,
                     qcRef: '',
-                    department: '',
+                    unit: '',
                     vendor: '',
                     paymentTerms: '',
                     poDate: '',
@@ -1173,7 +1173,7 @@
                     const parts = [];
                     if (this.searchQuery) {
                         const q = this.searchQuery.replace(/'/g, "\\'");
-                        parts.push(`(PO_Ref_Number.contains("${q}") || Department.Name.contains("${q}") || Vendor.Display_Name.contains("${q}"))`);
+                        parts.push(`(PO_Ref_Number.contains("${q}") || Unit.Name.contains("${q}") || Vendor.Display_Name.contains("${q}"))`);
                     }
                     if (this.currentFilter !== 'all') {
                         const statusMap = {
@@ -1221,7 +1221,7 @@
                     rec._prRef = pr ? (pr.PR_Number || pr.display_value || pr.zc_display_value || pr) : '–';
                     if (typeof rec._prRef === 'object') rec._prRef = rec._prRef.display_value || rec._prRef.zc_display_value || '–';
                     rec._prId = pr ? (pr.ID || rec.purchase_requisition_id) : null;
-                    rec._departmentName = rec.Department?.Name || rec['Department.Name'] || rec.Department || '–';
+                    rec._unitName = rec.Unit?.Name || rec['Unit.Name'] || rec.Unit || '–';
                     rec._vendorName = rec.Vendor?.Display_Name || rec.Vendor?.Name || rec.Vendor || '–';
                     rec._poDateFormatted = this.formatDate(rec.PO_Date);
                     rec._deliveryDateFormatted = this.formatDate(rec.delivery_date);
@@ -1278,8 +1278,8 @@
                             return m ? parseInt(m[1], 10) : ref.toLowerCase();
                         case 'pr_ref':
                             return rec._prRef || '';
-                        case 'department':
-                            return rec._departmentName || '';
+                        case 'unit':
+                            return rec._unitName || '';
                         case 'vendor':
                             return rec._vendorName || '';
                         case 'po_date':
@@ -1331,7 +1331,7 @@
                 // ── STATS ──
                 async computeStats() {
                     const q = this.searchQuery.replace(/'/g, "\\'");
-                    const searchCrit = q ? `(PO_Ref_Number.contains("${q}") || Department.Name.contains("${q}") || Vendor.Display_Name.contains("${q}"))` :
+                    const searchCrit = q ? `(PO_Ref_Number.contains("${q}") || Unit.Name.contains("${q}") || Vendor.Display_Name.contains("${q}"))` :
                         '';
                     const build = (sc) => [searchCrit, sc].filter(Boolean).join(' && ');
                     const map = [
@@ -1393,7 +1393,7 @@
                         prRef: '',
                         prLocked: false,
                         qcRef: '',
-                        department: '',
+                        unit: '',
                         vendor: '',
                         paymentTerms: '',
                         poDate: this.todayStr,
@@ -1420,7 +1420,7 @@
                     this.$nextTick(() => {
                         this.initPrSelect();
                         this.initQcSelect();
-                        this.initDeptSelect();
+                        this.initUnitSelect();
                         this.initVendorSelect();
                         this.initPaymentTermsSelect();
                     });
@@ -1436,9 +1436,9 @@
                         this.tsQc.destroy();
                         this.tsQc = null;
                     }
-                    if (this.tsDept) {
-                        this.tsDept.destroy();
-                        this.tsDept = null;
+                    if (this.tsUnit) {
+                        this.tsUnit.destroy();
+                        this.tsUnit = null;
                     }
                     if (this.tsVendor) {
                         this.tsVendor.destroy();
@@ -1524,21 +1524,21 @@
                     });
                 },
 
-                initDeptSelect() {
-                    this.tsDept = new TomSelect(this.$refs.deptSelect, {
+                initUnitSelect() {
+                    this.tsUnit = new TomSelect(this.$refs.unitSelect, {
                         valueField: 'ID',
                         labelField: 'Name',
                         searchField: 'Name',
                         maxItems: 1,
-                        placeholder: 'Select Department…',
+                        placeholder: 'Select Unit…',
                         render: {
                             option: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`,
                             item: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`
                         },
                         onChange: (val) => {
-                            this.form.department = val;
+                            this.form.unit = val;
                             if (val && this.form.deliveryLocked) {
-                                this.fetchDepartmentAddress(val);
+                                this.fetchUnitAddress(val);
                             } else if (!val) {
                                 this.form.deliveryAddress = { line1: '', line2: '', city: '', state: '', postal: '', country: '' };
                             }
@@ -1547,8 +1547,8 @@
                     ZOHO.CREATOR.DATA.getRecords({ report_name: this.UNIT_REPORT_NAME, max_records: 200 })
                         .then(res => {
                             if (res.code === 3000 && res.data) {
-                                this.tsDept.addOption(res.data);
-                                this.tsDept.refreshOptions(false);
+                                this.tsUnit.addOption(res.data);
+                                this.tsUnit.refreshOptions(false);
                             }
                         });
                 },
@@ -1657,28 +1657,28 @@
                             }
                         }
 
-                        // ── Auto-fill Department from PR ──
-                        if (pr.Department && pr.Department.ID) {
-                            const dept = pr.Department;
-                            this.form.department = dept.ID;
-                            // Ensure the option exists in tsDept, then set value
-                            if (this.tsDept) {
-                                if (!this.tsDept.getOption(dept.ID)) {
-                                    this.tsDept.addOption({ ID: dept.ID, Name: dept.Name || dept.ID });
+                        // ── Auto-fill Unit from PR ──
+                        if (pr.Unit && pr.Unit.ID) {
+                            const unit = pr.Unit;
+                            this.form.unit = unit.ID;
+                            // Ensure the option exists in tsUnit, then set value
+                            if (this.tsUnit) {
+                                if (!this.tsUnit.getOption(unit.ID)) {
+                                    this.tsUnit.addOption({ ID: unit.ID, Name: unit.Name || unit.ID });
                                 }
-                                this.tsDept.setValue(dept.ID, true);
-                                this.tsDept.disable();
+                                this.tsUnit.setValue(unit.ID, true);
+                                this.tsUnit.disable();
                             }
-                            // Auto-populate delivery address from PR department address
-                            const deptAddr = dept.Address || {};
+                            // Auto-populate delivery address from PR unit address
+                            const unitAddr = unit.Address || {};
                             if (this.form.deliveryLocked) {
                                 this.form.deliveryAddress = {
-                                    line1: deptAddr.address_line_1 || '',
-                                    line2: deptAddr.address_line_2 || '',
-                                    city: deptAddr.district_city || '',
-                                    state: deptAddr.state_province || '',
-                                    postal: deptAddr.postal_code || '',
-                                    country: deptAddr.country || ''
+                                    line1: unitAddr.address_line_1 || '',
+                                    line2: unitAddr.address_line_2 || '',
+                                    city: unitAddr.district_city || '',
+                                    state: unitAddr.state_province || '',
+                                    postal: unitAddr.postal_code || '',
+                                    country: unitAddr.country || ''
                                 };
                             }
                         }
@@ -1802,23 +1802,23 @@
                                 country: billing.country || ''
                             };
                             this.form.shippingAddress = { ...this.form.billingAddress };
-                            if (this.form.deliveryLocked && this.form.department) {
-                                this.fetchDepartmentAddress(this.form.department);
+                            if (this.form.deliveryLocked && this.form.unit) {
+                                this.fetchUnitAddress(this.form.unit);
                             }
                         }
                     } catch (e) { console.warn('Could not fetch vendor address', e); }
                 },
 
-                // ── Fetch Department Address ──
-                async fetchDepartmentAddress(deptId) {
+                // ── Fetch Unit Address ──
+                async fetchUnitAddress(unitId) {
                     try {
                         const res = await ZOHO.CREATOR.DATA.getRecordById({
                             report_name: this.UNIT_REPORT_NAME,
-                            id: deptId
+                            id: unitId
                         });
                         if (res.code === 3000 && res.data) {
-                            const dept = res.data;
-                            const addr = dept.Address || {};
+                            const unit = res.data;
+                            const addr = unit.Address || {};
                             if (this.form.deliveryLocked) {
                                 this.form.deliveryAddress = {
                                     line1: addr.address_line_1 || '',
@@ -1830,12 +1830,12 @@
                                 };
                             }
                         }
-                    } catch (e) { console.warn('Could not fetch department address', e); }
+                    } catch (e) { console.warn('Could not fetch unit address', e); }
                 },
 
                 resetForm() {
                     this.form.prLocked = false;
-                    this.form.department = '';
+                    this.form.unit = '';
                     this.form.vendor = '';
                     this.form.paymentTerms = '';
                     this.form.poDate = this.todayStr;
@@ -1852,9 +1852,9 @@
                         this.tsQc.clearOptions();
                         this.tsQc.refreshOptions(false);
                     }
-                    if (this.tsDept) {
-                        this.tsDept.enable();
-                        this.tsDept.clear(true);
+                    if (this.tsUnit) {
+                        this.tsUnit.enable();
+                        this.tsUnit.clear(true);
                     }
                     if (this.tsVendor) {
                         this.tsVendor.enable();
@@ -1887,8 +1887,8 @@
                         Toast.fire({ icon: 'error', title: 'Please select a Purchase Requisition.' });
                         return;
                     }
-                    if (!this.form.department) {
-                        Toast.fire({ icon: 'error', title: 'Department is required.' });
+                    if (!this.form.unit) {
+                        Toast.fire({ icon: 'error', title: 'Unit is required.' });
                         return;
                     }
                     if (!this.form.vendor) {
@@ -1944,7 +1944,7 @@
 
                         const payload = {
                             data: {
-                                Department: this.form.department,
+                                Unit: this.form.unit,
                                 Vendor: this.form.vendor,
                                 Payment_Terms: this.form.paymentTerms,
                                 PO_Date: this.formatDateForZoho(this.form.poDate),
