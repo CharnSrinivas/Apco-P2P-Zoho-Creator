@@ -264,7 +264,8 @@
                 <form id="editPrForm" class="p-5">
                     <div class="grid grid-cols-2 gap-4 mb-5">
                         <div>
-                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Unit<span class="text-red-500">*</span></label>
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Unit<span
+                                    class="text-red-500">*</span></label>
                             <select id="prUnitSelect" class="w-full text-xs" required></select>
                         </div>
                         <div>
@@ -854,7 +855,6 @@
                 $prDueDateInput.value = formatDateInput(rec.Due_Date);
                 $prDescriptionInput.value = rec.description || '';
 
-                // Set department select (TomSelect)
                 if (tsUnit) tsUnit.destroy();
                 tsUnit = new TomSelect($prUnitSelect, {
                     valueField: 'ID',
