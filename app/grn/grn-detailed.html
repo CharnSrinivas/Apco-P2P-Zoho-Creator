@@ -323,7 +323,6 @@
                                         <td class="px-4 py-2.5 text-gray-600 text-right tabular-nums"
                                             x-text="item.PO_Quantity || 0"></td>
                                         <td class="px-4 py-2.5 text-gray-900 font-semibold text-right tabular-nums"
-                                            :class="item.Received_Quantity !== item.PO_Quantity ? 'text-orange-600' : 'text-emerald-600'"
                                             x-text="item.Received_Quantity || 0"></td>
                                         <td class="px-4 py-2.5 text-gray-700 text-right tabular-nums"
                                             x-text="formatCurrency(item.Rate)"></td>
@@ -491,7 +490,6 @@
 
                 fetchData() {
                     this.isLoading = true;
-                    // Replace with the exact custom API name you configured for GRN Details
                     ZOHO.CREATOR.DATA.invokeCustomApi({
                         api_name: "Dev__Fetch_GRN_Details",
                         http_method: "GET",
@@ -504,7 +502,6 @@
                         this.rec = response.result[0];
                         this.items = this.rec.Items || [];
 
-                        // Extract PR Actions for timeline rendering if nested inside PR_Reference
                         this.actions = (this.rec.PR_Reference && this.rec.PR_Reference.PR_Actions)
                             ? this.rec.PR_Reference.PR_Actions
                             : [];
@@ -513,7 +510,7 @@
                             if (typeof P2PWorkflowUtils !== 'undefined') {
                                 P2PWorkflowUtils.renderProgress(
                                     this.actions,
-                                    "Purchase Order", // Display stage context
+                                    "Purchase Order",
                                     document.getElementById('globalProgressContainer'),
                                     document.getElementById('globalProgressFill')
                                 );
@@ -633,6 +630,7 @@
                     this.toast = { show: true, message, type };
                     this.toastTimer = setTimeout(() => this.hideToast(), 4000);
                 },
+
                 hideToast() {
                     this.toast.show = false;
                     if (this.toastTimer) { clearTimeout(this.toastTimer); this.toastTimer = null; }
@@ -654,64 +652,9 @@
 
                 get modalBtnText() { return this.modalTitle ? this.modalTitle.split(' ')[0] : 'Submit'; },
 
-                async approveGRN() {
-                    // Temporarily block clicks while validating
-                    this.isSubmitting = true;
-
-                    try {
-                        let poId = (this.rec.PO_Reference && this.rec.PO_Reference.ID) ? this.rec.PO_Reference.ID : null;
-
-                        if (poId) {
-                            // 1. Fetch parent PO to validate against the real-time received quantities
-                            const poRes = await ZOHO.CREATOR.DATA.getRecordById({ report_name: "Purchase_Order_Report", id: poId });
-                            if (poRes.code !== 3000) throw new Error("Could not fetch referenced PO for validation.");
-
-                            let poData = poRes.data;
-                            let mismatchItem = null;
-
-                            // 2. Loop through GRN items and compare against PO items
-                            for (let gItem of this.items) {
-                                let poItem = poData.Items.find(p => p.Item.ID === gItem.Item.ID);
-
-                                if (poItem) {
-                                    let poQty = parseInt(poItem.Quantity || 0);
-                                    let poRecQty = parseInt(poItem.Received_Quantity || 0);
-                                    let grnRecQty = parseInt(gItem.Received_Quantity || 0);
-
-                                    // Calculate what is left to receive on the PO
-                                    let remainingQty = poQty - poRecQty;
-
-                                    // Formula: (po.Quantity - po.Received_Quantity) - grn.Received_Quantity >= 0
-                                    // If less than 0, they are receiving more than allowed
-                                    if ((remainingQty - grnRecQty) < 0) {
-                                        mismatchItem = {
-                                            name: this.getItemName(gItem),
-                                            requested: grnRecQty,
-                                            allowed: remainingQty
-                                        };
-                                        break; // Stop loop on first error
-                                    }
-                                }
-                            }
-
-                            // 3. Reject the action if over-receipt is detected
-                            if (mismatchItem) {
-                                this.showToast(`Over-receipt detected for ${mismatchItem.name}. Attempting to receive ${mismatchItem.requested}, but only ${mismatchItem.allowed} remaining on PO.`, 'error');
-                                return;
-                            }
-                        }
-
-                        // 4. If validation passes, open the modal
-                        this.openModal("Approve GRN", "Approved", "bg-emerald-600", "hover:bg-emerald-700");
-
-                    } catch (err) {
-                        console.error(err);
-                        this.showToast("Validation failed: " + (err.message || "Could not verify PO quantities."), "error");
-                    } finally {
-                        this.isSubmitting = false;
-                    }
+                approveGRN() {
+                    this.openModal("Approve GRN", "Approved", "bg-emerald-600", "hover:bg-emerald-700");
                 },
-
 
                 rejectGRN() {
                     this.openModal("Reject GRN", "Rejected", "bg-red-600", "hover:bg-red-700");
@@ -723,32 +666,59 @@
                         let poId = (this.rec.PO_Reference && this.rec.PO_Reference.ID) ? this.rec.PO_Reference.ID : null;
 
                         if (this.pendingStatus === 'Approved' && poId) {
-                            // Fetch parent PO to calculate new quantities[cite: 1, 2]
-                            const poRes = await ZOHO.CREATOR.DATA.getRecordById({ report_name: "Purchase_Order_Report", id: poId });
-                            if (poRes.code !== 3000) throw new Error("Could not fetch referenced PO");
-                            let poData = poRes.data;
+                            // Fetch complete parent PO details using Custom API
+                            const poRes = await ZOHO.CREATOR.DATA.invokeCustomApi({
+                                api_name: "Dev__Fetch_PO_Details",
+                                http_method: "GET",
+                                content_type: "application/json",
+                                query_params: 'recId=' + poId,
+                            });
 
-                            // Calculate PO items update payload
+                            if (!poRes || !poRes.result || poRes.result.length === 0) {
+                                throw new Error("Could not fetch complete referenced PO details");
+                            }
+                            let poData = poRes.result[0];
+
+                            let validationErrorMsg = null;
                             let allComplete = true;
-                            let poItemsPayload = poData.Items.map(poItem => {
+
+                            // Calculate PO items update payload & Validate Logic
+                            let poItemsPayload = (poData.Items || []).map(poItem => {
                                 let grnMatchedItem = this.items.find(gItem => gItem.Item.ID === poItem.Item.ID);
                                 let addedQty = grnMatchedItem ? parseInt(grnMatchedItem.Received_Quantity || 0) : 0;
-                                let currentReceived = parseInt(poItem.Received_Quantity || 0);
-                                let totalReceived = currentReceived + addedQty;
 
-                                if (totalReceived < parseInt(poItem.Quantity || 0)) {
-                                    allComplete = false;
+                                let poQty = parseInt(poItem.Quantity || 0);
+                                let poAccumulatedReceived = parseInt(poItem.Received_Quantity || 0);
+
+                                // Formula: ( (po.Item.Quantity - po.Item.Received_Quantity) - grn.Item.Received_Quantity ) >= 0
+                                let remainingQtyAfterGrn = (poQty - poAccumulatedReceived) - addedQty;
+
+                                // If remaining is less than 0, they are trying to over-receive
+                                if (remainingQtyAfterGrn < 0) {
+                                    let itemName = grnMatchedItem ? this.getItemName(grnMatchedItem) : 'Item';
+                                    validationErrorMsg = `Quantity mismatch for ${itemName}. Attempting to receive ${addedQty}, but only ${poQty - poAccumulatedReceived} remaining on PO.`;
                                 }
 
+                                let totalReceived = poAccumulatedReceived + addedQty;
+                                if (totalReceived < poQty) {
+                                    allComplete = false;
+                                }
+                                let updatedPoItem = { ...poItem };
+                                updatedPoItem.Item = poItem.Item.ID;
                                 return {
-                                    ID: poItem.ID,
+                                    ...updatedPoItem,
                                     Received_Quantity: totalReceived
                                 };
                             });
 
+                            if (validationErrorMsg) {
+                                this.showToast(validationErrorMsg, 'error');
+                                this.isSubmitting = false;
+                                return;
+                            }
+
                             let newPoStatus = allComplete ? "Completely Received" : "Partially Received";
 
-                            // 1. Update PO Records (Items & Item Status)
                             await ZOHO.CREATOR.DATA.updateRecordById({
                                 report_name: "Purchase_Order_Report",
                                 id: poId,
@@ -765,7 +735,7 @@
 
                         if (grnUpdateRes.code !== 3000) throw new Error(grnUpdateRes.message || 'Failed to update GRN status');
 
-                        // 3. Log Audit Trail Action[cite: 1, 2]
+                        // 3. Log Audit Trail Action
                         if (this.rec.PR_Reference && this.rec.PR_Reference.ID) {
                             await ZOHO.CREATOR.DATA.addRecords({
                                 form_name: "PR_Action",

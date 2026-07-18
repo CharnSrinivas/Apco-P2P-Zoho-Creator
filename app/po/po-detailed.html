@@ -830,6 +830,10 @@
                     const pr = this.rec.PR || (Array.isArray(this.rec.Purchase_Requisition) ? this.rec.Purchase_Requisition[0] : this.rec.Purchase_Requisition);
                     return pr ? (pr.PR_Number || pr.display_value || this.rec.purchase_requisition_id) : '–';
                 },
+                get prRefId() {
+                    const pr = this.rec.PR || (Array.isArray(this.rec.Purchase_Requisition) ? this.rec.Purchase_Requisition[0] : this.rec.Purchase_Requisition);
+                    return pr ? (pr.ID || this.rec.purchase_requisition_id) : null;
+                },
 
                 get isDraft() { return (this.rec.Status || '').toLowerCase() === 'draft'; },
                 get isSubmitted() { return (this.rec.Status || '').toLowerCase() === 'submitted'; },
@@ -848,9 +852,15 @@
                         }
                     }
 
+                    const prText = this.prRefDisplay;
+                    const prId = this.prRefId;
+                    const prHtml = (prId && prText !== '–') 
+                        ? `<a href="#Page:PR_Detailed?recordId=${prId}" target="_parent" class="text-[#1B5CA8] hover:underline font-mono">${prText}</a>` 
+                        : `<span class="text-gray-900 font-semibold">${prText}</span>`;
+
                     return [
                         { label: 'PO Reference', value: this.poRefNumber },
-                        { label: 'PR Reference', value: this.prRefDisplay },
+                        { label: 'PR Reference', value: prHtml, isHtml: true },
                         { label: 'Department', value: deptName },
                         { label: 'PO Date', value: this.formatDate(this.rec.PO_Date) },
                         { label: 'Delivery Date', value: this.formatDate(this.rec.delivery_date) },

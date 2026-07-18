@@ -557,6 +557,7 @@
             <table class="w-full border-collapse" style="min-width:900px">
                 <colgroup>
                     <col style="width:100px">
+                    <col style="width:110px">
                     <col style="width:130px">
                     <col style="width:130px">
                     <col style="width:100px">
@@ -585,7 +586,7 @@
                 </thead>
                 <tbody>
                     <tr x-show="isLoading">
-                        <td colspan="9" class="px-3 py-12 text-center">
+                        <td colspan="10" class="px-3 py-12 text-center">
                             <div class="flex flex-col items-center gap-3">
                                 <div class="po-spinner"></div>
                                 <div class="text-sm text-gray-400 font-medium">Loading POs…</div>
@@ -593,7 +594,7 @@
                         </td>
                     </tr>
                     <tr x-show="!isLoading && pagedRecords.length === 0">
-                        <td colspan="9" class="px-3 py-12 text-center">
+                        <td colspan="10" class="px-3 py-12 text-center">
                             <div class="text-gray-400">
                                 <i class="bi bi-clipboard-x text-3xl mb-2 block"></i>
                                 <div class="text-sm font-medium text-gray-500">No records found</div>
@@ -605,6 +606,17 @@
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap">
                                 <span class="font-semibold text-[#1B5CA8] font-mono text-[11px]"
                                     x-text="rec._poRef"></span>
+                            </td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap">
+                                <template x-if="rec._prId">
+                                    <a :href="'#Page:PR_Detailed?recordId=' + rec._prId" target="_parent"
+                                       class="font-semibold text-[#1B5CA8] hover:underline font-mono text-[11px]"
+                                       x-text="rec._prRef"></a>
+                                </template>
+                                <template x-if="!rec._prId">
+                                    <span class="font-semibold text-gray-700 font-mono text-[11px]"
+                                        x-text="rec._prRef"></span>
+                                </template>
                             </td>
                             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900"
                                 x-text="rec._departmentName"></td>
@@ -620,8 +632,11 @@
                                     <span x-text="rec._statusLabel"></span>
                                 </span>
                             </td>
-                            <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[11px] text-gray-700"
-                                x-text="rec._itemsStatus"></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border"
+                                    :class="getItemsStatusStyle(rec._itemsStatus)"
+                                    x-text="rec._itemsStatus"></span>
+                            </td>
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap font-semibold text-gray-800 text-[12px]"
                                 x-text="rec._totalFormatted"></td>
                             <td
@@ -1052,6 +1067,7 @@
 
                 sortableColumns: [
                     { key: 'po_ref', label: 'PO #', align: 'left' },
+                    { key: 'pr_ref', label: 'PR Ref', align: 'left' },
                     { key: 'department', label: 'Department', align: 'left' },
                     { key: 'vendor', label: 'Vendor', align: 'left' },
                     { key: 'po_date', label: 'PO Date', align: 'left' },
@@ -1201,6 +1217,10 @@
 
                 decorateRecord(rec) {
                     rec._poRef = rec.PO_Ref_Number || rec.PO_Number || '–';
+                    const pr = rec.PR || (Array.isArray(rec.Purchase_Requisition) ? rec.Purchase_Requisition[0] : rec.Purchase_Requisition);
+                    rec._prRef = pr ? (pr.PR_Number || pr.display_value || pr.zc_display_value || pr) : '–';
+                    if (typeof rec._prRef === 'object') rec._prRef = rec._prRef.display_value || rec._prRef.zc_display_value || '–';
+                    rec._prId = pr ? (pr.ID || rec.purchase_requisition_id) : null;
                     rec._departmentName = rec.Department?.Name || rec['Department.Name'] || rec.Department || '–';
                     rec._vendorName = rec.Vendor?.Display_Name || rec.Vendor?.Name || rec.Vendor || '–';
                     rec._poDateFormatted = this.formatDate(rec.PO_Date);
@@ -1222,6 +1242,14 @@
                         'Cancelled': 'po-badge-cancelled'
                     };
                     return map[status] || 'po-badge-draft';
+                },
+
+                getItemsStatusStyle(status) {
+                    const st = (status || '').toLowerCase();
+                    if (st.includes('completely') || st === 'received') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                    if (st.includes('partially') || st === 'partial') return 'bg-blue-50 text-blue-700 border-blue-200';
+                    if (st === 'pending') return 'bg-amber-50 text-amber-700 border-amber-200';
+                    return 'bg-gray-50 text-gray-600 border-gray-200';
                 },
 
                 applySortAndRender() {
@@ -1248,6 +1276,8 @@
                             const ref = rec.PO_Ref_Number || rec.PO_Number || '';
                             const m = ref.match(/(\d+)$/);
                             return m ? parseInt(m[1], 10) : ref.toLowerCase();
+                        case 'pr_ref':
+                            return rec._prRef || '';
                         case 'department':
                             return rec._departmentName || '';
                         case 'vendor':
