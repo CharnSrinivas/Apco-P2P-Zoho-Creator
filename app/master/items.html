@@ -816,7 +816,6 @@
           this.isSubmitting = true;
           const cleanRates = this.form.Rates.map(r => {
             const cleanRate = { Vendor: r.Vendor, Unit_Price: r.Unit_Price, Selected: r.Selected };
-            if (r.ID) cleanRate.ID = r.ID;
             return cleanRate;
           });
           const cleanForm = {

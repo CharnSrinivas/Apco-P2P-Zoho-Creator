@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PO Listing & Creation</title>
 
-    <script src="https://cdn.tailwindcss.com">
-    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css" />
@@ -18,21 +17,15 @@
         rel="stylesheet" />
 
     <script
-        src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js">
-        </script>
-    <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js">
-    </script>
+        src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js"></script>
+    <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js">
-    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
     <style>
         [x-cloak] {
@@ -520,12 +513,10 @@
             </div>
         </div>
 
-        <!-- ===== HEADER ===== -->
+        <!-- ===== HEADER & TOOLBAR ===== -->
         <div class="flex items-center justify-between mt-[18px] mb-2">
             <span class="text-[13.5px] font-medium text-gray-900">Purchase Orders</span>
         </div>
-
-        <!-- ===== TOOLBAR ===== -->
         <div class="flex items-center justify-between gap-2.5 mb-2 flex-wrap">
             <div class="flex bg-gray-100 rounded-full p-[3px] gap-[2px]">
                 <template x-for="tab in filterTabs" :key="tab.key">
@@ -536,7 +527,6 @@
                     </button>
                 </template>
             </div>
-
             <div class="flex gap-2 items-center">
                 <div class="relative">
                     <i
@@ -580,8 +570,7 @@
                         </template>
                         <th
                             class="px-3 py-2 text-[11px] font-semibold text-gray-500 tracking-wide text-left whitespace-nowrap bg-gray-50 sticky-action-cell">
-                            Actions
-                        </th>
+                            Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -628,8 +617,7 @@
                                 x-text="rec._deliveryDateFormatted"></td>
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap">
                                 <span class="po-badge-status" :class="rec._statusClass">
-                                    <span class="dot"></span>
-                                    <span x-text="rec._statusLabel"></span>
+                                    <span class="dot"></span><span x-text="rec._statusLabel"></span>
                                 </span>
                             </td>
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap">
@@ -682,7 +670,6 @@
         <div class="po-modal-overlay" :class="{ active: showModal }" x-show="showModal" x-cloak>
             <div class="po-modal-bg" @click="closeModal()"></div>
             <div class="po-modal-box max-w-6xl" style="max-height:94vh;">
-                <!-- Header -->
                 <div
                     class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50 sticky top-0 z-20">
                     <h3 class="text-[15px] font-bold text-gray-800">Create Purchase Order</h3>
@@ -691,11 +678,9 @@
                     </button>
                 </div>
 
-                <!-- Body -->
                 <div class="modal-scroll">
                     <form @submit.prevent="submitPO()">
 
-                        <!-- PR Selection (driver) -->
                         <div class="mb-4">
                             <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
                                 Purchase Requisition <span class="text-red-500">*</span>
@@ -704,7 +689,6 @@
                             <select x-ref="prSelect" class="w-full text-xs" placeholder="Search PR Number…"></select>
                         </div>
 
-                        <!-- QC Selection (new) -->
                         <div class="mb-4" x-show="availableQCs.length > 0">
                             <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
                                 Quote Comparison <span class="text-red-500">*</span>
@@ -714,12 +698,10 @@
                             <select x-ref="qcSelect" class="w-full text-xs" placeholder="Select QC…"></select>
                         </div>
 
-                        <!-- PO Details -->
                         <div class="grid grid-cols-3 gap-4 mb-5">
                             <div>
                                 <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
-                                    Unit
-                                    <span x-show="form.prLocked"
+                                    Unit <span x-show="form.prLocked"
                                         class="ml-1 text-[10px] font-normal text-[#1B5CA8] bg-[#1B5CA8]/10 px-1.5 py-0.5 rounded-full">Auto</span>
                                 </label>
                                 <select x-ref="unitSelect" class="w-full text-xs" :disabled="form.prLocked"></select>
@@ -727,10 +709,11 @@
                             <div>
                                 <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
                                     Vendor
-                                    <span x-show="form.prLocked"
-                                        class="ml-1 text-[10px] font-normal text-[#1B5CA8] bg-[#1B5CA8]/10 px-1.5 py-0.5 rounded-full">Auto</span>
+                                    <span x-show="form.vendorLocked"
+                                        class="ml-1 text-[10px] font-normal text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded-full">From
+                                        QC</span>
                                 </label>
-                                <select x-ref="vendorSelect" class="w-full text-xs" :disabled="form.prLocked"></select>
+                                <select x-ref="vendorSelect" class="w-full text-xs"></select>
                             </div>
                             <div>
                                 <label
@@ -759,73 +742,47 @@
                             </div>
                         </div>
 
-                        <!-- Addresses: Billing + Shipping side-by-side, Delivery full-width below -->
-                        <!-- Row 1: Billing & Shipping -->
+                        <!-- Addresses Section -->
                         <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Billing Address -->
                             <div class="address-group">
                                 <span class="address-label"><i class="bi bi-building mr-1"></i> Billing Address</span>
                                 <div class="addr-row">
-                                    <div class="addr-field-wrap">
-                                        <span class="addr-label-sm">Address Line 1</span>
-                                        <input x-model="form.billingAddress.line1" placeholder="Street, building" />
-                                    </div>
-                                    <div class="addr-field-wrap">
-                                        <span class="addr-label-sm">Address Line 2</span>
-                                        <input x-model="form.billingAddress.line2" placeholder="Area, landmark" />
-                                    </div>
-                                    <div class="addr-field-wrap">
-                                        <span class="addr-label-sm">City</span>
-                                        <input x-model="form.billingAddress.city" placeholder="City / District" />
-                                    </div>
-                                    <div class="addr-field-wrap">
-                                        <span class="addr-label-sm">State</span>
-                                        <input x-model="form.billingAddress.state" placeholder="State" />
-                                    </div>
-                                    <div class="addr-field-wrap">
-                                        <span class="addr-label-sm">Postal Code</span>
-                                        <input x-model="form.billingAddress.postal" placeholder="PIN" />
-                                    </div>
-                                    <div class="addr-field-wrap">
-                                        <span class="addr-label-sm">Country</span>
-                                        <input x-model="form.billingAddress.country" placeholder="Country" />
-                                    </div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">Address Line 1</span><input
+                                            x-model="form.billingAddress.line1" placeholder="Street, building" /></div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">Address Line 2</span><input
+                                            x-model="form.billingAddress.line2" placeholder="Area, landmark" /></div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">City</span><input
+                                            x-model="form.billingAddress.city" placeholder="City / District" /></div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">State</span><input
+                                            x-model="form.billingAddress.state" placeholder="State" /></div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">Postal Code</span><input
+                                            x-model="form.billingAddress.postal" placeholder="PIN" /></div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">Country</span><input
+                                            x-model="form.billingAddress.country" placeholder="Country" /></div>
                                 </div>
                             </div>
-
                             <!-- Shipping Address -->
                             <div class="address-group">
                                 <span class="address-label"><i class="bi bi-truck mr-1"></i> Shipping Address</span>
                                 <div class="addr-row">
-                                    <div class="addr-field-wrap">
-                                        <span class="addr-label-sm">Address Line 1</span>
-                                        <input x-model="form.shippingAddress.line1" placeholder="Street, building" />
-                                    </div>
-                                    <div class="addr-field-wrap">
-                                        <span class="addr-label-sm">Address Line 2</span>
-                                        <input x-model="form.shippingAddress.line2" placeholder="Area, landmark" />
-                                    </div>
-                                    <div class="addr-field-wrap">
-                                        <span class="addr-label-sm">City</span>
-                                        <input x-model="form.shippingAddress.city" placeholder="City / District" />
-                                    </div>
-                                    <div class="addr-field-wrap">
-                                        <span class="addr-label-sm">State</span>
-                                        <input x-model="form.shippingAddress.state" placeholder="State" />
-                                    </div>
-                                    <div class="addr-field-wrap">
-                                        <span class="addr-label-sm">Postal Code</span>
-                                        <input x-model="form.shippingAddress.postal" placeholder="PIN" />
-                                    </div>
-                                    <div class="addr-field-wrap">
-                                        <span class="addr-label-sm">Country</span>
-                                        <input x-model="form.shippingAddress.country" placeholder="Country" />
-                                    </div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">Address Line 1</span><input
+                                            x-model="form.shippingAddress.line1" placeholder="Street, building" /></div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">Address Line 2</span><input
+                                            x-model="form.shippingAddress.line2" placeholder="Area, landmark" /></div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">City</span><input
+                                            x-model="form.shippingAddress.city" placeholder="City / District" /></div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">State</span><input
+                                            x-model="form.shippingAddress.state" placeholder="State" /></div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">Postal Code</span><input
+                                            x-model="form.shippingAddress.postal" placeholder="PIN" /></div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">Country</span><input
+                                            x-model="form.shippingAddress.country" placeholder="Country" /></div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Row 2: Delivery Address (full width) -->
+                        <!-- Delivery Address -->
                         <div class="mb-5">
                             <div class="address-group"
                                 :class="{ 'border-blue-200 bg-blue-50/30': form.deliveryLocked }">
@@ -835,41 +792,28 @@
                                         Per Unit</span>
                                 </span>
                                 <div class="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2 mt-2">
-                                    <div class="addr-field-wrap">
-                                        <span class="addr-label-sm">Address Line 1</span>
-                                        <input x-model="form.deliveryAddress.line1" placeholder="Street, building"
-                                            :disabled="form.deliveryLocked" />
-                                    </div>
-                                    <div class="addr-field-wrap">
-                                        <span class="addr-label-sm">Address Line 2</span>
-                                        <input x-model="form.deliveryAddress.line2" placeholder="Area, landmark"
-                                            :disabled="form.deliveryLocked" />
-                                    </div>
-                                    <div class="addr-field-wrap">
-                                        <span class="addr-label-sm">City</span>
-                                        <input x-model="form.deliveryAddress.city" placeholder="City / District"
-                                            :disabled="form.deliveryLocked" />
-                                    </div>
-                                    <div class="addr-field-wrap">
-                                        <span class="addr-label-sm">State</span>
-                                        <input x-model="form.deliveryAddress.state" placeholder="State"
-                                            :disabled="form.deliveryLocked" />
-                                    </div>
-                                    <div class="addr-field-wrap">
-                                        <span class="addr-label-sm">Postal Code</span>
-                                        <input x-model="form.deliveryAddress.postal" placeholder="PIN"
-                                            :disabled="form.deliveryLocked" />
-                                    </div>
-                                    <div class="addr-field-wrap">
-                                        <span class="addr-label-sm">Country</span>
-                                        <input x-model="form.deliveryAddress.country" placeholder="Country"
-                                            :disabled="form.deliveryLocked" />
-                                    </div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">Address Line 1</span><input
+                                            x-model="form.deliveryAddress.line1" placeholder="Street, building"
+                                            :disabled="form.deliveryLocked" /></div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">Address Line 2</span><input
+                                            x-model="form.deliveryAddress.line2" placeholder="Area, landmark"
+                                            :disabled="form.deliveryLocked" /></div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">City</span><input
+                                            x-model="form.deliveryAddress.city" placeholder="City / District"
+                                            :disabled="form.deliveryLocked" /></div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">State</span><input
+                                            x-model="form.deliveryAddress.state" placeholder="State"
+                                            :disabled="form.deliveryLocked" /></div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">Postal Code</span><input
+                                            x-model="form.deliveryAddress.postal" placeholder="PIN"
+                                            :disabled="form.deliveryLocked" /></div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">Country</span><input
+                                            x-model="form.deliveryAddress.country" placeholder="Country"
+                                            :disabled="form.deliveryLocked" /></div>
                                 </div>
                                 <div class="mt-2 text-right">
-                                    <button type="button" @click="form.deliveryLocked = !form.deliveryLocked" :class="form.deliveryLocked
-                                            ? 'bg-[#1B5CA8]/10 text-[#1B5CA8] hover:bg-[#1B5CA8]/20 border border-[#1B5CA8]/30'
-                                            : 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300'"
+                                    <button type="button" @click="form.deliveryLocked = !form.deliveryLocked"
+                                        :class="form.deliveryLocked ? 'bg-[#1B5CA8]/10 text-[#1B5CA8] hover:bg-[#1B5CA8]/20 border border-[#1B5CA8]/30' : 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300'"
                                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-colors focus:outline-none">
                                         <i :class="form.deliveryLocked ? 'bi bi-pencil-square' : 'bi bi-lock-fill'"
                                             class="text-[12px]"></i>
@@ -924,23 +868,18 @@
                                                         x-text="item._itemName || '–'"></div>
                                                     <input type="hidden" x-model="item.Item" />
                                                 </td>
-                                                <td class="px-3 py-2">
-                                                    <input type="number" step="any" min="0" x-model.number="item.Rate"
-                                                        @input="calcTotals()" class="grid-input" />
-                                                </td>
-                                                <td class="px-3 py-2">
-                                                    <input type="number" step="any" min="0"
+                                                <td class="px-3 py-2"><input type="number" step="any" min="0"
+                                                        x-model.number="item.Rate" @input="calcTotals()"
+                                                        class="grid-input" /></td>
+                                                <td class="px-3 py-2"><input type="number" step="any" min="0"
                                                         x-model.number="item.Quantity" @input="calcTotals()"
-                                                        class="grid-input" />
-                                                </td>
-                                                <td class="px-3 py-2">
-                                                    <input type="text" :value="formatINR(item.Amount)" disabled
+                                                        class="grid-input" /></td>
+                                                <td class="px-3 py-2"><input type="text" :value="formatINR(item.Amount)"
+                                                        disabled
                                                         class="grid-input bg-gray-100 text-[#1B5CA8] font-semibold cursor-not-allowed" />
                                                 </td>
-                                                <td class="px-3 py-2">
-                                                    <input type="text" x-model="item.Comment" placeholder="Optional"
-                                                        class="grid-input" />
-                                                </td>
+                                                <td class="px-3 py-2"><input type="text" x-model="item.Comment"
+                                                        placeholder="Optional" class="grid-input" /></td>
                                             </tr>
                                         </template>
                                     </tbody>
@@ -973,16 +912,13 @@
 
                         <!-- Notes & Terms -->
                         <div class="grid grid-cols-2 gap-4 mb-5">
-                            <div>
-                                <label
-                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Notes</label>
-                                <textarea x-model="form.notes" rows="2"
+                            <div><label
+                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Notes</label><textarea
+                                    x-model="form.notes" rows="2"
                                     class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></textarea>
                             </div>
-                            <div>
-                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Terms
-                                    &amp; Conditions</label>
-                                <textarea x-model="form.terms" rows="2"
+                            <div><label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Terms
+                                    &amp; Conditions</label><textarea x-model="form.terms" rows="2"
                                     class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></textarea>
                             </div>
                         </div>
@@ -1011,28 +947,20 @@
                                 <span x-show="!(submitting && submitAction === 'Submitted')">Submit for Approval</span>
                             </button>
                         </div>
-
                     </form>
                 </div>
             </div>
         </div>
-
     </div>
 
     <script>
         document.addEventListener('alpine:init', () => {
 
             const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3500,
-                timerProgressBar: true,
-                customClass: { popup: 'font-[Lato] text-sm' }
+                toast: true, position: 'top-end', showConfirmButton: false, timer: 3500, timerProgressBar: true, customClass: { popup: 'font-[Lato] text-sm' }
             });
 
             Alpine.data('poApp', () => ({
-                // ── Report / Form names ──
                 REPORT_NAME: 'Purchase_Order_Report',
                 FORM_NAME: 'Purchase_Order',
                 PR_REPORT_NAME: 'Purchase_Requisition_Report',
@@ -1041,109 +969,46 @@
                 VENDOR_REPORT_NAME: 'Vendor_Report',
                 ITEMS_REPORT_NAME: 'Items_Report',
 
-                // ── State ──
-                allRecords: [],
-                filteredRecords: [],
-                isLoading: true,
-                currentFilter: 'all',
-                currentPage: 1,
-                perPage: 10,
-                searchQuery: '',
-                searchInput: '',
-                searchTimer: null,
-                sortColumn: 'po_date',
-                sortDirection: 'desc',
-
+                allRecords: [], filteredRecords: [], isLoading: true, currentFilter: 'all', currentPage: 1, perPage: 10,
+                searchQuery: '', searchInput: '', searchTimer: null, sortColumn: 'po_date', sortDirection: 'desc',
                 stats: { all: '–', draft: '–', submitted: '–', approved: '–', rejected: '–', cancelled: '–' },
-
                 filterTabs: [
-                    { key: 'all', label: 'All' },
-                    { key: 'draft', label: 'Draft' },
-                    { key: 'submitted', label: 'Submitted' },
-                    { key: 'approved', label: 'Approved' },
-                    { key: 'rejected', label: 'Rejected' },
-                    { key: 'cancelled', label: 'Cancelled' }
+                    { key: 'all', label: 'All' }, { key: 'draft', label: 'Draft' }, { key: 'submitted', label: 'Submitted' },
+                    { key: 'approved', label: 'Approved' }, { key: 'rejected', label: 'Rejected' }, { key: 'cancelled', label: 'Cancelled' }
                 ],
-
                 sortableColumns: [
-                    { key: 'po_ref', label: 'PO #', align: 'left' },
-                    { key: 'pr_ref', label: 'PR Ref', align: 'left' },
-                    { key: 'unit', label: 'Unit', align: 'left' },
-                    { key: 'vendor', label: 'Vendor', align: 'left' },
-                    { key: 'po_date', label: 'PO Date', align: 'left' },
-                    { key: 'delivery_date', label: 'Delivery Date', align: 'left' },
-                    { key: 'status', label: 'Status', align: 'left' },
-                    { key: 'items_status', label: 'Items Status', align: 'left' },
+                    { key: 'po_ref', label: 'PO #', align: 'left' }, { key: 'pr_ref', label: 'PR Ref', align: 'left' },
+                    { key: 'unit', label: 'Unit', align: 'left' }, { key: 'vendor', label: 'Vendor', align: 'left' },
+                    { key: 'po_date', label: 'PO Date', align: 'left' }, { key: 'delivery_date', label: 'Delivery Date', align: 'left' },
+                    { key: 'status', label: 'Status', align: 'left' }, { key: 'items_status', label: 'Items Status', align: 'left' },
                     { key: 'total', label: 'Total Amount', align: 'left' }
                 ],
 
-                // ── Modal ──
-                showModal: false,
-                submitting: false,
-                submitAction: 'Submitted',
-                todayStr: new Date().toISOString().split('T')[0],
+                showModal: false, submitting: false, submitAction: 'Submitted', todayStr: new Date().toISOString().split('T')[0],
+                tsPr: null, tsQc: null, tsUnit: null, tsVendor: null, tsPaymentTerms: null,
+                availableQCs: [], _pendingQcId: null,
 
-                // TomSelect refs
-                tsPr: null,
-                tsQc: null,
-                tsUnit: null,
-                tsVendor: null,
-                tsPaymentTerms: null,
-
-                // QC list for dropdown
-                availableQCs: [],
-
-                // ── Form ──
                 form: {
-                    prRef: '',
-                    prLocked: false,
-                    qcRef: '',
-                    unit: '',
-                    vendor: '',
-                    paymentTerms: '',
-                    poDate: '',
-                    deliveryDate: '',
-                    notes: '',
-                    terms: '',
-                    items: [],
-                    subTotal: 0,
-                    discount: 0,
-                    totalAmount: 0,
+                    prRef: '', prLocked: false, vendorLocked: false, qcRef: '', unit: '', vendor: '', paymentTerms: '',
+                    poDate: '', deliveryDate: '', notes: '', terms: '', items: [],
+                    subTotal: 0, discount: 0, totalAmount: 0,
                     billingAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' },
                     shippingAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' },
                     deliveryAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' },
-                    deliveryLocked: true,
-                    _prId: '',
-                    _qcId: '',
+                    deliveryLocked: true, _prId: '', _qcId: '',
                 },
 
-                // ── Computed ──
-                get totalPages() {
-                    return Math.max(1, Math.ceil(this.filteredRecords.length / this.perPage));
-                },
-
-                get pagedRecords() {
-                    const start = (this.currentPage - 1) * this.perPage;
-                    return this.filteredRecords.slice(start, start + this.perPage);
-                },
-
+                get totalPages() { return Math.max(1, Math.ceil(this.filteredRecords.length / this.perPage)); },
+                get pagedRecords() { const start = (this.currentPage - 1) * this.perPage; return this.filteredRecords.slice(start, start + this.perPage); },
                 get paginationInfoText() {
-                    const total = this.filteredRecords.length;
-                    if (total === 0) return 'Showing 0 records';
-                    const start = (this.currentPage - 1) * this.perPage + 1;
-                    const end = Math.min(this.currentPage * this.perPage, total);
+                    const total = this.filteredRecords.length; if (total === 0) return 'Showing 0 records';
+                    const start = (this.currentPage - 1) * this.perPage + 1; const end = Math.min(this.currentPage * this.perPage, total);
                     return `Showing ${start}–${end} of ${total} records`;
                 },
-
                 get pageButtons() {
-                    const total = this.totalPages,
-                        cur = this.currentPage;
-                    let pages = [];
-                    for (let p = 1; p <= total; p++) {
-                        if (p <= 2 || p === total || (p >= cur - 1 && p <= cur + 1)) pages.push(p);
-                    }
-                    pages = [...new Set(pages)].sort((a, b) => a - b);
-                    const btns = [];
+                    const total = this.totalPages, cur = this.currentPage; let pages = [];
+                    for (let p = 1; p <= total; p++) { if (p <= 2 || p === total || (p >= cur - 1 && p <= cur + 1)) pages.push(p); }
+                    pages = [...new Set(pages)].sort((a, b) => a - b); const btns = [];
                     for (let i = 0; i < pages.length; i++) {
                         if (i > 0 && pages[i] - pages[i - 1] > 1) btns.push({ type: 'ellipsis', key: 'e' + pages[i] });
                         btns.push({ type: 'page', key: 'p' + pages[i], value: pages[i] });
@@ -1155,15 +1020,18 @@
                 init() {
                     this.fetchRecords();
                     this.$watch('searchInput', Alpine.debounce(() => {
-                        this.searchQuery = this.searchInput.trim();
-                        this.currentPage = 1;
-                        this.fetchRecords();
+                        this.searchQuery = this.searchInput.trim(); this.currentPage = 1; this.fetchRecords();
                     }, 400));
 
+                    // URL Params capture for auto-loading
                     ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
-                        const shouldCreate = String(params.createPo || '').toLowerCase() === 'true';
+                        console.log({params})
+                        const prId = params.prId || '';
+                        const qcId = params.qcId || '';
+                        const shouldCreate = String(params.createPo || '').toLowerCase() === 'true' || prId !== '';
+
                         if (shouldCreate) {
-                            setTimeout(() => this.openCreateModal(), 300);
+                            setTimeout(() => this.openCreateModal(prId, qcId), 300);
                         }
                     }).catch(() => { });
                 },
@@ -1176,13 +1044,7 @@
                         parts.push(`(PO_Ref_Number.contains("${q}") || Unit.Name.contains("${q}") || Vendor.Display_Name.contains("${q}"))`);
                     }
                     if (this.currentFilter !== 'all') {
-                        const statusMap = {
-                            draft: 'Status == "Draft"',
-                            submitted: 'Status == "Submitted"',
-                            approved: 'Status == "Approved"',
-                            rejected: 'Status == "Rejected"',
-                            cancelled: 'Status == "Cancelled"'
-                        };
+                        const statusMap = { draft: 'Status == "Draft"', submitted: 'Status == "Submitted"', approved: 'Status == "Approved"', rejected: 'Status == "Rejected"', cancelled: 'Status == "Cancelled"' };
                         if (statusMap[this.currentFilter]) parts.push(statusMap[this.currentFilter]);
                     }
                     return parts.join(' && ');
@@ -1191,28 +1053,16 @@
                 async fetchRecords() {
                     this.isLoading = true;
                     try {
-                        let acc = [],
-                            cursor = null;
-                        const crit = this.buildCriteria();
+                        let acc = [], cursor = null; const crit = this.buildCriteria();
                         do {
                             const config = { report_name: this.REPORT_NAME, max_records: 200, field_config: 'all' };
-                            if (crit) config.criteria = crit;
-                            if (cursor) config.record_cursor = cursor;
+                            if (crit) config.criteria = crit; if (cursor) config.record_cursor = cursor;
                             const res = await ZOHO.CREATOR.DATA.getRecords(config);
-                            if (res.code === 3000 && res.data) {
-                                acc = acc.concat(res.data);
-                                cursor = res.data.length >= 200 ? res.record_cursor : null;
-                            } else { cursor = null; }
+                            if (res.code === 3000 && res.data) { acc = acc.concat(res.data); cursor = res.data.length >= 200 ? res.record_cursor : null; } else { cursor = null; }
                         } while (cursor);
                         this.allRecords = acc.map(r => this.decorateRecord(r));
-                        this.applySortAndRender();
-                        this.computeStats();
-                    } catch (e) {
-                        this.allRecords = [];
-                        this.filteredRecords = [];
-                    } finally {
-                        this.isLoading = false;
-                    }
+                        this.applySortAndRender(); this.computeStats();
+                    } catch (e) { this.allRecords = []; this.filteredRecords = []; } finally { this.isLoading = false; }
                 },
 
                 decorateRecord(rec) {
@@ -1223,27 +1073,16 @@
                     rec._prId = pr ? (pr.ID || rec.purchase_requisition_id) : null;
                     rec._unitName = rec.Unit?.Name || rec['Unit.Name'] || rec.Unit || '–';
                     rec._vendorName = rec.Vendor?.Display_Name || rec.Vendor?.Name || rec.Vendor || '–';
-                    rec._poDateFormatted = this.formatDate(rec.PO_Date);
-                    rec._deliveryDateFormatted = this.formatDate(rec.delivery_date);
-                    const status = rec.Status || 'Draft';
-                    rec._statusLabel = status;
-                    rec._statusClass = this.getStatusClass(status);
-                    rec._itemsStatus = rec.Items_Status || '–';
-                    rec._totalFormatted = this.formatINR(rec.Total_Amount);
+                    rec._poDateFormatted = this.formatDate(rec.PO_Date); rec._deliveryDateFormatted = this.formatDate(rec.delivery_date);
+                    const status = rec.Status || 'Draft'; rec._statusLabel = status; rec._statusClass = this.getStatusClass(status);
+                    rec._itemsStatus = rec.Items_Status || '–'; rec._totalFormatted = this.formatINR(rec.Total_Amount);
                     return rec;
                 },
 
                 getStatusClass(status) {
-                    const map = {
-                        'Draft': 'po-badge-draft',
-                        'Submitted': 'po-badge-submitted',
-                        'Approved': 'po-badge-approved',
-                        'Rejected': 'po-badge-rejected',
-                        'Cancelled': 'po-badge-cancelled'
-                    };
+                    const map = { 'Draft': 'po-badge-draft', 'Submitted': 'po-badge-submitted', 'Approved': 'po-badge-approved', 'Rejected': 'po-badge-rejected', 'Cancelled': 'po-badge-cancelled' };
                     return map[status] || 'po-badge-draft';
                 },
-
                 getItemsStatusStyle(status) {
                     const st = (status || '').toLowerCase();
                     if (st.includes('completely') || st === 'received') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
@@ -1253,18 +1092,11 @@
                 },
 
                 applySortAndRender() {
-                    const col = this.sortColumn,
-                        dir = this.sortDirection;
+                    const col = this.sortColumn, dir = this.sortDirection;
                     this.allRecords.sort((a, b) => {
-                        let va = this.getSortValue(a, col),
-                            vb = this.getSortValue(b, col);
-                        let cmp = 0;
+                        let va = this.getSortValue(a, col), vb = this.getSortValue(b, col); let cmp = 0;
                         if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
-                        else {
-                            va = String(va).toLowerCase();
-                            vb = String(vb).toLowerCase();
-                            cmp = va < vb ? -1 : va > vb ? 1 : 0;
-                        }
+                        else { va = String(va).toLowerCase(); vb = String(vb).toLowerCase(); cmp = va < vb ? -1 : va > vb ? 1 : 0; }
                         return dir === 'asc' ? cmp : -cmp;
                     });
                     this.filteredRecords = this.allRecords;
@@ -1272,349 +1104,187 @@
 
                 getSortValue(rec, col) {
                     switch (col) {
-                        case 'po_ref':
-                            const ref = rec.PO_Ref_Number || rec.PO_Number || '';
-                            const m = ref.match(/(\d+)$/);
-                            return m ? parseInt(m[1], 10) : ref.toLowerCase();
-                        case 'pr_ref':
-                            return rec._prRef || '';
-                        case 'unit':
-                            return rec._unitName || '';
-                        case 'vendor':
-                            return rec._vendorName || '';
-                        case 'po_date':
-                            return rec.PO_Date ? dayjs(rec.PO_Date).valueOf() : 0;
-                        case 'delivery_date':
-                            return rec.delivery_date ? dayjs(rec.delivery_date).valueOf() : 0;
-                        case 'status':
-                            return rec.Status || 'Draft';
-                        case 'items_status':
-                            return rec._itemsStatus || '';
-                        case 'total':
-                            return parseFloat(rec.Total_Amount) || 0;
-                        default:
-                            return '';
+                        case 'po_ref': const ref = rec.PO_Ref_Number || rec.PO_Number || ''; const m = ref.match(/(\d+)$/); return m ? parseInt(m[1], 10) : ref.toLowerCase();
+                        case 'pr_ref': return rec._prRef || ''; case 'unit': return rec._unitName || ''; case 'vendor': return rec._vendorName || '';
+                        case 'po_date': return rec.PO_Date ? dayjs(rec.PO_Date).valueOf() : 0; case 'delivery_date': return rec.delivery_date ? dayjs(rec.delivery_date).valueOf() : 0;
+                        case 'status': return rec.Status || 'Draft'; case 'items_status': return rec._itemsStatus || ''; case 'total': return parseFloat(rec.Total_Amount) || 0;
+                        default: return '';
                     }
                 },
 
                 handleSortClick(col) {
-                    if (this.sortColumn === col) {
-                        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        this.sortColumn = col;
-                        this.sortDirection = (col === 'po_date' || col === 'delivery_date' || col === 'total') ? 'desc' :
-                            'asc';
-                    }
-                    this.currentPage = 1;
-                    this.applySortAndRender();
+                    if (this.sortColumn === col) { this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc'; }
+                    else { this.sortColumn = col; this.sortDirection = (col === 'po_date' || col === 'delivery_date' || col === 'total') ? 'desc' : 'asc'; }
+                    this.currentPage = 1; this.applySortAndRender();
                 },
+                setFilter(key) { this.currentFilter = key; this.currentPage = 1; this.fetchRecords(); },
+                onSearchInput() { clearTimeout(this.searchTimer); this.searchTimer = setTimeout(() => { this.searchQuery = this.searchInput.trim(); this.currentPage = 1; this.fetchRecords(); }, 400); },
+                goToPage(page) { this.currentPage = Math.max(1, Math.min(page, this.totalPages)); },
 
-                setFilter(key) {
-                    this.currentFilter = key;
-                    this.currentPage = 1;
-                    this.fetchRecords();
-                },
-
-                onSearchInput() {
-                    clearTimeout(this.searchTimer);
-                    this.searchTimer = setTimeout(() => {
-                        this.searchQuery = this.searchInput.trim();
-                        this.currentPage = 1;
-                        this.fetchRecords();
-                    }, 400);
-                },
-
-                goToPage(page) {
-                    this.currentPage = Math.max(1, Math.min(page, this.totalPages));
-                },
-
-                // ── STATS ──
                 async computeStats() {
                     const q = this.searchQuery.replace(/'/g, "\\'");
-                    const searchCrit = q ? `(PO_Ref_Number.contains("${q}") || Unit.Name.contains("${q}") || Vendor.Display_Name.contains("${q}"))` :
-                        '';
+                    const searchCrit = q ? `(PO_Ref_Number.contains("${q}") || Unit.Name.contains("${q}") || Vendor.Display_Name.contains("${q}"))` : '';
                     const build = (sc) => [searchCrit, sc].filter(Boolean).join(' && ');
                     const map = [
-                        { key: 'all', crit: build('') },
-                        { key: 'draft', crit: build('Status == "Draft"') },
-                        { key: 'submitted', crit: build('Status == "Submitted"') },
-                        { key: 'approved', crit: build('Status == "Approved"') },
-                        { key: 'rejected', crit: build('Status == "Rejected"') },
-                        { key: 'cancelled', crit: build('Status == "Cancelled"') }
+                        { key: 'all', crit: build('') }, { key: 'draft', crit: build('Status == "Draft"') }, { key: 'submitted', crit: build('Status == "Submitted"') },
+                        { key: 'approved', crit: build('Status == "Approved"') }, { key: 'rejected', crit: build('Status == "Rejected"') }, { key: 'cancelled', crit: build('Status == "Cancelled"') }
                     ];
                     for (const m of map) {
-                        const config = { report_name: this.REPORT_NAME };
-                        if (m.crit) config.criteria = m.crit;
-                        try {
-                            const res = await ZOHO.CREATOR.DATA.getRecordCount(config);
-                            this.stats[m.key] = res.result ? res.result.records_count : 0;
-                        } catch (e) { this.stats[m.key] = 0; }
+                        const config = { report_name: this.REPORT_NAME }; if (m.crit) config.criteria = m.crit;
+                        try { const res = await ZOHO.CREATOR.DATA.getRecordCount(config); this.stats[m.key] = res.result ? res.result.records_count : 0; } catch (e) { this.stats[m.key] = 0; }
                     }
                 },
 
                 // ── HELPERS ──
-                // Inside the Alpine data object (poApp)
                 async getItemUnitPrice(itemId) {
                     try {
-                        const res = await ZOHO.CREATOR.DATA.getRecordById({
-                            report_name: this.ITEMS_REPORT_NAME,
-                            id: itemId
-                        });
-                        if (res.code === 3000 && res.data) {
-                            return parseFloat(res.data.unit_price) || 0;
-                        }
+                        const res = await ZOHO.CREATOR.DATA.getRecordById({ report_name: this.ITEMS_REPORT_NAME, id: itemId });
+                        if (res.code === 3000 && res.data) { return parseFloat(res.data.unit_price) || 0; }
                     } catch (e) { /* ignore */ }
                     return 0;
                 },
-                formatDate(d) {
-                    if (!d) return '–';
-                    const parsed = dayjs(d);
-                    return parsed.isValid() ? parsed.format('DD MMM YYYY') : d;
-                },
+                formatDate(d) { if (!d) return '–'; const parsed = dayjs(d); return parsed.isValid() ? parsed.format('DD MMM YYYY') : d; },
+                formatINR(val) { if (val == null || isNaN(val) || val === '') return '–'; return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(val); },
 
-                formatINR(val) {
-                    if (val == null || isNaN(val) || val === '') return '–';
-                    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 })
-                        .format(val);
-                },
-
-                // ── VIEW PO ──
-                viewPO(id) {
-                    ZOHO.CREATOR.UTIL.navigateParentURL({
-                        action: 'open',
-                        url: '#Page:PO_Detailed?recordId=' + id,
-                        window: 'same'
-                    });
-                },
+                viewPO(id) { ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', url: '#Page:PO_Detailed?recordId=' + id, window: 'same' }); },
 
                 // ── MODAL ──
-                openCreateModal() {
+                openCreateModal(initialPrId = '', initialQcId = '') {
                     this.form = {
-                        prRef: '',
-                        prLocked: false,
-                        qcRef: '',
-                        unit: '',
-                        vendor: '',
-                        paymentTerms: '',
-                        poDate: this.todayStr,
-                        deliveryDate: '',
-                        notes: '',
-                        terms: '',
-                        items: [],
-                        subTotal: 0,
-                        discount: 0,
-                        totalAmount: 0,
+                        prRef: '', prLocked: false, vendorLocked: false, qcRef: '', unit: '', vendor: '', paymentTerms: '', poDate: this.todayStr, deliveryDate: '', notes: '', terms: '', items: [],
+                        subTotal: 0, discount: 0, totalAmount: 0,
                         billingAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' },
                         shippingAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' },
                         deliveryAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' },
-                        deliveryLocked: true,
-                        _prId: '',
-                        _qcId: ''
+                        deliveryLocked: true, _prId: '', _qcId: ''
                     };
                     this.availableQCs = [];
-                    this.submitting = false;
-                    this.submitAction = 'Submitted';
+                    this._pendingQcId = initialQcId || null;
+
+                    this.submitting = false; this.submitAction = 'Submitted';
                     if (this.$refs.fileInput) this.$refs.fileInput.value = '';
                     this.showModal = true;
 
                     this.$nextTick(() => {
-                        this.initPrSelect();
-                        this.initQcSelect();
-                        this.initUnitSelect();
-                        this.initVendorSelect();
-                        this.initPaymentTermsSelect();
+                        this.initPrSelect(); this.initQcSelect(); this.initUnitSelect(); this.initVendorSelect(); this.initPaymentTermsSelect();
+
+                        // Automatically trigger PR selection if provided
+                        if (initialPrId) {
+                            this.tsPr.addOption({ ID: initialPrId, PR_Number: 'Loading PR...' });
+                            this.tsPr.setValue(initialPrId);
+                        }
                     });
                 },
 
                 closeModal() {
                     this.showModal = false;
-                    if (this.tsPr) {
-                        this.tsPr.destroy();
-                        this.tsPr = null;
-                    }
-                    if (this.tsQc) {
-                        this.tsQc.destroy();
-                        this.tsQc = null;
-                    }
-                    if (this.tsUnit) {
-                        this.tsUnit.destroy();
-                        this.tsUnit = null;
-                    }
-                    if (this.tsVendor) {
-                        this.tsVendor.destroy();
-                        this.tsVendor = null;
-                    }
-                    if (this.tsPaymentTerms) {
-                        this.tsPaymentTerms.destroy();
-                        this.tsPaymentTerms = null;
-                    }
+                    if (this.tsPr) { this.tsPr.destroy(); this.tsPr = null; }
+                    if (this.tsQc) { this.tsQc.destroy(); this.tsQc = null; }
+                    if (this.tsUnit) { this.tsUnit.destroy(); this.tsUnit = null; }
+                    if (this.tsVendor) { this.tsVendor.destroy(); this.tsVendor = null; }
+                    if (this.tsPaymentTerms) { this.tsPaymentTerms.destroy(); this.tsPaymentTerms = null; }
                 },
 
-                // ── TOMSELECT: PR ──
+                // ── TOMSELECT ──
                 initPrSelect() {
                     this.tsPr = new TomSelect(this.$refs.prSelect, {
-                        valueField: 'ID',
-                        labelField: 'PR_Number',
-                        searchField: ['PR_Number', 'Requisition_Number'],
-                        maxItems: 1,
-                        placeholder: 'Search PR Number…',
-                        loadThrottle: 350,
+                        valueField: 'ID', labelField: 'PR_Number', searchField: ['PR_Number', 'Requisition_Number'],
+                        maxItems: 1, placeholder: 'Search PR Number…', loadThrottle: 350,
                         onChange: (val) => {
                             this.form._prId = val;
-                            if (val) {
-                                this.fetchPRDetails(val);
-                                this.loadQCsForPR(val);
-                            } else {
-                                this.resetForm();
-                            }
+                            if (val) { this.fetchPRDetails(val); this.loadQCsForPR(val); } else { this.resetForm(); }
                         },
                         load: (query, callback) => {
-                            if (!query.length) return callback();
-                            const q = query.replace(/'/g, "\\'");
+                            if (!query.length) return callback(); const q = query.replace(/'/g, "\\'");
                             ZOHO.CREATOR.DATA.getRecords({
-                                report_name: this.PR_REPORT_NAME,
-                                // criteria: `(PR_Number.contains("${q}") && Status == "In Progress" && Current_Stage == "Quote Comparison")`
-                                criteria: `(PR_Number.contains("${q}") && Status == "In Progress")`
-                            }).then(res => {
-                                const data = (res.code === 3000 && res.data) ? res.data : [];
-                                callback(data);
-                            }).catch(() => callback());
+                                report_name: this.PR_REPORT_NAME, criteria: `(PR_Number.contains("${q}") && Status == "In Progress")`
+                            }).then(res => { callback((res.code === 3000 && res.data) ? res.data : []); }).catch(() => callback());
                         },
                         render: {
-                            option: (d, e) =>
-                                `<div class="font-mono font-medium">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>`,
-                            item: (d, e) =>
-                                `<div class="font-mono">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>`
+                            option: (d, e) => `<div class="font-mono font-medium">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>`,
+                            item: (d, e) => `<div class="font-mono">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>`
                         }
                     });
                 },
 
-                // ── TOMSELECT: QC ──
                 initQcSelect() {
                     this.tsQc = new TomSelect(this.$refs.qcSelect, {
-                        valueField: 'ID',
-                        labelField: 'QC_Ref_Number',
-                        searchField: ['QC_Ref_Number', 'Quote_Comparison_Subject'],
-                        maxItems: 1,
-                        placeholder: 'Select QC…',
+                        valueField: 'ID', labelField: 'QC_Ref_Number', searchField: ['QC_Ref_Number', 'Quote_Comparison_Subject'],
+                        maxItems: 1, placeholder: 'Select QC…',
                         onChange: (val) => {
                             this.form._qcId = val;
                             if (val) {
                                 this.fetchQCDetails(val);
                             } else {
-                                // Clear vendor, payment terms, rates
-                                this.form.vendor = '';
-                                this.form.paymentTerms = '';
-                                if (this.tsVendor) this.tsVendor.clear(true);
-                                if (this.tsPaymentTerms) this.tsPaymentTerms.clear(true);
-                                // Reset item rates
-                                this.form.items.forEach(item => {
-                                    item.Rate = 0;
-                                    item.Amount = 0;
-                                });
+                                this.form.vendor = ''; this.form.paymentTerms = ''; this.form.vendorLocked = false;
+                                if (this.tsVendor) this.tsVendor.clear(true); if (this.tsPaymentTerms) this.tsPaymentTerms.clear(true);
+                                this.form.items.forEach(item => { item.Rate = 0; item.Amount = 0; });
                                 this.calcTotals();
                             }
                         },
                         render: {
-                            option: (d, e) =>
-                                `<div class="font-mono font-medium">${e(d.QC_Ref_Number || d.QC_Number || 'Unknown')}</div>`,
-                            item: (d, e) =>
-                                `<div class="font-mono">${e(d.QC_Ref_Number || d.QC_Number || 'Unknown')}</div>`
+                            option: (d, e) => `<div class="font-mono font-medium">${e(d.QC_Ref_Number || d.QC_Number || 'Unknown')}</div>`,
+                            item: (d, e) => `<div class="font-mono">${e(d.QC_Ref_Number || d.QC_Number || 'Unknown')}</div>`
                         }
                     });
                 },
 
                 initUnitSelect() {
                     this.tsUnit = new TomSelect(this.$refs.unitSelect, {
-                        valueField: 'ID',
-                        labelField: 'Name',
-                        searchField: 'Name',
-                        maxItems: 1,
-                        placeholder: 'Select Unit…',
-                        render: {
-                            option: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`,
-                            item: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`
-                        },
+                        valueField: 'ID', labelField: 'Name', searchField: 'Name', maxItems: 1, placeholder: 'Select Unit…',
+                        render: { option: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`, item: (d, e) => `<div class="font-medium">${e(d.Name)}</div>` },
                         onChange: (val) => {
                             this.form.unit = val;
-                            if (val && this.form.deliveryLocked) {
-                                this.fetchUnitAddress(val);
-                            } else if (!val) {
-                                this.form.deliveryAddress = { line1: '', line2: '', city: '', state: '', postal: '', country: '' };
-                            }
+                            if (val && this.form.deliveryLocked) { this.fetchUnitAddress(val); }
+                            else if (!val) { this.form.deliveryAddress = { line1: '', line2: '', city: '', state: '', postal: '', country: '' }; }
                         }
                     });
-                    ZOHO.CREATOR.DATA.getRecords({ report_name: this.UNIT_REPORT_NAME, max_records: 200 })
-                        .then(res => {
-                            if (res.code === 3000 && res.data) {
-                                this.tsUnit.addOption(res.data);
-                                this.tsUnit.refreshOptions(false);
-                            }
-                        });
+                    ZOHO.CREATOR.DATA.getRecords({ report_name: this.UNIT_REPORT_NAME, max_records: 200 }).then(res => {
+                        if (res.code === 3000 && res.data) { this.tsUnit.addOption(res.data); this.tsUnit.refreshOptions(false); }
+                    });
                 },
 
                 initVendorSelect() {
                     this.tsVendor = new TomSelect(this.$refs.vendorSelect, {
-                        valueField: 'ID',
-                        labelField: 'Display_Name',
-                        searchField: ['Display_Name', 'Company_Name'],
-                        maxItems: 1,
-                        placeholder: 'Select Vendor…',
-                        render: {
-                            option: (d, e) => `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>`,
-                            item: (d, e) => `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>`
-                        },
-                        onChange: (val) => {
-                            this.form.vendor = val;
-                            if (val) this.fetchVendorAddress(val);
-                        }
+                        valueField: 'ID', labelField: 'Display_Name', searchField: ['Display_Name', 'Company_Name'],
+                        maxItems: 1, placeholder: 'Select Vendor…',
+                        render: { option: (d, e) => `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>`, item: (d, e) => `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>` },
+                        onChange: (val) => { this.form.vendor = val; if (val) this.fetchVendorAddress(val); }
                     });
-                    ZOHO.CREATOR.DATA.getRecords({ report_name: this.VENDOR_REPORT_NAME, max_records: 200 })
-                        .then(res => {
-                            if (res.code === 3000 && res.data) {
-                                this.tsVendor.addOption(res.data);
-                                this.tsVendor.refreshOptions(false);
-                            }
-                        });
+                    ZOHO.CREATOR.DATA.getRecords({ report_name: this.VENDOR_REPORT_NAME, max_records: 200 }).then(res => {
+                        if (res.code === 3000 && res.data) { this.tsVendor.addOption(res.data); this.tsVendor.refreshOptions(false); }
+                    });
                 },
 
                 initPaymentTermsSelect() {
                     this.tsPaymentTerms = new TomSelect(this.$refs.paymentTermsSelect, {
-                        valueField: 'value',
-                        labelField: 'label',
-                        searchField: 'label',
-                        maxItems: 1,
-                        placeholder: 'Select Payment Terms…',
-                        options: [
-                            { value: 'Advance', label: 'Advance' },
-                            { value: '15 Days Credit', label: '15 Days Credit' },
-                            { value: '30 Days Credit', label: '30 Days Credit' },
-                            { value: '45 Days Credit', label: '45 Days Credit' }
-                        ],
-                        render: {
-                            option: (d, e) => `<div class="font-medium">${e(d.label)}</div>`,
-                            item: (d, e) => `<div class="font-medium">${e(d.label)}</div>`
-                        },
+                        valueField: 'value', labelField: 'label', searchField: 'label', maxItems: 1, placeholder: 'Select Payment Terms…',
+                        options: [{ value: 'Advance', label: 'Advance' }, { value: '15 Days Credit', label: '15 Days Credit' }, { value: '30 Days Credit', label: '30 Days Credit' }, { value: '45 Days Credit', label: '45 Days Credit' }],
+                        render: { option: (d, e) => `<div class="font-medium">${e(d.label)}</div>`, item: (d, e) => `<div class="font-medium">${e(d.label)}</div>` },
                         onChange: (val) => { this.form.paymentTerms = val; }
                     });
                 },
 
-                // ── Load QCs for selected PR ──
                 async loadQCsForPR(prId) {
                     try {
-                        const res = await ZOHO.CREATOR.DATA.getRecords({
-                            report_name: this.QC_REPORT_NAME,
-                            criteria: `PR_Ref == ${prId}`,
-                            max_records: 200
-                        });
+                        const res = await ZOHO.CREATOR.DATA.getRecords({ report_name: this.QC_REPORT_NAME, criteria: `PR_Ref == "${prId}"`, max_records: 200 });
                         if (res.code === 3000 && res.data) {
                             this.availableQCs = res.data;
-                            // Populate QC dropdown
                             if (this.tsQc) {
-                                this.tsQc.clearOptions();
-                                this.tsQc.addOption(this.availableQCs);
-                                this.tsQc.refreshOptions(false);
-                                if (this.availableQCs.length === 1) {
+                                this.tsQc.clearOptions(); this.tsQc.addOption(this.availableQCs); this.tsQc.refreshOptions(false);
+
+                                // Auto-select pending QC if provided from URL
+                                if (this._pendingQcId) {
+                                    const pendingId = this._pendingQcId;
+                                    this._pendingQcId = null;
+                                    // If the QC wasn't returned by the PR-filtered query,
+                                    // add it explicitly so setValue doesn't silently fail
+                                    if (!this.tsQc.getOption(pendingId)) {
+                                        this.tsQc.addOption({ ID: pendingId, QC_Ref_Number: 'Loading QC...' });
+                                        this.tsQc.refreshOptions(false);
+                                    }
+                                    this.tsQc.setValue(pendingId);
+                                } else if (this.availableQCs.length === 1) {
                                     this.tsQc.setValue(this.availableQCs[0].ID);
                                 } else {
                                     this.tsQc.clear(true);
@@ -1622,211 +1292,143 @@
                             }
                         } else {
                             this.availableQCs = [];
-                            if (this.tsQc) {
-                                this.tsQc.clearOptions();
+                            if (this.tsQc) { this.tsQc.clearOptions(); this.tsQc.refreshOptions(false); }
+                            // Still try to auto-select the pending QC even if the PR filter returned nothing
+                            if (this._pendingQcId && this.tsQc) {
+                                const pendingId = this._pendingQcId;
+                                this._pendingQcId = null;
+                                this.tsQc.addOption({ ID: pendingId, QC_Ref_Number: 'Loading QC...' });
                                 this.tsQc.refreshOptions(false);
+                                this.tsQc.setValue(pendingId);
                             }
                         }
                     } catch (e) {
                         console.warn('Could not load QCs', e);
+                        // On error, still attempt to select the pending QC
+                        if (this._pendingQcId && this.tsQc) {
+                            const pendingId = this._pendingQcId;
+                            this._pendingQcId = null;
+                            this.tsQc.addOption({ ID: pendingId, QC_Ref_Number: 'Loading QC...' });
+                            this.tsQc.refreshOptions(false);
+                            this.tsQc.setValue(pendingId);
+                        }
                     }
                 },
 
-                // ── Fetch PR Details ──
                 async fetchPRDetails(prId) {
                     Toast.fire({ icon: 'info', title: 'Fetching PR details…' });
                     try {
-                        const prRes = await ZOHO.CREATOR.DATA.invokeCustomApi({
-                            api_name: 'Dev__Fetch_PR_Details',
-                            http_method: 'GET',
-                            query_params: 'recId=' + prId
-                        });
-
-                        if (!prRes || !prRes.result || prRes.result.length === 0) {
-                            Toast.fire({ icon: 'error', title: 'PR not found.' });
-                            return;
-                        }
+                        const prRes = await ZOHO.CREATOR.DATA.invokeCustomApi({ api_name: 'Dev__Fetch_PR_Details', http_method: 'GET', query_params: 'recId=' + prId });
+                        if (!prRes || !prRes.result || prRes.result.length === 0) { Toast.fire({ icon: 'error', title: 'PR not found.' }); return; }
 
                         const pr = prRes.result[0];
 
-                        // ── Auto-fill Delivery Date from PR Due_Date ──
-                        if (pr.Due_Date) {
-                            const parsed = dayjs(pr.Due_Date, ['DD-MMM-YYYY', 'YYYY-MM-DD', 'MM/DD/YYYY']);
-                            if (parsed.isValid()) {
-                                this.form.deliveryDate = parsed.format('YYYY-MM-DD');
-                            }
+                        if (this.tsPr) {
+                            this.tsPr.updateOption(prId, { ID: prId, PR_Number: pr.PR_Number || pr.Requisition_Number || prId });
                         }
 
-                        // ── Auto-fill Unit from PR ──
+                        if (pr.Due_Date) {
+                            const parsed = dayjs(pr.Due_Date, ['DD-MMM-YYYY', 'YYYY-MM-DD', 'MM/DD/YYYY']);
+                            if (parsed.isValid()) { this.form.deliveryDate = parsed.format('YYYY-MM-DD'); }
+                        }
+
                         if (pr.Unit && pr.Unit.ID) {
-                            const unit = pr.Unit;
-                            this.form.unit = unit.ID;
-                            // Ensure the option exists in tsUnit, then set value
+                            const unit = pr.Unit; this.form.unit = unit.ID;
                             if (this.tsUnit) {
-                                if (!this.tsUnit.getOption(unit.ID)) {
-                                    this.tsUnit.addOption({ ID: unit.ID, Name: unit.Name || unit.ID });
-                                }
-                                this.tsUnit.setValue(unit.ID, true);
-                                this.tsUnit.disable();
+                                if (!this.tsUnit.getOption(unit.ID)) { this.tsUnit.addOption({ ID: unit.ID, Name: unit.Name || unit.ID }); }
+                                this.tsUnit.setValue(unit.ID, true); this.tsUnit.disable();
                             }
-                            // Auto-populate delivery address from PR unit address
                             const unitAddr = unit.Address || {};
                             if (this.form.deliveryLocked) {
                                 this.form.deliveryAddress = {
-                                    line1: unitAddr.address_line_1 || '',
-                                    line2: unitAddr.address_line_2 || '',
-                                    city: unitAddr.district_city || '',
-                                    state: unitAddr.state_province || '',
-                                    postal: unitAddr.postal_code || '',
-                                    country: unitAddr.country || ''
+                                    line1: unitAddr.address_line_1 || '', line2: unitAddr.address_line_2 || '', city: unitAddr.district_city || '',
+                                    state: unitAddr.state_province || '', postal: unitAddr.postal_code || '', country: unitAddr.country || ''
                                 };
                             }
                         }
 
-                        // ── Items from PR ──
-                        const requestedItems = pr.Requested_Items || [];
-                        this.form.items = [];
-                        const itemMap = {};
-
-                        // First, build the items array with basic info
+                        const requestedItems = pr.Requested_Items || []; this.form.items = []; const itemMap = {};
                         requestedItems.forEach((ri, idx) => {
-                            const itemId = ri.Item?.ID || ri.Item?.id || '';
-                            const itemName = ri.Item?.item_name || ri.Item?.display_value || ri.Item || 'Item ' + (idx + 1);
-                            const qty = parseFloat(ri.Quantity) || 0;
-                            const unit = ri.Unit || '';
-                            const comment = ri.Comment || '';
+                            const itemId = ri.Item?.ID || ri.Item?.id || ''; const itemName = ri.Item?.item_name || ri.Item?.display_value || ri.Item || 'Item ' + (idx + 1);
+                            const qty = parseFloat(ri.Quantity) || 0; const unit = ri.Unit || ''; const comment = ri.Comment || '';
                             const uid = Date.now() + Math.random() + idx;
-                            const row = {
-                                uid,
-                                Item: itemId,
-                                _itemName: itemName,
-                                Unit: unit,
-                                Quantity: qty,
-                                Rate: 0,
-                                Amount: 0,
-                                Comment: comment,
-                                _originalIndex: idx
-                            };
-                            this.form.items.push(row);
-                            if (itemId) itemMap[itemId] = row;
+                            const row = { uid, Item: itemId, _itemName: itemName, Unit: unit, Quantity: qty, Rate: 0, Amount: 0, Comment: comment, _originalIndex: idx };
+                            this.form.items.push(row); if (itemId) itemMap[itemId] = row;
                         });
 
-                        // ── Fetch unit price for each item from Item Master ──
                         for (const item of this.form.items) {
-                            if (item.Item) {
-                                const unitPrice = await this.getItemUnitPrice(item.Item);
-                                item.Rate = unitPrice;
-                                item.Amount = unitPrice * (item.Quantity || 0);
-                            }
+                            if (item.Item) { const unitPrice = await this.getItemUnitPrice(item.Item); item.Rate = unitPrice; item.Amount = unitPrice * (item.Quantity || 0); }
                         }
 
-                        this.form.prLocked = true;
-                        this.calcTotals();
+                        this.form.prLocked = true; this.calcTotals();
+                        Toast.fire({ icon: 'success', title: `PR loaded — ${this.form.items.length} item(s)` });
 
-                        // Load QCs for this PR (existing logic)
-                        this.loadQCsForPR(prId);
-
-                        Toast.fire({ icon: 'success', title: `PR loaded — ${this.form.items.length} item(s) with rates from Item Master` });
-
-                    } catch (err) {
-                        console.error('fetchPRDetails error', err);
-                        Toast.fire({ icon: 'error', title: 'Failed to load PR details' });
-                    }
+                    } catch (err) { console.error('fetchPRDetails error', err); Toast.fire({ icon: 'error', title: 'Failed to load PR details' }); }
                 },
-                // ── Fetch QC Details ──
+
                 async fetchQCDetails(qcId) {
                     Toast.fire({ icon: 'info', title: 'Fetching QC details…' });
                     try {
-                        const res = await ZOHO.CREATOR.DATA.getRecordById({
-                            report_name: this.QC_REPORT_NAME,
-                            id: qcId
-                        });
+                        const res = await ZOHO.CREATOR.DATA.getRecordById({ report_name: this.QC_REPORT_NAME, id: qcId });
                         if (res.code === 3000 && res.data) {
                             const qc = res.data;
-                            // ... (set vendor, payment terms, etc.) ...
 
-                            // ── Update rates with QC negotiated rates ──
-                            const qcLines = qc.Quotation_Comparison_Statement || qc.QuoteLines || [];
-                            const rateMap = {};
+                            // Auto-set vendor from QC finalized vendor
+                            if (qc.Finalized_Vendor) {
+                                const vId = typeof qc.Finalized_Vendor === 'object' ? qc.Finalized_Vendor.ID : qc.Finalized_Vendor;
+                                const vName = typeof qc.Finalized_Vendor === 'object' ? (qc.Finalized_Vendor.display_value || 'Selected Vendor') : 'Selected Vendor';
+
+                                if (this.tsVendor) {
+                                    this.tsVendor.addOption({ ID: vId, Display_Name: vName, Company_Name: vName });
+                                    this.tsVendor.setValue(vId);
+                                    this.form.vendorLocked = true;
+                                }
+                            }
+
+                            const qcLines = qc.Quotation_Comparison_Statement || qc.QuoteLines || []; const rateMap = {};
                             qcLines.forEach(line => {
                                 const itemId = line.Items?.[0]?.ID || line.Items_Master?.ID || line.Item?.ID || line.Item || '';
                                 const rate = parseFloat(line.Negotiated_Rate) || parseFloat(line.Basic_Rate) || 0;
                                 if (itemId) rateMap[itemId] = rate;
-                                // fallback by name
-                                if (!itemId) {
-                                    const name = line.Items?.[0]?.item_name || line.Items_Master?.item_name || line.Item?.item_name || '';
-                                    if (name) rateMap[name.toLowerCase()] = rate;
-                                }
+                                if (!itemId) { const name = line.Items?.[0]?.item_name || line.Items_Master?.item_name || line.Item?.item_name || ''; if (name) rateMap[name.toLowerCase()] = rate; }
                             });
 
                             this.form.items.forEach(item => {
                                 let rate = 0;
-                                if (item.Item && rateMap[item.Item]) {
-                                    rate = rateMap[item.Item];
-                                } else if (item._itemName) {
-                                    const lowerName = item._itemName.toLowerCase();
-                                    if (rateMap[lowerName]) rate = rateMap[lowerName];
-                                }
-                                if (rate > 0) {
-                                    item.Rate = rate;
-                                    item.Amount = rate * (item.Quantity || 0);
-                                }
+                                if (item.Item && rateMap[item.Item]) { rate = rateMap[item.Item]; }
+                                else if (item._itemName) { const lowerName = item._itemName.toLowerCase(); if (rateMap[lowerName]) rate = rateMap[lowerName]; }
+                                if (rate > 0) { item.Rate = rate; item.Amount = rate * (item.Quantity || 0); }
                             });
 
-                            this.calcTotals();
-                            Toast.fire({ icon: 'success', title: 'QC loaded — rates updated from QC.' });
-                        } else {
-                            Toast.fire({ icon: 'error', title: 'Failed to load QC details.' });
-                        }
-                    } catch (err) {
-                        console.error('fetchQCDetails error', err);
-                        Toast.fire({ icon: 'error', title: 'Failed to load QC details' });
-                    }
+                            this.calcTotals(); Toast.fire({ icon: 'success', title: 'QC loaded — vendor & rates updated.' });
+                        } else { Toast.fire({ icon: 'error', title: 'Failed to load QC details.' }); }
+                    } catch (err) { console.error('fetchQCDetails error', err); Toast.fire({ icon: 'error', title: 'Failed to load QC details' }); }
                 },
-                // ── Fetch Vendor Address ──
+
                 async fetchVendorAddress(vendorId) {
                     try {
-                        const res = await ZOHO.CREATOR.DATA.getRecordById({
-                            report_name: this.VENDOR_REPORT_NAME,
-                            id: vendorId
-                        });
+                        const res = await ZOHO.CREATOR.DATA.getRecordById({ report_name: this.VENDOR_REPORT_NAME, id: vendorId });
                         if (res.code === 3000 && res.data) {
-                            const vendor = res.data;
-                            const billing = vendor.Billing_Address || {};
+                            const vendor = res.data; const billing = vendor.Billing_Address || {};
                             this.form.billingAddress = {
-                                line1: billing.address_line_1 || '',
-                                line2: billing.address_line_2 || '',
-                                city: billing.district_city || '',
-                                state: billing.state_province || '',
-                                postal: billing.postal_code || '',
-                                country: billing.country || ''
+                                line1: billing.address_line_1 || '', line2: billing.address_line_2 || '', city: billing.district_city || '',
+                                state: billing.state_province || '', postal: billing.postal_code || '', country: billing.country || ''
                             };
                             this.form.shippingAddress = { ...this.form.billingAddress };
-                            if (this.form.deliveryLocked && this.form.unit) {
-                                this.fetchUnitAddress(this.form.unit);
-                            }
+                            if (this.form.deliveryLocked && this.form.unit) { this.fetchUnitAddress(this.form.unit); }
                         }
                     } catch (e) { console.warn('Could not fetch vendor address', e); }
                 },
 
-                // ── Fetch Unit Address ──
                 async fetchUnitAddress(unitId) {
                     try {
-                        const res = await ZOHO.CREATOR.DATA.getRecordById({
-                            report_name: this.UNIT_REPORT_NAME,
-                            id: unitId
-                        });
+                        const res = await ZOHO.CREATOR.DATA.getRecordById({ report_name: this.UNIT_REPORT_NAME, id: unitId });
                         if (res.code === 3000 && res.data) {
-                            const unit = res.data;
-                            const addr = unit.Address || {};
+                            const unit = res.data; const addr = unit.Address || {};
                             if (this.form.deliveryLocked) {
                                 this.form.deliveryAddress = {
-                                    line1: addr.address_line_1 || '',
-                                    line2: addr.address_line_2 || '',
-                                    city: addr.district_city || '',
-                                    state: addr.state_province || '',
-                                    postal: addr.postal_code || '',
-                                    country: addr.country || ''
+                                    line1: addr.address_line_1 || '', line2: addr.address_line_2 || '', city: addr.district_city || '',
+                                    state: addr.state_province || '', postal: addr.postal_code || '', country: addr.country || ''
                                 };
                             }
                         }
@@ -1834,181 +1436,71 @@
                 },
 
                 resetForm() {
-                    this.form.prLocked = false;
-                    this.form.unit = '';
-                    this.form.vendor = '';
-                    this.form.paymentTerms = '';
-                    this.form.poDate = this.todayStr;
-                    this.form.deliveryDate = '';
-                    this.form.items = [];
-                    this.form.subTotal = 0;
-                    this.form.totalAmount = 0;
+                    this.form.prLocked = false; this.form.vendorLocked = false; this.form.unit = ''; this.form.vendor = ''; this.form.paymentTerms = ''; this.form.poDate = this.todayStr; this.form.deliveryDate = '';
+                    this.form.items = []; this.form.subTotal = 0; this.form.totalAmount = 0;
                     this.form.billingAddress = { line1: '', line2: '', city: '', state: '', postal: '', country: '' };
                     this.form.shippingAddress = { line1: '', line2: '', city: '', state: '', postal: '', country: '' };
                     this.form.deliveryAddress = { line1: '', line2: '', city: '', state: '', postal: '', country: '' };
-                    this.form.deliveryLocked = true;
-                    this.availableQCs = [];
-                    if (this.tsQc) {
-                        this.tsQc.clearOptions();
-                        this.tsQc.refreshOptions(false);
-                    }
-                    if (this.tsUnit) {
-                        this.tsUnit.enable();
-                        this.tsUnit.clear(true);
-                    }
-                    if (this.tsVendor) {
-                        this.tsVendor.enable();
-                        this.tsVendor.clear(true);
-                    }
-                    if (this.tsPaymentTerms) {
-                        this.tsPaymentTerms.enable();
-                        this.tsPaymentTerms.clear(true);
-                    }
+                    this.form.deliveryLocked = true; this.availableQCs = [];
+
+                    if (this.tsQc) { this.tsQc.clearOptions(); this.tsQc.refreshOptions(false); }
+                    if (this.tsUnit) { this.tsUnit.enable(); this.tsUnit.clear(true); }
+                    if (this.tsVendor) { this.tsVendor.enable(); this.tsVendor.clear(true); }
+                    if (this.tsPaymentTerms) { this.tsPaymentTerms.enable(); this.tsPaymentTerms.clear(true); }
                 },
 
-                // ── CALCULATE TOTALS ──
                 calcTotals() {
                     let subTotal = 0;
-                    this.form.items.forEach(item => {
-                        const rate = parseFloat(item.Rate) || 0;
-                        const qty = parseFloat(item.Quantity) || 0;
-                        item.Amount = rate * qty;
-                        subTotal += item.Amount;
-                    });
-                    this.form.subTotal = subTotal;
-                    const discount = parseFloat(this.form.discount) || 0;
-                    this.form.totalAmount = Math.max(0, subTotal - discount);
+                    this.form.items.forEach(item => { const rate = parseFloat(item.Rate) || 0; const qty = parseFloat(item.Quantity) || 0; item.Amount = rate * qty; subTotal += item.Amount; });
+                    this.form.subTotal = subTotal; const discount = parseFloat(this.form.discount) || 0; this.form.totalAmount = Math.max(0, subTotal - discount);
                 },
 
-                // ── SUBMIT PO ──
                 async submitPO() {
-                    // Validate
-                    if (!this.form._prId) {
-                        Toast.fire({ icon: 'error', title: 'Please select a Purchase Requisition.' });
-                        return;
-                    }
-                    if (!this.form.unit) {
-                        Toast.fire({ icon: 'error', title: 'Unit is required.' });
-                        return;
-                    }
-                    if (!this.form.vendor) {
-                        Toast.fire({ icon: 'error', title: 'Vendor is required.' });
-                        return;
-                    }
-                    if (!this.form.paymentTerms) {
-                        Toast.fire({ icon: 'error', title: 'Payment Terms is required.' });
-                        return;
-                    }
-                    if (!this.form.poDate) {
-                        Toast.fire({ icon: 'error', title: 'PO Date is required.' });
-                        return;
-                    }
-                    if (!this.form.deliveryDate) {
-                        Toast.fire({ icon: 'error', title: 'Delivery Date is required.' });
-                        return;
-                    }
-                    if (this.form.items.length === 0) {
-                        Toast.fire({ icon: 'error', title: 'At least one item is required.' });
-                        return;
-                    }
+                    if (!this.form._prId) { Toast.fire({ icon: 'error', title: 'Please select a Purchase Requisition.' }); return; }
+                    if (!this.form.unit) { Toast.fire({ icon: 'error', title: 'Unit is required.' }); return; }
+                    if (!this.form.vendor) { Toast.fire({ icon: 'error', title: 'Vendor is required.' }); return; }
+                    if (!this.form.paymentTerms) { Toast.fire({ icon: 'error', title: 'Payment Terms is required.' }); return; }
+                    if (!this.form.poDate) { Toast.fire({ icon: 'error', title: 'PO Date is required.' }); return; }
+                    if (!this.form.deliveryDate) { Toast.fire({ icon: 'error', title: 'Delivery Date is required.' }); return; }
+                    if (this.form.items.length === 0) { Toast.fire({ icon: 'error', title: 'At least one item is required.' }); return; }
+
                     let hasMissingRate = false;
-                    this.form.items.forEach(item => {
-                        if (!item.Rate || item.Rate <= 0) hasMissingRate = true;
-                    });
-                    if (hasMissingRate) {
-                        Toast.fire({ icon: 'warning', title: 'Some items have no rate. Please fill manually.' });
-                        return;
-                    }
+                    this.form.items.forEach(item => { if (!item.Rate || item.Rate <= 0) hasMissingRate = true; });
+                    if (hasMissingRate) { Toast.fire({ icon: 'warning', title: 'Some items have no rate. Please fill manually.' }); return; }
 
                     this.submitting = true;
-
                     try {
                         const status = this.submitAction === 'Draft' ? 'Draft' : 'Submitted';
-
-                        const itemsGrid = this.form.items.map(item => ({
-                            Item: item.Item,
-                            Rate: parseFloat(item.Rate) || 0,
-                            Quantity: parseFloat(item.Quantity) || 0,
-                            Amount: parseFloat(item.Amount) || 0,
-                            Comment: item.Comment || ''
-                        }));
-
-                        const buildAddress = (addr) => ({
-                            address_line_1: addr.line1 || '',
-                            address_line_2: addr.line2 || '',
-                            district_city: addr.city || '',
-                            state_province: addr.state || '',
-                            postal_code: addr.postal || '',
-                            country: addr.country || ''
-                        });
+                        const itemsGrid = this.form.items.map(item => ({ Item: item.Item, Rate: parseFloat(item.Rate) || 0, Quantity: parseFloat(item.Quantity) || 0, Amount: parseFloat(item.Amount) || 0, Comment: item.Comment || '' }));
+                        const buildAddress = (addr) => ({ address_line_1: addr.line1 || '', address_line_2: addr.line2 || '', district_city: addr.city || '', state_province: addr.state || '', postal_code: addr.postal || '', country: addr.country || '' });
 
                         const payload = {
                             data: {
-                                Unit: this.form.unit,
-                                Vendor: this.form.vendor,
-                                Payment_Terms: this.form.paymentTerms,
-                                PO_Date: this.formatDateForZoho(this.form.poDate),
-                                delivery_date: this.formatDateForZoho(this.form.deliveryDate),
-                                Status: status,
-                                Notes: this.form.notes || '',
-                                Terms_Conditions: this.form.terms || '',
-                                Sub_Total: this.form.subTotal,
-                                Discount: parseFloat(this.form.discount) || 0,
-                                Total_Amount: this.form.totalAmount,
-                                Purchase_Requisition: this.form._prId,
-                                Quote_Comparison: this.form._qcId || '',
-                                Items: itemsGrid,
-                                Billing_Address: buildAddress(this.form.billingAddress),
-                                Shipping_Address: buildAddress(this.form.shippingAddress),
-                                Delivary_Address: buildAddress(this.form.deliveryAddress),
-                                CGST: 0,
-                                SGST: 0,
-                                IGST: 0,
-                                purchase_requisition_id: this.form._prId,
-                                Items_Status: "Pending",
+                                Unit: this.form.unit, Vendor: this.form.vendor, Payment_Terms: this.form.paymentTerms, PO_Date: this.formatDateForZoho(this.form.poDate),
+                                delivery_date: this.formatDateForZoho(this.form.deliveryDate), Status: status, Notes: this.form.notes || '', Terms_Conditions: this.form.terms || '',
+                                Sub_Total: this.form.subTotal, Discount: parseFloat(this.form.discount) || 0, Total_Amount: this.form.totalAmount, Purchase_Requisition: this.form._prId,
+                                Quote_Comparison: this.form._qcId || '', Items: itemsGrid, Billing_Address: buildAddress(this.form.billingAddress),
+                                Shipping_Address: buildAddress(this.form.shippingAddress), Delivary_Address: buildAddress(this.form.deliveryAddress), CGST: 0, SGST: 0, IGST: 0,
+                                purchase_requisition_id: this.form._prId, Items_Status: "Pending",
                             }
                         };
 
                         const res = await ZOHO.CREATOR.DATA.addRecords({ form_name: this.FORM_NAME, payload });
-
                         if (res.code === 3000 && res.data) {
                             const newId = res.data.ID;
-
                             const files = this.$refs.fileInput?.files || [];
                             if (files.length > 0) {
-                                const uploads = Array.from(files).map(f =>
-                                    ZOHO.CREATOR.FILE.uploadFile({
-                                        report_name: this.REPORT_NAME,
-                                        field_name: 'Attachments',
-                                        file: f,
-                                        id: newId
-                                    })
-                                );
+                                const uploads = Array.from(files).map(f => ZOHO.CREATOR.FILE.uploadFile({ report_name: this.REPORT_NAME, field_name: 'Attachments', file: f, id: newId }));
                                 await Promise.all(uploads);
                             }
-
                             const msg = status === 'Draft' ? 'PO saved as Draft!' : 'PO submitted for approval!';
                             Toast.fire({ icon: 'success', title: msg });
-                            this.closeModal();
-                            this.searchInput = '';
-                            this.searchQuery = '';
-                            this.fetchRecords();
-                        } else {
-                            throw new Error(res.message || 'Creation failed.');
-                        }
-                    } catch (err) {
-                        Toast.fire({ icon: 'error', title: err.message || 'Submission failed.' });
-                    } finally {
-                        this.submitting = false;
-                    }
+                            this.closeModal(); this.searchInput = ''; this.searchQuery = ''; this.fetchRecords();
+                        } else { throw new Error(res.message || 'Creation failed.'); }
+                    } catch (err) { Toast.fire({ icon: 'error', title: err.message || 'Submission failed.' }); } finally { this.submitting = false; }
                 },
 
-                formatDateForZoho(dateStr) {
-                    if (!dateStr) return '';
-                    const d = dayjs(dateStr);
-                    return d.isValid() ? d.format('DD-MMM-YYYY') : dateStr;
-                }
-
+                formatDateForZoho(dateStr) { if (!dateStr) return ''; const d = dayjs(dateStr); return d.isValid() ? d.format('DD-MMM-YYYY') : dateStr; }
             }));
         });
     </script>

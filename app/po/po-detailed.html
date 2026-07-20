@@ -629,7 +629,7 @@
 
                         <button x-show="isSubmitted"
                             @click="openActionModal('Reject Purchase Order', 'Rejected', 'bg-white text-red-600 border border-red-300', 'hover:bg-red-50')"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors no-underline cursor-pointer shadow-sm">
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-red-7z00 border border-red-300 hover:bg-red-50 transition-colors no-underline cursor-pointer shadow-sm">
                             <i class="bi bi-x-lg"></i> Reject
                         </button>
                     </div>
@@ -961,16 +961,15 @@
                                     }
                                 }
                             };
-                            console.log({ prActionConfig })
-                            await ZOHO.CREATOR.DATA.addRecords(prActionConfig);
+                        await ZOHO.CREATOR.DATA.addRecords(prActionConfig);
                         }
 
-                        Toast.fire({ icon: 'success', title: 'Action completed successfully' });
+                        Toast.fire({ icon: this.pendingStatus === 'Rejected' ? 'warning' : 'success', title: `PO ${this.pendingStatus} successfully` });
                         this.closeActionModal();
                         this.fetchData();
                     } catch (err) {
                         console.error(err);
-                        Toast.fire({ icon: 'error', title: err.message || 'Action failed' });
+                        Toast.fire({ icon: 'error', title: err.message || `Failed to ${this.pendingStatus.toLowerCase()} PO` });
                     } finally {
                         this.isSubmitting = false;
                     }

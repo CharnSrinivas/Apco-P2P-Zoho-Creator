@@ -652,6 +652,17 @@
                         </template>
                         <span x-text="isExporting ? 'Preparing...' : 'Print QCS'"></span>
                     </button>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button @click="isQcApproved && createPO()"
+                            :disabled="!isQcApproved"
+                            :title="isQcApproved ? 'Create Purchase Order' : 'QC must be Approved before creating a PO'"
+                            :class="isQcApproved
+                                ? 'bg-[#1B5CA8] hover:bg-[#12427b] text-white cursor-pointer'
+                                : 'bg-gray-200 text-gray-400 cursor-not-allowed'"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-sm">
+                            <i class="bi bi-cart-plus"></i> Create PO
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -1305,6 +1316,10 @@
                         .includes(s);
                 },
                 get isFreezed() { return (this.rec.Status || '').toLowerCase() === 'freezed'; },
+                get isQcApproved() {
+                    const s = (this.rec.Status || '').toLowerCase();
+                    return s === 'approved' || s === 'finalized';
+                },
                 get showActionButtons() {
                     const s = (this.rec.Status || '').toLowerCase(); return ['submitted',
                         'freezed', 'requested for re negotiation'
@@ -1505,6 +1520,24 @@
                 requestReNegotiation() {
                     this.openModal("Request Re Negotiation", "Requested For Re Negotiation",
                         "Quote Comparison", "bg-amber-500", "hover:bg-amber-600");
+                },
+
+                createPO() {
+                    let prId = '';
+                    // Handle dynamic JSON representation of PR_Ref
+                    if (this.rec.PR_Ref && this.rec.PR_Ref?.ID) {
+                        prId = this.rec.PR_Ref.ID || '';
+                    } else if (this.rec.PR_Ref) {
+                        prId = this.rec.PR_Ref;
+                    }
+
+                    const qcId = this.recordId;
+
+                    ZOHO.CREATOR.UTIL.navigateParentURL({
+                        action: 'open',
+                        window: 'same',
+                        url: `#Page:Purchase_Orders?prId=${prId}&qcId=${qcId}&createPo=true`
+                    });
                 },
 
                 async submitAction() {

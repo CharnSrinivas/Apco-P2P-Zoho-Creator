@@ -1318,12 +1318,12 @@
                 async submitAction() {
                     this.isSubmitting = true;
                     try {
-                        // Step 1: If approving, update the RFQ's own Status to "Approved" first
-                        if (this.pendingStatus === 'Approved') {
+                        // Step 1: Update the RFQ's own Status field for Approve or Reject
+                        if (this.pendingStatus === 'Approved' || this.pendingStatus === 'Rejected') {
                             const updateRes = await ZOHO.CREATOR.DATA.updateRecordById({
                                 report_name: "Request_For_Quotation_Report",
                                 id: this.recordId,
-                                payload: { data: { Status: "Approved" } }
+                                payload: { data: { Status: this.pendingStatus } }
                             });
                             if (updateRes.code !== 3000) {
                                 throw new Error(updateRes.message || 'Failed to update RFQ status');
