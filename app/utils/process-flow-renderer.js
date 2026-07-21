@@ -29,14 +29,89 @@ const P2PWorkflowUtils = {
 		{ key: "bill", label: "Bill", icon: "bi-coin", page: "Bills" },
 		{ key: "payment", label: "Payment", icon: "bi-cash", page: "Payments" },
 	],
-	CUSTOM_API_NAMES: {
-		FETCH_PR_DETAILS: "Prod__Fetch_PR_Details",
-		FETCH_RFQ_DETAILS: "Prod__Get_RFQ_Details",
-		FETCH_QC_DETAILS: "Prod__Fetch_Vendor_Comparison_Details",
-		SEND_RFQ_EMAIL_TO_VENDOR: "Prod__Send_RFQ_Email_To_Vendor",
-		CHECK_ITEM_IN_GRN: "Prod__Check_Vendor_Requirement_For_Item",
-		FETCH_PO_DETAILS: "Prod__Fetch_PO_Details",
-		FETCH_GRN_DETAILS: "Prod__Fetch_GRN_Details",
+
+	// Base API names without environment prefix.
+	// Use getApiName(key) to get the fully-prefixed name at runtime.
+	_API_BASE_NAMES: {
+		FETCH_PR_DETAILS: "Fetch_PR_Details",
+		FETCH_RFQ_DETAILS: "Get_RFQ_Details",
+		FETCH_QC_DETAILS: "Fetch_Vendor_Comparison_Details",
+		SEND_RFQ_EMAIL_TO_VENDOR: "Send_RFQ_Email_To_Vendor",
+		CHECK_ITEM_IN_GRN: "Check_Vendor_Requirement_For_Item",
+		FETCH_PO_DETAILS: "Fetch_PO_Details",
+		FETCH_GRN_DETAILS: "Fetch_GRN_Details",
+	},
+
+	// Resolved prefix — set by init(), defaults to "Dev__" until resolved.
+	_envPrefix: "Dev__",
+
+	// Promise that resolves once the environment prefix has been detected.
+	// Await this before calling getApiName() in critical paths.
+	_envReady: null,
+
+	/**
+	 * Detect the current Zoho Creator environment and cache the API prefix.
+	 * Call once on widget load (e.g. in ZOHO.CREATOR.init callback).
+	 *
+	 * Uses ZOHO.CREATOR.UTIL.getInitParams() — the response includes
+	 * `envUrlFragment` (e.g. "/environment/development" or "/environment/production").
+	 *
+	 * @returns {Promise<string>} Resolves to the active prefix ("Dev__" | "Prod__").
+	 */
+	init: function () {
+		if (this._envReady) return this._envReady;
+
+		this._envReady = ZOHO.CREATOR.UTIL.getInitParams()
+			.then((response) => {
+				const fragment =
+					(response && response.envUrlFragment) || "";
+				// Development environment contains "development" in the fragment
+				const isDev = fragment.toLowerCase().includes("development");
+				this._envPrefix = isDev ? "Dev__" : "Prod__";
+				return this._envPrefix;
+			})
+			.catch(() => {
+				// Fallback: keep default "Dev__" on error to avoid
+				// accidentally calling production APIs in unknown environments.
+				this._envPrefix = "Dev__";
+				return this._envPrefix;
+			});
+
+		return this._envReady;
+	},
+
+	/**
+	 * Returns the fully-prefixed custom API name for the given key.
+	 * Make sure init() has been awaited before calling this.
+	 *
+	 * @param {string} key - A key from _API_BASE_NAMES (e.g. "FETCH_PR_DETAILS")
+	 * @returns {string} e.g. "Dev__Fetch_PR_Details" or "Prod__Fetch_PR_Details"
+	 */
+	getApiName: function (key) {
+		const base = this._API_BASE_NAMES[key];
+		if (!base) {
+			console.warn(`P2PWorkflowUtils.getApiName: unknown key "${key}"`);
+			return key;
+		}
+		return this._envPrefix + base;
+	},
+
+	/**
+	 * A live map of all custom API names with the correct environment prefix applied.
+	 * Use this in HTML/JS instead of hardcoding string keys.
+	 *
+	 * Example:
+	 *   api_name: P2PWorkflowUtils.API.FETCH_PR_DETAILS
+	 *   // → "Dev__Fetch_PR_Details"  (development)
+	 *   // → "Prod__Fetch_PR_Details" (production)
+	 *
+	 * @returns {{ [key: string]: string }}
+	 */
+	get API() {
+		const prefix = this._envPrefix;
+		return Object.fromEntries(
+			Object.entries(this._API_BASE_NAMES).map(([k, v]) => [k, prefix + v])
+		);
 	},
 	// Helper: Map Creator Stage Strings to Step Keys
 	stageToStepKey: function (stage) {
