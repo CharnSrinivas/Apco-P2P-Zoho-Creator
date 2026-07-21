@@ -124,22 +124,24 @@
             color: #1B5CA8;
         }
 
+        .po-spinner,
+        .draft-spinner {
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
         .po-spinner {
             border: 2.5px solid #e5e7eb;
             border-top-color: #1B5CA8;
-            border-radius: 50%;
             width: 28px;
             height: 28px;
-            animation: spin 0.7s linear infinite;
         }
 
         .draft-spinner {
             border: 2px solid #e5e7eb;
             border-top-color: #6b7280;
-            border-radius: 50%;
             width: 14px;
             height: 14px;
-            animation: spin 0.7s linear infinite;
         }
 
         @keyframes spin {
@@ -186,8 +188,25 @@
             color: #111827 !important;
         }
 
-        .ts-dropdown .option:hover {
-            background-color: #e5e7eb !important;
+        .ts-control .item {
+            background-color: #EBF3FC !important;
+            color: #1B5CA8 !important;
+            border: 1px solid #c2defc !important;
+            border-radius: 0.25rem !important;
+            padding: 0.15rem 0.5rem !important;
+            margin: 0.15rem !important;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .ts-control .item .remove {
+            margin-left: 6px;
+            color: #1B5CA8;
+            opacity: 0.7;
+            cursor: pointer;
+            border-left: 1px solid #c2defc;
+            padding-left: 4px;
         }
 
         .grid-input {
@@ -214,35 +233,10 @@
             cursor: not-allowed;
         }
 
-        .grid-select .ts-control {
-            padding: 0.25rem 0.5rem !important;
-            font-size: 0.75rem !important;
-            min-height: 32px !important;
-            border-radius: 0.375rem !important;
-        }
-
         .modal-scroll {
             max-height: 78vh;
             overflow-y: auto;
             padding: 1.25rem;
-        }
-
-        .modal-scroll::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        .modal-scroll::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 4px;
-        }
-
-        .modal-scroll::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        .modal-scroll::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
         }
 
         .po-badge-status {
@@ -416,10 +410,6 @@
             transition: all 0.15s;
         }
 
-        .address-group:hover {
-            border-color: #cbd5e1;
-        }
-
         .address-group .address-label {
             font-size: 0.6rem;
             font-weight: 700;
@@ -445,25 +435,12 @@
             border: 1px solid #e5e7eb;
             border-radius: 0.3rem;
             outline: none;
-            transition: all 0.15s;
-        }
-
-        .address-group .addr-row input:focus {
-            border-color: #1B5CA8;
-            box-shadow: 0 0 0 3px rgba(27, 92, 168, 0.10);
-        }
-
-        .address-group .addr-row input:disabled {
-            background: #f3f4f6;
-            color: #4b5563;
-            cursor: not-allowed;
         }
 
         .address-group .addr-row .addr-label-sm {
             font-size: 0.6rem;
             font-weight: 600;
             color: #6b7280;
-            width: 100%;
             margin-bottom: 0.1rem;
         }
 
@@ -479,7 +456,7 @@
 <body class="bg-gray-50 p-6 font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased">
     <div id="app" x-data="poApp()" x-init="init()" x-cloak class="max-w-6xl mx-auto">
 
-        <!-- ===== STATS ===== -->
+        <!-- ===== STATS BANNER ===== -->
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 mb-4">
             <div class="stat-card stat-total">
                 <div class="stat-label">Total</div>
@@ -513,7 +490,7 @@
             </div>
         </div>
 
-        <!-- ===== HEADER & TOOLBAR ===== -->
+        <!-- ===== HEADER TOOLBAR ===== -->
         <div class="flex items-center justify-between mt-[18px] mb-2">
             <span class="text-[13.5px] font-medium text-gray-900">Purchase Orders</span>
         </div>
@@ -532,7 +509,7 @@
                     <i
                         class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px] pointer-events-none"></i>
                     <input x-model="searchInput" @input="onSearchInput()"
-                        class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[200px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10"
+                        class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[200px] focus:outline-none focus:border-[#1B5CA8]"
                         type="text" placeholder="Search by PO #, Unit…" />
                 </div>
                 <button @click="openCreateModal()"
@@ -542,12 +519,12 @@
             </div>
         </div>
 
-        <!-- ===== TABLE ===== -->
+        <!-- ===== DASHBOARD TABLE ===== -->
         <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
             <table class="w-full border-collapse" style="min-width:900px">
                 <colgroup>
                     <col style="width:100px">
-                    <col style="width:110px">
+                    <col style="width:130px">
                     <col style="width:130px">
                     <col style="width:130px">
                     <col style="width:100px">
@@ -563,8 +540,7 @@
                             <th @click="handleSortClick(col.key)"
                                 class="px-3 py-2 text-[11px] font-semibold text-gray-500 tracking-wide whitespace-nowrap"
                                 :class="[col.align === 'center' ? 'text-center' : 'text-left', sortColumn === col.key ? 'sort-active' : '']">
-                                <span x-text="col.label"></span>
-                                <span class="sort-indicator"
+                                <span x-text="col.label"></span><span class="sort-indicator"
                                     x-text="sortColumn === col.key ? (sortDirection === 'asc' ? '▲' : '▼') : ''"></span>
                             </th>
                         </template>
@@ -584,29 +560,19 @@
                     </tr>
                     <tr x-show="!isLoading && pagedRecords.length === 0">
                         <td colspan="10" class="px-3 py-12 text-center">
-                            <div class="text-gray-400">
-                                <i class="bi bi-clipboard-x text-3xl mb-2 block"></i>
+                            <div class="text-gray-400"><i class="bi bi-clipboard-x text-3xl mb-2 block"></i>
                                 <div class="text-sm font-medium text-gray-500">No records found</div>
                             </div>
                         </td>
                     </tr>
                     <template x-for="rec in pagedRecords" :key="rec.ID">
                         <tr class="border-b border-gray-100 hover:bg-[#EBF3FC] transition-colors duration-150 group">
-                            <td class="px-3 py-[9px] align-middle whitespace-nowrap">
-                                <span class="font-semibold text-[#1B5CA8] font-mono text-[11px]"
-                                    x-text="rec._poRef"></span>
-                            </td>
-                            <td class="px-3 py-[9px] align-middle whitespace-nowrap">
-                                <template x-if="rec._prId">
-                                    <a :href="'#Page:PR_Detailed?recordId=' + rec._prId" target="_parent"
-                                        class="font-semibold text-[#1B5CA8] hover:underline font-mono text-[11px]"
-                                        x-text="rec._prRef"></a>
-                                </template>
-                                <template x-if="!rec._prId">
-                                    <span class="font-semibold text-gray-700 font-mono text-[11px]"
-                                        x-text="rec._prRef"></span>
-                                </template>
-                            </td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap"><span
+                                    class="font-semibold text-[#1B5CA8] font-mono text-[11px]"
+                                    x-text="rec._poRef"></span></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap"><span
+                                    class="font-semibold text-gray-700 font-mono text-[11px]"
+                                    x-text="rec._prRef"></span></td>
                             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900"
                                 x-text="rec._unitName"></td>
                             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[12px]"
@@ -615,13 +581,10 @@
                                 x-text="rec._poDateFormatted"></td>
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[11px] text-gray-500"
                                 x-text="rec._deliveryDateFormatted"></td>
-                            <td class="px-3 py-[9px] align-middle whitespace-nowrap">
-                                <span class="po-badge-status" :class="rec._statusClass">
-                                    <span class="dot"></span><span x-text="rec._statusLabel"></span>
-                                </span>
-                            </td>
-                            <td class="px-3 py-[9px] align-middle whitespace-nowrap">
-                                <span
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap"><span class="po-badge-status"
+                                    :class="rec._statusClass"><span class="dot"></span><span
+                                        x-text="rec._statusLabel"></span></span></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap"><span
                                     class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border"
                                     :class="getItemsStatusStyle(rec._itemsStatus)" x-text="rec._itemsStatus"></span>
                             </td>
@@ -630,90 +593,87 @@
                             <td
                                 class="px-3 py-[9px] align-middle whitespace-nowrap bg-white group-hover:bg-[#EBF3FC] sticky-action-cell">
                                 <button @click="viewPO(rec.ID)"
-                                    class="inline-flex items-center gap-[3px] px-2 py-[3px] rounded bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 text-[11px] font-medium transition-colors">
-                                    <i class="bi bi-box-arrow-up-right"></i> View
-                                </button>
+                                    class="inline-flex items-center gap-[3px] px-2 py-[3px] rounded bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 text-[11px] font-medium transition-colors"><i
+                                        class="bi bi-box-arrow-up-right"></i> View</button>
                             </td>
                         </tr>
                     </template>
                 </tbody>
             </table>
 
-            <!-- Pagination -->
+            <!-- Pagination Toolbar -->
             <div x-show="filteredRecords.length > 0"
                 class="flex items-center justify-between px-[13px] py-[9px] border-t border-gray-200 bg-gray-50 text-xs text-gray-500">
                 <span x-text="paginationInfoText"></span>
                 <div class="flex gap-1">
                     <button @click="goToPage(currentPage - 1)" :disabled="currentPage <= 1"
-                        class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors"
-                        :class="currentPage <= 1 ? 'opacity-40 cursor-not-allowed' : 'hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]'">
-                        <i class="bi bi-chevron-left"></i>
-                    </button>
+                        class="min-w-[27px] h-[27px] border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center disabled:opacity-40"><i
+                            class="bi bi-chevron-left"></i></button>
                     <template x-for="pg in pageButtons" :key="pg.key">
                         <button @click="pg.type === 'page' && goToPage(pg.value)" :disabled="pg.type === 'ellipsis'"
-                            class="min-w-[27px] h-[27px] px-1 rounded inline-flex items-center justify-center transition-colors"
-                            :class="pg.type === 'ellipsis' ? 'border-0 text-gray-400 text-xs cursor-default' : (pg.value === currentPage ? 'border border-[#1B5CA8] bg-[#1B5CA8] text-white font-semibold' : 'border border-gray-300 bg-white text-gray-600 hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]')"
+                            class="min-w-[27px] h-[27px] rounded inline-flex items-center justify-center transition-colors text-xs"
+                            :class="pg.type === 'ellipsis' ? 'text-gray-400 cursor-default' : (pg.value === currentPage ? 'border border-[#1B5CA8] bg-[#1B5CA8] text-white font-semibold' : 'border border-gray-300 bg-white text-gray-600 hover:bg-[#EBF3FC]')"
                             x-text="pg.type === 'ellipsis' ? '…' : pg.value"></button>
                     </template>
                     <button @click="goToPage(currentPage + 1)" :disabled="currentPage >= totalPages"
-                        class="min-w-[27px] h-[27px] px-1 border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center transition-colors"
-                        :class="currentPage >= totalPages ? 'opacity-40 cursor-not-allowed' : 'hover:border-[#1B5CA8] hover:text-[#1B5CA8] hover:bg-[#EBF3FC]'">
-                        <i class="bi bi-chevron-right"></i>
-                    </button>
+                        class="min-w-[27px] h-[27px] border border-gray-300 rounded bg-white text-gray-600 inline-flex items-center justify-center disabled:opacity-40"><i
+                            class="bi bi-chevron-right"></i></button>
                 </div>
             </div>
         </div>
 
         <!-- ============================================================= -->
-        <!-- CREATE PO MODAL                                               -->
+        <!-- CREATE PURCHASE ORDER MODAL                                   -->
         <!-- ============================================================= -->
-        <div class="po-modal-overlay" :class="{ active: showModal }" x-show="showModal" x-cloak>
+        <div class="po-modal-overlay" x-show="showModal" x-cloak>
             <div class="po-modal-bg" @click="closeModal()"></div>
-            <div class="po-modal-box max-w-6xl" style="max-height:94vh;">
+            <div class="po-modal-box max-w-5xl" style="max-height:94vh;">
                 <div
                     class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50 sticky top-0 z-20">
                     <h3 class="text-[15px] font-bold text-gray-800">Create Purchase Order</h3>
-                    <button @click="closeModal()" class="text-gray-400 hover:text-gray-700 transition-colors">
-                        <i class="bi bi-x-lg text-lg"></i>
-                    </button>
+                    <button @click="closeModal()" type="button" class="text-gray-400 hover:text-gray-700"><i
+                            class="bi bi-x-lg text-lg"></i></button>
                 </div>
 
                 <div class="modal-scroll">
                     <form @submit.prevent="submitPO()">
 
+                        <!-- VENDOR SELECTION FIRST -->
                         <div class="mb-4">
                             <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
-                                Purchase Requisition <span class="text-red-500">*</span>
-                                <span class="text-gray-400 font-normal ml-1">(Approved PRs ready for PO)</span>
+                                Select Vendor <span class="text-red-500">*</span>
+                                <span class="text-gray-400 font-normal ml-1">(Unlocks searchable PR multi-select
+                                    dropdown)</span>
                             </label>
-                            <select x-ref="prSelect" class="w-full text-xs" placeholder="Search PR Number…"></select>
+                            <select x-ref="vendorSelect" class="w-full text-xs"
+                                placeholder="Search and select vendor..."></select>
                         </div>
 
-                        <div class="mb-4" x-show="availableQCs.length > 0">
+                        <!-- SEARCHABLE & MULTI-SELECTABLE PR DROPDOWN -->
+                        <div class="mb-4">
                             <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
-                                Quote Comparison <span class="text-red-500">*</span>
-                                <span class="text-gray-400 font-normal ml-1">(Select a QC to auto-fill vendor &
-                                    rates)</span>
+                                Purchase Requisitions <span class="text-red-500">*</span>
+                                <span class="text-gray-400 font-normal ml-1">(Select one or multiple PR entries to
+                                    extract item matrix lines)</span>
                             </label>
-                            <select x-ref="qcSelect" class="w-full text-xs" placeholder="Select QC…"></select>
+                            <select x-ref="prSelect" class="w-full text-xs"
+                                placeholder="Search and select PR Numbers..." multiple></select>
                         </div>
 
-                        <div class="grid grid-cols-3 gap-4 mb-5">
+                        <!-- QUOTE COMPARISON CONDITIONAL DROPDOWN -->
+                        <div class="mb-4" x-show="availableQCs.length > 0">
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Quote
+                                Comparison Link</label>
+                            <select x-ref="qcSelect" class="w-full text-xs"
+                                placeholder="Select quote verification link…"></select>
+                        </div>
+
+                        <!-- DATES & ORG SETTINGS GRID -->
+                        <div class="grid grid-cols-4 gap-4 mb-4">
                             <div>
-                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
-                                    Unit <span x-show="form.prLocked"
-                                        class="ml-1 text-[10px] font-normal text-[#1B5CA8] bg-[#1B5CA8]/10 px-1.5 py-0.5 rounded-full">Auto</span>
-                                </label>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Unit
+                                    <span class="text-red-500">*</span></label>
                                 <select x-ref="unitSelect" class="w-full text-xs" :disabled="form.prLocked"></select>
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
-                                    Vendor
-                                    <span x-show="form.vendorLocked"
-                                        class="ml-1 text-[10px] font-normal text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded-full">From
-                                        QC</span>
-                                </label>
-                                <select x-ref="vendorSelect" class="w-full text-xs"></select>
                             </div>
                             <div>
                                 <label
@@ -730,156 +690,153 @@
                             <div>
                                 <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PO
                                     Date <span class="text-red-500">*</span></label>
-                                <input type="date" x-model="form.poDate" :min="todayStr"
-                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm" />
+                                <input type="date" x-model="form.poDate"
+                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px]" />
                             </div>
                             <div>
                                 <label
                                     class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Delivery
                                     Date <span class="text-red-500">*</span></label>
-                                <input type="date" x-model="form.deliveryDate" :min="todayStr"
-                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm" />
+                                <input type="date" x-model="form.deliveryDate"
+                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px]" />
                             </div>
                         </div>
 
-                        <!-- Addresses Section -->
+                        <!-- BILLING & DELIVERY ADDRESS -->
                         <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Billing Address -->
                             <div class="address-group">
-                                <span class="address-label"><i class="bi bi-building mr-1"></i> Billing Address</span>
+                                <span class="address-label"><i class="bi bi-building mr-1"></i> Billing Address
+                                    Details</span>
                                 <div class="addr-row">
-                                    <div class="addr-field-wrap"><span class="addr-label-sm">Address Line 1</span><input
-                                            x-model="form.billingAddress.line1" placeholder="Street, building" /></div>
-                                    <div class="addr-field-wrap"><span class="addr-label-sm">Address Line 2</span><input
-                                            x-model="form.billingAddress.line2" placeholder="Area, landmark" /></div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">Line 1</span><input
+                                            x-model="form.billingAddress.line1" /></div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">Line 2</span><input
+                                            x-model="form.billingAddress.line2" /></div>
                                     <div class="addr-field-wrap"><span class="addr-label-sm">City</span><input
-                                            x-model="form.billingAddress.city" placeholder="City / District" /></div>
+                                            x-model="form.billingAddress.city" /></div>
                                     <div class="addr-field-wrap"><span class="addr-label-sm">State</span><input
-                                            x-model="form.billingAddress.state" placeholder="State" /></div>
-                                    <div class="addr-field-wrap"><span class="addr-label-sm">Postal Code</span><input
-                                            x-model="form.billingAddress.postal" placeholder="PIN" /></div>
+                                            x-model="form.billingAddress.state" /></div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">PIN</span><input
+                                            x-model="form.billingAddress.postal" /></div>
                                     <div class="addr-field-wrap"><span class="addr-label-sm">Country</span><input
-                                            x-model="form.billingAddress.country" placeholder="Country" /></div>
+                                            x-model="form.billingAddress.country" /></div>
                                 </div>
                             </div>
-                            <!-- Shipping Address -->
-                            <div class="address-group">
-                                <span class="address-label"><i class="bi bi-truck mr-1"></i> Shipping Address</span>
-                                <div class="addr-row">
-                                    <div class="addr-field-wrap"><span class="addr-label-sm">Address Line 1</span><input
-                                            x-model="form.shippingAddress.line1" placeholder="Street, building" /></div>
-                                    <div class="addr-field-wrap"><span class="addr-label-sm">Address Line 2</span><input
-                                            x-model="form.shippingAddress.line2" placeholder="Area, landmark" /></div>
-                                    <div class="addr-field-wrap"><span class="addr-label-sm">City</span><input
-                                            x-model="form.shippingAddress.city" placeholder="City / District" /></div>
-                                    <div class="addr-field-wrap"><span class="addr-label-sm">State</span><input
-                                            x-model="form.shippingAddress.state" placeholder="State" /></div>
-                                    <div class="addr-field-wrap"><span class="addr-label-sm">Postal Code</span><input
-                                            x-model="form.shippingAddress.postal" placeholder="PIN" /></div>
-                                    <div class="addr-field-wrap"><span class="addr-label-sm">Country</span><input
-                                            x-model="form.shippingAddress.country" placeholder="Country" /></div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Delivery Address -->
-                        <div class="mb-5">
                             <div class="address-group"
                                 :class="{ 'border-blue-200 bg-blue-50/30': form.deliveryLocked }">
-                                <span class="address-label"><i class="bi bi-geo-alt mr-1"></i> Delivery Address
-                                    <span x-show="form.deliveryLocked"
-                                        class="ml-1 text-[10px] font-normal text-[#1B5CA8] bg-[#1B5CA8]/10 px-1.5 py-0.5 rounded-full">As
-                                        Per Unit</span>
-                                </span>
-                                <div class="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2 mt-2">
-                                    <div class="addr-field-wrap"><span class="addr-label-sm">Address Line 1</span><input
-                                            x-model="form.deliveryAddress.line1" placeholder="Street, building"
-                                            :disabled="form.deliveryLocked" /></div>
-                                    <div class="addr-field-wrap"><span class="addr-label-sm">Address Line 2</span><input
-                                            x-model="form.deliveryAddress.line2" placeholder="Area, landmark"
-                                            :disabled="form.deliveryLocked" /></div>
+                                <span class="address-label"><i class="bi bi-geo-alt mr-1"></i> Delivery Drop
+                                    Address</span>
+                                <div class="grid grid-cols-2 gap-x-3 gap-y-1.5 mt-1">
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">Line 1</span><input
+                                            class="p-1 text-xs border rounded bg-white"
+                                            x-model="form.deliveryAddress.line1" :disabled="form.deliveryLocked" />
+                                    </div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">Line 2</span><input
+                                            class="p-1 text-xs border rounded bg-white"
+                                            x-model="form.deliveryAddress.line2" :disabled="form.deliveryLocked" />
+                                    </div>
                                     <div class="addr-field-wrap"><span class="addr-label-sm">City</span><input
-                                            x-model="form.deliveryAddress.city" placeholder="City / District"
-                                            :disabled="form.deliveryLocked" /></div>
+                                            class="p-1 text-xs border rounded bg-white"
+                                            x-model="form.deliveryAddress.city" :disabled="form.deliveryLocked" /></div>
                                     <div class="addr-field-wrap"><span class="addr-label-sm">State</span><input
-                                            x-model="form.deliveryAddress.state" placeholder="State"
-                                            :disabled="form.deliveryLocked" /></div>
-                                    <div class="addr-field-wrap"><span class="addr-label-sm">Postal Code</span><input
-                                            x-model="form.deliveryAddress.postal" placeholder="PIN"
-                                            :disabled="form.deliveryLocked" /></div>
+                                            class="p-1 text-xs border rounded bg-white"
+                                            x-model="form.deliveryAddress.state" :disabled="form.deliveryLocked" />
+                                    </div>
+                                    <div class="addr-field-wrap"><span class="addr-label-sm">PIN</span><input
+                                            class="p-1 text-xs border rounded bg-white"
+                                            x-model="form.deliveryAddress.postal" :disabled="form.deliveryLocked" />
+                                    </div>
                                     <div class="addr-field-wrap"><span class="addr-label-sm">Country</span><input
-                                            x-model="form.deliveryAddress.country" placeholder="Country"
-                                            :disabled="form.deliveryLocked" /></div>
+                                            class="p-1 text-xs border rounded bg-white"
+                                            x-model="form.deliveryAddress.country" :disabled="form.deliveryLocked" />
+                                    </div>
                                 </div>
                                 <div class="mt-2 text-right">
                                     <button type="button" @click="form.deliveryLocked = !form.deliveryLocked"
-                                        :class="form.deliveryLocked ? 'bg-[#1B5CA8]/10 text-[#1B5CA8] hover:bg-[#1B5CA8]/20 border border-[#1B5CA8]/30' : 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300'"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-colors focus:outline-none">
-                                        <i :class="form.deliveryLocked ? 'bi bi-pencil-square' : 'bi bi-lock-fill'"
-                                            class="text-[12px]"></i>
-                                        <span x-text="form.deliveryLocked ? 'Edit Address' : 'Lock Address'"></span>
+                                        :class="form.deliveryLocked ? 'bg-[#1B5CA8]/10 text-[#1B5CA8]' : 'bg-amber-50 text-amber-700 border border-amber-300'"
+                                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold">
+                                        <i :class="form.deliveryLocked ? 'bi bi-pencil-square' : 'bi bi-lock-fill'"></i>
+                                        <span
+                                            x-text="form.deliveryLocked ? 'Edit Drop Location' : 'Lock to Target Unit'"></span>
                                     </button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Items Grid -->
+                        <!-- AGGREGATED ITEMS GRID WITH SELECTION CHECKBOXES -->
                         <div class="mb-5 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
                             <div
-                                class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                                <span class="text-xs font-semibold text-gray-700 tracking-wide">Items <span
-                                        class="text-red-500">*</span></span>
-                                <span class="text-[10px] text-gray-400" x-show="form.prLocked">Auto-filled from
-                                    PR</span>
+                                class="bg-gray-50 px-4 py-2.5 border-b border-gray-200 flex justify-between items-center">
+                                <span class="text-xs font-semibold text-gray-700">Aggregated Items from Line
+                                    Requisitions</span>
+                                <span class="text-[10px] text-gray-400">Duplicate items from multiple PRs will be summed
+                                    upon submission</span>
                             </div>
                             <div class="overflow-x-auto" style="overflow:visible;">
-                                <table class="w-full border-collapse min-w-[650px]">
+                                <table class="w-full border-collapse min-w-[700px]">
                                     <thead class="bg-white border-b border-gray-200">
                                         <tr>
                                             <th
-                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[28%]">
-                                                Item</th>
+                                                class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-center w-[6%]">
+                                                Include</th>
                                             <th
-                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[12%]">
-                                                Rate</th>
+                                                class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-left w-[32%]">
+                                                Item Details</th>
                                             <th
-                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[12%]">
-                                                Qty</th>
+                                                class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-left w-[14%]">
+                                                Negotiated Rate</th>
                                             <th
-                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[15%]">
-                                                Amount</th>
-                                            <th class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left">
-                                                Comment</th>
+                                                class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-left w-[14%]">
+                                                Quantity</th>
+                                            <th
+                                                class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-left w-[16%]">
+                                                Total Line Cost</th>
+                                            <th class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-left">
+                                                Internal Comments</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <template x-if="form.items.length === 0">
                                             <tr>
-                                                <td colspan="5"
-                                                    class="px-3 py-6 text-center text-xs text-gray-400 italic">No items.
-                                                    Select a PR to auto-fill.</td>
+                                                <td colspan="6"
+                                                    class="px-3 py-8 text-center text-xs text-gray-400 italic">No
+                                                    operational items found. Select linked PR numbers to aggregate
+                                                    lines.</td>
                                             </tr>
                                         </template>
-                                        <template x-for="(item, idx) in form.items" :key="item.uid">
-                                            <tr
-                                                class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors bg-white">
-                                                <td class="px-3 py-2">
-                                                    <div class="text-xs font-medium text-gray-700 truncate max-w-[180px]"
-                                                        x-text="item._itemName || '–'"></div>
-                                                    <input type="hidden" x-model="item.Item" />
+                                        <template x-for="item in form.items" :key="item.uid">
+                                            <tr class="border-b border-gray-100 transition-colors bg-white"
+                                                :class="!item.Selected ? 'opacity-40 bg-gray-50/50' : ''">
+                                                <td class="px-3 py-2 text-center align-middle">
+                                                    <input type="checkbox" x-model="item.Selected"
+                                                        @change="calcTotals()"
+                                                        class="w-3.5 h-3.5 text-[#1B5CA8] rounded border-gray-300 focus:ring-[#1B5CA8]/30 cursor-pointer" />
                                                 </td>
-                                                <td class="px-3 py-2"><input type="number" step="any" min="0"
-                                                        x-model.number="item.Rate" @input="calcTotals()"
-                                                        class="grid-input" /></td>
-                                                <td class="px-3 py-2"><input type="number" step="any" min="0"
-                                                        x-model.number="item.Quantity" @input="calcTotals()"
-                                                        class="grid-input" /></td>
-                                                <td class="px-3 py-2"><input type="text" :value="formatINR(item.Amount)"
-                                                        disabled
-                                                        class="grid-input bg-gray-100 text-[#1B5CA8] font-semibold cursor-not-allowed" />
+                                                <td class="px-3 py-2 align-middle">
+                                                    <div class="text-xs font-semibold text-gray-800 truncate max-w-[220px]"
+                                                        x-text="item._itemName"></div>
+                                                    <div class="text-[9px] text-[#1B5CA8] font-mono"
+                                                        x-text="'Origin: ' + item._prNumber"></div>
                                                 </td>
-                                                <td class="px-3 py-2"><input type="text" x-model="item.Comment"
-                                                        placeholder="Optional" class="grid-input" /></td>
+                                                <td class="px-3 py-2 align-middle">
+                                                    <input type="number" step="any" min="0" x-model.number="item.Rate"
+                                                        :disabled="!item.Selected" @input="calcTotals()"
+                                                        class="grid-input" />
+                                                </td>
+                                                <td class="px-3 py-2 align-middle">
+                                                    <input type="number" step="any" min="0"
+                                                        x-model.number="item.Quantity" :disabled="!item.Selected"
+                                                        @input="calcTotals()" class="grid-input font-medium" />
+                                                </td>
+                                                <td class="px-3 py-2 align-middle">
+                                                    <input type="text" :value="formatINR(item.Amount)" disabled
+                                                        class="grid-input bg-gray-100 font-bold text-[#1B5CA8] cursor-not-allowed" />
+                                                </td>
+                                                <td class="px-3 py-2 align-middle">
+                                                    <input type="text" x-model="item.Comment" :disabled="!item.Selected"
+                                                        placeholder="Line notes..." class="grid-input" />
+                                                </td>
                                             </tr>
                                         </template>
                                     </tbody>
@@ -887,64 +844,72 @@
                             </div>
                         </div>
 
-                        <!-- Totals -->
-                        <div class="grid grid-cols-3 gap-4 mb-5">
-                            <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                <label class="block text-[10px] font-semibold text-gray-500 tracking-wide mb-1">Sub
-                                    Total</label>
-                                <input type="text" :value="formatINR(form.subTotal)" disabled
-                                    class="w-full py-1.5 px-3 bg-white border border-gray-200 rounded-md text-[13px] font-semibold text-gray-700 cursor-not-allowed" />
+                        <!-- FINANCIAL BOTTOM WRAPPER PLACED ONE BELOW THE OTHER -->
+                        <div class="flex justify-end mb-5">
+                            <div
+                                class="w-full sm:w-[320px] bg-gray-50 p-3 rounded-lg border border-gray-200 flex flex-col gap-2.5">
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-0.5">Sub
+                                        Total</label>
+                                    <input type="text" :value="formatINR(form.subTotal)" disabled
+                                        class="w-full py-1 px-2.5 bg-gray-100 border border-gray-200 rounded text-xs font-semibold text-gray-700 cursor-not-allowed" />
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-[10px] font-semibold text-gray-500 uppercase mb-0.5">Discount
+                                        Value</label>
+                                    <input type="number" step="any" min="0" x-model.number="form.discount"
+                                        @input="calcTotals()"
+                                        class="w-full py-1 px-2.5 bg-white border border-gray-200 rounded text-xs focus:outline-none focus:border-[#1B5CA8]" />
+                                </div>
+                                <div class="pt-1.5 border-t border-gray-200">
+                                    <label class="block text-[10px] font-bold text-[#1B5CA8] uppercase mb-0.5">Total Net
+                                        Amount</label>
+                                    <input type="text" :value="formatINR(form.totalAmount)" disabled
+                                        class="w-full py-1.5 px-2.5 bg-[#EBF3FC] border border-[#1B5CA8]/30 rounded text-xs font-bold text-[#1B5CA8] cursor-not-allowed" />
+                                </div>
                             </div>
-                            <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        </div>
+
+                        <!-- FOOTER CONDITIONS -->
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
                                 <label
-                                    class="block text-[10px] font-semibold text-gray-500 tracking-wide mb-1">Discount</label>
-                                <input type="number" step="any" min="0" x-model.number="form.discount"
-                                    @input="calcTotals()"
-                                    class="w-full py-1.5 px-3 bg-white border border-gray-200 rounded-md text-[13px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10" />
+                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1">Notes</label>
+                                <textarea x-model="form.notes" rows="2"
+                                    class="w-full py-1.5 px-2.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:outline-none"></textarea>
                             </div>
-                            <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                <label class="block text-[10px] font-semibold text-gray-500 tracking-wide mb-1">Total
-                                    Amount</label>
-                                <input type="text" :value="formatINR(form.totalAmount)" disabled
-                                    class="w-full py-1.5 px-3 bg-[#EBF3FC] border border-[#1B5CA8]/30 rounded-md text-[13px] font-bold text-[#1B5CA8] cursor-not-allowed" />
-                            </div>
-                        </div>
-
-                        <!-- Notes & Terms -->
-                        <div class="grid grid-cols-2 gap-4 mb-5">
-                            <div><label
-                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Notes</label><textarea
-                                    x-model="form.notes" rows="2"
-                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></textarea>
-                            </div>
-                            <div><label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Terms
-                                    &amp; Conditions</label><textarea x-model="form.terms" rows="2"
-                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"></textarea>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1">Terms
+                                    &amp; Conditions</label>
+                                <textarea x-model="form.terms" rows="2"
+                                    class="w-full py-1.5 px-2.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:outline-none"></textarea>
                             </div>
                         </div>
 
-                        <!-- Attachments -->
-                        <div class="mb-5">
+                        <!-- ATTACHMENTS MAPPING -->
+                        <div class="mb-4">
                             <label
-                                class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Attachments</label>
+                                class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1">Documentation
+                                Attachments</label>
                             <input type="file" x-ref="fileInput" multiple
-                                class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-[#EBF3FC] file:text-[#1B5CA8] hover:file:bg-[#d8e8fa] transition-colors cursor-pointer border border-gray-200 rounded-lg bg-gray-50 py-1.5 px-2" />
+                                class="w-full text-xs text-gray-500 border border-gray-200 rounded-lg bg-gray-50 py-1 px-2" />
                         </div>
 
-                        <!-- Actions -->
-                        <div class="flex justify-end gap-2 border-t border-gray-100 pt-4 mt-2">
+                        <!-- ACTION FOOTER BAR -->
+                        <div class="flex justify-end gap-2 border-t border-gray-100 pt-3.5">
                             <button type="button" @click="closeModal()"
-                                class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
+                                class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50">Cancel</button>
                             <button type="submit" @click="submitAction = 'Draft'" :disabled="submitting"
-                                class="inline-flex items-center justify-center min-w-[100px] px-4 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors shadow-sm">
-                                <div x-show="submitting && submitAction === 'Draft'" class="draft-spinner"></div>
-                                <span x-show="!(submitting && submitAction === 'Draft')">Save as Draft</span>
+                                class="inline-flex items-center justify-center min-w-[100px] px-4 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50">
+                                <div x-show="submitting && submitAction === 'Draft'" class="draft-spinner mr-1.5"></div>
+                                <span>Save as Draft</span>
                             </button>
                             <button type="submit" @click="submitAction = 'Submitted'" :disabled="submitting"
-                                class="inline-flex items-center justify-center min-w-[120px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm">
-                                <div x-show="submitting && submitAction === 'Submitted'" class="po-spinner"
-                                    style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
-                                <span x-show="!(submitting && submitAction === 'Submitted')">Submit for Approval</span>
+                                class="inline-flex items-center justify-center min-w-[120px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b]">
+                                <div x-show="submitting && submitAction === 'Submitted'" class="po-spinner mr-1.5"
+                                    style="width:12px;height:12px;border-width:2px;border-top-color:white;"></div>
+                                <span>Submit for Approval</span>
                             </button>
                         </div>
                     </form>
@@ -955,552 +920,399 @@
 
     <script>
         document.addEventListener('alpine:init', () => {
-
-            const Toast = Swal.mixin({
-                toast: true, position: 'top-end', showConfirmButton: false, timer: 3500, timerProgressBar: true, customClass: { popup: 'font-[Lato] text-sm' }
-            });
+            const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true });
 
             Alpine.data('poApp', () => ({
-                REPORT_NAME: 'Purchase_Order_Report',
-                FORM_NAME: 'Purchase_Order',
-                PR_REPORT_NAME: 'Purchase_Requisition_Report',
-                QC_REPORT_NAME: 'Quote_Comparison_Report',
-                UNIT_REPORT_NAME: 'Unit_Report',
-                VENDOR_REPORT_NAME: 'Vendor_Report',
-                ITEMS_REPORT_NAME: 'Items_Report',
-
-                allRecords: [], filteredRecords: [], isLoading: true, currentFilter: 'all', currentPage: 1, perPage: 10,
-                searchQuery: '', searchInput: '', searchTimer: null, sortColumn: 'po_date', sortDirection: 'desc',
-                stats: { all: '–', draft: '–', submitted: '–', approved: '–', rejected: '–', cancelled: '–' },
-                filterTabs: [
-                    { key: 'all', label: 'All' }, { key: 'draft', label: 'Draft' }, { key: 'submitted', label: 'Submitted' },
-                    { key: 'approved', label: 'Approved' }, { key: 'rejected', label: 'Rejected' }, { key: 'cancelled', label: 'Cancelled' }
-                ],
-                sortableColumns: [
-                    { key: 'po_ref', label: 'PO #', align: 'left' }, { key: 'pr_ref', label: 'PR Ref', align: 'left' },
-                    { key: 'unit', label: 'Unit', align: 'left' }, { key: 'vendor', label: 'Vendor', align: 'left' },
-                    { key: 'po_date', label: 'PO Date', align: 'left' }, { key: 'delivery_date', label: 'Delivery Date', align: 'left' },
-                    { key: 'status', label: 'Status', align: 'left' }, { key: 'items_status', label: 'Items Status', align: 'left' },
-                    { key: 'total', label: 'Total Amount', align: 'left' }
-                ],
-
+                REPORT_NAME: 'Purchase_Order_Report', FORM_NAME: 'Purchase_Order', PR_REPORT_NAME: 'Purchase_Requisition_Report', QC_REPORT_NAME: 'Quote_Comparison_Report', UNIT_REPORT_NAME: 'Unit_Report', VENDOR_REPORT_NAME: 'Vendor_Report', ITEMS_REPORT_NAME: 'Items_Report',
+                allRecords: [], filteredRecords: [], isLoading: true, currentFilter: 'all', currentPage: 1, perPage: 10, searchQuery: '', searchInput: '', sortColumn: 'po_date', sortDirection: 'desc',
+                stats: { all: 0, draft: 0, submitted: 0, approved: 0, rejected: 0, cancelled: 0 },
+                filterTabs: [{ key: 'all', label: 'All' }, { key: 'draft', label: 'Draft' }, { key: 'submitted', label: 'Submitted' }, { key: 'approved', label: 'Approved' }, { key: 'rejected', label: 'Rejected' }, { key: 'cancelled', label: 'Cancelled' }],
+                sortableColumns: [{ key: 'po_ref', label: 'PO #', align: 'left' }, { key: 'pr_ref', label: 'PR Refs', align: 'left' }, { key: 'unit', label: 'Unit', align: 'left' }, { key: 'vendor', label: 'Vendor', align: 'left' }, { key: 'po_date', label: 'PO Date', align: 'left' }, { key: 'delivery_date', label: 'Delivery Date', align: 'left' }, { key: 'status', label: 'Status', align: 'left' }, { key: 'items_status', label: 'Items Status', align: 'left' }, { key: 'total', label: 'Total Amount', align: 'left' }],
                 showModal: false, submitting: false, submitAction: 'Submitted', todayStr: new Date().toISOString().split('T')[0],
-                tsPr: null, tsQc: null, tsUnit: null, tsVendor: null, tsPaymentTerms: null,
-                availableQCs: [], _pendingQcId: null,
-
+                tsPr: null, tsQc: null, tsUnit: null, tsVendor: null, tsPaymentTerms: null, availableQCs: [],
                 form: {
-                    prRef: '', prLocked: false, vendorLocked: false, qcRef: '', unit: '', vendor: '', paymentTerms: '',
-                    poDate: '', deliveryDate: '', notes: '', terms: '', items: [],
+                    prIds: [], prLocked: false, unit: '', vendor: '', paymentTerms: '', poDate: '', deliveryDate: '', notes: '', terms: '', items: [],
                     subTotal: 0, discount: 0, totalAmount: 0,
                     billingAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' },
-                    shippingAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' },
                     deliveryAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' },
-                    deliveryLocked: true, _prId: '', _qcId: '',
+                    deliveryLocked: true, _qcId: ''
                 },
-
                 get totalPages() { return Math.max(1, Math.ceil(this.filteredRecords.length / this.perPage)); },
                 get pagedRecords() { const start = (this.currentPage - 1) * this.perPage; return this.filteredRecords.slice(start, start + this.perPage); },
-                get paginationInfoText() {
-                    const total = this.filteredRecords.length; if (total === 0) return 'Showing 0 records';
-                    const start = (this.currentPage - 1) * this.perPage + 1; const end = Math.min(this.currentPage * this.perPage, total);
-                    return `Showing ${start}–${end} of ${total} records`;
-                },
-                get pageButtons() {
-                    const total = this.totalPages, cur = this.currentPage; let pages = [];
-                    for (let p = 1; p <= total; p++) { if (p <= 2 || p === total || (p >= cur - 1 && p <= cur + 1)) pages.push(p); }
-                    pages = [...new Set(pages)].sort((a, b) => a - b); const btns = [];
-                    for (let i = 0; i < pages.length; i++) {
-                        if (i > 0 && pages[i] - pages[i - 1] > 1) btns.push({ type: 'ellipsis', key: 'e' + pages[i] });
-                        btns.push({ type: 'page', key: 'p' + pages[i], value: pages[i] });
-                    }
-                    return btns;
-                },
+                get paginationInfoText() { const total = this.filteredRecords.length; if (total === 0) return 'Showing 0 records'; return `Showing ${(this.currentPage - 1) * this.perPage + 1}–${Math.min(this.currentPage * this.perPage, total)} of ${total} records`; },
+                get pageButtons() { const total = this.totalPages, cur = this.currentPage; let pages = []; for (let p = 1; p <= total; p++) { if (p <= 2 || p === total || (p >= cur - 1 && p <= cur + 1)) pages.push(p); } pages = [...new Set(pages)].sort((a, b) => a - b); const btns = []; for (let i = 0; i < pages.length; i++) { if (i > 0 && pages[i] - pages[i - 1] > 1) btns.push({ type: 'ellipsis', key: 'e' + pages[i] }); btns.push({ type: 'page', key: 'p' + pages[i], value: pages[i] }); } return btns; },
 
-                // ── INIT ──
-                init() {
-                    this.fetchRecords();
-                    this.$watch('searchInput', Alpine.debounce(() => {
-                        this.searchQuery = this.searchInput.trim(); this.currentPage = 1; this.fetchRecords();
-                    }, 400));
+                init() { this.fetchRecords(); this.$watch('searchInput', Alpine.debounce(() => { this.searchQuery = this.searchInput.trim(); this.currentPage = 1; this.fetchRecords(); }, 400)); },
 
-                    // URL Params capture for auto-loading
-                    ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
-                        console.log({params})
-                        const prId = params.prId || '';
-                        const qcId = params.qcId || '';
-                        const shouldCreate = String(params.createPo || '').toLowerCase() === 'true' || prId !== '';
-
-                        if (shouldCreate) {
-                            setTimeout(() => this.openCreateModal(prId, qcId), 300);
-                        }
-                    }).catch(() => { });
-                },
-
-                // ── DATA FETCHING ──
                 buildCriteria() {
-                    const parts = [];
-                    if (this.searchQuery) {
-                        const q = this.searchQuery.replace(/'/g, "\\'");
-                        parts.push(`(PO_Ref_Number.contains("${q}") || Unit.Name.contains("${q}") || Vendor.Display_Name.contains("${q}"))`);
-                    }
-                    if (this.currentFilter !== 'all') {
-                        const statusMap = { draft: 'Status == "Draft"', submitted: 'Status == "Submitted"', approved: 'Status == "Approved"', rejected: 'Status == "Rejected"', cancelled: 'Status == "Cancelled"' };
-                        if (statusMap[this.currentFilter]) parts.push(statusMap[this.currentFilter]);
-                    }
+                    const parts = []; if (this.searchQuery) { const q = this.searchQuery.replace(/'/g, "\\'"); parts.push(`(PO_Ref_Number.contains("${q}") || Unit.Name.contains("${q}") || Vendor.Display_Name.contains("${q}"))`); }
+                    if (this.currentFilter !== 'all') { const statusMap = { draft: 'Status == "Draft"', submitted: 'Status == "Submitted"', approved: 'Status == "Approved"', rejected: 'Status == "Rejected"', cancelled: 'Status == "Cancelled"' }; if (statusMap[this.currentFilter]) parts.push(statusMap[this.currentFilter]); }
                     return parts.join(' && ');
                 },
-
                 async fetchRecords() {
-                    this.isLoading = true;
-                    try {
+                    this.isLoading = true; try {
                         let acc = [], cursor = null; const crit = this.buildCriteria();
                         do {
-                            const config = { report_name: this.REPORT_NAME, max_records: 200, field_config: 'all' };
-                            if (crit) config.criteria = crit; if (cursor) config.record_cursor = cursor;
-                            const res = await ZOHO.CREATOR.DATA.getRecords(config);
-                            if (res.code === 3000 && res.data) { acc = acc.concat(res.data); cursor = res.data.length >= 200 ? res.record_cursor : null; } else { cursor = null; }
+                            const config = { report_name: this.REPORT_NAME, max_records: 200, field_config: 'all' }; if (crit) config.criteria = crit; if (cursor) config.record_cursor = cursor;
+                            const res = await ZOHO.CREATOR.DATA.getRecords(config); if (res.code === 3000 && res.data) { acc = acc.concat(res.data); cursor = res.data.length >= 200 ? res.record_cursor : null; } else { cursor = null; }
                         } while (cursor);
-                        this.allRecords = acc.map(r => this.decorateRecord(r));
-                        this.applySortAndRender(); this.computeStats();
+                        this.allRecords = acc.map(r => this.decorateRecord(r)); this.applySortAndRender(); this.computeStats();
                     } catch (e) { this.allRecords = []; this.filteredRecords = []; } finally { this.isLoading = false; }
                 },
-
                 decorateRecord(rec) {
                     rec._poRef = rec.PO_Ref_Number || rec.PO_Number || '–';
-                    const pr = rec.PR || (Array.isArray(rec.Purchase_Requisition) ? rec.Purchase_Requisition[0] : rec.Purchase_Requisition);
-                    rec._prRef = pr ? (pr.PR_Number || pr.display_value || pr.zc_display_value || pr) : '–';
-                    if (typeof rec._prRef === 'object') rec._prRef = rec._prRef.display_value || rec._prRef.zc_display_value || '–';
-                    rec._prId = pr ? (pr.ID || rec.purchase_requisition_id) : null;
-                    rec._unitName = rec.Unit?.Name || rec['Unit.Name'] || rec.Unit || '–';
-                    rec._vendorName = rec.Vendor?.Display_Name || rec.Vendor?.Name || rec.Vendor || '–';
+                    const prs = Array.isArray(rec.Purchase_Requisitions) ? rec.Purchase_Requisitions : (rec.Purchase_Requisition ? [rec.Purchase_Requisition] : []);
+                    rec._prRef = prs.map(pr => pr.display_value || pr.PR_Number || '–').join(', ') || '–';
+                    rec._unitName = rec.Unit?.Name || rec['Unit.Name'] || rec.Unit || '–'; rec._vendorName = rec.Vendor?.Display_Name || rec.Vendor?.Name || rec.Vendor || '–';
                     rec._poDateFormatted = this.formatDate(rec.PO_Date); rec._deliveryDateFormatted = this.formatDate(rec.delivery_date);
-                    const status = rec.Status || 'Draft'; rec._statusLabel = status; rec._statusClass = this.getStatusClass(status);
+                    rec._statusLabel = rec.Status || 'Draft'; rec._statusClass = this.getStatusClass(rec._statusLabel);
                     rec._itemsStatus = rec.Items_Status || '–'; rec._totalFormatted = this.formatINR(rec.Total_Amount);
                     return rec;
                 },
-
-                getStatusClass(status) {
-                    const map = { 'Draft': 'po-badge-draft', 'Submitted': 'po-badge-submitted', 'Approved': 'po-badge-approved', 'Rejected': 'po-badge-rejected', 'Cancelled': 'po-badge-cancelled' };
-                    return map[status] || 'po-badge-draft';
-                },
-                getItemsStatusStyle(status) {
-                    const st = (status || '').toLowerCase();
-                    if (st.includes('completely') || st === 'received') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-                    if (st.includes('partially') || st === 'partial') return 'bg-blue-50 text-blue-700 border-blue-200';
-                    if (st === 'pending') return 'bg-amber-50 text-amber-700 border-amber-200';
-                    return 'bg-gray-50 text-gray-600 border-gray-200';
-                },
-
+                getStatusClass(status) { const map = { 'Draft': 'po-badge-draft', 'Submitted': 'po-badge-submitted', 'Approved': 'po-badge-approved', 'Rejected': 'po-badge-rejected', 'Cancelled': 'po-badge-cancelled' }; return map[status] || 'po-badge-draft'; },
+                getItemsStatusStyle(status) { const st = (status || '').toLowerCase(); if (st.includes('completely')) return 'bg-emerald-50 text-emerald-700 border-emerald-200'; if (st.includes('partially')) return 'bg-blue-50 text-blue-700 border-blue-200'; return 'bg-amber-50 text-amber-700 border-amber-200'; },
                 applySortAndRender() {
                     const col = this.sortColumn, dir = this.sortDirection;
                     this.allRecords.sort((a, b) => {
-                        let va = this.getSortValue(a, col), vb = this.getSortValue(b, col); let cmp = 0;
-                        if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
-                        else { va = String(va).toLowerCase(); vb = String(vb).toLowerCase(); cmp = va < vb ? -1 : va > vb ? 1 : 0; }
+                        let va = this.getSortValue(a, col), vb = this.getSortValue(b, col); let cmp = va < vb ? -1 : va > vb ? 1 : 0;
                         return dir === 'asc' ? cmp : -cmp;
-                    });
-                    this.filteredRecords = this.allRecords;
+                    }); this.filteredRecords = this.allRecords;
                 },
-
                 getSortValue(rec, col) {
                     switch (col) {
-                        case 'po_ref': const ref = rec.PO_Ref_Number || rec.PO_Number || ''; const m = ref.match(/(\d+)$/); return m ? parseInt(m[1], 10) : ref.toLowerCase();
-                        case 'pr_ref': return rec._prRef || ''; case 'unit': return rec._unitName || ''; case 'vendor': return rec._vendorName || '';
-                        case 'po_date': return rec.PO_Date ? dayjs(rec.PO_Date).valueOf() : 0; case 'delivery_date': return rec.delivery_date ? dayjs(rec.delivery_date).valueOf() : 0;
-                        case 'status': return rec.Status || 'Draft'; case 'items_status': return rec._itemsStatus || ''; case 'total': return parseFloat(rec.Total_Amount) || 0;
+                        case 'po_ref': return (rec.PO_Ref_Number || '').toLowerCase(); case 'pr_ref': return rec._prRef || '';
+                        case 'po_date': return rec.PO_Date ? dayjs(rec.PO_Date).valueOf() : 0; case 'total': return parseFloat(rec.Total_Amount) || 0;
                         default: return '';
                     }
                 },
-
-                handleSortClick(col) {
-                    if (this.sortColumn === col) { this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc'; }
-                    else { this.sortColumn = col; this.sortDirection = (col === 'po_date' || col === 'delivery_date' || col === 'total') ? 'desc' : 'asc'; }
-                    this.currentPage = 1; this.applySortAndRender();
-                },
+                handleSortClick(col) { if (this.sortColumn === col) { this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc'; } else { this.sortColumn = col; this.sortDirection = 'asc'; } this.currentPage = 1; this.applySortAndRender(); },
                 setFilter(key) { this.currentFilter = key; this.currentPage = 1; this.fetchRecords(); },
-                onSearchInput() { clearTimeout(this.searchTimer); this.searchTimer = setTimeout(() => { this.searchQuery = this.searchInput.trim(); this.currentPage = 1; this.fetchRecords(); }, 400); },
+                onSearchInput() { this.fetchRecords(); },
                 goToPage(page) { this.currentPage = Math.max(1, Math.min(page, this.totalPages)); },
-
                 async computeStats() {
-                    const q = this.searchQuery.replace(/'/g, "\\'");
-                    const searchCrit = q ? `(PO_Ref_Number.contains("${q}") || Unit.Name.contains("${q}") || Vendor.Display_Name.contains("${q}"))` : '';
+                    const q = this.searchQuery.replace(/'/g, "\\'"); const searchCrit = q ? `(PO_Ref_Number.contains("${q}") || Unit.Name.contains("${q}") || Vendor.Display_Name.contains("${q}"))` : '';
                     const build = (sc) => [searchCrit, sc].filter(Boolean).join(' && ');
-                    const map = [
-                        { key: 'all', crit: build('') }, { key: 'draft', crit: build('Status == "Draft"') }, { key: 'submitted', crit: build('Status == "Submitted"') },
-                        { key: 'approved', crit: build('Status == "Approved"') }, { key: 'rejected', crit: build('Status == "Rejected"') }, { key: 'cancelled', crit: build('Status == "Cancelled"') }
-                    ];
-                    for (const m of map) {
-                        const config = { report_name: this.REPORT_NAME }; if (m.crit) config.criteria = m.crit;
-                        try { const res = await ZOHO.CREATOR.DATA.getRecordCount(config); this.stats[m.key] = res.result ? res.result.records_count : 0; } catch (e) { this.stats[m.key] = 0; }
-                    }
+                    const map = [{ key: 'all', crit: build('') }, { key: 'draft', crit: build('Status == "Draft"') }, { key: 'submitted', crit: build('Status == "Submitted"') }, { key: 'approved', crit: build('Status == "Approved"') }, { key: 'rejected', crit: build('Status == "Rejected"') }, { key: 'cancelled', crit: build('Status == "Cancelled"') }];
+                    for (const m of map) { const config = { report_name: this.REPORT_NAME }; if (m.crit) config.criteria = m.crit; try { const res = await ZOHO.CREATOR.DATA.getRecordCount(config); this.stats[m.key] = res.result ? res.result.records_count : 0; } catch (e) { this.stats[m.key] = 0; } }
                 },
 
-                // ── HELPERS ──
-                async getItemUnitPrice(itemId) {
-                    try {
-                        const res = await ZOHO.CREATOR.DATA.getRecordById({ report_name: this.ITEMS_REPORT_NAME, id: itemId });
-                        if (res.code === 3000 && res.data) { return parseFloat(res.data.unit_price) || 0; }
-                    } catch (e) { /* ignore */ }
-                    return 0;
-                },
-                formatDate(d) { if (!d) return '–'; const parsed = dayjs(d); return parsed.isValid() ? parsed.format('DD MMM YYYY') : d; },
-                formatINR(val) { if (val == null || isNaN(val) || val === '') return '–'; return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(val); },
-
+                async getItemUnitPrice(itemId) { try { const res = await ZOHO.CREATOR.DATA.getRecordById({ report_name: this.ITEMS_REPORT_NAME, id: itemId }); if (res.code === 3000 && res.data) return parseFloat(res.data.unit_price) || 0; } catch (e) { } return 0; },
+                formatDate(d) { if (!d) return '–'; return dayjs(d).isValid() ? dayjs(d).format('DD MMM YYYY') : d; },
+                formatINR(val) { if (val == null || isNaN(val) || val === '') return '₹0.00'; return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(val); },
                 viewPO(id) { ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', url: '#Page:PO_Detailed?recordId=' + id, window: 'same' }); },
 
-                // ── MODAL ──
-                openCreateModal(initialPrId = '', initialQcId = '') {
-                    this.form = {
-                        prRef: '', prLocked: false, vendorLocked: false, qcRef: '', unit: '', vendor: '', paymentTerms: '', poDate: this.todayStr, deliveryDate: '', notes: '', terms: '', items: [],
-                        subTotal: 0, discount: 0, totalAmount: 0,
-                        billingAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' },
-                        shippingAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' },
-                        deliveryAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' },
-                        deliveryLocked: true, _prId: '', _qcId: ''
-                    };
-                    this.availableQCs = [];
-                    this._pendingQcId = initialQcId || null;
-
-                    this.submitting = false; this.submitAction = 'Submitted';
-                    if (this.$refs.fileInput) this.$refs.fileInput.value = '';
-                    this.showModal = true;
-
-                    this.$nextTick(() => {
-                        this.initPrSelect(); this.initQcSelect(); this.initUnitSelect(); this.initVendorSelect(); this.initPaymentTermsSelect();
-
-                        // Automatically trigger PR selection if provided
-                        if (initialPrId) {
-                            this.tsPr.addOption({ ID: initialPrId, PR_Number: 'Loading PR...' });
-                            this.tsPr.setValue(initialPrId);
-                        }
-                    });
+                openCreateModal() {
+                    this.resetForm(); this.showModal = true; this.submitting = false;
+                    this.$nextTick(() => { this.initVendorSelect(); this.initPrSelect(); this.initQcSelect(); this.initUnitSelect(); this.initPaymentTermsSelect(); });
                 },
-
                 closeModal() {
                     this.showModal = false;
-                    if (this.tsPr) { this.tsPr.destroy(); this.tsPr = null; }
-                    if (this.tsQc) { this.tsQc.destroy(); this.tsQc = null; }
-                    if (this.tsUnit) { this.tsUnit.destroy(); this.tsUnit = null; }
-                    if (this.tsVendor) { this.tsVendor.destroy(); this.tsVendor = null; }
-                    if (this.tsPaymentTerms) { this.tsPaymentTerms.destroy(); this.tsPaymentTerms = null; }
-                },
-
-                // ── TOMSELECT ──
-                initPrSelect() {
-                    this.tsPr = new TomSelect(this.$refs.prSelect, {
-                        valueField: 'ID', labelField: 'PR_Number', searchField: ['PR_Number', 'Requisition_Number'],
-                        maxItems: 1, placeholder: 'Search PR Number…', loadThrottle: 350,
-                        onChange: (val) => {
-                            this.form._prId = val;
-                            if (val) { this.fetchPRDetails(val); this.loadQCsForPR(val); } else { this.resetForm(); }
-                        },
-                        load: (query, callback) => {
-                            if (!query.length) return callback(); const q = query.replace(/'/g, "\\'");
-                            ZOHO.CREATOR.DATA.getRecords({
-                                report_name: this.PR_REPORT_NAME, criteria: `(PR_Number.contains("${q}") && Status == "In Progress")`
-                            }).then(res => { callback((res.code === 3000 && res.data) ? res.data : []); }).catch(() => callback());
-                        },
-                        render: {
-                            option: (d, e) => `<div class="font-mono font-medium">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>`,
-                            item: (d, e) => `<div class="font-mono">${e(d.PR_Number || d.Requisition_Number || 'Unknown')}</div>`
-                        }
-                    });
-                },
-
-                initQcSelect() {
-                    this.tsQc = new TomSelect(this.$refs.qcSelect, {
-                        valueField: 'ID', labelField: 'QC_Ref_Number', searchField: ['QC_Ref_Number', 'Quote_Comparison_Subject'],
-                        maxItems: 1, placeholder: 'Select QC…',
-                        onChange: (val) => {
-                            this.form._qcId = val;
-                            if (val) {
-                                this.fetchQCDetails(val);
-                            } else {
-                                this.form.vendor = ''; this.form.paymentTerms = ''; this.form.vendorLocked = false;
-                                if (this.tsVendor) this.tsVendor.clear(true); if (this.tsPaymentTerms) this.tsPaymentTerms.clear(true);
-                                this.form.items.forEach(item => { item.Rate = 0; item.Amount = 0; });
-                                this.calcTotals();
-                            }
-                        },
-                        render: {
-                            option: (d, e) => `<div class="font-mono font-medium">${e(d.QC_Ref_Number || d.QC_Number || 'Unknown')}</div>`,
-                            item: (d, e) => `<div class="font-mono">${e(d.QC_Ref_Number || d.QC_Number || 'Unknown')}</div>`
-                        }
-                    });
-                },
-
-                initUnitSelect() {
-                    this.tsUnit = new TomSelect(this.$refs.unitSelect, {
-                        valueField: 'ID', labelField: 'Name', searchField: 'Name', maxItems: 1, placeholder: 'Select Unit…',
-                        render: { option: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`, item: (d, e) => `<div class="font-medium">${e(d.Name)}</div>` },
-                        onChange: (val) => {
-                            this.form.unit = val;
-                            if (val && this.form.deliveryLocked) { this.fetchUnitAddress(val); }
-                            else if (!val) { this.form.deliveryAddress = { line1: '', line2: '', city: '', state: '', postal: '', country: '' }; }
-                        }
-                    });
-                    ZOHO.CREATOR.DATA.getRecords({ report_name: this.UNIT_REPORT_NAME, max_records: 200 }).then(res => {
-                        if (res.code === 3000 && res.data) { this.tsUnit.addOption(res.data); this.tsUnit.refreshOptions(false); }
-                    });
+                    if (this.tsPr) this.tsPr.destroy(); if (this.tsQc) this.tsQc.destroy();
+                    if (this.tsUnit) this.tsUnit.destroy(); if (this.tsVendor) this.tsVendor.destroy();
+                    if (this.tsPaymentTerms) this.tsPaymentTerms.destroy();
                 },
 
                 initVendorSelect() {
                     this.tsVendor = new TomSelect(this.$refs.vendorSelect, {
-                        valueField: 'ID', labelField: 'Display_Name', searchField: ['Display_Name', 'Company_Name'],
-                        maxItems: 1, placeholder: 'Select Vendor…',
-                        render: { option: (d, e) => `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>`, item: (d, e) => `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>` },
-                        onChange: (val) => { this.form.vendor = val; if (val) this.fetchVendorAddress(val); }
+                        valueField: 'ID', labelField: 'Display_Name', searchField: ['Display_Name', 'Company_Name'], maxItems: 1,
+                        onChange: (val) => {
+                            this.form.vendor = val;
+                            if (val) {
+                                this.fetchVendorAddress(val); this.tsPr.enable(); this.tsPr.clear(true); this.form.items = [];
+                            } else {
+                                this.tsPr.clear(true); this.tsPr.disable(); this.form.items = [];
+                            }
+                        }
                     });
-                    ZOHO.CREATOR.DATA.getRecords({ report_name: this.VENDOR_REPORT_NAME, max_records: 200 }).then(res => {
-                        if (res.code === 3000 && res.data) { this.tsVendor.addOption(res.data); this.tsVendor.refreshOptions(false); }
+                    ZOHO.CREATOR.DATA.getRecords({ report_name: this.VENDOR_REPORT_NAME, max_records: 200 }).then(res => { if (res.code === 3000 && res.data) this.tsVendor.addOption(res.data); });
+                },
+                initPrSelect() {
+                    this.tsPr = new TomSelect(this.$refs.prSelect, {
+                        valueField: 'ID', labelField: 'PR_Number', searchField: ['PR_Number'], maxItems: null, plugins: ['remove_button'],
+                        onChange: (vals) => { this.form.prIds = vals || []; this.syncAggregatedPRItems(this.form.prIds); this.loadQCsForPRs(this.form.prIds); },
+                        load: (query, callback) => {
+                            ZOHO.CREATOR.DATA.getRecords({ report_name: this.PR_REPORT_NAME, criteria: `(Status == "Partially Ordered" || Status == "In Progress" || Status == "Approved")` }).then(res => { callback((res.code === 3000 && res.data) ? res.data : []); }).catch(() => callback());
+                        }
+                    });
+                    this.tsPr.disable();
+                },
+                initQcSelect() {
+                    this.tsQc = new TomSelect(this.$refs.qcSelect, {
+                        valueField: 'ID', labelField: 'QC_Ref_Number', maxItems: 1,
+                        onChange: (val) => { this.form._qcId = val; if (val) this.fetchQCDetails(val); }
                     });
                 },
-
+                initUnitSelect() {
+                    this.tsUnit = new TomSelect(this.$refs.unitSelect, {
+                        valueField: 'ID', labelField: 'Name', maxItems: 1,
+                        onChange: (val) => { this.form.unit = val; if (val && this.form.deliveryLocked) this.fetchUnitAddress(val); }
+                    });
+                    ZOHO.CREATOR.DATA.getRecords({ report_name: this.UNIT_REPORT_NAME, max_records: 200 }).then(res => { if (res.code === 3000 && res.data) this.tsUnit.addOption(res.data); });
+                },
                 initPaymentTermsSelect() {
-                    this.tsPaymentTerms = new TomSelect(this.$refs.paymentTermsSelect, {
-                        valueField: 'value', labelField: 'label', searchField: 'label', maxItems: 1, placeholder: 'Select Payment Terms…',
-                        options: [{ value: 'Advance', label: 'Advance' }, { value: '15 Days Credit', label: '15 Days Credit' }, { value: '30 Days Credit', label: '30 Days Credit' }, { value: '45 Days Credit', label: '45 Days Credit' }],
-                        render: { option: (d, e) => `<div class="font-medium">${e(d.label)}</div>`, item: (d, e) => `<div class="font-medium">${e(d.label)}</div>` },
-                        onChange: (val) => { this.form.paymentTerms = val; }
-                    });
+                    this.tsPaymentTerms = new TomSelect(this.$refs.paymentTermsSelect, { valueField: 'value', labelField: 'label', maxItems: 1, onChange: (val) => { this.form.paymentTerms = val; } });
                 },
 
-                async loadQCsForPR(prId) {
-                    try {
-                        const res = await ZOHO.CREATOR.DATA.getRecords({ report_name: this.QC_REPORT_NAME, criteria: `PR_Ref == "${prId}"`, max_records: 200 });
-                        if (res.code === 3000 && res.data) {
-                            this.availableQCs = res.data;
-                            if (this.tsQc) {
-                                this.tsQc.clearOptions(); this.tsQc.addOption(this.availableQCs); this.tsQc.refreshOptions(false);
+                async syncAggregatedPRItems(selectedPrIds) {
+                    this.form.items = this.form.items.filter(item => selectedPrIds.includes(item._prId));
+                    const existingPrIds = [...new Set(this.form.items.map(i => i._prId))];
+                    const newPrIds = selectedPrIds.filter(id => !existingPrIds.includes(id));
 
-                                // Auto-select pending QC if provided from URL
-                                if (this._pendingQcId) {
-                                    const pendingId = this._pendingQcId;
-                                    this._pendingQcId = null;
-                                    // If the QC wasn't returned by the PR-filtered query,
-                                    // add it explicitly so setValue doesn't silently fail
-                                    if (!this.tsQc.getOption(pendingId)) {
-                                        this.tsQc.addOption({ ID: pendingId, QC_Ref_Number: 'Loading QC...' });
-                                        this.tsQc.refreshOptions(false);
-                                    }
-                                    this.tsQc.setValue(pendingId);
-                                } else if (this.availableQCs.length === 1) {
-                                    this.tsQc.setValue(this.availableQCs[0].ID);
-                                } else {
-                                    this.tsQc.clear(true);
+                    for (const prId of newPrIds) {
+                        try {
+                            // Implemented fix: Using custom API as instructed.
+                            const prRes = await ZOHO.CREATOR.DATA.invokeCustomApi({ api_name: 'Dev__Fetch_PR_Details', http_method: 'GET', query_params: 'recId=' + prId });
+                            if (prRes && prRes.result && prRes.result.length > 0) {
+                                const pr = prRes.result[0];
+                                if (this.form.items.length === 0 && pr.Unit?.ID) {
+                                    this.form.unit = pr.Unit.ID; if (this.tsUnit) this.tsUnit.setValue(pr.Unit.ID, true);
+                                    if (pr.Due_Date) this.form.deliveryDate = dayjs(pr.Due_Date).format('YYYY-MM-DD');
+                                }
+
+                                // Fetch from Items to access Ordered_Quantity, fallback to Requested_Items
+                                const requisitionItemsList = (pr.Items && pr.Items.length > 0) ? pr.Items : (pr.Requested_Items || []);
+
+                                for (let idx = 0; idx < requisitionItemsList.length; idx++) {
+                                    const ri = requisitionItemsList[idx];
+                                    const itemId = ri.Item?.ID || ri.Item?.id || ri.Item || '';
+                                    const rate = itemId ? await this.getItemUnitPrice(itemId) : 0;
+
+                                    // Prepopulate with Remaining Quantity (Quantity - Ordered_Quantity)
+                                    const totalQty = parseFloat(ri.Quantity) || 0;
+                                    const orderedQty = parseFloat(ri.Ordered_Quantity) || 0;
+                                    const remainingQty = Math.max(0, totalQty - orderedQty);
+
+                                    // Skip items if already completely fulfilled
+                                    if (remainingQty <= 0) continue;
+
+                                    this.form.items.push({
+                                        uid: Date.now() + Math.random() + idx, Selected: true, Item: itemId,
+                                        _itemName: ri.Item?.item_name || ri.Item?.display_value || 'Item',
+                                        Quantity: remainingQty, Rate: rate, Amount: rate * remainingQty,
+                                        Comment: ri.Comment || '', _prId: prId, _prNumber: pr.PR_Number || ''
+                                    });
                                 }
                             }
-                        } else {
-                            this.availableQCs = [];
-                            if (this.tsQc) { this.tsQc.clearOptions(); this.tsQc.refreshOptions(false); }
-                            // Still try to auto-select the pending QC even if the PR filter returned nothing
-                            if (this._pendingQcId && this.tsQc) {
-                                const pendingId = this._pendingQcId;
-                                this._pendingQcId = null;
-                                this.tsQc.addOption({ ID: pendingId, QC_Ref_Number: 'Loading QC...' });
-                                this.tsQc.refreshOptions(false);
-                                this.tsQc.setValue(pendingId);
-                            }
-                        }
-                    } catch (e) {
-                        console.warn('Could not load QCs', e);
-                        // On error, still attempt to select the pending QC
-                        if (this._pendingQcId && this.tsQc) {
-                            const pendingId = this._pendingQcId;
-                            this._pendingQcId = null;
-                            this.tsQc.addOption({ ID: pendingId, QC_Ref_Number: 'Loading QC...' });
-                            this.tsQc.refreshOptions(false);
-                            this.tsQc.setValue(pendingId);
-                        }
+                        } catch (e) { console.error(e); }
                     }
+                    this.form.prLocked = this.form.prIds.length > 0;
+                    this.calcTotals();
                 },
 
-                async fetchPRDetails(prId) {
-                    Toast.fire({ icon: 'info', title: 'Fetching PR details…' });
+                async loadQCsForPRs(prIds) {
+                    if (!prIds || prIds.length === 0) return;
                     try {
-                        const prRes = await ZOHO.CREATOR.DATA.invokeCustomApi({ api_name: 'Dev__Fetch_PR_Details', http_method: 'GET', query_params: 'recId=' + prId });
-                        if (!prRes || !prRes.result || prRes.result.length === 0) { Toast.fire({ icon: 'error', title: 'PR not found.' }); return; }
-
-                        const pr = prRes.result[0];
-
-                        if (this.tsPr) {
-                            this.tsPr.updateOption(prId, { ID: prId, PR_Number: pr.PR_Number || pr.Requisition_Number || prId });
-                        }
-
-                        if (pr.Due_Date) {
-                            const parsed = dayjs(pr.Due_Date, ['DD-MMM-YYYY', 'YYYY-MM-DD', 'MM/DD/YYYY']);
-                            if (parsed.isValid()) { this.form.deliveryDate = parsed.format('YYYY-MM-DD'); }
-                        }
-
-                        if (pr.Unit && pr.Unit.ID) {
-                            const unit = pr.Unit; this.form.unit = unit.ID;
-                            if (this.tsUnit) {
-                                if (!this.tsUnit.getOption(unit.ID)) { this.tsUnit.addOption({ ID: unit.ID, Name: unit.Name || unit.ID }); }
-                                this.tsUnit.setValue(unit.ID, true); this.tsUnit.disable();
-                            }
-                            const unitAddr = unit.Address || {};
-                            if (this.form.deliveryLocked) {
-                                this.form.deliveryAddress = {
-                                    line1: unitAddr.address_line_1 || '', line2: unitAddr.address_line_2 || '', city: unitAddr.district_city || '',
-                                    state: unitAddr.state_province || '', postal: unitAddr.postal_code || '', country: unitAddr.country || ''
-                                };
-                            }
-                        }
-
-                        const requestedItems = pr.Requested_Items || []; this.form.items = []; const itemMap = {};
-                        requestedItems.forEach((ri, idx) => {
-                            const itemId = ri.Item?.ID || ri.Item?.id || ''; const itemName = ri.Item?.item_name || ri.Item?.display_value || ri.Item || 'Item ' + (idx + 1);
-                            const qty = parseFloat(ri.Quantity) || 0; const unit = ri.Unit || ''; const comment = ri.Comment || '';
-                            const uid = Date.now() + Math.random() + idx;
-                            const row = { uid, Item: itemId, _itemName: itemName, Unit: unit, Quantity: qty, Rate: 0, Amount: 0, Comment: comment, _originalIndex: idx };
-                            this.form.items.push(row); if (itemId) itemMap[itemId] = row;
-                        });
-
-                        for (const item of this.form.items) {
-                            if (item.Item) { const unitPrice = await this.getItemUnitPrice(item.Item); item.Rate = unitPrice; item.Amount = unitPrice * (item.Quantity || 0); }
-                        }
-
-                        this.form.prLocked = true; this.calcTotals();
-                        Toast.fire({ icon: 'success', title: `PR loaded — ${this.form.items.length} item(s)` });
-
-                    } catch (err) { console.error('fetchPRDetails error', err); Toast.fire({ icon: 'error', title: 'Failed to load PR details' }); }
+                        const formattedIds = prIds.map(id => `"${id}"`).join(',');
+                        const res = await ZOHO.CREATOR.DATA.getRecords({ report_name: this.QC_REPORT_NAME, criteria: `PR_Ref in [${formattedIds}]`, max_records: 200 });
+                        if (res.code === 3000 && res.data) { this.availableQCs = res.data; this.tsQc.clearOptions(); this.tsQc.addOption(res.data); }
+                    } catch (e) { }
                 },
 
                 async fetchQCDetails(qcId) {
-                    Toast.fire({ icon: 'info', title: 'Fetching QC details…' });
                     try {
                         const res = await ZOHO.CREATOR.DATA.getRecordById({ report_name: this.QC_REPORT_NAME, id: qcId });
                         if (res.code === 3000 && res.data) {
-                            const qc = res.data;
-
-                            // Auto-set vendor from QC finalized vendor
-                            if (qc.Finalized_Vendor) {
-                                const vId = typeof qc.Finalized_Vendor === 'object' ? qc.Finalized_Vendor.ID : qc.Finalized_Vendor;
-                                const vName = typeof qc.Finalized_Vendor === 'object' ? (qc.Finalized_Vendor.display_value || 'Selected Vendor') : 'Selected Vendor';
-
-                                if (this.tsVendor) {
-                                    this.tsVendor.addOption({ ID: vId, Display_Name: vName, Company_Name: vName });
-                                    this.tsVendor.setValue(vId);
-                                    this.form.vendorLocked = true;
-                                }
-                            }
-
-                            const qcLines = qc.Quotation_Comparison_Statement || qc.QuoteLines || []; const rateMap = {};
-                            qcLines.forEach(line => {
-                                const itemId = line.Items?.[0]?.ID || line.Items_Master?.ID || line.Item?.ID || line.Item || '';
-                                const rate = parseFloat(line.Negotiated_Rate) || parseFloat(line.Basic_Rate) || 0;
-                                if (itemId) rateMap[itemId] = rate;
-                                if (!itemId) { const name = line.Items?.[0]?.item_name || line.Items_Master?.item_name || line.Item?.item_name || ''; if (name) rateMap[name.toLowerCase()] = rate; }
-                            });
-
-                            this.form.items.forEach(item => {
-                                let rate = 0;
-                                if (item.Item && rateMap[item.Item]) { rate = rateMap[item.Item]; }
-                                else if (item._itemName) { const lowerName = item._itemName.toLowerCase(); if (rateMap[lowerName]) rate = rateMap[lowerName]; }
-                                if (rate > 0) { item.Rate = rate; item.Amount = rate * (item.Quantity || 0); }
-                            });
-
-                            this.calcTotals(); Toast.fire({ icon: 'success', title: 'QC loaded — vendor & rates updated.' });
-                        } else { Toast.fire({ icon: 'error', title: 'Failed to load QC details.' }); }
-                    } catch (err) { console.error('fetchQCDetails error', err); Toast.fire({ icon: 'error', title: 'Failed to load QC details' }); }
+                            const qcLines = res.data.Quotation_Comparison_Statement || []; const rateMap = {};
+                            qcLines.forEach(l => { const id = l.Item?.ID || l.Item || ''; if (id) rateMap[id] = parseFloat(l.Negotiated_Rate) || 0; });
+                            this.form.items.forEach(item => { if (item.Item && rateMap[item.Item]) { item.Rate = rateMap[item.Item]; item.Amount = item.Rate * item.Quantity; } });
+                            this.calcTotals();
+                        }
+                    } catch (err) { }
                 },
 
                 async fetchVendorAddress(vendorId) {
                     try {
                         const res = await ZOHO.CREATOR.DATA.getRecordById({ report_name: this.VENDOR_REPORT_NAME, id: vendorId });
                         if (res.code === 3000 && res.data) {
-                            const vendor = res.data; const billing = vendor.Billing_Address || {};
-                            this.form.billingAddress = {
-                                line1: billing.address_line_1 || '', line2: billing.address_line_2 || '', city: billing.district_city || '',
-                                state: billing.state_province || '', postal: billing.postal_code || '', country: billing.country || ''
-                            };
-                            this.form.shippingAddress = { ...this.form.billingAddress };
-                            if (this.form.deliveryLocked && this.form.unit) { this.fetchUnitAddress(this.form.unit); }
+                            const b = res.data.Billing_Address || {};
+                            this.form.billingAddress = { line1: b.address_line_1 || '', line2: b.address_line_2 || '', city: b.district_city || '', state: b.state_province || '', postal: b.postal_code || '', country: b.country || '' };
                         }
-                    } catch (e) { console.warn('Could not fetch vendor address', e); }
+                    } catch (e) { }
                 },
-
                 async fetchUnitAddress(unitId) {
                     try {
                         const res = await ZOHO.CREATOR.DATA.getRecordById({ report_name: this.UNIT_REPORT_NAME, id: unitId });
-                        if (res.code === 3000 && res.data) {
-                            const unit = res.data; const addr = unit.Address || {};
-                            if (this.form.deliveryLocked) {
-                                this.form.deliveryAddress = {
-                                    line1: addr.address_line_1 || '', line2: addr.address_line_2 || '', city: addr.district_city || '',
-                                    state: addr.state_province || '', postal: addr.postal_code || '', country: addr.country || ''
-                                };
-                            }
+                        if (res.code === 3000 && res.data?.Address) {
+                            const a = res.data.Address;
+                            this.form.deliveryAddress = { line1: a.address_line_1 || '', line2: a.address_line_2 || '', city: a.district_city || '', state: a.state_province || '', postal: a.postal_code || '', country: a.country || '' };
                         }
-                    } catch (e) { console.warn('Could not fetch unit address', e); }
+                    } catch (e) { }
                 },
 
                 resetForm() {
-                    this.form.prLocked = false; this.form.vendorLocked = false; this.form.unit = ''; this.form.vendor = ''; this.form.paymentTerms = ''; this.form.poDate = this.todayStr; this.form.deliveryDate = '';
-                    this.form.items = []; this.form.subTotal = 0; this.form.totalAmount = 0;
-                    this.form.billingAddress = { line1: '', line2: '', city: '', state: '', postal: '', country: '' };
-                    this.form.shippingAddress = { line1: '', line2: '', city: '', state: '', postal: '', country: '' };
-                    this.form.deliveryAddress = { line1: '', line2: '', city: '', state: '', postal: '', country: '' };
-                    this.form.deliveryLocked = true; this.availableQCs = [];
-
-                    if (this.tsQc) { this.tsQc.clearOptions(); this.tsQc.refreshOptions(false); }
-                    if (this.tsUnit) { this.tsUnit.enable(); this.tsUnit.clear(true); }
-                    if (this.tsVendor) { this.tsVendor.enable(); this.tsVendor.clear(true); }
-                    if (this.tsPaymentTerms) { this.tsPaymentTerms.enable(); this.tsPaymentTerms.clear(true); }
+                    this.form = { prIds: [], prLocked: false, unit: '', vendor: '', paymentTerms: '', poDate: this.todayStr, deliveryDate: '', notes: '', terms: '', items: [], subTotal: 0, discount: 0, totalAmount: 0, billingAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' }, deliveryAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' }, deliveryLocked: true, _qcId: '' };
+                    this.availableQCs = [];
                 },
-
                 calcTotals() {
                     let subTotal = 0;
-                    this.form.items.forEach(item => { const rate = parseFloat(item.Rate) || 0; const qty = parseFloat(item.Quantity) || 0; item.Amount = rate * qty; subTotal += item.Amount; });
-                    this.form.subTotal = subTotal; const discount = parseFloat(this.form.discount) || 0; this.form.totalAmount = Math.max(0, subTotal - discount);
+                    this.form.items.forEach(item => {
+                        if (item.Selected) {
+                            item.Amount = (parseFloat(item.Rate) || 0) * (parseFloat(item.Quantity) || 0);
+                            subTotal += item.Amount;
+                        } else {
+                            item.Amount = 0;
+                        }
+                    });
+                    this.form.subTotal = subTotal;
+                    this.form.totalAmount = Math.max(0, subTotal - (parseFloat(this.form.discount) || 0));
                 },
 
                 async submitPO() {
-                    if (!this.form._prId) { Toast.fire({ icon: 'error', title: 'Please select a Purchase Requisition.' }); return; }
-                    if (!this.form.unit) { Toast.fire({ icon: 'error', title: 'Unit is required.' }); return; }
-                    if (!this.form.vendor) { Toast.fire({ icon: 'error', title: 'Vendor is required.' }); return; }
-                    if (!this.form.paymentTerms) { Toast.fire({ icon: 'error', title: 'Payment Terms is required.' }); return; }
-                    if (!this.form.poDate) { Toast.fire({ icon: 'error', title: 'PO Date is required.' }); return; }
-                    if (!this.form.deliveryDate) { Toast.fire({ icon: 'error', title: 'Delivery Date is required.' }); return; }
-                    if (this.form.items.length === 0) { Toast.fire({ icon: 'error', title: 'At least one item is required.' }); return; }
+                    const activeItems = this.form.items.filter(i => i.Selected);
+                    if (!this.form.vendor || this.form.prIds.length === 0 || !this.form.unit || activeItems.length === 0) {
+                        Toast.fire({ icon: 'error', title: 'Complete all mandatory field configurations.' }); return;
+                    }
 
-                    let hasMissingRate = false;
-                    this.form.items.forEach(item => { if (!item.Rate || item.Rate <= 0) hasMissingRate = true; });
-                    if (hasMissingRate) { Toast.fire({ icon: 'warning', title: 'Some items have no rate. Please fill manually.' }); return; }
+                    // --- ITEM AGGREGATION LOGIC ---
+                    const groupedItemsMap = {};
+                    activeItems.forEach(i => {
+                        const itemId = i.Item;
+                        if (!groupedItemsMap[itemId]) {
+                            groupedItemsMap[itemId] = {
+                                Item: itemId,
+                                Rate: parseFloat(i.Rate) || 0,
+                                Quantity: 0,
+                                Amount: 0,
+                                Comment: ''
+                            };
+                        }
+
+                        groupedItemsMap[itemId].Quantity += (parseFloat(i.Quantity) || 0);
+                        groupedItemsMap[itemId].Amount += (parseFloat(i.Amount) || 0);
+
+                        if (i.Comment) {
+                            if (groupedItemsMap[itemId].Comment && !groupedItemsMap[itemId].Comment.includes(i.Comment)) {
+                                groupedItemsMap[itemId].Comment += ' | ' + i.Comment;
+                            } else if (!groupedItemsMap[itemId].Comment) {
+                                groupedItemsMap[itemId].Comment = i.Comment;
+                            }
+                        }
+                    });
+                    const finalGroupedItems = Object.values(groupedItemsMap);
 
                     this.submitting = true;
                     try {
-                        const status = this.submitAction === 'Draft' ? 'Draft' : 'Submitted';
-                        const itemsGrid = this.form.items.map(item => ({ Item: item.Item, Rate: parseFloat(item.Rate) || 0, Quantity: parseFloat(item.Quantity) || 0, Amount: parseFloat(item.Amount) || 0, Comment: item.Comment || '' }));
-                        const buildAddress = (addr) => ({ address_line_1: addr.line1 || '', address_line_2: addr.line2 || '', district_city: addr.city || '', state_province: addr.state || '', postal_code: addr.postal || '', country: addr.country || '' });
-
-                        const payload = {
+                        const poPayload = {
                             data: {
-                                Unit: this.form.unit, Vendor: this.form.vendor, Payment_Terms: this.form.paymentTerms, PO_Date: this.formatDateForZoho(this.form.poDate),
-                                delivery_date: this.formatDateForZoho(this.form.deliveryDate), Status: status, Notes: this.form.notes || '', Terms_Conditions: this.form.terms || '',
-                                Sub_Total: this.form.subTotal, Discount: parseFloat(this.form.discount) || 0, Total_Amount: this.form.totalAmount, Purchase_Requisition: this.form._prId,
-                                Quote_Comparison: this.form._qcId || '', Items: itemsGrid, Billing_Address: buildAddress(this.form.billingAddress),
-                                Shipping_Address: buildAddress(this.form.shippingAddress), Delivary_Address: buildAddress(this.form.deliveryAddress), CGST: 0, SGST: 0, IGST: 0,
-                                purchase_requisition_id: this.form._prId, Items_Status: "Pending",
+                                Unit: this.form.unit, Vendor: this.form.vendor, Payment_Terms: this.form.paymentTerms,
+                                PO_Date: dayjs(this.form.poDate).format('DD-MMM-YYYY'), delivery_date: dayjs(this.form.deliveryDate).format('DD-MMM-YYYY'),
+                                Status: this.submitAction === 'Draft' ? 'Draft' : 'Submitted', Notes: this.form.notes || '', Terms_Conditions: this.form.terms || '',
+                                Sub_Total: this.form.subTotal, Discount: parseFloat(this.form.discount) || 0, Total_Amount: this.form.totalAmount,
+                                Purchase_Requisitions: this.form.prIds, Quote_Comparison: this.form._qcId || '', Items_Status: "Pending",
+                                Billing_Address: { address_line_1: this.form.billingAddress.line1, address_line_2: this.form.billingAddress.line2, district_city: this.form.billingAddress.city, state_province: this.form.billingAddress.state, postal_code: this.form.billingAddress.postal, country: this.form.billingAddress.country },
+                                Delivary_Address: { address_line_1: this.form.deliveryAddress.line1, address_line_2: this.form.deliveryAddress.line2, district_city: this.form.deliveryAddress.city, state_province: this.form.deliveryAddress.state, postal_code: this.form.deliveryAddress.postal, country: this.form.deliveryAddress.country },
+                                Items: finalGroupedItems
                             }
                         };
 
-                        const res = await ZOHO.CREATOR.DATA.addRecords({ form_name: this.FORM_NAME, payload });
-                        if (res.code === 3000 && res.data) {
-                            const newId = res.data.ID;
-                            const files = this.$refs.fileInput?.files || [];
-                            if (files.length > 0) {
-                                const uploads = Array.from(files).map(f => ZOHO.CREATOR.FILE.uploadFile({ report_name: this.REPORT_NAME, field_name: 'Attachments', file: f, id: newId }));
-                                await Promise.all(uploads);
-                            }
-                            const msg = status === 'Draft' ? 'PO saved as Draft!' : 'PO submitted for approval!';
-                            Toast.fire({ icon: 'success', title: msg });
-                            this.closeModal(); this.searchInput = ''; this.searchQuery = ''; this.fetchRecords();
-                        } else { throw new Error(res.message || 'Creation failed.'); }
-                    } catch (err) { Toast.fire({ icon: 'error', title: err.message || 'Submission failed.' }); } finally { this.submitting = false; }
-                },
+                        const res = await ZOHO.CREATOR.DATA.addRecords({ form_name: this.FORM_NAME, payload: JSON.parse(JSON.stringify(poPayload)) });
+                        if (res.code === 3000) {
 
-                formatDateForZoho(dateStr) { if (!dateStr) return ''; const d = dayjs(dateStr); return d.isValid() ? d.format('DD-MMM-YYYY') : dateStr; }
+                            // =========================================================================
+                            // NEW (V2): UPDATE PR'S "ORDERED_QUANTITY" AND STATUS AFTER PO SUCCESS
+                            // =========================================================================
+                            try {
+                                const prUpdates = {};
+                                // Map items back to their origin PR ID
+                                activeItems.forEach(i => {
+                                    if (!prUpdates[i._prId]) prUpdates[i._prId] = [];
+                                    prUpdates[i._prId].push({ itemId: i.Item, orderQty: parseFloat(i.Quantity) || 0 });
+                                });
+
+                                // Loop through unique PRs and execute updates concurrently
+                                const prUpdatePromises = Object.keys(prUpdates).map(async prId => {
+                                    // Bug fix: Utilizing custom API over native getRecordById
+                                    const prRes = await ZOHO.CREATOR.DATA.invokeCustomApi({
+                                        api_name: 'Dev__Fetch_PR_Details',
+                                        http_method: 'GET',
+                                        query_params: 'recId=' + prId
+                                    });
+
+                                    if (prRes && prRes.result && prRes.result.length > 0) {
+                                        const prData = prRes.result[0];
+                                        const itemsSubform = (prData.Items && prData.Items.length > 0) ? prData.Items : (prData.Requested_Items || []);
+
+                                        let fullyOrdered = true;
+                                        let anyOrdered = false;
+
+                                        // Update subform rows matching the ordered Item ID
+                                        const updatedSubform = itemsSubform.map(row => {
+                                            // Extract the correct string ID for the Item lookup field
+                                            const rowItemId = row.Item?.ID || row.Item?.id || row.Item;
+                                            const match = prUpdates[prId].find(u => u.itemId == rowItemId);
+
+                                            const currentOQ = parseFloat(row.Ordered_Quantity) || 0;
+                                            const totalQty = parseFloat(row.Quantity) || 0;
+                                            let newOQ = currentOQ;
+
+                                            if (match) newOQ += match.orderQty;
+
+                                            // Determine line level status
+                                            let rowStatus = row.Status || 'Pending';
+                                            if (newOQ >= totalQty && totalQty > 0) {
+                                                rowStatus = 'Completely Ordered';
+                                            } else if (newOQ > 0) {
+                                                rowStatus = 'Partially Ordered';
+                                            }
+
+                                            if (newOQ < totalQty) fullyOrdered = false;
+                                            if (newOQ > 0) anyOrdered = true;
+
+                                            // Ensure date string is compatible with creator API
+                                            let dueDate = row.Due_Date || "";
+                                            if (dueDate && dueDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                                                dueDate = dayjs(dueDate).format('DD-MMM-YYYY');
+                                            }
+
+                                            // Return object mapping strictly with fields, dropping 'ID' property.
+                                            return {
+                                                Item: rowItemId,
+                                                Quantity: totalQty,
+                                                Ordered_Quantity: newOQ,
+                                                Due_Date: dueDate,
+                                                Comment: row.Comment || "",
+                                                Status: rowStatus
+                                            };
+                                        });
+
+                                        // Determine Master PR status based on Subform evaluation
+                                        let prMasterStatus = prData.Status;
+                                        if (fullyOrdered && itemsSubform.length > 0) {
+                                            prMasterStatus = 'Completely Ordered';
+                                        } else if (anyOrdered) {
+                                            prMasterStatus = 'Partially Ordered';
+                                        }
+
+                                        // Push updates back to original PR record using V2 Widget Syntax
+                                        return ZOHO.CREATOR.DATA.updateRecordById({
+                                            report_name: this.PR_REPORT_NAME,
+                                            id: prId,
+                                            payload: {
+                                                data: {
+                                                    Items: updatedSubform,
+                                                    Status: prMasterStatus
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+
+                                await Promise.all(prUpdatePromises);
+
+                            } catch (prErr) {
+                                console.error('Failed to sync updated quantities to Purchase Requisition:', prErr);
+                            }
+                            // =========================================================================
+
+                            Toast.fire({ icon: 'success', title: 'Purchase Order tracked successfully.' });
+                            this.closeModal(); this.fetchRecords();
+                        }
+                    } catch (err) {
+                        Toast.fire({ icon: 'error', title: 'Transaction failure.' });
+                    } finally {
+                        this.submitting = false;
+                    }
+                }
             }));
         });
     </script>

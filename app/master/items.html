@@ -549,7 +549,7 @@
             }
 
             do {
-              let config = { report_name: 'Items_Report', max_records: 200 };
+              let config = { report_name: 'Items_Report', max_records: 200, field_config: 'all' };
               if (criteria) config.criteria = criteria;
               if (cursor) config.record_cursor = cursor;
 
