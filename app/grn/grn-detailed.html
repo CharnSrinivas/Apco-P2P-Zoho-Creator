@@ -491,7 +491,7 @@
                 fetchData() {
                     this.isLoading = true;
                     ZOHO.CREATOR.DATA.invokeCustomApi({
-                        api_name: "Dev__Fetch_GRN_Details",
+                        api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_GRN_DETAILS,
                         http_method: "GET",
                         content_type: "application/json",
                         query_params: 'recId=' + this.recordId,
@@ -668,7 +668,7 @@
                         if (this.pendingStatus === 'Approved' && poId) {
                             // Fetch complete parent PO details using Custom API
                             const poRes = await ZOHO.CREATOR.DATA.invokeCustomApi({
-                                api_name: "Dev__Fetch_PO_Details",
+                                api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_PO_DETAILS,
                                 http_method: "GET",
                                 content_type: "application/json",
                                 query_params: 'recId=' + poId,

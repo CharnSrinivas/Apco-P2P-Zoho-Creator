@@ -1061,7 +1061,10 @@
                     for (const prId of newPrIds) {
                         try {
                             // Implemented fix: Using custom API as instructed.
-                            const prRes = await ZOHO.CREATOR.DATA.invokeCustomApi({ api_name: 'Dev__Fetch_PR_Details', http_method: 'GET', query_params: 'recId=' + prId });
+                            const prRes = await ZOHO.CREATOR.DATA.invokeCustomApi({
+                                api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_PR_DETAILS,
+                                http_method: 'GET', query_params: 'recId=' + prId
+                            });
                             if (prRes && prRes.result && prRes.result.length > 0) {
                                 const pr = prRes.result[0];
                                 if (this.form.items.length === 0 && pr.Unit?.ID) {
@@ -1223,7 +1226,7 @@
                                 const prUpdatePromises = Object.keys(prUpdates).map(async prId => {
                                     // Bug fix: Utilizing custom API over native getRecordById
                                     const prRes = await ZOHO.CREATOR.DATA.invokeCustomApi({
-                                        api_name: 'Dev__Fetch_PR_Details',
+                                        api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_PR_DETAILS,
                                         http_method: 'GET',
                                         query_params: 'recId=' + prId
                                     });

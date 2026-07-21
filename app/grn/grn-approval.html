@@ -864,7 +864,8 @@
                     Toast.fire({ icon: 'info', title: 'Fetching PO Details...' });
                     try {
                         let res = await ZOHO.CREATOR.DATA.invokeCustomApi({
-                            api_name: "Dev__Fetch_PO_Details", http_method: "GET",
+                            api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_PO_DETAILS,
+                            http_method: "GET",
                             query_params: 'recId=' + poId
                         });
 
