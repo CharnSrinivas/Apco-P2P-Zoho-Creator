@@ -1077,7 +1077,7 @@
 
                 Promise.all([
                     ZOHO.CREATOR.DATA.invokeCustomApi({
-                        api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_PR_DETAILS,
+                        api_name: P2PWorkflowUtils.API.FETCH_PR_DETAILS,
                         http_method: "GET",
                         content_type: "application/json",
                         query_params: 'recId=' + recordId,
@@ -1464,6 +1464,7 @@
 
             // ─── Initial load ──────────────────────────────────────────────
             function loadPrDetails() {
+                P2PWorkflowUtils.init(); // Detect env prefix (Dev__ / Prod__)
                 ZOHO.CREATOR.UTIL.getQueryParams().then(function (params) {
                     const recordId = params && params.recordId ? params.recordId : null;
                     if (!recordId) {

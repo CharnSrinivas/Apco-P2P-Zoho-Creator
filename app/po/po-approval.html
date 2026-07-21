@@ -942,7 +942,7 @@
                 get paginationInfoText() { const total = this.filteredRecords.length; if (total === 0) return 'Showing 0 records'; return `Showing ${(this.currentPage - 1) * this.perPage + 1}–${Math.min(this.currentPage * this.perPage, total)} of ${total} records`; },
                 get pageButtons() { const total = this.totalPages, cur = this.currentPage; let pages = []; for (let p = 1; p <= total; p++) { if (p <= 2 || p === total || (p >= cur - 1 && p <= cur + 1)) pages.push(p); } pages = [...new Set(pages)].sort((a, b) => a - b); const btns = []; for (let i = 0; i < pages.length; i++) { if (i > 0 && pages[i] - pages[i - 1] > 1) btns.push({ type: 'ellipsis', key: 'e' + pages[i] }); btns.push({ type: 'page', key: 'p' + pages[i], value: pages[i] }); } return btns; },
 
-                init() { this.fetchRecords(); this.$watch('searchInput', Alpine.debounce(() => { this.searchQuery = this.searchInput.trim(); this.currentPage = 1; this.fetchRecords(); }, 400)); },
+                init() { P2PWorkflowUtils.init(); this.fetchRecords(); this.$watch('searchInput', Alpine.debounce(() => { this.searchQuery = this.searchInput.trim(); this.currentPage = 1; this.fetchRecords(); }, 400)); },
 
                 buildCriteria() {
                     const parts = []; if (this.searchQuery) { const q = this.searchQuery.replace(/'/g, "\\'"); parts.push(`(PO_Ref_Number.contains("${q}") || Unit.Name.contains("${q}") || Vendor.Display_Name.contains("${q}"))`); }
@@ -1062,7 +1062,7 @@
                         try {
                             // Implemented fix: Using custom API as instructed.
                             const prRes = await ZOHO.CREATOR.DATA.invokeCustomApi({
-                                api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_PR_DETAILS,
+                                api_name: P2PWorkflowUtils.API.FETCH_PR_DETAILS,
                                 http_method: 'GET', query_params: 'recId=' + prId
                             });
                             if (prRes && prRes.result && prRes.result.length > 0) {
@@ -1226,7 +1226,7 @@
                                 const prUpdatePromises = Object.keys(prUpdates).map(async prId => {
                                     // Bug fix: Utilizing custom API over native getRecordById
                                     const prRes = await ZOHO.CREATOR.DATA.invokeCustomApi({
-                                        api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_PR_DETAILS,
+                                        api_name: P2PWorkflowUtils.API.FETCH_PR_DETAILS,
                                         http_method: 'GET',
                                         query_params: 'recId=' + prId
                                     });

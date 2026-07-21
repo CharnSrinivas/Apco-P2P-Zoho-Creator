@@ -748,6 +748,7 @@
 
                 // ===== INIT =====
                 initWidget() {
+                    P2PWorkflowUtils.init(); // Detect env prefix (Dev__ / Prod__)
                     ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
                         this.recordId = params?.recordId || null;
                         if (!this.recordId) {
@@ -766,7 +767,7 @@
                 fetchData() {
                     this.isLoading = true;
                     ZOHO.CREATOR.DATA.invokeCustomApi({
-                        api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_RFQ_DETAILS,
+                        api_name: P2PWorkflowUtils.API.FETCH_RFQ_DETAILS,
                         http_method: "GET",
                         content_type: "application/json",
                         query_params: 'recId=' + this.recordId,
@@ -1368,7 +1369,7 @@
                     this.sendingEmailVendorId = group.vendorId;
                     try {
                         const response = await ZOHO.CREATOR.DATA.invokeCustomApi({
-                            api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.SEND_RFQ_EMAIL_TO_VENDOR,
+                            api_name: P2PWorkflowUtils.API.SEND_RFQ_EMAIL_TO_VENDOR,
                             http_method: "POST",
                             content_type: "application/json",
                             payload: { rfqId: this.recordId, vendorId: group.vendorId }

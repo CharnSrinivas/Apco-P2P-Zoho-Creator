@@ -250,3 +250,67 @@
 [info] [2026-07-21T05:57:30.829Z] :  ==> app/pr/.DS_Store
 [info] [2026-07-21T05:57:30.829Z] :  ==> app/vendor-comparison/.DS_Store
 [info] [2026-07-21T05:57:30.829Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-07-21T09:19:36.716Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-07-21T09:19:36.722Z] :  ==> app/.DS_Store
+[info] [2026-07-21T09:19:36.722Z] :  ==> app/grn/.DS_Store
+[info] [2026-07-21T09:19:36.722Z] :  ==> app/pr/.DS_Store
+[info] [2026-07-21T09:19:36.722Z] :  ==> app/vendor-comparison/.DS_Store
+[info] [2026-07-21T09:19:36.723Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-07-21T09:19:36.726Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-07-21T09:19:36.726Z] :  ==> app/.DS_Store
+[info] [2026-07-21T09:19:36.726Z] :  ==> app/grn/.DS_Store
+[info] [2026-07-21T09:19:36.727Z] :  ==> app/pr/.DS_Store
+[info] [2026-07-21T09:19:36.727Z] :  ==> app/vendor-comparison/.DS_Store
+[info] [2026-07-21T09:19:36.727Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-07-21T12:47:03.080Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-07-21T12:47:03.087Z] :  ==> app/.DS_Store
+[info] [2026-07-21T12:47:03.087Z] :  ==> app/grn/.DS_Store
+[info] [2026-07-21T12:47:03.087Z] :  ==> app/pr/.DS_Store
+[info] [2026-07-21T12:47:03.087Z] :  ==> app/vendor-comparison/.DS_Store
+[info] [2026-07-21T12:47:03.088Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-07-21T12:47:11.900Z] : ✖ You are not currently logged in. Use command 'ZET login' to login.
+[info] [2026-07-21T12:47:19.515Z] : 
+[info] [2026-07-21T12:47:19.523Z] : Click this URL to login to your Zoho Account
+[info] [2026-07-21T12:47:19.523Z] : https://accounts.zoho.com/oauth/v2/auth?client_id=1000.gnjph6g96nf23jd4u14tba2egykhik&scope=ZAPPS.apps.ALL%20AaaServer.profile.READ%20ZMProcessors.connectors.CREATE&response_type=code&access_type=offline&prompt=consent&redirect_uri=http%3A%2F%2Flocalhost%3A9005
+[info] [2026-07-21T12:47:19.523Z] : Note: To login to CN DC, update the above URL from accounts.zoho.com to accounts.zoho.com.cn
+[info] [2026-07-21T12:47:19.523Z] : 
+[debug] [2026-07-21T12:47:39.856Z] : DCType Of the user is in
+[debug] [2026-07-21T12:47:39.861Z] : >>>> HTTP REQUEST : POST https://accounts.zoho.in/oauth/v2/token 
+<request query omitted>
+
+[debug] [2026-07-21T12:47:40.056Z] : <<<< HTTP RESPONSE : 200
+Response Headers{"server":"ZGS","date":"Tue, 21 Jul 2026 12:47:40 GMT","content-type":"application/json;charset=UTF-8","content-length":"336","connection":"keep-alive","set-cookie":["zalb_50e15ce8e1=d5a89c35acb18f66361eb8ed9d2d60f6; Path=/; Secure; HttpOnly","iamcsr=f9b694dc-d191-4544-a589-9ba52b730d69;path=/;SameSite=Strict;Secure;priority=high"],"cache-control":"no-store","x-content-type-options":"nosniff","content-security-policy":"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.zohocdn.com https://*.zoho.com https://*.zoho.eu https://*.zoho.com.cn https://*.zoho.com.au https://*.zoho.jp https://*.zoho.uk https://*.zoho.sa https://*.zohocloud.ca; report-uri https://logsapi.zoho.in/csplog?service=accounts;","pragma":"no-cache","x-frame-options":"SAMEORIGIN","content-language":"en-US","strict-transport-security":"max-age=64072000; includeSubDomains; preload"}
+
+[debug] [2026-07-21T12:47:40.056Z] : TOTAL TIME TAKEN : 194 ms
+
+[debug] [2026-07-21T12:47:40.061Z] : >>>> HTTP REQUEST : GET https://accounts.zoho.in/oauth/user/info 
+
+[debug] [2026-07-21T12:47:40.100Z] : <<<< HTTP RESPONSE : 200
+Response Headers{"server":"ZGS","date":"Tue, 21 Jul 2026 12:47:40 GMT","content-type":"application/json;charset=UTF-8","content-length":"170","connection":"keep-alive","set-cookie":["zalb_50e15ce8e1=31a7aa4e979668a9e3f09f3a59e92946; Path=/; Secure; HttpOnly","iamcsr=85a478d2-cf2f-404f-af66-7fb11a9a228b;path=/;SameSite=Strict;Secure;priority=high"],"x-content-type-options":"nosniff","content-security-policy":"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.zohocdn.com https://*.zoho.com https://*.zoho.eu https://*.zoho.com.cn https://*.zoho.com.au https://*.zoho.jp https://*.zoho.uk https://*.zoho.sa https://*.zohocloud.ca; report-uri https://logsapi.zoho.in/csplog?service=accounts;","cache-control":"private,no-cache,no-store,max-age=0,must-revalidate","pragma":"no-cache","expires":"Thu, 01 Jan 1970 00:00:00 GMT","x-frame-options":"SAMEORIGIN","content-language":"en-US","strict-transport-security":"max-age=64072000; includeSubDomains; preload"}
+
+[info] [2026-07-21T12:47:53.864Z] : ✔ Logged as : zohoone@apcobuildingsolutions.com
+[info] [2026-07-21T12:48:02.618Z] : ℹ Command ZET push not applicable for the selected service as it is not mapped to ZET online model.
+[error] [2026-07-21T12:54:43.082Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-07-21T12:54:43.089Z] :  ==> app/.DS_Store
+[info] [2026-07-21T12:54:43.089Z] :  ==> app/grn/.DS_Store
+[info] [2026-07-21T12:54:43.090Z] :  ==> app/pr/.DS_Store
+[info] [2026-07-21T12:54:43.090Z] :  ==> app/vendor-comparison/.DS_Store
+[info] [2026-07-21T12:54:43.090Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-07-21T12:54:43.093Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-07-21T12:54:43.094Z] :  ==> app/.DS_Store
+[info] [2026-07-21T12:54:43.094Z] :  ==> app/grn/.DS_Store
+[info] [2026-07-21T12:54:43.094Z] :  ==> app/pr/.DS_Store
+[info] [2026-07-21T12:54:43.094Z] :  ==> app/vendor-comparison/.DS_Store
+[info] [2026-07-21T12:54:43.094Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-07-21T12:56:49.660Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-07-21T12:56:49.666Z] :  ==> app/.DS_Store
+[info] [2026-07-21T12:56:49.666Z] :  ==> app/grn/.DS_Store
+[info] [2026-07-21T12:56:49.666Z] :  ==> app/pr/.DS_Store
+[info] [2026-07-21T12:56:49.666Z] :  ==> app/vendor-comparison/.DS_Store
+[info] [2026-07-21T12:56:49.667Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-07-21T12:56:49.670Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-07-21T12:56:49.671Z] :  ==> app/.DS_Store
+[info] [2026-07-21T12:56:49.671Z] :  ==> app/grn/.DS_Store
+[info] [2026-07-21T12:56:49.671Z] :  ==> app/pr/.DS_Store
+[info] [2026-07-21T12:56:49.671Z] :  ==> app/vendor-comparison/.DS_Store
+[info] [2026-07-21T12:56:49.671Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2

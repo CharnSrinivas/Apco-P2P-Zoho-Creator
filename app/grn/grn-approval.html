@@ -664,6 +664,7 @@
                 meta: { vendorName: '', prRefName: '', qcRefName: '' },
 
                 initApp() {
+                    P2PWorkflowUtils.init(); // Detect env prefix (Dev__ / Prod__)
                     this.fetchRecords();
 
                     this.$watch('searchQuery', Alpine.debounce(() => {
@@ -864,7 +865,7 @@
                     Toast.fire({ icon: 'info', title: 'Fetching PO Details...' });
                     try {
                         let res = await ZOHO.CREATOR.DATA.invokeCustomApi({
-                            api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_PO_DETAILS,
+                            api_name: P2PWorkflowUtils.API.FETCH_PO_DETAILS,
                             http_method: "GET",
                             query_params: 'recId=' + poId
                         });

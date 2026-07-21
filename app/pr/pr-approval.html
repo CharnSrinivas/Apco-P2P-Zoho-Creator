@@ -780,6 +780,7 @@
             todayStr: new Date().toISOString().split('T')[0],
 
             init() {
+                P2PWorkflowUtils.init(); // Detect env prefix (Dev__ / Prod__)
                 this.fetchRecords();
                 this.fetchItemMasters();
                 this.fetchUnitMasters();
@@ -1076,7 +1077,7 @@
 
                 const checks = itemsToCheck.map(item => {
                     return ZOHO.CREATOR.DATA.invokeCustomApi({
-                        api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_RFQ_DETAILS,
+                        api_name: P2PWorkflowUtils.API.FETCH_RFQ_DETAILS,
                         http_method: "POST",
                         payload: {
                             itemIds: item.id

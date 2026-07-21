@@ -7,7 +7,8 @@
     <title>Purchase Order Detail</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css" />
 
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.default.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
@@ -16,15 +17,20 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+        rel="stylesheet" />
 
     <style>
-        [x-cloak] { display: none !important; }
+        [x-cloak] {
+            display: none !important;
+        }
 
         .po-spinner {
             border: 2.5px solid #e5e7eb;
@@ -43,7 +49,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* Timeline and Connector Defaults */
@@ -80,11 +88,20 @@
         }
 
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .fade-in { animation: fadeInUp 0.35s ease-out both; }
+        .fade-in {
+            animation: fadeInUp 0.35s ease-out both;
+        }
 
         /* Modal Styles */
         .po-modal-overlay {
@@ -140,7 +157,8 @@
 
 <body class="bg-gray-50 p-4 md:p-6">
 
-    <div id="app" x-data="poWidget()" x-init="initWidget()" x-cloak class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-6xl mx-auto w-full">
+    <div id="app" x-data="poWidget()" x-init="initWidget()" x-cloak
+        class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-6xl mx-auto w-full">
 
         <!-- ─── ACTION MODAL (Submit / Approve / Reject) ─── -->
         <div x-show="showActionModal" style="display: none;" class="po-modal-overlay">
@@ -148,18 +166,27 @@
             <div class="po-modal-box max-w-md fade-in" @click.away="closeActionModal()">
                 <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
                     <h3 class="text-[14px] font-bold text-gray-800" x-text="modalTitle"></h3>
-                    <button @click="closeActionModal()" class="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer">
+                    <button @click="closeActionModal()"
+                        class="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer">
                         <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
                 <div class="p-5 bg-gray-50/50">
-                    <label class="block text-xs font-semibold text-gray-700 mb-2">Remarks <span class="text-gray-400 font-normal text-[11px]">(Optional)</span></label>
-                    <textarea x-model="modalComment" rows="3" class="w-full border border-gray-300 rounded-lg p-3 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1B5CA8]/20 focus:border-[#1B5CA8] transition-all shadow-sm" placeholder="Enter operational remarks..."></textarea>
+                    <label class="block text-xs font-semibold text-gray-700 mb-2">Remarks <span
+                            class="text-gray-400 font-normal text-[11px]">(Optional)</span></label>
+                    <textarea x-model="modalComment" rows="3"
+                        class="w-full border border-gray-300 rounded-lg p-3 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1B5CA8]/20 focus:border-[#1B5CA8] transition-all shadow-sm"
+                        placeholder="Enter operational remarks..."></textarea>
                 </div>
                 <div class="px-5 py-3.5 bg-white flex justify-end gap-2.5 border-t border-gray-100">
-                    <button @click="closeActionModal()" :disabled="isSubmitting" class="px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm cursor-pointer disabled:opacity-50">Cancel</button>
-                    <button @click="executeAction()" :disabled="isSubmitting" :class="modalBtnClass + ' ' + modalBtnHoverClass" class="px-4 py-2 rounded-lg text-xs font-semibold text-white transition-colors shadow-sm cursor-pointer flex items-center gap-1.5 disabled:opacity-70">
-                        <template x-if="isSubmitting"><div class="btn-spinner border-t-white w-3.5 h-3.5 mr-1"></div></template>
+                    <button @click="closeActionModal()" :disabled="isSubmitting"
+                        class="px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm cursor-pointer disabled:opacity-50">Cancel</button>
+                    <button @click="executeAction()" :disabled="isSubmitting"
+                        :class="modalBtnClass + ' ' + modalBtnHoverClass"
+                        class="px-4 py-2 rounded-lg text-xs font-semibold text-white transition-colors shadow-sm cursor-pointer flex items-center gap-1.5 disabled:opacity-70">
+                        <template x-if="isSubmitting">
+                            <div class="btn-spinner border-t-white w-3.5 h-3.5 mr-1"></div>
+                        </template>
                         <span x-text="isSubmitting ? 'Processing...' : modalBtnText"></span>
                     </button>
                 </div>
@@ -170,9 +197,11 @@
         <div x-show="isEditModalOpen" style="display: none;" class="po-modal-overlay">
             <div class="po-modal-bg" x-show="isEditModalOpen" x-transition.opacity @click="closeEditModal()"></div>
             <div class="po-modal-box max-w-5xl fade-in">
-                <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50 sticky top-0 z-20">
+                <div
+                    class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50 sticky top-0 z-20">
                     <h3 class="text-[15px] font-bold text-gray-800">Edit Purchase Order</h3>
-                    <button @click="closeEditModal()" type="button" class="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer">
+                    <button @click="closeEditModal()" type="button"
+                        class="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer">
                         <i class="bi bi-x-lg text-lg"></i>
                     </button>
                 </div>
@@ -180,24 +209,35 @@
                     <form @submit.prevent="submitEdit">
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             <div>
-                                <label class="cursor-not-allowed block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Unit</label>
-                                <select disabled x-ref="unitSelect" class="w-full cursor-not-allowed opacity-70"></select>
+                                <label
+                                    class="cursor-not-allowed block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Unit</label>
+                                <select disabled x-ref="unitSelect"
+                                    class="w-full cursor-not-allowed opacity-70"></select>
                             </div>
                             <div>
-                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Vendor <span class="text-red-500">*</span></label>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Vendor
+                                    <span class="text-red-500">*</span></label>
                                 <select x-ref="vendorSelect" class="w-full" required></select>
                             </div>
                             <div>
-                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PO Date <span class="text-red-500">*</span></label>
-                                <input x-model="editForm.PO_Date" type="date" required class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all shadow-sm" />
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PO
+                                    Date <span class="text-red-500">*</span></label>
+                                <input x-model="editForm.PO_Date" type="date" required
+                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all shadow-sm" />
                             </div>
                             <div>
-                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Delivery Date <span class="text-red-500">*</span></label>
-                                <input x-model="editForm.delivery_date" type="date" required class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all shadow-sm" />
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Delivery
+                                    Date <span class="text-red-500">*</span></label>
+                                <input x-model="editForm.delivery_date" type="date" required
+                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all shadow-sm" />
                             </div>
                             <div>
-                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Payment Terms <span class="text-red-500">*</span></label>
-                                <select x-model="editForm.Payment_Terms" required class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all shadow-sm">
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Payment
+                                    Terms <span class="text-red-500">*</span></label>
+                                <select x-model="editForm.Payment_Terms" required
+                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all shadow-sm">
                                     <option value="">Select...</option>
                                     <option value="Advance">Advance</option>
                                     <option value="15 Days Credit">15 Days Credit</option>
@@ -213,34 +253,54 @@
                                 <table class="w-full border-collapse">
                                     <thead class="bg-gray-50 border-b border-gray-200">
                                         <tr>
-                                            <th class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-left w-[30%] uppercase tracking-wide">Item Lookup</th>
-                                            <th class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-right w-[15%] uppercase tracking-wide">Rate (₹)</th>
-                                            <th class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-right w-[12%] uppercase tracking-wide">Qty</th>
-                                            <th class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-right w-[15%] uppercase tracking-wide">Amount (₹)</th>
-                                            <th class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-left w-[20%] uppercase tracking-wide">Comment</th>
-                                            <th class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-center w-[8%]"></th>
+                                            <th
+                                                class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-left w-[30%] uppercase tracking-wide">
+                                                Item Lookup</th>
+                                            <th
+                                                class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-right w-[15%] uppercase tracking-wide">
+                                                Rate (₹)</th>
+                                            <th
+                                                class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-right w-[12%] uppercase tracking-wide">
+                                                Qty</th>
+                                            <th
+                                                class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-right w-[15%] uppercase tracking-wide">
+                                                Amount (₹)</th>
+                                            <th
+                                                class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-left w-[20%] uppercase tracking-wide">
+                                                Comment</th>
+                                            <th
+                                                class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-center w-[8%]">
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <template x-for="(item, idx) in editForm.Items" :key="item.uid">
                                             <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
                                                 <td class="px-2 py-2">
-                                                    <select class="w-full text-xs" :x-ref="'itemSelectEdit_'+idx" x-init="() => { const ts = initDynamicItemEdit($el, item); return () => ts.destroy(); }"></select>
+                                                    <select class="w-full text-xs" :x-ref="'itemSelectEdit_'+idx"
+                                                        x-init="() => { const ts = initDynamicItemEdit($el, item); return () => ts.destroy(); }"></select>
                                                 </td>
                                                 <td class="px-2 py-2">
-                                                    <input x-model.number="item.Rate" @input="calculateTotals" type="number" step="any" min="0" required class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[13px] text-right focus:bg-white focus:border-[#1B5CA8] outline-none" />
+                                                    <input x-model.number="item.Rate" @input="calculateTotals"
+                                                        type="number" step="any" min="0" required
+                                                        class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[13px] text-right focus:bg-white focus:border-[#1B5CA8] outline-none" />
                                                 </td>
                                                 <td class="px-2 py-2">
-                                                    <input x-model.number="item.Quantity" @input="calculateTotals" type="number" min="1" step="any" required class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[13px] text-right focus:bg-white focus:border-[#1B5CA8] outline-none" />
+                                                    <input x-model.number="item.Quantity" @input="calculateTotals"
+                                                        type="number" min="1" step="any" required
+                                                        class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[13px] text-right focus:bg-white focus:border-[#1B5CA8] outline-none" />
                                                 </td>
                                                 <td class="px-2 py-2">
-                                                    <input x-model="item.Amount" type="number" disabled class="w-full py-1.5 px-2 bg-gray-100 border border-gray-200 rounded text-[13px] text-right font-semibold text-gray-600 cursor-not-allowed" />
+                                                    <input x-model="item.Amount" type="number" disabled
+                                                        class="w-full py-1.5 px-2 bg-gray-100 border border-gray-200 rounded text-[13px] text-right font-semibold text-gray-600 cursor-not-allowed" />
                                                 </td>
                                                 <td class="px-2 py-2">
-                                                    <input x-model="item.Comment" type="text" placeholder="Optional" class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[13px] focus:bg-white focus:border-[#1B5CA8] outline-none" />
+                                                    <input x-model="item.Comment" type="text" placeholder="Optional"
+                                                        class="w-full py-1.5 px-2 bg-gray-50 border border-gray-200 rounded text-[13px] focus:bg-white focus:border-[#1B5CA8] outline-none" />
                                                 </td>
                                                 <td class="px-2 py-2 text-center">
-                                                    <button type="button" @click="removeItemRow(idx)" class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50 cursor-pointer">
+                                                    <button type="button" @click="removeItemRow(idx)"
+                                                        class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50 cursor-pointer">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
                                                 </td>
@@ -254,12 +314,17 @@
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Notes</label>
-                                    <textarea x-model="editForm.Notes" rows="2" class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all shadow-sm"></textarea>
+                                    <label
+                                        class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Notes</label>
+                                    <textarea x-model="editForm.Notes" rows="2"
+                                        class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all shadow-sm"></textarea>
                                 </div>
                                 <div>
-                                    <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Terms & Conditions</label>
-                                    <textarea x-model="editForm.Terms_Conditions" rows="2" class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all shadow-sm"></textarea>
+                                    <label
+                                        class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Terms
+                                        & Conditions</label>
+                                    <textarea x-model="editForm.Terms_Conditions" rows="2"
+                                        class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all shadow-sm"></textarea>
                                 </div>
                             </div>
 
@@ -270,21 +335,30 @@
                                 </div>
                                 <div class="flex items-center justify-between text-xs text-gray-600">
                                     <span class="font-semibold">Discount (-)</span>
-                                    <input type="number" x-model.number="editForm.Discount" @input="calculateTotals" min="0" step="any" class="w-28 py-1 px-2 border border-gray-200 rounded text-right outline-none focus:border-[#1B5CA8]" />
+                                    <input type="number" x-model.number="editForm.Discount" @input="calculateTotals"
+                                        min="0" step="any"
+                                        class="w-28 py-1 px-2 border border-gray-200 rounded text-right outline-none focus:border-[#1B5CA8]" />
                                 </div>
                                 <div class="flex items-center justify-between text-xs text-gray-600">
                                     <span class="font-semibold">CGST (+)</span>
-                                    <input type="number" x-model.number="editForm.CGST" @input="calculateTotals" min="0" step="any" class="w-28 py-1 px-2 border border-gray-200 rounded text-right outline-none focus:border-[#1B5CA8]" />
+                                    <input type="number" x-model.number="editForm.CGST" @input="calculateTotals" min="0"
+                                        step="any"
+                                        class="w-28 py-1 px-2 border border-gray-200 rounded text-right outline-none focus:border-[#1B5CA8]" />
                                 </div>
                                 <div class="flex items-center justify-between text-xs text-gray-600">
                                     <span class="font-semibold">SGST (+)</span>
-                                    <input type="number" x-model.number="editForm.SGST" @input="calculateTotals" min="0" step="any" class="w-28 py-1 px-2 border border-gray-200 rounded text-right outline-none focus:border-[#1B5CA8]" />
+                                    <input type="number" x-model.number="editForm.SGST" @input="calculateTotals" min="0"
+                                        step="any"
+                                        class="w-28 py-1 px-2 border border-gray-200 rounded text-right outline-none focus:border-[#1B5CA8]" />
                                 </div>
                                 <div class="flex items-center justify-between text-xs text-gray-600">
                                     <span class="font-semibold">IGST (+)</span>
-                                    <input type="number" x-model.number="editForm.IGST" @input="calculateTotals" min="0" step="any" class="w-28 py-1 px-2 border border-gray-200 rounded text-right outline-none focus:border-[#1B5CA8]" />
+                                    <input type="number" x-model.number="editForm.IGST" @input="calculateTotals" min="0"
+                                        step="any"
+                                        class="w-28 py-1 px-2 border border-gray-200 rounded text-right outline-none focus:border-[#1B5CA8]" />
                                 </div>
-                                <div class="flex items-center justify-between text-[14px] font-bold text-[#1B5CA8] border-t border-gray-200 pt-3">
+                                <div
+                                    class="flex items-center justify-between text-[14px] font-bold text-[#1B5CA8] border-t border-gray-200 pt-3">
                                     <span>Total Amount</span>
                                     <span x-text="formatINR(editForm.Total_Amount, false)"></span>
                                 </div>
@@ -292,8 +366,10 @@
                         </div>
 
                         <div class="flex justify-end gap-2 border-t border-gray-100 pt-4 mt-6">
-                            <button type="button" @click="closeEditModal()" class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors cursor-pointer">Cancel</button>
-                            <button type="submit" :disabled="isUpdatingRecord" class="inline-flex items-center justify-center min-w-[100px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70 cursor-pointer">
+                            <button type="button" @click="closeEditModal()"
+                                class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors cursor-pointer">Cancel</button>
+                            <button type="submit" :disabled="isUpdatingRecord"
+                                class="inline-flex items-center justify-center min-w-[100px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70 cursor-pointer">
                                 <span x-show="!isUpdatingRecord">Save PO</span>
                                 <div x-show="isUpdatingRecord" class="btn-spinner border-t-white w-3.5 h-3.5"></div>
                             </button>
@@ -311,7 +387,8 @@
         <div x-show="hasError" class="text-center py-24 fade-in">
             <i class="bi bi-exclamation-octagon text-4xl text-red-400 mb-3 block"></i>
             <div class="text-sm font-medium text-gray-700">Failed to load PO details</div>
-            <div class="text-xs text-gray-500 mt-1" x-text="errorMessage || 'Please check the record ID and try again.'"></div>
+            <div class="text-xs text-gray-500 mt-1"
+                x-text="errorMessage || 'Please check the record ID and try again.'"></div>
         </div>
 
         <!-- ─── MAIN CONTENT ─── -->
@@ -321,22 +398,29 @@
             <div class="flex flex-col md:flex-row md:items-start justify-between mb-5 pt-2 gap-4">
                 <div>
                     <nav class="flex items-center gap-1.5 text-xs mb-2.5">
-                        <button onclick="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',window:'same',url:'#Page:Purchase_Orders'})" class="text-[#1B5CA8] hover:text-[#14457e] font-medium transition-colors no-underline cursor-pointer">Purchase Orders</button>
+                        <button
+                            onclick="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',window:'same',url:'#Page:Purchase_Orders'})"
+                            class="text-[#1B5CA8] hover:text-[#14457e] font-medium transition-colors no-underline cursor-pointer">Purchase
+                            Orders</button>
                         <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
                         <span class="text-gray-500 font-medium" x-text="poRefNumber"></span>
                     </nav>
                     <div class="flex items-center gap-2.5 flex-wrap">
-                        <h1 class="text-[18px] md:text-[20px] font-bold text-gray-900 leading-none" x-text="poRefNumber"></h1>
+                        <h1 class="text-[18px] md:text-[20px] font-bold text-gray-900 leading-none"
+                            x-text="poRefNumber"></h1>
                         <span x-html="getStatusBadge(rec.Status)"></span>
                     </div>
                     <div class="text-xs text-gray-500 mt-2 flex items-center gap-2">
-                        <i class="bi bi-calendar-event text-gray-400"></i> Date: <span class="font-semibold text-gray-800" x-text="formatDate(rec.PO_Date)"></span>
+                        <i class="bi bi-calendar-event text-gray-400"></i> Date: <span
+                            class="font-semibold text-gray-800" x-text="formatDate(rec.PO_Date)"></span>
                         <span class="text-gray-300">|</span>
-                        <i class="bi bi-calendar-check text-gray-400"></i> Delivery by: <span class="font-semibold text-gray-800" x-text="formatDate(rec.delivery_date)"></span>
+                        <i class="bi bi-calendar-check text-gray-400"></i> Delivery by: <span
+                            class="font-semibold text-gray-800" x-text="formatDate(rec.delivery_date)"></span>
                     </div>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
-                    <button x-show="canEdit" @click="openEditModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer">
+                    <button x-show="canEdit" @click="openEditModal()"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer">
                         <i class="bi bi-pencil-square"></i> Edit PO
                     </button>
                 </div>
@@ -344,7 +428,8 @@
 
             <!-- PROCESS PROGRESS -->
             <div class="bg-white border border-gray-200 rounded-lg p-5 mb-5 w-full shadow-sm hidden md:block">
-                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">P2P Process Progress</div>
+                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">P2P Process Progress
+                </div>
                 <div class="relative flex justify-between items-start" id="globalProgressContainer">
                     <div class="step-connector">
                         <div class="step-connector-fill" id="globalProgressFill" style="width:0%;"></div>
@@ -357,29 +442,38 @@
 
                 <!-- LEFT COLUMN -->
                 <div class="xl:col-span-2 space-y-5">
-                    
+
                     <!-- Details & PR References -->
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                         <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
                             <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
-                                <div class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]"><i class="bi bi-file-text"></i></div>
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
+                                    <i class="bi bi-file-text"></i>
+                                </div>
                                 Order Details
                             </div>
                         </div>
                         <div class="px-[18px] py-[15px]">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
                                 <template x-for="field in detailFields" :key="field.label">
-                                    <div class="flex justify-between items-center py-2 text-xs border-b border-dashed border-gray-100">
+                                    <div
+                                        class="flex justify-between items-center py-2 text-xs border-b border-dashed border-gray-100">
                                         <span class="text-gray-500 font-medium" x-text="field.label"></span>
-                                        <template x-if="field.isHtml"><span x-html="field.value" class="text-right flex flex-wrap justify-end gap-1"></span></template>
-                                        <template x-if="!field.isHtml"><span class="text-gray-900 font-semibold text-right" x-text="field.value || '–'"></span></template>
+                                        <template x-if="field.isHtml"><span x-html="field.value"
+                                                class="text-right flex flex-wrap justify-end gap-1"></span></template>
+                                        <template x-if="!field.isHtml"><span
+                                                class="text-gray-900 font-semibold text-right"
+                                                x-text="field.value || '–'"></span></template>
                                     </div>
                                 </template>
                             </div>
                             <template x-if="rec.Notes">
                                 <div class="mt-4 pt-3 border-t border-gray-100">
-                                    <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Operational Notes</div>
-                                    <div class="text-xs text-gray-700 leading-relaxed max-w-none bg-yellow-50 p-2.5 rounded border border-yellow-100" x-text="rec.Notes"></div>
+                                    <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                                        Operational Notes</div>
+                                    <div class="text-xs text-gray-700 leading-relaxed max-w-none bg-yellow-50 p-2.5 rounded border border-yellow-100"
+                                        x-text="rec.Notes"></div>
                                 </div>
                             </template>
                         </div>
@@ -389,17 +483,22 @@
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                         <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
                             <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
-                                <div class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-indigo-50 text-indigo-600"><i class="bi bi-geo-alt"></i></div>
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-indigo-50 text-indigo-600">
+                                    <i class="bi bi-geo-alt"></i>
+                                </div>
                                 Location & Shipping Details
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100">
                             <template x-for="addr in getAddresses()" :key="addr.title">
                                 <div class="p-4">
-                                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
+                                    <div
+                                        class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
                                         <i :class="addr.icon"></i> <span x-text="addr.title"></span>
                                     </div>
-                                    <div class="text-[12px] text-gray-800 leading-relaxed font-medium" x-text="addr.formatted"></div>
+                                    <div class="text-[12px] text-gray-800 leading-relaxed font-medium"
+                                        x-text="addr.formatted"></div>
                                 </div>
                             </template>
                         </div>
@@ -407,51 +506,76 @@
 
                     <!-- Line Items -->
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+                        <div
+                            class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50 flex justify-between items-center">
                             <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
-                                <div class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]"><i class="bi bi-box-seam"></i></div>
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
+                                    <i class="bi bi-box-seam"></i>
+                                </div>
                                 Ordered Line Items
                             </div>
                             <div class="text-[11px] font-semibold text-gray-500">
-                                Items Status: <span :class="{'text-emerald-600': rec.Items_Status === 'Completely Received', 'text-amber-600': rec.Items_Status === 'Partially Received'}" x-text="rec.Items_Status || 'Pending'"></span>
+                                Items Status: <span
+                                    :class="{'text-emerald-600': rec.Items_Status === 'Completely Received', 'text-amber-600': rec.Items_Status === 'Partially Received'}"
+                                    x-text="rec.Items_Status || 'Pending'"></span>
                             </div>
                         </div>
-                        
+
                         <div x-show="items.length === 0" class="px-[18px] py-8 text-center text-gray-400 text-xs">
                             <i class="bi bi-inbox text-2xl mb-2 block"></i> No line items found
                         </div>
-                        
+
                         <div class="overflow-x-auto w-full" x-show="items.length > 0">
                             <table class="w-full border-collapse text-xs">
                                 <thead>
                                     <tr class="bg-gray-50 border-b border-gray-200">
-                                        <th class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">#</th>
-                                        <th class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">Item Description</th>
-                                        <th class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right">Rate / Unit</th>
-                                        <th class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right">Ordered Qty</th>
-                                        <th class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right">Rcvd Qty</th>
-                                        <th class="px-4 py-2 text-[10px] font-bold text-[#1B5CA8] uppercase tracking-wide text-right">Total Amount</th>
+                                        <th
+                                            class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
+                                            #</th>
+                                        <th
+                                            class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
+                                            Item Description</th>
+                                        <th
+                                            class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right">
+                                            Rate / Unit</th>
+                                        <th
+                                            class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right">
+                                            Ordered Qty</th>
+                                        <th
+                                            class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right">
+                                            Rcvd Qty</th>
+                                        <th
+                                            class="px-4 py-2 text-[10px] font-bold text-[#1B5CA8] uppercase tracking-wide text-right">
+                                            Total Amount</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <template x-for="(item, i) in items" :key="i">
                                         <tr class="border-b border-gray-50 hover:bg-gray-50/70 transition-colors">
-                                            <td class="px-4 py-3 text-gray-400 font-mono text-[11px]" x-text="i + 1"></td>
+                                            <td class="px-4 py-3 text-gray-400 font-mono text-[11px]" x-text="i + 1">
+                                            </td>
                                             <td class="px-4 py-3 text-gray-900 font-medium">
                                                 <span x-text="getItemName(item)"></span>
                                                 <template x-if="item.Comment">
-                                                    <div class="text-[11px] text-gray-400 font-normal mt-0.5 bg-white inline-block px-1 rounded border border-gray-100" x-text="item.Comment"></div>
+                                                    <div class="text-[11px] text-gray-400 font-normal mt-0.5 bg-white inline-block px-1 rounded border border-gray-100"
+                                                        x-text="item.Comment"></div>
                                                 </template>
                                             </td>
                                             <td class="px-4 py-3 text-gray-600 text-right tabular-nums">
                                                 <span x-text="formatINR(getRate(item), false)"></span>
-                                                <span class="text-[10px] text-gray-400 ml-0.5" x-text="'/ ' + getItemUnit(item)"></span>
+                                                <span class="text-[10px] text-gray-400 ml-0.5"
+                                                    x-text="'/ ' + getItemUnit(item)"></span>
                                             </td>
-                                            <td class="px-4 py-3 text-gray-800 font-semibold text-right tabular-nums" x-text="item.Quantity || 0"></td>
+                                            <td class="px-4 py-3 text-gray-800 font-semibold text-right tabular-nums"
+                                                x-text="item.Quantity || 0"></td>
                                             <td class="px-4 py-3 text-right tabular-nums">
-                                                <span :class="{'text-emerald-600 font-bold': item.Received_Quantity >= item.Quantity, 'text-gray-500': !item.Received_Quantity}" x-text="item.Received_Quantity || '0'"></span>
+                                                <span
+                                                    :class="{'text-emerald-600 font-bold': item.Received_Quantity >= item.Quantity, 'text-gray-500': !item.Received_Quantity}"
+                                                    x-text="item.Received_Quantity || '0'"></span>
                                             </td>
-                                            <td class="px-4 py-3 text-gray-900 font-bold text-right tabular-nums" x-text="formatINR(item.Amount, false)"></td>
+                                            <td class="px-4 py-3 text-gray-900 font-bold text-right tabular-nums"
+                                                x-text="formatINR(item.Amount, false)"></td>
                                         </tr>
                                     </template>
                                 </tbody>
@@ -461,13 +585,25 @@
                         <!-- Grand Totals footer -->
                         <div class="bg-gray-50/80 p-4 border-t border-gray-200 flex justify-end">
                             <div class="w-full max-w-xs space-y-2 text-xs">
-                                <div class="flex justify-between text-gray-600"><span class="font-semibold">Sub Total</span> <span class="font-medium tabular-nums" x-text="formatINR(rec.Sub_Total, false)"></span></div>
-                                <div class="flex justify-between text-gray-600"><span class="font-semibold">Discount (-)</span> <span class="font-medium tabular-nums text-red-600" x-text="formatINR(rec.Discount, false)"></span></div>
-                                <div class="flex justify-between text-gray-600"><span class="font-semibold">CGST (+)</span> <span class="font-medium tabular-nums" x-text="formatINR(rec.CGST, false)"></span></div>
-                                <div class="flex justify-between text-gray-600"><span class="font-semibold">SGST (+)</span> <span class="font-medium tabular-nums" x-text="formatINR(rec.SGST, false)"></span></div>
-                                <div class="flex justify-between text-gray-600"><span class="font-semibold">IGST (+)</span> <span class="font-medium tabular-nums" x-text="formatINR(rec.IGST, false)"></span></div>
-                                <div class="flex justify-between border-t border-gray-200 pt-2 text-[15px] font-black text-[#1B5CA8]">
-                                    <span>Grand Total</span> <span class="tabular-nums" x-text="formatINR(rec.Total_Amount, true)"></span>
+                                <div class="flex justify-between text-gray-600"><span class="font-semibold">Sub
+                                        Total</span> <span class="font-medium tabular-nums"
+                                        x-text="formatINR(rec.Sub_Total, false)"></span></div>
+                                <div class="flex justify-between text-gray-600"><span class="font-semibold">Discount
+                                        (-)</span> <span class="font-medium tabular-nums text-red-600"
+                                        x-text="formatINR(rec.Discount, false)"></span></div>
+                                <div class="flex justify-between text-gray-600"><span class="font-semibold">CGST
+                                        (+)</span> <span class="font-medium tabular-nums"
+                                        x-text="formatINR(rec.CGST, false)"></span></div>
+                                <div class="flex justify-between text-gray-600"><span class="font-semibold">SGST
+                                        (+)</span> <span class="font-medium tabular-nums"
+                                        x-text="formatINR(rec.SGST, false)"></span></div>
+                                <div class="flex justify-between text-gray-600"><span class="font-semibold">IGST
+                                        (+)</span> <span class="font-medium tabular-nums"
+                                        x-text="formatINR(rec.IGST, false)"></span></div>
+                                <div
+                                    class="flex justify-between border-t border-gray-200 pt-2 text-[15px] font-black text-[#1B5CA8]">
+                                    <span>Grand Total</span> <span class="tabular-nums"
+                                        x-text="formatINR(rec.Total_Amount, true)"></span>
                                 </div>
                             </div>
                         </div>
@@ -475,15 +611,21 @@
 
                     <!-- Workflow Action Buttons -->
                     <div class="flex flex-wrap items-center gap-2.5 fade-in" x-show="showActionButtons" x-cloak>
-                        <button x-show="isDraft" @click="openActionModal('Submit Purchase Order', 'Submitted', 'bg-blue-600', 'hover:bg-blue-700')" class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-[13px] font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer shadow-sm">
+                        <button x-show="isDraft"
+                            @click="openActionModal('Submit Purchase Order', 'Submitted', 'bg-blue-600', 'hover:bg-blue-700')"
+                            class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-[13px] font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer shadow-sm">
                             <i class="bi bi-send"></i> Submit PO for Approval
                         </button>
 
-                        <button x-show="isSubmitted" @click="openActionModal('Approve Purchase Order', 'Approved', 'bg-emerald-600', 'hover:bg-emerald-700')" class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-[13px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors cursor-pointer shadow-sm">
+                        <button x-show="isSubmitted"
+                            @click="openActionModal('Approve Purchase Order', 'Approved', 'bg-emerald-600', 'hover:bg-emerald-700')"
+                            class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-[13px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors cursor-pointer shadow-sm">
                             <i class="bi bi-check-circle-fill"></i> Approve Order
                         </button>
 
-                        <button x-show="isSubmitted" @click="openActionModal('Reject Purchase Order', 'Rejected', 'bg-white text-red-600 border border-red-300', 'hover:bg-red-50')" class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-[13px] font-bold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors cursor-pointer shadow-sm">
+                        <button x-show="isSubmitted"
+                            @click="openActionModal('Reject Purchase Order', 'Rejected', 'bg-white text-red-600 border border-red-300', 'hover:bg-red-50')"
+                            class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-[13px] font-bold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors cursor-pointer shadow-sm">
                             <i class="bi bi-x-circle-fill"></i> Reject
                         </button>
                     </div>
@@ -494,25 +636,40 @@
                 <div class="space-y-5">
                     <!-- Vendor Summary -->
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+                        <div
+                            class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50 flex justify-between items-center">
                             <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
-                                <div class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-purple-50 text-purple-600"><i class="bi bi-building"></i></div>
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-purple-50 text-purple-600">
+                                    <i class="bi bi-building"></i>
+                                </div>
                                 Vendor Overview
                             </div>
                         </div>
                         <div class="p-4">
                             <template x-if="rec.Vendor">
                                 <div>
-                                    <div class="text-[15px] font-black text-gray-800" x-text="rec.Vendor.Display_Name || rec.Vendor.Company_Name"></div>
+                                    <div class="text-[15px] font-black text-gray-800"
+                                        x-text="rec.Vendor.Display_Name || rec.Vendor.Company_Name"></div>
                                     <div class="text-xs text-gray-600 mt-2.5 space-y-2">
-                                        <div class="flex items-center"><i class="bi bi-envelope text-gray-400 w-5"></i> <span x-text="rec.Vendor.email || 'N/A'"></span></div>
-                                        <div class="flex items-center"><i class="bi bi-telephone text-gray-400 w-5"></i> <span x-text="rec.Vendor.mobile || 'N/A'"></span></div>
-                                        <div class="flex items-center"><i class="bi bi-briefcase text-gray-400 w-5"></i> <span x-text="rec.Vendor.Business_Type || 'Vendor'"></span></div>
+                                        <div class="flex items-center"><i class="bi bi-envelope text-gray-400 w-5"></i>
+                                            <span x-text="rec.Vendor.email || 'N/A'"></span>
+                                        </div>
+                                        <div class="flex items-center"><i class="bi bi-telephone text-gray-400 w-5"></i>
+                                            <span x-text="rec.Vendor.mobile || 'N/A'"></span>
+                                        </div>
+                                        <div class="flex items-center"><i class="bi bi-briefcase text-gray-400 w-5"></i>
+                                            <span x-text="rec.Vendor.Business_Type || 'Vendor'"></span>
+                                        </div>
                                     </div>
                                     <template x-if="rec.Payment_Terms">
                                         <div class="mt-4 pt-3 border-t border-gray-100">
-                                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1">Payment Terms</span>
-                                            <span class="inline-block bg-purple-50 text-purple-700 text-[11px] font-bold px-2 py-1 rounded" x-text="rec.Payment_Terms"></span>
+                                            <span
+                                                class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1">Payment
+                                                Terms</span>
+                                            <span
+                                                class="inline-block bg-purple-50 text-purple-700 text-[11px] font-bold px-2 py-1 rounded"
+                                                x-text="rec.Payment_Terms"></span>
                                         </div>
                                     </template>
                                 </div>
@@ -528,11 +685,15 @@
                         <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                             <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
                                 <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
-                                    <div class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-slate-100 text-slate-600"><i class="bi bi-shield-check"></i></div>
+                                    <div
+                                        class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-slate-100 text-slate-600">
+                                        <i class="bi bi-shield-check"></i>
+                                    </div>
                                     Terms & Conditions
                                 </div>
                             </div>
-                            <div class="p-4 text-xs text-gray-700 leading-relaxed bg-slate-50 border-t border-slate-100" x-text="rec.Terms_Conditions"></div>
+                            <div class="p-4 text-xs text-gray-700 leading-relaxed bg-slate-50 border-t border-slate-100"
+                                x-text="rec.Terms_Conditions"></div>
                         </div>
                     </template>
 
@@ -540,7 +701,10 @@
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                         <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
                             <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
-                                <div class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-amber-50 text-amber-600"><i class="bi bi-clock-history"></i></div>
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-amber-50 text-amber-600">
+                                    <i class="bi bi-clock-history"></i>
+                                </div>
                                 Document History
                             </div>
                         </div>
@@ -576,6 +740,7 @@
                 tsInstances: { unit: null, vendor: null, items: [] },
 
                 initWidget() {
+                    P2PWorkflowUtils.init(); // Detect env prefix (Dev__ / Prod__)
                     ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
                         this.recordId = params?.recordId || null;
                         if (!this.recordId) {
@@ -601,8 +766,9 @@
 
                 fetchData() {
                     this.isLoading = true;
+                    console.log({ API: P2PWorkflowUtils.API })
                     ZOHO.CREATOR.DATA.invokeCustomApi({
-                        api_name: typeof P2PWorkflowUtils !== 'undefined' ? P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_PO_DETAILS : "fetch_po_details",
+                        api_name: typeof P2PWorkflowUtils !== 'undefined' ? P2PWorkflowUtils.API.FETCH_PO_DETAILS : "fetch_po_details",
                         http_method: "GET", content_type: "application/json", query_params: 'recId=' + this.recordId,
                     }).then((response) => {
                         if (!response || !response.result || response.result.length === 0) throw new Error("No data returned");
@@ -688,13 +854,13 @@
                     // Vendor Billing
                     let billing = this.formatAddress(this.rec.Vendor?.Billing_Address);
                     if (billing) addresses.push({ title: 'Vendor Billing Address', icon: 'bi-building-check', formatted: billing });
-                    
+
                     // Fallback delivery address logic: Prefer PO's Delivary_Address, else Unit's Address
                     let delivery = this.formatAddress(this.rec.Delivary_Address);
                     if (!delivery && this.rec.Unit?.Address) delivery = this.formatAddress(this.rec.Unit.Address);
                     if (delivery) addresses.push({ title: 'Delivery Address', icon: 'bi-truck', formatted: delivery });
 
-                    if(addresses.length === 0) addresses.push({ title: 'Notice', icon: 'bi-info-circle', formatted: 'No specific address data found in record.' });
+                    if (addresses.length === 0) addresses.push({ title: 'Notice', icon: 'bi-info-circle', formatted: 'No specific address data found in record.' });
                     return addresses;
                 },
 
@@ -834,11 +1000,12 @@
                         const res = await ZOHO.CREATOR.DATA.updateRecordById({ report_name: "Purchase_Order_Report", id: this.recordId, payload: payload });
                         if (res.code === 3000) { Toast.fire({ icon: 'success', title: 'PO updated successfully' }); this.closeEditModal(); this.fetchData(); }
                         else throw new Error(res.message || "Failed to update record.");
-                    } catch (err) { Toast.fire({ icon: 'error', title: err.message || 'Update failed' }); } 
+                    } catch (err) { Toast.fire({ icon: 'error', title: err.message || 'Update failed' }); }
                     finally { this.isUpdatingRecord = false; }
                 }
             }));
         });
     </script>
 </body>
+
 </html>

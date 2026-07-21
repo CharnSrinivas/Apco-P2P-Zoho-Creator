@@ -552,6 +552,7 @@
         pendingPrId: null,
 
         init() {
+          P2PWorkflowUtils.init(); // Detect env prefix (Dev__ / Prod__)
           this.fetchRecords();
           this.fetchItemMasters();
           this.fetchUnitMasters();
@@ -1003,7 +1004,7 @@
           Toast.fire({ icon: 'info', title: 'Fetching PR details...' });
           try {
             let res = await ZOHO.CREATOR.DATA.invokeCustomApi({
-              api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_PR_DETAILS,
+              api_name: P2PWorkflowUtils.API.FETCH_PR_DETAILS,
               http_method: "GET", query_params: 'recId=' + prId
             });
 

@@ -1093,6 +1093,7 @@
 
                 // ── Init ──
                 initWidget() {
+                    P2PWorkflowUtils.init(); // Detect env prefix (Dev__ / Prod__)
                     ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
                         this.recordId = params?.recordId || null;
                         if (!this.recordId) {
@@ -1109,7 +1110,7 @@
                 fetchData() {
                     this.isLoading = true;
                     ZOHO.CREATOR.DATA.invokeCustomApi({
-                        api_name: P2PWorkflowUtils.CUSTOM_API_NAMES.FETCH_QC_DETAILS,
+                        api_name: P2PWorkflowUtils.API.FETCH_QC_DETAILS,
                         http_method: "GET",
                         content_type: "application/json",
                         query_params: 'recId=' + this.recordId
