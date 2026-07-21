@@ -30,13 +30,13 @@ const P2PWorkflowUtils = {
 		{ key: "payment", label: "Payment", icon: "bi-cash", page: "Payments" },
 	],
 	CUSTOM_API_NAMES: {
-		FETCH_PR_DETAILS: "Dev__Fetch_PR_Details",
-		FETCH_RFQ_DETAILS: "Dev__Get_RFQ_Details",
-		FETCH_QC_DETAILS: "Dev__Fetch_Vendor_Comparison_Details",
-		SEND_RFQ_EMAIL_TO_VENDOR: "Dev__Send_RFQ_Email_To_Vendor",
-		CHECK_ITEM_IN_GRN: "Dev__Check_Vendor_Requirement_For_Item",
-		FETCH_PO_DETAILS: "Dev__Fetch_PO_Details",
-		FETCH_GRN_DETAILS: "Dev__Fetch_GRN_Details",
+		FETCH_PR_DETAILS: "Prod__Fetch_PR_Details",
+		FETCH_RFQ_DETAILS: "Prod__Get_RFQ_Details",
+		FETCH_QC_DETAILS: "Prod__Fetch_Vendor_Comparison_Details",
+		SEND_RFQ_EMAIL_TO_VENDOR: "Prod__Send_RFQ_Email_To_Vendor",
+		CHECK_ITEM_IN_GRN: "Prod__Check_Vendor_Requirement_For_Item",
+		FETCH_PO_DETAILS: "Prod__Fetch_PO_Details",
+		FETCH_GRN_DETAILS: "Prod__Fetch_GRN_Details",
 	},
 	// Helper: Map Creator Stage Strings to Step Keys
 	stageToStepKey: function (stage) {
