@@ -245,6 +245,7 @@
           <col style="width:130px">
           <col style="width:110px">
           <col style="width:110px">
+          <col style="width:110px">
           <col style="width:100px">
           <col style="width:100px">
           <col style="width:110px">
@@ -252,13 +253,14 @@
         </colgroup>
         <thead>
           <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
-            <template x-for="col in ['rfq_number', 'unit', 'pr_ref', 'requester', 'req_date', 'due_date', 'status']"
+            <template
+              x-for="col in ['rfq_number', 'unit', 'department', 'pr_ref', 'requester', 'req_date', 'due_date', 'status']"
               :key="col">
               <th @click="toggleSort(col)" data-sort
                 class="px-3 py-2 text-[11px] font-semibold text-gray-500  tracking-wide text-left whitespace-nowrap"
                 :class="sortCol === col ? 'sort-active' : ''">
                 <span
-                  x-text="{rfq_number: 'RFQ #', unit: 'Unit', pr_ref: 'PR Ref', requester: 'Requester', req_date: 'Request Date', due_date: 'Due Date', status: 'Status'}[col]"></span>
+                  x-text="{rfq_number: 'RFQ #', unit: 'Unit', department: 'Department', pr_ref: 'PR Ref', requester: 'Requester', req_date: 'Request Date', due_date: 'Due Date', status: 'Status'}[col]"></span>
                 <span class="sort-indicator" x-text="sortCol === col ? (sortDir === 'asc' ? '▲' : '▼') : ''"></span>
               </th>
             </template>
@@ -296,6 +298,9 @@
               <td
                 class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900"
                 x-text="rec['Unit.Name'] || '–'"></td>
+              <td
+                class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-gray-700"
+                x-text="(rec.Department && (rec.Department.Name || rec.Department.zc_display_value)) || '–'"></td>
               <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap"
                 :title="Array.isArray(rec.PR_Refs) && rec.PR_Refs.length > 0 ? rec.PR_Refs.map(pr => pr.zc_display_value || pr.PR_Number || 'PR').join(', ') : ''">
                 <template x-if="Array.isArray(rec.PR_Refs) && rec.PR_Refs.length > 0">
@@ -316,7 +321,7 @@
                 </template>
               </td>
               <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[12px]"
-                x-text="rec.Added_User?.display_value || rec.Added_User || '–'"></td>
+                x-text="rec.Requested_By_Email || rec.Added_User || '–'"></td>
               <td
                 class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-gray-500"
                 x-text="formatDate(rec.Request_Date)"></td>
@@ -340,18 +345,6 @@
                     <i class="bi bi-box-arrow-up-right"></i> View
                   </button>
 
-                  <!-- <template x-if="normalizeStatusGroup(rec) === 'pending'">
-                    <div class="flex gap-1.5">
-                      <button @click="updateRecordStatus(rec.ID, 'Approved')"
-                        class="inline-flex items-center gap-[3px] px-2 py-[3px] rounded bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 text-[11px] font-medium transition-colors">
-                        <i class="bi bi-check-lg"></i> Approve
-                      </button>
-                      <button @click="updateRecordStatus(rec.ID, 'Rejected')"
-                        class="inline-flex items-center gap-[3px] px-2 py-[3px] rounded bg-white text-red-600 border border-red-600 hover:bg-red-50 text-[11px] font-medium transition-colors">
-                        <i class="bi bi-x-lg"></i> Reject
-                      </button>
-                    </div>
-                  </template> -->
                 </div>
               </td>
             </tr>
@@ -407,7 +400,7 @@
             <select id="rfqPrRef" class="w-full text-xs"></select>
           </div>
 
-          <div class="grid grid-cols-2 gap-4 mb-5">
+          <div class="grid grid-cols-3 gap-4 mb-5">
             <div>
               <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
                 Unit
@@ -415,6 +408,11 @@
                   class="ml-1 text-[10px] font-normal text-[#1B5CA8] bg-[#1B5CA8]/10 px-1.5 py-0.5 rounded-full">Auto-filled</span>
               </label>
               <select id="rfqUnit" class="w-full text-xs"></select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Department<span
+                  class="text-red-500">*</span></label>
+              <select id="rfqDepartment" required class="w-full text-xs"></select>
             </div>
             <div>
               <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Request Date
@@ -498,9 +496,19 @@
           <div class="flex justify-end gap-2 border-t border-gray-100 pt-4">
             <button type="button" @click="closeModal()"
               class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
-            <button type="submit" :disabled="isSubmitting"
+            <button type="button" @click="saveAsDraft()" :disabled="isDrafting || isSubmitting"
+              class="inline-flex items-center justify-center gap-1.5 min-w-[110px] px-4 py-1.5 bg-gray-50 text-gray-700 border border-gray-300 rounded-md text-xs font-semibold hover:bg-gray-100 transition-colors shadow-sm disabled:opacity-70">
+              <span x-show="!isDrafting" class="inline-flex items-center gap-1.5">
+                <!-- <i class="bi bi-floppy"></i> -->
+                Save as Draft</span>
+              <div x-show="isDrafting" class="rfq-spinner" style="width:14px;height:14px;border-width:2px;"></div>
+            </button>
+            <button type="submit" :disabled="isSubmitting || isDrafting"
               class="inline-flex items-center justify-center min-w-[90px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70">
-              <span x-show="!isSubmitting">Submit RFQ</span>
+
+              <span x-show="!isSubmitting">
+                <!-- <i class="bi bi-floppy"></i> -->
+                Submit RFQ</span>
               <div x-show="isSubmitting" class="rfq-spinner"
                 style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
             </button>
@@ -521,12 +529,14 @@
         REPORT_NAME: 'Request_For_Quotation_Report',
         ITEMS_REPORT_NAME: 'Items_Report',
         UNIT_REPORT_NAME: 'Unit_Report',
+        DEPARTMENTS_REPORT_NAME: 'Departments_Report',
         PR_REPORT_NAME: 'Purchase_Requisition_Report',
         VENDOR_REPORT_NAME: 'Vendor_Report',
 
         allRecords: [],
         itemMasters: [],
         unitMasters: [],
+        departmentMasters: [],
         vendorMasters: [],
 
         filter: 'all',
@@ -541,12 +551,13 @@
 
         isModalOpen: false,
         isSubmitting: false,
+        isDrafting: false,
         todayDate: dayjs().format('YYYY-MM-DD'),
 
-        rfqForm: { unit: '', reqDate: '', dueDate: '', prRef: '', prLocked: false, purpose: '', items: [] },
+        rfqForm: { unit: '', department: '', reqDate: '', dueDate: '', prRef: '', prLocked: false, purpose: '', items: [] },
 
         // TS instances manager
-        tsInstances: { unit: null, pr: null, items: [], vendorItems: [] },
+        tsInstances: { unit: null, department: null, pr: null, items: [], vendorItems: [] },
 
         // Holds a PR ID passed via query params so openCreateModal can pre-load it
         pendingPrId: null,
@@ -554,8 +565,10 @@
         init() {
           P2PWorkflowUtils.init(); // Detect env prefix (Dev__ / Prod__)
           this.fetchRecords();
+          this.computeStats();
           this.fetchItemMasters();
           this.fetchUnitMasters();
+          this.fetchDepartmentMasters();
           this.fetchVendorMasters();
 
           this.$watch('search', Alpine.debounce(() => {
@@ -613,7 +626,7 @@
 
           if (this.search.trim()) {
             let q = this.search.trim().replace(/'/g, "\\'");
-            criteria.push(`(Unit.contains("${q}") || RFQ_Ref_Number.contains("${q}"))`);
+            criteria.push(`(Unit.Name.contains("${q}") || RFQ_Ref_Number.contains("${q}") || PR_Refs.PR_Number.contains("${q}"))`);
           }
 
           if (this.filter === 'pending') criteria.push('(Status == "Submitted" || Status == "Draft")');
@@ -645,7 +658,6 @@
             } while (cursor);
 
             this.allRecords = accumulated;
-            this.computeStats();
           } catch (err) {
             console.error('Fetch error', err);
             this.allRecords = [];
@@ -693,6 +705,13 @@
           } catch (err) { console.error('Failed to load units', err); }
         },
 
+        async fetchDepartmentMasters() {
+          try {
+            let res = await ZOHO.CREATOR.DATA.getRecords({ report_name: this.DEPARTMENTS_REPORT_NAME, max_records: 200 });
+            if (res.code === 3000) this.departmentMasters = res.data;
+          } catch (err) { console.error('Failed to load departments', err); }
+        },
+
         // Preload the full Vendor Master list once, so each item row's Vendor dropdown
         // is instantly searchable without a network round-trip per keystroke. Any vendor
         // added in Vendor Master shows up here the next time this modal opens.
@@ -713,38 +732,6 @@
             } while (cursor);
             this.vendorMasters = accumulated;
           } catch (err) { console.error('Failed to load vendors', err); }
-        },
-
-        // --- Action: Update Record Status ---
-        async updateRecordStatus(recordId, newStatus) {
-          try {
-            Swal.fire({
-              title: `Processing...`,
-              allowOutsideClick: false,
-              didOpen: () => { Swal.showLoading(); }
-            });
-
-            const payload = {
-              report_name: this.REPORT_NAME,
-              id: recordId,
-              payload: {
-                data: {
-                  Status: newStatus
-                }
-              }
-            };
-
-            const response = await ZOHO.CREATOR.DATA.updateRecordById(payload);
-            if (response.code === 3000) {
-              Swal.fire({ icon: 'success', title: `RFQ ${newStatus}!`, toast: true, position: 'top-end', timer: 3000, showConfirmButton: false });
-              this.fetchRecords();
-            } else {
-              throw new Error(response.message || 'Update failed');
-            }
-          } catch (err) {
-            console.error(err);
-            Swal.fire({ icon: 'error', title: 'Action Failed', text: err.message || 'Failed to update record.' });
-          }
         },
 
         // --- UI Helpers ---
@@ -825,6 +812,7 @@
 
           this.$nextTick(() => {
             this.initUnitSelect();
+            this.initDepartmentSelect();
             this.initPrSelect();
 
             if (prId) {
@@ -851,6 +839,7 @@
         closeModal() {
           this.isModalOpen = false;
           if (this.tsInstances.unit) this.tsInstances.unit.destroy();
+          if (this.tsInstances.department) this.tsInstances.department.destroy();
           if (this.tsInstances.pr) this.tsInstances.pr.destroy();
           this.tsInstances.items.forEach(ts => ts && ts.destroy());
           this.tsInstances.items = [];
@@ -888,6 +877,18 @@
           });
         },
 
+        initDepartmentSelect() {
+          this.tsInstances.department = new TomSelect(document.getElementById('rfqDepartment'), {
+            valueField: 'ID', labelField: 'Name', searchField: 'Name',
+            options: this.departmentMasters, maxItems: 1, placeholder: 'Select Department...',
+            onChange: (val) => { this.rfqForm.department = val; },
+            render: {
+              option: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`,
+              item: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`
+            }
+          });
+        },
+
         initPrSelect() {
           this.tsInstances.pr = new TomSelect(document.getElementById('rfqPrRef'), {
             valueField: 'ID', labelField: 'PR_Number', searchField: ['PR_Number', 'Requisition_Number'],
@@ -913,7 +914,7 @@
               var q = query.replace(/'/g, "\\'");
               ZOHO.CREATOR.DATA.getRecords({
                 report_name: this.PR_REPORT_NAME,
-                criteria: `PR_Number.startsWith("${q}") &&( Status == "In Progress" || Status == "Partially Approved"))`
+                criteria: `(PR_Number.startsWith("${q}") || Requisition_Number.startsWith("${q.toLowerCase().replace('pr-', '')}")) && (Status == "In Progress" && Items_Approval_Status.contains("Approved"))`
               }).then(res => callback(res.code === 3000 ? res.data : [])).catch(() => callback());
             },
             render: {
@@ -1010,7 +1011,7 @@
             if (res && res.result && res.result.length > 0) {
               const pr = res.result[0];
               const items = pr.Requested_Items || [];
-              const PrNumber = pr.PR_Number || pr.Requisition_Number || '';
+              const PrNumber = pr.PR_Number || 'PR-' + pr.Requisition_Number || '';
               if (PrNumber && this.tsInstances.pr && this.tsInstances.pr.options[prId]) {
                 this.tsInstances.pr.updateOption(prId, {
                   ID: String(prId),
@@ -1118,14 +1119,25 @@
             const payload = {
               data: {
                 Unit: this.rfqForm.unit,
+                Department: this.rfqForm.department,
                 Request_Date: dayjs(this.rfqForm.reqDate).format('DD-MMM-YYYY'),
                 Due_Date: dayjs(this.rfqForm.dueDate).format('DD-MMM-YYYY'),
                 Purpose: this.rfqForm.purpose,
                 PR_Refs: this.rfqForm.prRef ? [this.rfqForm.prRef] : [],
                 Status: "Submitted",
+                Current_Stage: "Request For Quotation",
                 Items: this.rfqForm.items.map(i => ({
                   Item: i.id, Vendor: [...i.vendorIds], Unit: i.unit, Quantity: i.quantity, Comment: i.comment
-                }))
+                })),
+                Quotations: this.rfqForm.items.flatMap(i =>
+                  (i.vendorIds || []).map(vId => ({
+                    Vendor: vId,
+                    item_master: i.id,
+                    Quantity: i.quantity,
+                    Quote_Received: 0,
+                    Emails_Sent: 0
+                  }))
+                )
               }
             };
 
@@ -1145,6 +1157,57 @@
             Toast.fire({ icon: 'error', title: err.message || 'Submission failed.' });
           } finally {
             this.isSubmitting = false;
+          }
+        },
+
+        async saveAsDraft() {
+          if (this.rfqForm.items.length === 0 || this.rfqForm.items.some(i => !i.id)) {
+            Toast.fire({ icon: 'error', title: 'Please add at least one item before saving as draft.' });
+            return;
+          }
+
+          this.isDrafting = true;
+          try {
+            const payload = {
+              data: {
+                Unit: this.rfqForm.unit,
+                Department: this.rfqForm.department,
+                Request_Date: this.rfqForm.reqDate ? dayjs(this.rfqForm.reqDate).format('DD-MMM-YYYY') : '',
+                Due_Date: this.rfqForm.dueDate ? dayjs(this.rfqForm.dueDate).format('DD-MMM-YYYY') : '',
+                Purpose: this.rfqForm.purpose,
+                PR_Refs: this.rfqForm.prRef ? [this.rfqForm.prRef] : [],
+                Status: "Draft",
+                Current_Stage: "Request For Quotation",
+                Items: this.rfqForm.items.map(i => ({
+                  Item: i.id, Vendor: [...(i.vendorIds || [])], Unit: i.unit, Quantity: i.quantity, Comment: i.comment
+                })),
+                Quotations: this.rfqForm.items.flatMap(i =>
+                  (i.vendorIds || []).map(vId => ({
+                    Vendor: vId,
+                    item_master: i.id,
+                    Quantity: i.quantity,
+                    Quote_Received: 0,
+                    Emails_Sent: 0
+                  }))
+                )
+              }
+            };
+
+            const plainPayload = JSON.parse(JSON.stringify(payload));
+
+            let res = await ZOHO.CREATOR.DATA.addRecords({ form_name: "Request_For_Quotation", payload: plainPayload });
+            if (res.code === 3000) {
+              Toast.fire({ icon: 'success', title: 'RFQ saved as Draft!' });
+              this.closeModal();
+              this.search = '';
+              this.fetchRecords();
+            } else {
+              throw new Error(res.message);
+            }
+          } catch (err) {
+            Toast.fire({ icon: 'error', title: err.message || 'Failed to save draft.' });
+          } finally {
+            this.isDrafting = false;
           }
         }
       }));

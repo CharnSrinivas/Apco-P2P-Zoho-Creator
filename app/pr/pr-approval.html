@@ -292,6 +292,7 @@
                     <col style="width:120px">
                     <col style="width:108px">
                     <col style="width:108px">
+                    <col style="width:108px">
                     <col style="width:90px">
                     <col style="width:90px">
                     <col style="width:90px">
@@ -343,6 +344,8 @@
                                     x-text="rec._prNumber"></span></td>
                             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900"
                                 x-text="rec.Unit.Name || '–'"></td>
+                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-gray-700"
+                                x-text="(rec.Department && (rec.Department.Name || rec.Department.zc_display_value)) || '–'"></td>
                             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[12px]"
                                 x-text="rec._requesterName"></td>
                             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-gray-500"
@@ -751,6 +754,7 @@
             sortableColumns: [
                 { key: 'pr_number', label: 'PR #', align: 'left' },
                 { key: 'unit', label: 'Unit', align: 'left' },
+                { key: 'department', label: 'Department', align: 'left' },
                 { key: 'requester', label: 'Requester', align: 'left' },
                 { key: 'date', label: 'Date', align: 'left' },
                 { key: 'stage', label: 'Stage', align: 'left' },
