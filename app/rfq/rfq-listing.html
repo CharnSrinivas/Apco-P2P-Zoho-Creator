@@ -568,9 +568,8 @@
             this.fetchRecords();
           });
 
-          // ── Auto-open RFQ creation if launched with createPr=true ──────────────
           ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
-            const shouldCreate = String(params.createPr || '').toLowerCase() === 'true';
+            const shouldCreate = String(params.createRfq || '').toLowerCase() === 'true';
             const prId = params.prId || '';
             if (shouldCreate) {
               this.pendingPrId = prId || null;

@@ -5,18 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PR Detail</title>
-    <script src="https://cdn.tailwindcss.com"></script>
 
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
-    <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
 
-    <script
-        src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js">
-        </script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
+    <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+
+    <script
+        src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,7 +27,11 @@
         rel="stylesheet">
 
     <style>
-        /* ── Spinners ── */
+        [x-cloak] {
+            display: none !important;
+        }
+
+        /* Spinners */
         .btn-spinner {
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-top-color: #ffffff;
@@ -44,13 +50,22 @@
             animation: spin 0.7s linear infinite;
         }
 
+        .btn-spinner-blue {
+            border: 2px solid rgba(27, 92, 168, 0.2);
+            border-top-color: #1B5CA8;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            animation: spin 0.7s linear infinite;
+        }
+
         @keyframes spin {
             to {
                 transform: rotate(360deg);
             }
         }
 
-        /* ── Progress stepper connector ── */
+        /* Progress stepper connector */
         .step-connector {
             position: absolute;
             top: 14px;
@@ -70,7 +85,6 @@
             transition: width 0.6s ease;
         }
 
-        /* ── Timeline connector ── */
         .timeline-line {
             position: absolute;
             left: 15px;
@@ -84,7 +98,7 @@
             display: none;
         }
 
-        /* ── Fade in ── */
+        /* Fade in */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -101,7 +115,7 @@
             animation: fadeInUp 0.35s ease-out both;
         }
 
-        /* ── Edit Modal styles (from RFQ) ── */
+        /* Modal styling */
         .rfq-modal-overlay {
             position: fixed;
             inset: 0;
@@ -110,6 +124,11 @@
             align-items: center;
             justify-content: center;
             padding: 1rem;
+        }
+
+        .rfq-modal-bg {
+            position: absolute;
+            inset: 0;
             background: rgba(17, 24, 39, 0.4);
             backdrop-filter: blur(2px);
         }
@@ -120,19 +139,15 @@
             background: #fff;
             border-radius: 11px;
             width: 100%;
-            max-width: 5xl;
-            max-height: 90vh;
-            overflow-y: auto;
             box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
         }
 
+        /* TomSelect overrides */
         .ts-control {
             border: 1px solid #e5e7eb !important;
             border-radius: 0.5rem !important;
             font-size: 0.8125rem !important;
             padding: 0.5rem 0.75rem !important;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
-            font-family: inherit;
             background-color: #f9fafb !important;
             transition: all 0.2s ease-in-out;
         }
@@ -148,7 +163,6 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
             border: 1px solid #f3f4f6 !important;
             padding: 0.35rem !important;
-            margin-top: 4px !important;
             font-size: 0.8125rem !important;
         }
 
@@ -164,15 +178,7 @@
             color: #111827 !important;
         }
 
-        /* Toast (optional) – we can reuse the RFQ toast style if needed */
-        .toast-enter {
-            animation: toastIn 0.3s ease-out both;
-        }
-
-        .toast-leave {
-            animation: toastOut 0.25s ease-in both;
-        }
-
+        /* Toast Animations */
         @keyframes toastIn {
             from {
                 opacity: 0;
@@ -196,72 +202,116 @@
                 transform: translateY(-12px) scale(0.96);
             }
         }
+
+        .toast-enter {
+            animation: toastIn 0.3s ease-out both;
+        }
+
+        .toast-leave {
+            animation: toastOut 0.25s ease-in both;
+        }
     </style>
 </head>
 
 <body class="bg-gray-50 p-6">
-    <div id="actionModal"
-        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm transition-opacity">
-        <div
-            class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden fade-in mx-4 border border-gray-200 flex flex-col max-h-[90vh]">
-            <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-white shrink-0">
-                <h3 id="modalTitle" class="text-[14px] font-bold text-gray-800">Submit Action</h3>
-                <button id="closeModalBtn" class="text-gray-400 hover:text-gray-700 cursor-pointer transition-colors">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
 
-            <div class="p-5 bg-gray-50/50 overflow-y-auto flex-1">
-                <div id="approvalItemsWrapper" class="hidden mb-5">
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="block text-xs font-semibold text-gray-700">
-                            Adjust Approved Quantities
-                        </label>
-                        <span class="text-[10px] text-gray-400 font-medium">Set quantity to 0 to remove item</span>
-                    </div>
-                    <div id="approvalItemsList"
-                        class="bg-white border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-100">
-                    </div>
+    <div id="app" x-data="prWidget()" x-init="initWidget()" x-cloak
+        class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-6xl mx-auto">
+
+        <!-- Toast Notification -->
+        <div x-show="toast.show"
+            class="fixed top-5 right-5 z-[100] flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-[13px] font-medium max-w-sm"
+            :class="{ 'bg-emerald-50 border-emerald-200 text-emerald-800': toast.type === 'success', 'bg-red-50 border-red-200 text-red-800': toast.type === 'error' }"
+            x-transition:enter="toast-enter" x-transition:leave="toast-leave">
+            <i class="bi text-[15px]"
+                :class="toast.type === 'success' ? 'bi-check-circle-fill text-emerald-600' : 'bi-exclamation-circle-fill text-red-600'"></i>
+            <span x-text="toast.message"></span>
+            <button @click="hideToast()" class="ml-auto text-gray-400 hover:text-gray-600 cursor-pointer"><i
+                    class="bi bi-x text-[15px]"></i></button>
+        </div>
+
+        <!-- Action / Approval Modal -->
+        <div x-show="showActionModal" style="display: none;"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm transition-opacity">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden fade-in mx-4 border border-gray-200 flex flex-col max-h-[90vh]"
+                @click.away="closeActionModal()">
+                <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-white shrink-0">
+                    <h3 class="text-[14px] font-bold text-gray-800" x-text="pendingAction.title"></h3>
+                    <button @click="closeActionModal()"
+                        class="text-gray-400 hover:text-gray-700 cursor-pointer transition-colors"><i
+                            class="bi bi-x-lg"></i></button>
                 </div>
 
-                <label class="block text-xs font-semibold text-gray-700 mb-2">
-                    Comment <span class="text-gray-400 font-normal text-[11px]">(Optional)</span>
-                </label>
-                <textarea id="actionComment" rows="3"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1B5CA8]/20 focus:border-[#1B5CA8] transition-all shadow-sm"
-                    placeholder="Enter your remarks here..."></textarea>
-            </div>
+                <div class="p-5 bg-gray-50/50 overflow-y-auto flex-1">
+                    <div x-show="pendingAction.status === 'Approved' && approvalItems.length > 0" class="mb-5">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-xs font-semibold text-gray-700">Adjust Approved Quantities</label>
+                            <span class="text-[10px] text-gray-400 font-medium">Set quantity to 0 to remove item</span>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-100">
+                            <template x-for="(item, index) in approvalItems" :key="index">
+                                <div class="p-3">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex-1 min-w-0 pr-4">
+                                            <div class="text-[13px] font-medium text-gray-900 truncate mb-0.5"
+                                                x-text="item.itemName"></div>
+                                            <div class="text-[11px] text-gray-500">Requested Qty: <span
+                                                    class="font-semibold" x-text="item.originalQty"></span></div>
+                                        </div>
+                                        <div class="w-24 shrink-0 relative">
+                                            <label
+                                                class="absolute -top-1 left-2 bg-white px-1 text-[9px] font-semibold text-gray-400 uppercase">Qty</label>
+                                            <input type="number" x-model.number="item.approvedQty" min="0"
+                                                :max="item.originalQty"
+                                                class="w-full border rounded-md py-1.5 px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1B5CA8]/20 transition-all shadow-sm"
+                                                :class="item.approvedQty > item.originalQty ? 'border-red-400 focus:border-red-500' : 'border-gray-300 focus:border-[#1B5CA8]'">
+                                        </div>
+                                    </div>
+                                    <div x-show="item.approvedQty > item.originalQty"
+                                        class="mt-1.5 text-[11px] text-orange-400 font-medium text-right flex justify-end items-center gap-1">
+                                        <i class="bi bi-exclamation-triangle"></i> Exceeding requested qty (<span
+                                            x-text="item.originalQty"></span>)
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
 
-            <div class="px-5 py-3.5 bg-white flex justify-end gap-2.5 border-t border-gray-100 shrink-0">
-                <button id="cancelActionBtn"
-                    class="px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors cursor-pointer shadow-sm">
-                    Cancel
-                </button>
-                <button id="confirmActionBtn"
-                    class="px-4 py-2 rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer shadow-sm flex items-center gap-1.5">
-                    <span id="confirmActionText">Submit</span>
-                </button>
-            </div>
-        </div>
-    </div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-2">Comment <span
+                            class="text-gray-400 font-normal text-[11px]">(Optional)</span></label>
+                    <textarea x-model="pendingAction.comment" rows="3"
+                        class="w-full border border-gray-300 rounded-lg p-3 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1B5CA8]/20 focus:border-[#1B5CA8] transition-all shadow-sm"
+                        placeholder="Enter your remarks here..."></textarea>
+                </div>
 
-    <div id="app" class="font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased max-w-5xl mx-auto">
-
-        <!-- Toast container -->
-        <div id="toastContainer" class="fixed top-5 right-5 z-[100] flex flex-col gap-2"></div>
-
-        <!-- Edit Modal (inspired by RFQ) -->
-        <div id="editModal" class="rfq-modal-overlay hidden fade-in">
-            <div class="rfq-modal-box max-w-5xl">
-                <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
-                    <h3 class="text-[15px] font-bold text-gray-800">Edit Purchase Requisition</h3>
-                    <button id="closeEditModalBtn"
-                        class="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer">
-                        <i class="bi bi-x-lg text-lg"></i>
+                <div class="px-5 py-3.5 bg-white flex justify-end gap-2.5 border-t border-gray-100 shrink-0">
+                    <button @click="closeActionModal()" :disabled="isSubmittingAction"
+                        class="px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors cursor-pointer shadow-sm disabled:opacity-50">Cancel</button>
+                    <button @click="submitAction()" :disabled="isSubmittingAction || isQuantityExceeded"
+                        :class="pendingAction.btnBgClass + ' ' + pendingAction.btnHoverClass"
+                        class="px-4 py-2 rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer shadow-sm flex items-center gap-1.5 disabled:opacity-70 disabled:cursor-not-allowed">
+                        <template x-if="isSubmittingAction">
+                            <div class="btn-spinner mr-1"></div>
+                        </template>
+                        <span x-text="isSubmittingAction ? 'Submitting...' : pendingAction.title.split(' ')[0]"></span>
                     </button>
                 </div>
+            </div>
+        </div>
 
-                <form id="editPrForm" class="p-5">
+        <!-- Edit PR Modal -->
+        <div x-show="isEditModalOpen" style="display: none;" class="rfq-modal-overlay">
+            <div class="rfq-modal-bg" x-show="isEditModalOpen" x-transition.opacity @click="closeEditModal()"></div>
+            <div class="rfq-modal-box max-w-5xl fade-in" style="max-height: 90vh; overflow-y: auto;"
+                x-show="isEditModalOpen">
+                <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50">
+                    <h3 class="text-[15px] font-bold text-gray-800">Edit Purchase Requisition</h3>
+                    <button @click="closeEditModal()"
+                        class="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer"><i
+                            class="bi bi-x-lg text-lg"></i></button>
+                </div>
+
+                <form @submit.prevent="submitEditPR" class="p-5">
                     <div class="grid grid-cols-2 gap-4 mb-5">
                         <div>
                             <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Unit<span
@@ -271,29 +321,29 @@
                         <div>
                             <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PR Date
                                 <span class="text-red-500">*</span></label>
-                            <input type="date" id="prDateInput" required
+                            <input type="date" x-model="editForm.prDate" required
                                 class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
                         </div>
                         <div>
                             <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Due Date
                                 <span class="text-red-500">*</span></label>
-                            <input type="date" id="prDueDateInput" required
+                            <input type="date" x-model="editForm.dueDate" required
                                 class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
                         </div>
                         <div>
                             <label
                                 class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Description</label>
-                            <input type="text" id="prDescriptionInput"
+                            <input type="text" x-model="editForm.description"
                                 class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
                         </div>
                     </div>
 
-                    <!-- Items Grid (Requested_Items) -->
+                    <!-- Items Grid -->
                     <div class="mb-5 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
                         <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
                             <span class="text-xs font-semibold text-gray-700 tracking-wide">Requested Items <span
                                     class="text-red-500">*</span></span>
-                            <button type="button" id="addItemRowBtn"
+                            <button type="button" @click="addEditItemRow()"
                                 class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors cursor-pointer">+
                                 Add Item</button>
                         </div>
@@ -318,20 +368,41 @@
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody id="editItemsBody">
-                                    <!-- Rows will be inserted here -->
+                                <tbody>
+                                    <template x-for="(item, index) in editForm.items" :key="item.uid">
+                                        <tr
+                                            class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors bg-white">
+                                            <td class="px-3 py-2 relative"><select x-init="initItemSelect($el, item)"
+                                                    class="w-full text-xs" required></select></td>
+                                            <td class="px-3 py-2"><input type="number" x-model.number="item.quantity"
+                                                    min="1" required
+                                                    class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
+                                            </td>
+                                            <td class="px-3 py-2"><input type="date" x-model="item.dueDate"
+                                                    class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
+                                            </td>
+                                            <td class="px-3 py-2"><input type="text" x-model="item.comment"
+                                                    placeholder="Optional"
+                                                    class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
+                                            </td>
+                                            <td class="px-3 py-2 text-center"><button type="button"
+                                                    @click="removeEditItemRow(index)"
+                                                    class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50 cursor-pointer"><i
+                                                        class="bi bi-trash"></i></button></td>
+                                        </tr>
+                                    </template>
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
                     <div class="flex justify-end gap-2 border-t border-gray-100 pt-4">
-                        <button type="button" id="cancelEditBtn"
+                        <button type="button" @click="closeEditModal()"
                             class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors cursor-pointer">Cancel</button>
-                        <button type="submit" id="saveEditBtn"
+                        <button type="submit" :disabled="isSubmittingEdit"
                             class="inline-flex items-center justify-center min-w-[100px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70 cursor-pointer">
-                            <span id="saveEditText">Save Changes</span>
-                            <div id="saveEditSpinner" class="btn-spinner hidden"
+                            <span x-show="!isSubmittingEdit">Save Changes</span>
+                            <div x-show="isSubmittingEdit" class="btn-spinner"
                                 style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
                         </button>
                     </div>
@@ -339,51 +410,70 @@
             </div>
         </div>
 
-        <!-- Loading, Error, Main -->
-        <div id="loadingState" class="flex flex-col items-center justify-center py-24 gap-3">
+        <!-- States: Loading / Error -->
+        <div x-show="isLoading" class="flex flex-col items-center justify-center py-24 gap-3">
             <div class="pr-spinner"></div>
             <div class="text-sm text-gray-400 font-medium">Loading PR details…</div>
         </div>
 
-        <div id="errorState" class="hidden text-center py-24">
+        <div x-show="hasError" class="text-center py-24">
             <i class="bi bi-alert-circle text-4xl text-red-400 mb-3 block"></i>
             <div class="text-sm font-medium text-gray-600">Failed to load PR details</div>
-            <div class="text-xs text-gray-400 mt-1">Please check the record ID and try again.</div>
+            <div class="text-xs text-gray-400 mt-1"
+                x-text="errorMessage || 'Please check the record ID and try again.'"></div>
         </div>
 
-        <div id="mainContent" class="hidden">
+        <!-- Main View -->
+        <div x-show="!isLoading && !hasError" class="fade-in">
+            <!-- Header Section -->
             <div class="mb-5">
                 <nav class="flex items-center gap-1.5 text-xs mb-2.5">
                     <button
                         onclick="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',window:'same',url:'#Page:PR_Approval'})"
-                        class=" text-[#1B5CA8] hover:text-[#14457e] font-medium transition-colors no-underline cursor-pointer">
-                        Purchase Requisitions
-                    </button>
+                        class="text-[#1B5CA8] hover:text-[#14457e] font-medium transition-colors no-underline cursor-pointer">Purchase
+                        Requisitions</button>
                     <i class="bi bi-chevron-right text-[11px] text-gray-400"></i>
-                    <span class="text-gray-500 font-medium" id="breadcrumbPrNum">–</span>
+                    <span class="text-gray-500 font-medium" x-text="prNumber"></span>
                 </nav>
+
                 <div class="flex items-center justify-between gap-2.5">
                     <div class="flex items-center gap-2.5">
-                        <h1 class="text-[17px] font-bold text-gray-900 leading-none" id="headerPrNum">–</h1>
-                        <span id="headerBadge"></span>
+                        <h1 class="text-[17px] font-bold text-gray-900 leading-none" x-text="prNumber"></h1>
+                        <span x-html="getStatusBadgeHTML(rec.Status)"></span>
+                        <template x-if="rec.Current_Stage">
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium tracking-wide border border-blue-200 bg-blue-50 text-blue-700">
+                                <i class="bi bi-geo-alt text-[10px]"></i> <span x-text="rec.Current_Stage"></span>
+                            </span>
+                        </template>
                     </div>
-                    <div class="flex items-center gap-2 shrink-0" id="topActions">
-                        <button id="editBtn"
-                            class="hidden inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer">
-                            <i class="bi bi-pencil-square"></i> Edit
+
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button x-show="isDraft" @click="openEditModal()"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer"><i
+                                class="bi bi-pencil-square"></i> Edit</button>
+                        <button x-show="isInProgress" @click="createRFQ()"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#1B5CA8] text-white hover:bg-[#12427b] transition-colors no-underline cursor-pointer shadow-sm"><i
+                                class="bi bi-file-earmark-plus"></i> Create New RFQ</button>
+                        <button @click="downloadPDF()" :disabled="isGeneratingPDF"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#EBF3FC] border border-[#1B5CA8]/30 text-[#1B5CA8] hover:bg-blue-100 rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer disabled:opacity-50">
+                            <template x-if="!isGeneratingPDF"><i class="bi bi-download"></i></template>
+                            <template x-if="isGeneratingPDF">
+                                <div class="btn-spinner-blue" style="width:13px;height:13px;"></div>
+                            </template>
+                            <span x-text="isGeneratingPDF ? 'Preparing...' : 'Download PDF'"></span>
                         </button>
-                        <div id="createRFQBtnWrapper" class="hidden">
-                            <button id="createRFQBtn"
-                                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#1B5CA8] text-white hover:bg-[#12427b] transition-colors no-underline cursor-pointer shadow-sm">
-                                <i class="bi bi-file-earmark-plus"></i> Create New RFQ
-                            </button>
-                        </div>
                     </div>
                 </div>
-                <div class="text-xs text-gray-400 mt-1" id="headerSub">–</div>
+
+                <div class="text-xs text-gray-400 mt-1">
+                    <span x-text="getDisplayName(rec.Unit)"></span> · Requested <span
+                        x-text="formatDate(rec.PR_Date)"></span>
+                </div>
             </div>
 
-            <div class="bg-white border border-gray-200 rounded-lg p-5 mb-4 fade-in">
+            <!-- Progress Tracker -->
+            <div class="bg-white border border-gray-200 rounded-lg p-5 mb-4">
                 <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">PR Process Progress
                 </div>
                 <div class="relative flex justify-between items-start" id="progressContainer">
@@ -393,98 +483,375 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-5 gap-4">
-                <div class="col-span-3 space-y-4">
-                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden fade-in">
-                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
-                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+            <!-- Details Section -->
+            <div class="flex flex-col gap-y-4">
+                <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                    <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                        <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                            <div
+                                class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
+                                <i class="bi bi-file-text"></i>
+                            </div>
+                            Requisition Details
+                        </div>
+                    </div>
+                    <div class="px-[18px] py-[20px]">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
                                 <div
-                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
-                                    <i class="bi bi-file-text"></i>
+                                    class="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-3 border-b border-gray-100 pb-1">
+                                    Requisition Info</div>
+                                <div class="mb-3">
+                                    <div class="text-[11px] text-gray-500 font-medium">PR Number</div>
+                                    <div class="text-[13px] font-semibold text-gray-900" x-text="prNumber"></div>
                                 </div>
-                                Requisition Details
+                                <div class="mb-3">
+                                    <div class="text-[11px] text-gray-500 font-medium">Status</div>
+                                    <div class="mt-1" x-html="getStatusBadgeHTML(rec.Status)"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div
+                                    class="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-3 border-b border-gray-100 pb-1">
+                                    Requester Details</div>
+                                <div class="mb-3">
+                                    <div class="text-[11px] text-gray-500 font-medium">Unit / Location</div>
+                                    <div class="text-[13px] font-semibold text-gray-900"
+                                        x-text="getDisplayName(rec.Unit)"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="text-[11px] text-gray-500 font-medium">Requested By</div>
+                                    <div class="text-[13px] font-semibold text-gray-900 truncate"
+                                        x-text="getDisplayName(rec.Requested_By_Email || rec.Added_User)"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="text-[11px] text-gray-500 font-medium">Department</div>
+                                    <div class="text-[13px] font-semibold text-gray-900"
+                                        x-text="getDisplayName(rec.Department)"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div
+                                    class="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-3 border-b border-gray-100 pb-1">
+                                    Timeline</div>
+                                <div class="mb-3">
+                                    <div class="text-[11px] text-gray-500 font-medium">PR Date</div>
+                                    <div class="text-[13px] font-semibold text-gray-900"
+                                        x-text="formatDate(rec.PR_Date)"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="text-[11px] text-gray-500 font-medium">Due Date</div>
+                                    <div class="text-[13px] font-semibold text-[#1B5CA8]"
+                                        x-text="formatDate(rec.Due_Date)"></div>
+                                </div>
                             </div>
                         </div>
-                        <div class="px-[18px] py-[15px]" id="prDetailsBody"></div>
-                    </div>
-
-                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden fade-in">
-                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
-                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
-                                <div
-                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
-                                    <i class="bi bi-list-ul"></i>
-                                </div>
-                                <span>Requested Line Items</span>
+                        <template x-if="rec.description">
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                                    Description / Purpose</div>
+                                <div class="text-xs text-gray-700 leading-relaxed max-w-none p-3 bg-gray-50 border border-gray-100 rounded-md"
+                                    x-text="rec.description"></div>
                             </div>
-                        </div>
-                        <div id="requestedItemsTableBody"></div>
-                    </div>
-
-                    <div id="approvedItemsCard"
-                        class="hidden bg-white border border-gray-200 rounded-lg overflow-hidden fade-in">
-                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-emerald-50/60">
-                            <div class="text-[12px] font-semibold text-emerald-800 flex items-center gap-2">
-                                <div
-                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-emerald-100 text-emerald-700">
-                                    <i class="bi bi-check2-square"></i>
-                                </div>
-                                <span>Approved Line Items</span>
-                            </div>
-                        </div>
-                        <div id="approvedItemsTableBody"></div>
-                    </div>
-
-                    <div class="flex items-center gap-2.5 fade-in" id="actionButtons" style="display:none;">
-                        <button id="submitDraftBtn" style="display:none;"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#1B5CA8] text-white hover:bg-[#12427b] transition-colors no-underline cursor-pointer shadow-sm">
-                            <i class="bi bi-send"></i> <span class="btn-text">Submit Requisition</span>
-                        </button>
-
-                        <button id="approveBtn" style="display:none;"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors no-underline cursor-pointer shadow-sm">
-                            <i class="bi bi-check-lg"></i> <span class="btn-text">Approve</span>
-                        </button>
-                        <button id="rejectBtn" style="display:none;"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors no-underline cursor-pointer shadow-sm">
-                            <i class="bi bi-x-lg"></i> Reject
-                        </button>
-
-                        <button id="cancelBtn"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors no-underline cursor-pointer shadow-sm">
-                            <i class="bi bi-slash-circle"></i> Cancel
-                        </button>
+                        </template>
                     </div>
                 </div>
 
-                <div class="col-span-2 space-y-4">
-
-                    <div id="attachmentsCard"
-                        class="hidden bg-white border border-gray-200 rounded-lg overflow-hidden fade-in">
-                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
-                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
-                                <div
-                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-indigo-50 text-indigo-600">
-                                    <i class="bi bi-paperclip"></i>
-                                </div>
-                                Attachments
+                <!-- Approved Items -->
+                <div x-show="rec.Items && rec.Items.length > 0"
+                    class="bg-white border border-emerald-200 rounded-lg shadow-sm flex flex-col">
+                    <div
+                        class="px-[18px] py-[13px] border-b border-emerald-200 bg-emerald-50 flex justify-between items-center rounded-t-lg">
+                        <div class="text-[12px] font-semibold text-emerald-800 flex items-center gap-2">
+                            <div
+                                class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-emerald-100 text-emerald-700">
+                                <i class="bi bi-check2-square"></i>
                             </div>
+                            <span>Approved Line Items & Delivery Status</span>
                         </div>
-                        <div class="px-[18px] py-[15px]" id="attachmentsBody">
+                        <div x-show="selectedIndices.length > 0" x-cloak class="flex gap-2 fade-in">
+                            <button @click="createPO()"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-md text-[11px] font-semibold hover:bg-emerald-700 transition-colors shadow-sm">
+                                <i class="bi bi-cart-plus"></i> Create PO
+                            </button>
+                            <button @click="createRFQ()"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-md text-[11px] font-semibold hover:bg-gray-50 transition-colors shadow-sm">
+                                <i class="bi bi-file-earmark-plus"></i> Create RFQ
+                            </button>
                         </div>
                     </div>
 
-                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden fade-in">
-                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
-                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
-                                <div
-                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-amber-50 text-amber-600">
-                                    <i class="bi bi-clock-history"></i>
-                                </div>
-                                Audit Trail
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full border-collapse text-xs whitespace-nowrap min-w-[1200px]">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-200">
+                                    <th class="px-4 py-2 w-8 text-center">
+                                        <input type="checkbox" :checked="selectAll" @change="toggleAll()"
+                                            class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                                    </th>
+                                    <th
+                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left w-8">
+                                        #</th>
+                                    <th
+                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide  text-left">
+                                        Item Details</th>
+                                    <th
+                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
+                                        RFQ</th>
+                                    <th
+                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
+                                        QC</th>
+                                    <th
+                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
+                                        Last PO</th>
+                                    <th
+                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-center">
+                                        Status</th>
+                                    <th
+                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right">
+                                        App. Qty</th>
+                                    <th
+                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right">
+                                        Ord. Qty</th>
+                                    <th
+                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right">
+                                        Rec. Qty</th>
+                                    <th
+                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left min-w-[150px]">
+                                        Due Date</th>
+                                    <th
+                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-center sticky right-0 bg-gray-50 border-l border-gray-200 shadow-sm z-10">
+                                        Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="(item, i) in rec.Items" :key="i">
+                                    <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors group">
+                                        <td class="px-4 py-3 text-center">
+                                            <input type="checkbox" x-model="selectedIndices" :value="i"
+                                                class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                                        </td>
+                                        <td class="px-4 py-3 text-gray-400 font-mono w-8" x-text="i + 1"></td>
+                                        <td class="px-4 py-3 text-gray-900 font-medium whitespace-normal">
+                                            <span x-text="getItemName(item.Item)"></span>
+                                        </td>
+
+                                        <!-- RFQ -->
+                                        <td class="px-4 py-3 text-center">
+                                            <template
+                                                x-if="item.Request_For_Quotations && item.Request_For_Quotations.length > 0">
+                                                <div class="flex flex-col gap-1.5">
+                                                    <template x-for="rfq in item.Request_For_Quotations">
+                                                        <button @click="openRFQ(rfq.ID)"
+                                                            class="inline-flex items-center gap-1 text-[10.5px] font-mono font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded px-2 py-0.5 transition-colors cursor-pointer w-max"
+                                                            title="Open RFQ">
+                                                            <span x-text="rfq.RFQ_Ref_Number"></span>
+                                                        </button>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                            <template
+                                                x-if="!item.Request_For_Quotations || item.Request_For_Quotations.length === 0">
+                                                <span class="text-gray-300 text-[10.5px] font-medium">–</span>
+                                            </template>
+                                        </td>
+
+                                        <!-- QC -->
+                                        <td class="px-4 py-3 text-center">
+                                            <template
+                                                x-if="item.Quote_Comparisions && item.Quote_Comparisions.length > 0">
+                                                <div class="flex flex-col gap-1.5">
+                                                    <template x-for="qc in item.Quote_Comparisions">
+                                                        <button @click="openQC(qc.ID)"
+                                                            class="inline-flex items-center gap-1 text-[10.5px] font-mono font-medium bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 rounded px-2 py-0.5 transition-colors cursor-pointer w-max"
+                                                            title="Open QC">
+                                                            <span x-text="qc.QC_Ref_Number"></span>
+                                                        </button>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                            <template
+                                                x-if="!item.Quote_Comparisions || item.Quote_Comparisions.length === 0">
+                                                <span class="text-gray-300 text-[10.5px] font-medium">–</span>
+                                            </template>
+                                        </td>
+
+                                        <!-- Last PO -->
+                                        <td class="px-4 py-3 text-center">
+                                            <template x-if="item.Purchase_Orders && item.Purchase_Orders.length > 0">
+                                                <div class="flex flex-col gap-1.5">
+                                                    <template x-for="po in item.Purchase_Orders">
+                                                        <button @click="openPO(po.ID)"
+                                                            class="inline-flex items-center gap-1 text-[10.5px] font-mono font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded px-2 py-0.5 transition-colors cursor-pointer w-max"
+                                                            title="Open PO"> <span x-text="po.PO_Ref_Number"></span>
+                                                        </button>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                            <template x-if="!item.Purchase_Orders || item.Purchase_Orders.length === 0">
+                                                <span class="text-gray-300 text-[10.5px] font-medium">–</span>
+                                            </template>
+                                        </td>
+
+                                        <td class="px-4 py-3 text-center"><span
+                                                class="px-2 py-0.5 rounded text-[10px] font-semibold"
+                                                :class="getLineItemStatusColor(item.Status)"
+                                                x-text="item.Status || 'Pending'"></span></td>
+                                        <td class="px-4 py-3 text-gray-700 text-right tabular-nums font-semibold"
+                                            x-text="item.Quantity || 0"></td>
+                                        <td class="px-4 py-3 text-gray-500 text-right tabular-nums"
+                                            x-text="item.Ordered_Quantity || 0"></td>
+                                        <td class="px-4 py-3 text-gray-500 text-right tabular-nums"
+                                            x-text="item.Received_Quantity || 0"></td>
+                                        <td class="px-4 py-3 text-gray-600 text-left"
+                                            x-text="formatDate(item.Due_Date)"></td>
+
+                                        <!-- Actions -->
+                                        <td
+                                            class="px-4 py-3 text-center align-top sticky right-0 bg-white group-hover:bg-gray-50 border-l border-gray-100 z-10 transition-colors">
+                                            <div class="flex flex-col items-center justify-center gap-2">
+                                                <button @click="createPO()" title="Create PO"
+                                                    class="h-[26px] gap-1.5 px-2 py-1 flex items-center justify-center rounded bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 transition-colors cursor-pointer shadow-sm">
+                                                    Create PO
+                                                    <i class="bi bi-cart-plus text-[13px]"></i>
+                                                </button>
+                                                <button @click="createRFQ()" title="Create RFQ"
+                                                    class="h-[26px] gap-1.5 px-2 py-1 flex items-center justify-center rounded bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-[#1B5CA8] border border-gray-200 transition-colors cursor-pointer shadow-sm">
+                                                    Create RFQ
+                                                    <i class="bi bi-file-earmark-plus text-[13px]"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <!-- Comment row -->
+                                    <template x-if="item.Comment">
+                                        <tr class="border-b border-gray-50 bg-amber-50/40">
+                                            <td colspan="12" class="px-4 pb-2.5 pt-0">
+                                                <div
+                                                    class="flex items-start gap-1.5 text-[11px] text-gray-500 font-normal">
+                                                    <i class="bi bi-chat-left-text text-amber-400 mt-0.5 shrink-0"></i>
+                                                    <span x-text="item.Comment"></span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Requested Items -->
+                <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                    <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                        <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                            <div
+                                class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
+                                <i class="bi bi-list-ul"></i>
                             </div>
+                            <span>Requested Line Items</span>
                         </div>
-                        <div class="px-[18px] py-[15px]" id="auditTrailBody"></div>
+                    </div>
+                    <div x-show="requestedItems.length === 0" class="px-[18px] py-8 text-center text-gray-400 text-xs">
+                        <i class="bi bi-box-seam text-xl mb-1 block"></i>No line items
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table x-show="requestedItems.length > 0" class="w-full border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-200">
+                                    <th
+                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left w-8">
+                                        #</th>
+                                    <th
+                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
+                                        Item Details</th>
+                                    <th
+                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right">
+                                        Qty</th>
+                                    <th
+                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
+                                        Due Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="(item, i) in requestedItems" :key="i">
+                                    <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                                        <td class="px-4 py-3 text-gray-400 font-mono w-8" x-text="i + 1"></td>
+                                        <td class="px-4 py-3 text-gray-900 font-medium">
+                                            <span x-text="getItemName(item.Item)"></span>
+                                            <template x-if="item.Comment">
+                                                <div class="text-[11px] text-gray-400 font-normal mt-1"
+                                                    x-text="item.Comment"></div>
+                                            </template>
+                                        </td>
+                                        <td class="px-4 py-3 text-gray-700 text-right tabular-nums w-24"
+                                            x-text="item.Quantity || 0"></td>
+                                        <td class="px-4 py-3 text-gray-600 text-left"
+                                            x-text="formatDate(item.Due_Date)"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Actions Buttons (Draft / Approval) -->
+                <div class="flex items-center gap-2.5" x-show="showActionButtons">
+                    <button x-show="isDraft" @click="submitDraft()"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#1B5CA8] text-white hover:bg-[#12427b] transition-colors no-underline cursor-pointer shadow-sm disabled:opacity-70">
+                        <template x-if="!isSubmittingDraft"><i class="bi bi-send"></i></template>
+                        <template x-if="isSubmittingDraft">
+                            <div class="btn-spinner mr-1"></div>
+                        </template>
+                        <span x-text="isSubmittingDraft ? 'Submitting...' : 'Submit Requisition'"></span>
+                    </button>
+                    <button x-show="isPRStage && !isRejected && !isApproved" @click="approvePR()"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors no-underline cursor-pointer shadow-sm">
+                        <i class="bi bi-check-lg"></i> <span
+                            x-text="rec.Request_For_Quotation === 'Yes' ? 'Approve & Submit For RFQ' : 'Approve & Submit'"></span>
+                    </button>
+                    <button x-show="isPRStage && !isRejected && !isApproved" @click="rejectPR()"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors no-underline cursor-pointer shadow-sm">
+                        <i class="bi bi-x-lg"></i> Reject
+                    </button>
+                    <button x-show="isDraft || (isPRStage && !isRejected && !isApproved)" @click="cancelPR()"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors no-underline cursor-pointer shadow-sm">
+                        <i class="bi bi-slash-circle"></i> Cancel
+                    </button>
+                </div>
+
+                <!-- Attachments -->
+                <div x-show="hasAttachments"
+                    class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                    <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                        <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                            <div
+                                class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-indigo-50 text-indigo-600">
+                                <i class="bi bi-paperclip"></i>
+                            </div>
+                            Attachments
+                        </div>
+                    </div>
+                    <div class="px-[18px] py-[15px]">
+                        <div class="space-y-3">
+                            <template x-for="(att, idx) in formattedAttachments" :key="idx">
+                                <div
+                                    class="flex items-center justify-between p-3 border border-gray-100 rounded-lg bg-white shadow-sm hover:shadow transition-shadow">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                            <i class="bi bi-file-earmark-text text-[15px]"></i>
+                                        </div>
+                                        <div class="text-xs font-semibold text-gray-800 truncate max-w-[150px]"
+                                            :title="att.displayName" x-text="att.displayName"></div>
+                                    </div>
+                                    <button @click="downloadFile(att.filePath)"
+                                        class="px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 rounded text-[11px] font-semibold transition-colors flex items-center gap-1.5 cursor-pointer">
+                                        <i class="bi bi-download"></i> Download
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -492,997 +859,524 @@
     </div>
 
     <script>
-        (function () {
-            'use strict';
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('prWidget', () => ({
+                isLoading: true,
+                hasError: false,
+                errorMessage: '',
+                recordId: null,
+                rec: {},
+                requestedItems: [],
+                actions: [],
+                selectedIndices: [], // Tracks bulk selections
 
-            // ─── Utility functions ────────────────────────────────────────────
+                // Masters
+                itemMasters: [],
+                unitMasters: [],
+                tsInstances: { unit: null, items: [] },
 
-            function esc(str) {
-                if (str == null || str === '') return '–';
-                const div = document.createElement('div');
-                div.textContent = String(str);
-                return div.innerHTML;
-            }
+                // UI states
+                toast: { show: false, message: '', type: 'success' },
+                toastTimer: null,
+                isGeneratingPDF: false,
+                isSubmittingDraft: false,
 
-            function formatDate(dateStr) {
-                if (!dateStr) return '–';
-                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                try {
-                    const d = new Date(dateStr);
-                    if (isNaN(d.getTime())) return dateStr;
-                    return String(d.getDate()).padStart(2, '0') + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
-                } catch (e) {
-                    return dateStr;
-                }
-            }
+                // Edit Modal
+                isEditModalOpen: false,
+                isSubmittingEdit: false,
+                editForm: { unit: '', prDate: '', dueDate: '', description: '', items: [] },
 
-            function formatDateInput(dateStr) {
-                if (!dateStr) return '';
-                try {
-                    const d = new Date(dateStr);
-                    if (isNaN(d.getTime())) return '';
-                    return d.toISOString().split('T')[0];
-                } catch (e) { return ''; }
-            }
+                // Action Modal
+                showActionModal: false,
+                isSubmittingAction: false,
+                pendingAction: { title: '', status: '', movedTo: '', btnBgClass: '', btnHoverClass: '', comment: '' },
+                approvalItems: [],
 
-            function getDisplayName(field) {
-                if (!field) return '–';
-                if (typeof field === 'object' && field.display_value) return field.display_value;
-                if (typeof field === 'object' && field.first_name) {
-                    return ((field.first_name || '') + ' ' + (field.last_name || '')).trim() || '–';
-                }
-                if (typeof field === 'object' && field.Name) return field.Name;
-                return String(field);
-            }
+                // Constants
+                ITEMS_REPORT: 'Items_Report',
+                UNIT_REPORT: 'Unit_Report',
+                PR_REPORT: 'Purchase_Requisition_Report',
 
-            function normalizeStatus(status) {
-                if (!status) return 'draft';
-                const s = status.toLowerCase();
-                if (s === 'draft') return 'draft';
-                if (s === 'submitted') return 'submitted';
-                if (s === 'approved') return 'approved';
-                if (s === 'rejected') return 'rejected';
-                if (s === 'cancelled') return 'cancelled';
-                if (s === 'in progress') return 'in progress';
-                return 'submitted';
-            }
+                initWidget() {
+                    if (typeof P2PWorkflowUtils !== 'undefined') P2PWorkflowUtils.init();
 
-            function getStatusBadgeHTML(status) {
-                const norm = normalizeStatus(status);
-                const config = {
-                    draft: {
-                        border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400',
-                        label: status || 'Draft'
-                    },
-                    submitted: {
-                        border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800',
-                        dot: 'bg-amber-500', label: status || 'Submitted'
-                    },
-                    'in progress': {
-                        border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800',
-                        dot: 'bg-blue-500', label: status || 'In Progress'
-                    },
-                    approved: {
-                        border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800',
-                        dot: 'bg-emerald-600', label: status || 'Approved'
-                    },
-                    rejected: {
-                        border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600',
-                        label: 'Rejected'
-                    },
-                    cancelled: {
-                        border: 'border-gray-300', bg: 'bg-gray-100', text: 'text-gray-700',
-                        dot: 'bg-gray-500', label: 'Cancelled'
-                    },
-                };
-                const c = config[norm] || config.submitted;
-                return '<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border ' +
-                    c.border + ' ' + c.bg + ' ' + c.text +
-                    '"><span class="w-[5px] h-[5px] rounded-full ' + c.dot +
-                    ' shrink-0"></span>' + esc(c.label) + '</span>';
-            }
-
-            // ─── DOM refs ────────────────────────────────────────────────────
-            const $loading = document.getElementById('loadingState');
-            const $error = document.getElementById('errorState');
-            const $main = document.getElementById('mainContent');
-            const $headerPrNum = document.getElementById('headerPrNum');
-            const $headerBadge = document.getElementById('headerBadge');
-            const $headerSub = document.getElementById('headerSub');
-            const $breadcrumbPrNum = document.getElementById('breadcrumbPrNum');
-            const $progressContainer = document.getElementById('progressContainer');
-            const $progressFill = document.getElementById('progressFill');
-            const $auditTrailBody = document.getElementById('auditTrailBody');
-            const $prDetails = document.getElementById('prDetailsBody');
-            const $requestedItemsTableBody = document.getElementById('requestedItemsTableBody');
-            const $approvedItemsCard = document.getElementById('approvedItemsCard');
-            const $approvedItemsTableBody = document.getElementById('approvedItemsTableBody');
-            const $actionButtons = document.getElementById('actionButtons');
-            const $attachmentsCard = document.getElementById('attachmentsCard');
-            const $attachmentsBody = document.getElementById('attachmentsBody');
-
-            const $approveBtn = document.getElementById('approveBtn');
-            const $rejectBtn = document.getElementById('rejectBtn');
-            const $cancelBtn = document.getElementById('cancelBtn');
-            const $submitDraftBtn = document.getElementById('submitDraftBtn');
-            const $editBtn = document.getElementById('editBtn');
-            const $createRFQBtn = document.getElementById('createRFQBtn');
-            const $createRFQBtnWrapper = document.getElementById('createRFQBtnWrapper');
-
-            // ─── Edit Modal refs ────────────────────────────────────────────
-            const $editModal = document.getElementById('editModal');
-            const $closeEditModalBtn = document.getElementById('closeEditModalBtn');
-            const $cancelEditBtn = document.getElementById('cancelEditBtn');
-            const $saveEditBtn = document.getElementById('saveEditBtn');
-            const $saveEditText = document.getElementById('saveEditText');
-            const $saveEditSpinner = document.getElementById('saveEditSpinner');
-            const $editItemsBody = document.getElementById('editItemsBody');
-            const $addItemRowBtn = document.getElementById('addItemRowBtn');
-            const $prUnitSelect = document.getElementById('prUnitSelect');
-            const $prDateInput = document.getElementById('prDateInput');
-            const $prDueDateInput = document.getElementById('prDueDateInput');
-            const $prDescriptionInput = document.getElementById('prDescriptionInput');
-
-            // ─── State ──────────────────────────────────────────────────────
-            let currentRecordId = null;
-            let currentPR = null; // full record
-            let requestedItems = [];
-            let itemMasters = [];
-            let unitMasters = [];
-            let tsUnit = null;
-            let tsItems = [];
-
-            // ─── Toast ──────────────────────────────────────────────────────
-            function showToast(message, type = 'success') {
-                const container = document.getElementById('toastContainer');
-                const toast = document.createElement('div');
-                toast.className =
-                    `flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-[13px] font-medium max-w-sm toast-enter`;
-                if (type === 'success') {
-                    toast.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
-                } else {
-                    toast.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
-                }
-                toast.innerHTML = `
-                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill text-emerald-600' : 'bi-exclamation-circle-fill text-red-600'} text-[15px]"></i>
-                    <span>${esc(message)}</span>
-                    <button class="ml-auto text-gray-400 hover:text-gray-600 cursor-pointer" onclick="this.parentElement.remove()">
-                        <i class="bi bi-x text-[15px]"></i>
-                    </button>
-                `;
-                container.appendChild(toast);
-                setTimeout(() => {
-                    toast.classList.remove('toast-enter');
-                    toast.classList.add('toast-leave');
-                    setTimeout(() => toast.remove(), 300);
-                }, 4000);
-            }
-
-            // ─── Fetch masters ─────────────────────────────────────────────
-            async function fetchItemMasters() {
-                try {
-                    let res = await ZOHO.CREATOR.DATA.getRecords({
-                        report_name: "Items_Report",
-                        criteria: 'status == "Active"',
-                        max_records: 200
+                    ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
+                        this.recordId = params?.recordId || null;
+                        if (!this.recordId) {
+                            this.hasError = true;
+                            this.isLoading = false;
+                            this.errorMessage = "No Record ID provided in URL parameters.";
+                            return;
+                        }
+                        this.fetchMasters();
+                        this.fetchData();
                     });
-                    if (res.code === 3000) itemMasters = res.data;
-                } catch (err) { console.error('Failed to load items', err); }
-            }
+                },
 
-            async function fetchUnitMasters() {
-                try {
-                    let res = await ZOHO.CREATOR.DATA.getRecords({
-                        report_name: "Unit_Report",
-                        max_records: 200
-                    });
-                    if (res.code === 3000) unitMasters = res.data;
-                } catch (err) { console.error('Failed to load units', err); }
-            }
+                fetchData() {
+                    this.isLoading = true;
+                    this.hasError = false;
 
-            // ─── Render functions ──────────────────────────────────────────
-            function renderPRDetails(rec) {
-                const prNum = rec.PR_Number || 'PR-' + rec.Requisition_Number;
-                $headerPrNum.textContent = prNum;
-                $breadcrumbPrNum.textContent = prNum;
-                $headerBadge.innerHTML = getStatusBadgeHTML(rec.Status) +
-                    (rec.Current_Stage ?
-                        ' <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium tracking-wide border border-blue-200 bg-blue-50 text-blue-700"><i class="bi bi-geo-alt text-[10px]"></i>' +
-                        esc(rec.Current_Stage) + '</span>' : '');
+                    Promise.all([
+                        ZOHO.CREATOR.DATA.invokeCustomApi({
+                            api_name: typeof P2PWorkflowUtils !== 'undefined' ? P2PWorkflowUtils.API.FETCH_PR_DETAILS : "fetch_pr_details",
+                            http_method: "GET",
+                            content_type: "application/json",
+                            query_params: 'recId=' + this.recordId,
+                        }),
+                        ZOHO.CREATOR.DATA.getRecordById({ report_name: this.PR_REPORT, id: this.recordId })
+                    ]).then(responses => {
+                        const apiRes = responses[0];
+                        const recByIdRes = responses[1];
 
-                // Fix Unit display
-                const unitDisplay = getDisplayName(rec.Unit);
-                $headerSub.textContent = unitDisplay + ' · Requested ' + formatDate(rec.PR_Date);
+                        if (!apiRes || !apiRes.result || apiRes.result.length === 0) throw new Error("No PR data returned");
 
-                const fields = [
-                    { label: 'PR Number', value: prNum },
-                    { label: 'Unit', value: unitDisplay },
-                    { label: 'Requester', value: getDisplayName(rec.Added_User) },
-                    { label: 'PR Date', value: formatDate(rec.PR_Date) },
-                    { label: 'Due Date', value: formatDate(rec.Due_Date) },
-                    { label: 'Status', value: null, html: getStatusBadgeHTML(rec.Status) },
-                ];
+                        this.rec = apiRes.result[0];
+                        this.requestedItems = this.rec.Requested_Items || [];
+                        this.actions = this.rec.PR_Actions || [];
+                        this.selectedIndices = []; // Reset selections
 
-                let html = '<div class="grid grid-cols-2 gap-x-6 gap-y-0">';
-                fields.forEach(function (f) {
-                    html += '<div class="flex justify-between items-center py-2 text-xs border-b border-dashed border-gray-100">' +
-                        '<span class="text-gray-500 font-medium">' + f.label + '</span>' +
-                        (f.html ? '<span>' + f.html + '</span>' : '<span class="text-gray-900 font-semibold">' +
-                            esc(f.value) + '</span>') +
-                        '</div>';
-                });
-                html += '</div>';
+                        if (recByIdRes?.data?.Attachments) {
+                            this.rec.Attachments = recByIdRes.data.Attachments;
+                        }
 
-                if (rec.description) {
-                    html += '<div class="mt-4 pt-3 border-t border-gray-100">' +
-                        '<div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">Description</div>' +
-                        '<div class="text-xs text-gray-700 leading-relaxed max-w-none">' + esc(rec.description) +
-                        '</div>' +
-                        '</div>';
-                }
-                $prDetails.innerHTML = html;
-            }
-
-            function renderTable(items, targetElement) {
-                if (!items || !items.length) {
-                    targetElement.innerHTML =
-                        '<div class="px-[18px] py-8 text-center text-gray-400 text-xs"><i class="bi bi-box-seam text-xl mb-1 block"></i>No line items</div>';
-                    return;
-                }
-
-                let html = '<table class="w-full border-collapse text-xs">' +
-                    '<thead><tr class="bg-gray-50 border-b border-gray-200">' +
-                    '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">#</th>' +
-                    '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">Item</th>' +
-                    '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right">Qty</th>' +
-                    '<th class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">Due Date</th>' +
-                    '</tr></thead><tbody>';
-
-                items.forEach(function (item, i) {
-                    const rawItem = item.Item;
-                    const itemName = (rawItem && typeof rawItem === 'object') ? (rawItem.display_value || rawItem
-                        .item_name || '-') : (rawItem ? 'Item #' + rawItem : '-');
-                    const qty = item.Quantity || 0;
-                    const dueDate = formatDate(item.Due_Date);
-                    const comment = item.Comment || '';
-
-                    html += '<tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">' +
-                        '<td class="px-4 py-2.5 text-gray-400 font-mono w-8">' + (i + 1) + '</td>' +
-                        '<td class="px-4 py-2.5 text-gray-900 font-medium">' + esc(itemName) +
-                        (comment ? '<div class="text-[11px] text-gray-400 font-normal mt-0.5">' + esc(comment) +
-                            '</div>' : '') +
-                        '</td>' +
-                        '<td class="px-4 py-2.5 text-gray-700 text-right tabular-nums w-24">' + esc(qty) +
-                        '</td>' +
-                        '<td class="px-4 py-2.5 text-gray-600 text-left">' + esc(dueDate) + '</td>' +
-                        '</tr>';
-                });
-
-                html += '</tbody></table>';
-                targetElement.innerHTML = html;
-            }
-
-            function renderActionButtons(rec) {
-                const isRejected = rec.Status && rec.Status.toLowerCase() === 'rejected';
-                const isApproved = rec.Status && rec.Status.toLowerCase() === 'approved';
-                const isDraft = rec.Status && rec.Status.toLowerCase() === 'draft';
-                const isPRStage = rec.Current_Stage === 'Purchase Requisition' && rec.Status.toLowerCase() === 'submitted';
-
-                $actionButtons.style.display = 'none';
-                $approveBtn.style.display = 'none';
-                $rejectBtn.style.display = 'none';
-                $submitDraftBtn.style.display = 'none';
-
-                if (isDraft) {
-                    $actionButtons.style.display = 'flex';
-                    $submitDraftBtn.style.display = 'inline-flex';
-                    $cancelBtn.style.display = 'inline-flex';
-                } else if (isPRStage && !isRejected && !isApproved) {
-                    $actionButtons.style.display = 'flex';
-                    $approveBtn.style.display = 'inline-flex';
-                    $rejectBtn.style.display = 'inline-flex';
-                    $cancelBtn.style.display = 'inline-flex';
-                } else {
-                    $actionButtons.style.display = 'none';
-                }
-
-                if (isDraft) {
-                    $editBtn.classList.remove('hidden');
-                } else {
-                    $editBtn.classList.add('hidden');
-                }
-            }
-
-            function renderAttachments(attachmentData, recordId) {
-                if (!attachmentData) {
-                    $attachmentsCard.classList.add('hidden');
-                    return;
-                }
-                let attachments = Array.isArray(attachmentData) ? attachmentData : [attachmentData];
-                let html = '<div class="space-y-3">';
-                attachments.forEach(function (att) {
-                    let fullPath = (typeof att === 'object' && att !== null) ? (att.display_value || att.ID ||
-                        att) : att;
-                    let filePath = fullPath;
-                    if (typeof fullPath === 'string' && fullPath.includes('filepath=')) {
-                        filePath = fullPath.split('filepath=')[1].split('&')[0];
-                    }
-                    let displayName = filePath;
-                    let parts = filePath.split('_');
-                    if (parts.length > 1 && !isNaN(parts[0])) {
-                        displayName = parts.slice(1).join('_');
-                    }
-                    html += `
-                        <div class="flex items-center justify-between p-3 border border-gray-100 rounded-lg bg-white shadow-sm hover:shadow transition-shadow">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                    <i class="bi bi-file-earmark-text text-[15px]"></i>
-                                </div>
-                                <div>
-                                    <div class="text-xs font-semibold text-gray-800 truncate max-w-[150px]" title="${esc(displayName)}">${esc(displayName)}</div>
-                                </div>
-                            </div>
-                            <button onclick="downloadAttachment('${filePath}', '${recordId}')" class="px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 rounded text-[11px] font-semibold transition-colors flex items-center gap-1.5 cursor-pointer">
-                                <i class="bi bi-download"></i> Download
-                            </button>
-                        </div>
-                    `;
-                });
-                html += '</div>';
-                $attachmentsBody.innerHTML = html;
-                $attachmentsCard.classList.remove('hidden');
-            }
-
-            window.downloadAttachment = function (filePath, recordId) {
-                ZOHO.CREATOR.UTIL.getInitParams().then(function (response) {
-                    var appOwner = response.scope;
-                    var appLinkName = response.appLinkName || "npk-p2p-software";
-                    var url =
-                        `https://creatorapp.zoho.in/creator/v2.1/data/${appOwner}/${appLinkName}/report/Purchase_Requisition_Report/${recordId}/Attachments/download?filepath=${filePath}`;
-                    window.open(url);
-                });
-            };
-
-            // ─── Edit Modal logic ──────────────────────────────────────────
-
-            function openEditModal(rec) {
-                // Load masters if not loaded
-                if (itemMasters.length === 0) fetchItemMasters();
-                if (unitMasters.length === 0) fetchUnitMasters();
-
-                // Populate form fields
-                $prDateInput.value = formatDateInput(rec.PR_Date);
-                $prDueDateInput.value = formatDateInput(rec.Due_Date);
-                $prDescriptionInput.value = rec.description || '';
-
-                if (tsUnit) tsUnit.destroy();
-                tsUnit = new TomSelect($prUnitSelect, {
-                    valueField: 'ID',
-                    labelField: 'Name',
-                    searchField: 'Name',
-                    options: unitMasters,
-                    maxItems: 1,
-                    placeholder: 'Select Unit...',
-                    render: {
-                        option: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`,
-                        item: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`
-                    }
-                });
-                const unitId = rec.Unit?.ID || rec.Unit || '';
-                if (unitId) {
-                    const unitName = getDisplayName(rec.Unit);
-                    // ensure option exists
-                    if (!tsUnit.options[unitId]) {
-                        tsUnit.addOption({ ID: String(unitId), Name: unitName });
-                    }
-                    tsUnit.setValue(unitId);
-                }
-
-                // Build items rows
-                buildEditItems(rec.Requested_Items || []);
-
-                // Show modal
-                $editModal.classList.remove('hidden');
-            }
-
-            function buildEditItems(items) {
-                $editItemsBody.innerHTML = '';
-                tsItems.forEach(ts => { if (ts) ts.destroy(); });
-                tsItems = [];
-
-                if (!items || items.length === 0) {
-                    // Add one empty row
-                    addItemRow(null);
-                } else {
-                    items.forEach(item => addItemRow(item));
-                }
-            }
-
-            function addItemRow(existingItem) {
-                const row = document.createElement('tr');
-                row.className = 'border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors bg-white';
-                row.dataset.rowId = Date.now() + Math.random();
-
-                const itemId = existingItem?.Item?.ID || existingItem?.Item || '';
-                const qty = existingItem?.Quantity || 1;
-                const dueDate = existingItem?.Due_Date ? formatDateInput(existingItem.Due_Date) : '';
-                const comment = existingItem?.Comment || '';
-
-                row.innerHTML = `
-                    <td class="px-3 py-2 relative">
-                        <select class="edit-item-select w-full text-xs" required></select>
-                    </td>
-                    <td class="px-3 py-2">
-                        <input type="number" class="edit-item-qty w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]" value="${esc(qty)}" min="1" required>
-                    </td>
-                    <td class="px-3 py-2">
-                        <input type="date" class="edit-item-due w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]" value="${esc(dueDate)}">
-                    </td>
-                    <td class="px-3 py-2">
-                        <input type="text" class="edit-item-comment w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]" placeholder="Optional" value="${esc(comment)}">
-                    </td>
-                    <td class="px-3 py-2 text-center">
-                        <button type="button" class="remove-item-btn text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50 cursor-pointer">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
-                `;
-
-                $editItemsBody.appendChild(row);
-
-                // Init TomSelect for item
-                const selectEl = row.querySelector('.edit-item-select');
-                const ts = new TomSelect(selectEl, {
-                    valueField: 'ID',
-                    labelField: 'item_name',
-                    searchField: 'item_name',
-                    options: itemMasters,
-                    maxItems: 1,
-                    placeholder: 'Search item...',
-                    render: {
-                        option: (d, e) => `<div class="font-medium">${e(d.item_name)}</div>`,
-                        item: (d, e) => `<div class="font-medium">${e(d.item_name)}</div>`
-                    }
-                });
-                if (itemId) {
-                    if (!ts.options[itemId]) {
-                        const name = existingItem?.Item?.display_value || existingItem?.Item?.item_name || 'Item #' +
-                            itemId;
-                        ts.addOption({ ID: String(itemId), item_name: name });
-                    }
-                    ts.setValue(itemId);
-                }
-                tsItems.push(ts);
-
-                // Remove button
-                row.querySelector('.remove-item-btn').addEventListener('click', function () {
-                    const rows = $editItemsBody.querySelectorAll('tr');
-                    if (rows.length === 1) {
-                        showToast('At least one item is required.', 'error');
-                        return;
-                    }
-                    // destroy TomSelect
-                    const idx = Array.from(rows).indexOf(row);
-                    if (tsItems[idx]) {
-                        tsItems[idx].destroy();
-                        tsItems.splice(idx, 1);
-                    }
-                    row.remove();
-                });
-            }
-
-            function closeEditModal() {
-                $editModal.classList.add('hidden');
-                // Cleanup TomSelect
-                if (tsUnit) {
-                    tsUnit.destroy();
-                    tsUnit = null;
-                }
-                tsItems.forEach(ts => { if (ts) ts.destroy(); });
-                tsItems = [];
-            }
-
-            async function submitEditPR(e) {
-                e.preventDefault();
-                // Validate
-                const unit = tsUnit ? tsUnit.getValue() : '';
-                if (!unit) {
-                    showToast('Please select a Unit.', 'error');
-                    return;
-                }
-                const prDate = $prDateInput.value;
-                const dueDate = $prDueDateInput.value;
-                if (!prDate || !dueDate) {
-                    showToast('Please fill in all required date fields.', 'error');
-                    return;
-                }
-
-                // Collect items
-                const rows = $editItemsBody.querySelectorAll('tr');
-                const itemsData = [];
-                let valid = true;
-                rows.forEach(row => {
-                    const itemSelect = row.querySelector('.edit-item-select');
-                    const itemId = itemSelect ? itemSelect.value : '';
-                    const qtyInput = row.querySelector('.edit-item-qty');
-                    const qty = parseInt(qtyInput.value, 10) || 0;
-                    const due = row.querySelector('.edit-item-due').value;
-                    const comment = row.querySelector('.edit-item-comment').value;
-
-                    if (!itemId) {
-                        valid = false;
-                        showToast('Please select an item for every row.', 'error');
-                        return;
-                    }
-                    if (qty < 1) {
-                        valid = false;
-                        showToast('Quantity must be at least 1.', 'error');
-                        return;
-                    }
-                    itemsData.push({
-                        Item: itemId,
-                        Quantity: qty,
-                        Due_Date: due ? dayjs(due).format('DD-MMM-YYYY') : '',
-                        Comment: comment
-                    });
-                });
-                if (!valid) return;
-
-                // Build payload
-                const payload = {
-                    data: {
-                        Unit: unit,
-                        PR_Date: dayjs(prDate).format('DD-MMM-YYYY'),
-                        Due_Date: dayjs(dueDate).format('DD-MMM-YYYY'),
-                        description: $prDescriptionInput.value,
-                        Requested_Items: itemsData
-                    }
-                };
-
-                // Disable save button
-                $saveEditBtn.disabled = true;
-                $saveEditText.classList.add('hidden');
-                $saveEditSpinner.classList.remove('hidden');
-
-                try {
-                    const res = await ZOHO.CREATOR.DATA.updateRecordById({
-                        report_name: "Purchase_Requisition_Report",
-                        id: currentRecordId,
-                        payload: payload
-                    });
-                    if (res.code === 3000) {
-                        showToast('PR updated successfully!', 'success');
-                        closeEditModal();
-                        fetchPRDetail(currentRecordId);
-                    } else {
-                        throw new Error(res.message || 'Failed to update PR.');
-                    }
-                } catch (err) {
-                    console.error(err);
-                    showToast(err.message || 'Update failed.', 'error');
-                } finally {
-                    $saveEditBtn.disabled = false;
-                    $saveEditText.classList.remove('hidden');
-                    $saveEditSpinner.classList.add('hidden');
-                }
-            }
-
-            // ─── Main fetch ────────────────────────────────────────────────
-
-            function fetchPRDetail(recordId) {
-                currentRecordId = recordId;
-                $loading.classList.remove('hidden');
-                $error.classList.add('hidden');
-                $main.classList.add('hidden');
-
-                Promise.all([
-                    ZOHO.CREATOR.DATA.invokeCustomApi({
-                        api_name: P2PWorkflowUtils.API.FETCH_PR_DETAILS,
-                        http_method: "GET",
-                        content_type: "application/json",
-                        query_params: 'recId=' + recordId,
-                    }),
-                    ZOHO.CREATOR.DATA.getRecordById({
-                        report_name: "Purchase_Requisition_Report",
-                        id: recordId
-                    })
-                ]).then(function (responses) {
-                    const apiRes = responses[0];
-                    const recordByIdRes = responses[1];
-
-                    if (!apiRes || !apiRes.result || apiRes.result.length === 0) {
-                        $loading.classList.add('hidden');
-                        $error.classList.remove('hidden');
-                        return;
-                    }
-
-                    const rec = apiRes.result[0];
-                    currentPR = rec;
-                    requestedItems = rec.Requested_Items || [];
-
-                    renderPRDetails(rec);
-                    renderActionButtons(rec);
-
-                    // Attachments
-                    const attachments = recordByIdRes && recordByIdRes.data && recordByIdRes.data.Attachments ?
-                        recordByIdRes.data.Attachments :
-                        rec.Attachments;
-                    if (attachments) {
-                        renderAttachments(attachments, recordId);
-                    } else {
-                        $attachmentsCard.classList.add('hidden');
-                    }
-
-                    // Requested Items
-                    renderTable(requestedItems, $requestedItemsTableBody);
-
-                    // Approved Items (if any)
-                    if (rec.Items && rec.Items.length > 0) {
-                        $approvedItemsCard.classList.remove('hidden');
-                        renderTable(rec.Items, $approvedItemsTableBody);
-                    } else {
-                        $approvedItemsCard.classList.add('hidden');
-                    }
-
-                    // Progress & Audit
-                    const actions = (rec.PR_Actions && rec.PR_Actions.length) ? rec.PR_Actions : [];
-                    if (typeof P2PWorkflowUtils !== 'undefined') {
-                        P2PWorkflowUtils.renderProgress(actions, rec.Current_Stage, $progressContainer, $progressFill);
-                        P2PWorkflowUtils.renderAuditTrail(actions, $auditTrailBody);
-                    } else {
-                        console.error("P2PWorkflowUtils script not loaded.");
-                    }
-
-                    $loading.classList.add('hidden');
-                    $main.classList.remove('hidden');
-
-                    // Bind action buttons
-                    const rfqRequested = rec.Request_For_Quotation === "Yes" || false;
-                    $approveBtn.querySelector('span').textContent = rfqRequested ?
-                        "Approve & Submit For RFQ" :
-                        "Approve & Submit";
-
-                    $approveBtn.onclick = function () {
-                        openActionModal("Approve PR", "Approved", "Request For Quotation", "bg-emerald-600",
-                            "hover:bg-emerald-700");
-                    };
-                    $rejectBtn.onclick = function () {
-                        openActionModal("Reject PR", "Rejected", "Request For Quotation", "bg-red-600",
-                            "hover:bg-red-700");
-                    };
-                    $submitDraftBtn.onclick = function () {
-                        submitDraft();
-                    };
-                    $cancelBtn.onclick = function () {
-                        ZOHO.CREATOR.UTIL.navigateParentURL({
-                            action: 'open', window: 'same',
-                            url: '#Page:PR_Approval'
+                        this.$nextTick(() => {
+                            if (typeof P2PWorkflowUtils !== 'undefined') {
+                                P2PWorkflowUtils.renderProgress(this.actions, this.rec.Current_Stage, document.getElementById('progressContainer'), document.getElementById('progressFill'));
+                            }
                         });
-                    };
-                    $editBtn.onclick = function () {
-                        openEditModal(rec);
-                    };
+                        this.isLoading = false;
+                    }).catch(err => {
+                        console.error('API Error:', err);
+                        this.hasError = true;
+                        this.isLoading = false;
+                    });
+                },
 
-                    // Create RFQ button
-                    const isInProgress = rec.Status && rec.Status.toLowerCase() === 'in progress';
-                    if (isInProgress) {
-                        $createRFQBtnWrapper.classList.remove('hidden');
+                async fetchMasters() {
+                    try {
+                        let [itemsRes, unitsRes] = await Promise.all([
+                            ZOHO.CREATOR.DATA.getRecords({ report_name: this.ITEMS_REPORT, criteria: 'status == "Active"', max_records: 200 }),
+                            ZOHO.CREATOR.DATA.getRecords({ report_name: this.UNIT_REPORT, max_records: 200 })
+                        ]);
+                        if (itemsRes.code === 3000) this.itemMasters = itemsRes.data;
+                        if (unitsRes.code === 3000) this.unitMasters = unitsRes.data;
+                    } catch (err) { console.error('Error fetching masters', err); }
+                },
+
+                // --- Computeds ---
+                get prNumber() { return this.rec.PR_Number || (this.rec.Requisition_Number ? 'PR-' + this.rec.Requisition_Number : '–'); },
+                get isDraft() { return (this.rec.Status || '').toLowerCase() === 'draft'; },
+                get isApproved() { return (this.rec.Status || '').toLowerCase() === 'approved'; },
+                get isRejected() { return (this.rec.Status || '').toLowerCase() === 'rejected'; },
+                get isInProgress() { return (this.rec.Status || '').toLowerCase() === 'in progress'; },
+                get isPRStage() { return this.rec.Current_Stage === 'Purchase Requisition' && (this.rec.Status || '').toLowerCase() === 'submitted'; },
+                get showActionButtons() { return this.isDraft || (this.isPRStage && !this.isRejected && !this.isApproved); },
+
+                get selectAll() {
+                    return this.rec.Items && this.rec.Items.length > 0 && this.selectedIndices.length === this.rec.Items.length;
+                },
+
+                get hasAttachments() { return this.rec.Attachments && (Array.isArray(this.rec.Attachments) ? this.rec.Attachments.length > 0 : true); },
+                get formattedAttachments() {
+                    if (!this.hasAttachments) return [];
+                    let atts = Array.isArray(this.rec.Attachments) ? this.rec.Attachments : [this.rec.Attachments];
+                    return atts.map(att => {
+                        let fullPath = (typeof att === 'object' && att !== null) ? (att.display_value || att.ID || att) : att;
+                        let filePath = fullPath;
+                        if (typeof fullPath === 'string' && fullPath.includes('filepath=')) filePath = fullPath.split('filepath=')[1].split('&')[0];
+                        let displayName = filePath;
+                        let parts = filePath.split('_');
+                        if (parts.length > 1 && !isNaN(parts[0])) displayName = parts.slice(1).join('_');
+                        return { filePath, displayName };
+                    });
+                },
+
+                get isQuantityExceeded() { return this.pendingAction.status === 'Approved' && this.approvalItems.some(i => i.approvedQty > i.originalQty); },
+
+                // --- Navigation / Create Methods ---
+                toggleAll() {
+                    if (this.selectAll) {
+                        this.selectedIndices = [];
                     } else {
-                        $createRFQBtnWrapper.classList.add('hidden');
+                        this.selectedIndices = this.rec.Items.map((_, i) => i);
                     }
-                    $createRFQBtn.onclick = function () {
-                        ZOHO.CREATOR.UTIL.navigateParentURL({
-                            action: 'open',
-                            window: 'same',
-                            url: '#Page:Request_For_Quotations?prId=' + recordId + '&createPr=true'
-                        });
+                },
+                openPO(id) { ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', window: 'same', url: '#Page:PO_Detailed?recordId=' + id }); },
+                openQC(id) { ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', window: 'same', url: '#Page:Quote_Comparison_Detailed?recordId=' + id }); },
+                openRFQ(id) { ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', window: 'same', url: '#Page:RFQ_Detailed?recordId=' + id }); },
+
+                createPO() {
+                    // Triggers bulk or single, target page relies on prId
+                    ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', window: 'same', url: '#Page:Purchase_Orders?prId=' + this.recordId + '&createPo=True' });
+                },
+                createRFQ() {
+                    ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', window: 'same', url: '#Page:Request_For_Quotations?prId=' + this.recordId + '&createRfq=True' });
+                },
+
+                // --- Helpers ---
+                getItemName(itemObj) {
+                    if (!itemObj) return '–';
+                    if (typeof itemObj === 'object') return itemObj.display_value || itemObj.item_name || '–';
+                    return `Item #${itemObj}`;
+                },
+                getDisplayName(field) {
+                    if (!field) return '–';
+                    if (typeof field === 'object' && field.display_value) return field.display_value;
+                    if (typeof field === 'object' && field.first_name) return ((field.first_name || '') + ' ' + (field.last_name || '')).trim() || '–';
+                    if (typeof field === 'object' && field.Name) return field.Name;
+                    return String(field);
+                },
+                formatDate(dateStr) {
+                    if (!dateStr) return '–';
+                    try {
+                        const d = new Date(dateStr);
+                        if (isNaN(d.getTime())) return dateStr;
+                        const mos = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        return `${String(d.getDate()).padStart(2, '0')} ${mos[d.getMonth()]} ${d.getFullYear()}`;
+                    } catch (e) { return dateStr; }
+                },
+                getLineItemStatusColor(status) {
+                    const s = (status || '').toLowerCase();
+                    if (s === 'partially ordered' || s === 'partially received') return 'bg-blue-50 text-blue-700 border border-blue-200';
+                    if (s === 'completely ordered') return 'bg-amber-50 text-amber-700 border border-amber-200';
+                    if (s === 'completely received') return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+                    return 'bg-gray-100 text-gray-700';
+                },
+                getStatusBadgeHTML(status) {
+                    const norm = (status || 'draft').toLowerCase();
+                    const config = {
+                        draft: { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400', label: status || 'Draft' },
+                        submitted: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500', label: status || 'Submitted' },
+                        'in progress': { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500', label: status || 'In Progress' },
+                        approved: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600', label: status || 'Approved' },
+                        rejected: { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600', label: 'Rejected' },
+                        cancelled: { border: 'border-gray-300', bg: 'bg-gray-100', text: 'text-gray-700', dot: 'bg-gray-500', label: 'Cancelled' },
+                        'partially ordered': { border: 'border-indigo-200', bg: 'bg-indigo-50', text: 'text-indigo-800', dot: 'bg-indigo-500', label: status },
+                        'completely ordered': { border: 'border-purple-200', bg: 'bg-purple-50', text: 'text-purple-800', dot: 'bg-purple-500', label: status },
+                        'partially received': { border: 'border-teal-200', bg: 'bg-teal-50', text: 'text-teal-800', dot: 'bg-teal-500', label: status },
+                        'completely received': { border: 'border-emerald-200', bg: 'bg-emerald-100', text: 'text-emerald-900', dot: 'bg-emerald-600', label: status }
                     };
+                    const c = config[norm] || config.submitted;
+                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border ${c.border} ${c.bg} ${c.text}"><span class="w-[5px] h-[5px] rounded-full ${c.dot} shrink-0"></span>${c.label}</span>`;
+                },
+                escapeHtml(str) {
+                    if (!str) return '';
+                    const d = document.createElement('div');
+                    d.textContent = str;
+                    return d.innerHTML;
+                },
 
-                }).catch(function (err) {
-                    console.error('Error loading PR:', err);
-                    $loading.classList.add('hidden');
-                    $error.classList.remove('hidden');
-                });
-            }
+                showToast(message, type = 'success') {
+                    if (this.toastTimer) clearTimeout(this.toastTimer);
+                    this.toast = { show: true, message, type };
+                    this.toastTimer = setTimeout(() => this.hideToast(), 4000);
+                },
+                hideToast() {
+                    this.toast.show = false;
+                    if (this.toastTimer) { clearTimeout(this.toastTimer); this.toastTimer = null; }
+                },
+                downloadFile(filePath) {
+                    ZOHO.CREATOR.UTIL.getInitParams().then((response) => {
+                        const appOwner = response.scope;
+                        const appLinkName = response.appLinkName || "npk-p2p-software";
+                        const url = `https://creatorapp.zoho.in/creator/v2.1/data/${appOwner}/${appLinkName}/report/${this.PR_REPORT}/${this.recordId}/Attachments/download?filepath=${filePath}`;
+                        window.open(url);
+                    });
+                },
 
-            function submitDraft() {
-                $submitDraftBtn.disabled = true;
-                $submitDraftBtn.innerHTML = '<div class="btn-spinner mr-1"></div> Submitting...';
+                // --- Action Submissions (Draft/Approve/Reject) ---
+                submitDraft() {
+                    this.isSubmittingDraft = true;
+                    ZOHO.CREATOR.DATA.updateRecordById({ report_name: this.PR_REPORT, id: this.recordId, payload: { data: { "Status": "Submitted" } } })
+                        .then(res => {
+                            if (res.code !== 3000) throw new Error("Failed to update status");
+                            return ZOHO.CREATOR.DATA.addRecords({ form_name: "PR_Action", payload: { data: { "PR_Number": this.recordId, "Status": "Submitted", "Moved_To": "Purchase Requisition", "Comment": "Submitted for approval" } } });
+                        })
+                        .then(res => {
+                            if (res.code === 3000) this.fetchData();
+                            else throw new Error("Failed to log action");
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            this.showToast('Error submitting PR', 'error');
+                        })
+                        .finally(() => this.isSubmittingDraft = false);
+                },
+                approvePR() {
+                    this.pendingAction = {
+                        title: "Approve PR", status: "Approved", movedTo: "Request For Quotation",
+                        btnBgClass: "bg-emerald-600", btnHoverClass: "hover:bg-emerald-700", comment: ''
+                    };
+                    this.approvalItems = this.requestedItems.map(item => ({
+                        originalItem: item, itemId: typeof item.Item === 'object' ? item.Item.ID : item.Item,
+                        itemName: this.getItemName(item.Item), originalQty: item.Quantity || 0, approvedQty: item.Quantity || 0
+                    }));
+                    this.showActionModal = true;
+                },
+                rejectPR() {
+                    this.pendingAction = {
+                        title: "Reject PR", status: "Rejected", movedTo: "Request For Quotation",
+                        btnBgClass: "bg-red-600", btnHoverClass: "hover:bg-red-700", comment: ''
+                    };
+                    this.approvalItems = [];
+                    this.showActionModal = true;
+                },
+                closeActionModal() {
+                    if (this.isSubmittingAction) return;
+                    this.showActionModal = false;
+                },
+                async submitAction() {
+                    this.isSubmittingAction = true;
+                    try {
+                        let statusToUpdate = this.pendingAction.status;
+                        let payloadData = { Status: statusToUpdate };
 
-                const updatePrConfig = {
-                    report_name: "Purchase_Requisition_Report",
-                    id: currentRecordId,
-                    payload: { data: { "Status": "Submitted" } }
-                };
+                        if (this.pendingAction.status === 'Approved') {
+                            const finalApprovedItems = [];
+                            let isPartiallyApproved = false;
+                            this.approvalItems.forEach(appItem => {
+                                if (appItem.approvedQty < appItem.originalQty) isPartiallyApproved = true;
+                                if (appItem.approvedQty > 0) {
+                                    let pItem = { Item: appItem.itemId, Quantity: appItem.approvedQty };
+                                    if (appItem.originalItem.Due_Date) pItem.Due_Date = dayjs(appItem.originalItem.Due_Date).format("DD-MMM-YYYY");
+                                    if (appItem.originalItem.Comment) pItem.Comment = appItem.originalItem.Comment;
+                                    finalApprovedItems.push(pItem);
+                                }
+                            });
+                            payloadData.Status = "In Progress";
+                            payloadData.Items = finalApprovedItems;
+                            payloadData.Items_Approval_Status = isPartiallyApproved ? "Partially Approved" : "Approved";
+                        }
 
-                ZOHO.CREATOR.DATA.updateRecordById(updatePrConfig)
-                    .then(function (updateResponse) {
-                        if (updateResponse.code === 3000) {
-                            const prActionConfig = {
-                                form_name: "PR_Action",
-                                payload: {
-                                    "data": {
-                                        "PR_Number": currentRecordId,
-                                        "Status": "Submitted",
-                                        "Moved_To": "Purchase Requisition",
-                                        "Comment": "Submitted for approval"
+                        const updateRes = await ZOHO.CREATOR.DATA.updateRecordById({ report_name: this.PR_REPORT, id: this.recordId, payload: { data: payloadData } });
+                        if (updateRes.code !== 3000) throw new Error("Failed to update PR record");
+
+                        const actionRes = await ZOHO.CREATOR.DATA.addRecords({ form_name: "PR_Action", payload: { data: { "PR_Number": this.recordId, "Status": this.pendingAction.status, "Moved_To": this.pendingAction.movedTo, "Comment": this.pendingAction.comment.trim() } } });
+                        if (actionRes.code !== 3000) throw new Error("Failed to log PR action");
+
+                        this.closeActionModal();
+                        this.fetchData();
+                        this.showToast('Action processed successfully');
+                    } catch (err) {
+                        console.error(err);
+                        this.showToast('An error occurred. Please try again.', 'error');
+                    } finally {
+                        this.isSubmittingAction = false;
+                    }
+                },
+                cancelPR() { ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', window: 'same', url: '#Page:PR_Approval' }); },
+
+                // --- Edit Form ---
+                openEditModal() {
+                    if (this.tsInstances.unit) this.tsInstances.unit.destroy();
+                    this.tsInstances.items.forEach(ts => ts && ts.destroy());
+                    this.tsInstances.items = [];
+                    this.editForm = {
+                        unit: this.rec.Unit?.ID || this.rec.Unit || '',
+                        prDate: this.rec.PR_Date ? dayjs(this.rec.PR_Date).format('YYYY-MM-DD') : '',
+                        dueDate: this.rec.Due_Date ? dayjs(this.rec.Due_Date).format('YYYY-MM-DD') : '',
+                        description: this.rec.description || '', items: []
+                    };
+                    if (this.requestedItems.length > 0) {
+                        this.requestedItems.forEach(it => {
+                            this.editForm.items.push({
+                                uid: Date.now() + Math.random(), id: it.Item?.ID || it.Item,
+                                tempName: it.Item?.display_value || it.Item?.item_name || '',
+                                quantity: it.Quantity || 1, dueDate: it.Due_Date ? dayjs(it.Due_Date).format('YYYY-MM-DD') : '', comment: it.Comment || ''
+                            });
+                        });
+                    } else { this.addEditItemRow(); }
+                    this.isEditModalOpen = true;
+                    this.$nextTick(() => { this.initUnitSelect(); });
+                },
+                closeEditModal() {
+                    this.isEditModalOpen = false;
+                    if (this.tsInstances.unit) this.tsInstances.unit.destroy();
+                    this.tsInstances.items.forEach(ts => ts && ts.destroy());
+                    this.tsInstances.items = [];
+                },
+                addEditItemRow() { this.editForm.items.push({ uid: Date.now() + Math.random(), id: '', quantity: 1, dueDate: '', comment: '' }); },
+                removeEditItemRow(index) {
+                    if (this.editForm.items.length === 1) return this.showToast('At least one item is required.', 'error');
+                    this.editForm.items.splice(index, 1);
+                    if (this.tsInstances.items[index]) { this.tsInstances.items[index].destroy(); this.tsInstances.items.splice(index, 1); }
+                },
+                initUnitSelect() {
+                    this.tsInstances.unit = new TomSelect(document.getElementById('prUnitSelect'), {
+                        valueField: 'ID', labelField: 'Name', searchField: 'Name', options: this.unitMasters, maxItems: 1, placeholder: 'Select Unit...',
+                        onChange: (val) => { this.editForm.unit = val; },
+                        render: { option: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`, item: (d, e) => `<div class="font-medium">${e(d.Name)}</div>` }
+                    });
+                    if (this.editForm.unit) {
+                        if (!this.tsInstances.unit.options[this.editForm.unit] && this.rec.Unit) this.tsInstances.unit.addOption({ ID: String(this.editForm.unit), Name: this.getDisplayName(this.rec.Unit) });
+                        this.tsInstances.unit.setValue(this.editForm.unit);
+                    }
+                },
+                initItemSelect(el, itemRef) {
+                    let ts = new TomSelect(el, {
+                        valueField: 'ID', labelField: 'item_name', searchField: 'item_name', options: this.itemMasters, maxItems: 1, placeholder: 'Search item...',
+                        onChange: (val) => { itemRef.id = val; },
+                        render: { option: (d, e) => `<div class="font-medium">${e(d.item_name)}</div>`, item: (d, e) => `<div class="font-medium">${e(d.item_name)}</div>` }
+                    });
+                    if (itemRef.id) {
+                        if (!ts.options[itemRef.id]) ts.addOption({ ID: String(itemRef.id), item_name: itemRef.tempName || 'Item #' + itemRef.id });
+                        ts.setValue(itemRef.id);
+                    }
+                    this.tsInstances.items.push(ts);
+                },
+                async submitEditPR() {
+                    if (!this.editForm.unit) return this.showToast('Please select a Unit.', 'error');
+                    if (this.editForm.items.some(i => !i.id)) return this.showToast('Please select an item for every row.', 'error');
+
+                    this.isSubmittingEdit = true;
+                    try {
+                        const payload = {
+                            data: {
+                                Unit: this.editForm.unit, PR_Date: dayjs(this.editForm.prDate).format('DD-MMM-YYYY'), Due_Date: dayjs(this.editForm.dueDate).format('DD-MMM-YYYY'), description: this.editForm.description,
+                                Requested_Items: this.editForm.items.map(i => {
+                                    let obj = { Item: i.id, Quantity: i.quantity, Comment: i.comment };
+                                    if (i.dueDate) obj.Due_Date = dayjs(i.dueDate).format('DD-MMM-YYYY');
+                                    return obj;
+                                })
+                            }
+                        };
+                        let res = await ZOHO.CREATOR.DATA.updateRecordById({ report_name: this.PR_REPORT, id: this.recordId, payload: payload });
+                        if (res.code === 3000) { this.showToast('PR updated successfully!', 'success'); this.closeEditModal(); this.fetchData(); }
+                        else throw new Error(res.message || "Failed to update record.");
+                    } catch (err) { this.showToast(err.message || 'Update failed.', 'error'); console.error(err); } finally { this.isSubmittingEdit = false; }
+                },
+
+                // --- PDF ---
+                downloadPDF() {
+                    if (!this.rec) return;
+                    this.isGeneratingPDF = true;
+                    try {
+                        const itemsToPrint = (this.rec.Items && this.rec.Items.length > 0) ? this.rec.Items : this.requestedItems;
+                        const isApprovedSet = (this.rec.Items && this.rec.Items.length > 0);
+                        let itemRows = '';
+                        itemsToPrint.forEach((item, i) => {
+                            itemRows += `
+                                <tr>
+                                    <td class="text-center">${i + 1}</td>
+                                    <td>
+                                        <strong>${this.escapeHtml(this.getItemName(item.Item))}</strong>
+                                        ${item.Comment ? `<br><small style="color:#666;">${this.escapeHtml(item.Comment)}</small>` : ''}
+                                    </td>
+                                    <td class="text-center">${item.Quantity || 0}</td>`;
+                            if (isApprovedSet) itemRows += `<td class="text-center">${item.Ordered_Quantity || 0}</td><td class="text-center">${item.Received_Quantity || 0}</td>`;
+                            itemRows += `<td class="text-center">${this.formatDate(item.Due_Date)}</td></tr>`;
+                        });
+
+                        const printHTML = `
+                            <!DOCTYPE html>
+                            <html lang="en">
+                            <head>
+                                <meta charset="UTF-8">
+                                <title>${this.prNumber}_Details</title>
+                                <style>
+                                    :root { --primary-color: #1B5CA8; --border-color: #bdc3c7; --bg-gray: #f8f9fa; }
+                                    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; line-height: 1.5; margin: 0; padding: 20px; font-size: 11pt; }
+                                    .document-wrapper { max-width: 800px; margin: 0 auto; }
+                                    .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--primary-color); padding-bottom: 15px; margin-bottom: 30px; }
+                                    .company-info h1 { margin: 0; color: var(--primary-color); font-size: 24pt; }
+                                    .company-info p { margin: 4px 0; color: #555; }
+                                    .document-title { text-align: right; }
+                                    .document-title h2 { margin: 0 0 10px 0; font-size: 20pt; text-transform: uppercase; letter-spacing: 1px; color: var(--primary-color); }
+                                    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; background: var(--bg-gray); padding: 15px; border: 1px solid var(--border-color); }
+                                    .meta-item { font-size: 11pt; }
+                                    .meta-item strong { display: inline-block; width: 120px; color: #555; }
+                                    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+                                    th, td { border: 1px solid var(--border-color); padding: 10px; text-align: left; }
+                                    th { background-color: var(--primary-color); color: white; font-weight: bold; font-size: 10pt; text-transform: uppercase; }
+                                    .text-right { text-align: right; }
+                                    .text-center { text-align: center; }
+                                    .desc-box { border: 1px solid var(--border-color); padding: 15px; margin-bottom: 40px; page-break-inside: avoid; }
+                                    .desc-box h4 { margin-top: 0; margin-bottom: 10px; color: var(--primary-color); }
+                                    .signature-section { display: flex; justify-content: space-between; margin-top: 60px; page-break-inside: avoid; }
+                                    .signature-box { width: 35%; border-top: 1px solid #000; text-align: center; padding-top: 5px; font-weight: bold; color: #555;}
+                                    @media print {
+                                        body { padding: 0; background: white; }
+                                        .document-wrapper { max-width: 100%; }
+                                        th { background-color: var(--primary-color) !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                                        .meta-grid, .desc-box { background-color: var(--bg-gray) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                                        @page { size: A4; margin: 1.5cm; }
+                                        tr { page-break-inside: avoid; }
                                     }
-                                }
-                            };
-                            return ZOHO.CREATOR.DATA.addRecords(prActionConfig);
-                        } else {
-                            throw new Error("Failed to update PR status.");
-                        }
-                    })
-                    .then(function (actionResponse) {
-                        if (actionResponse.code === 3000) {
-                            fetchPRDetail(currentRecordId);
-                        } else {
-                            throw new Error("Failed to log PR action.");
-                        }
-                    })
-                    .catch(function (err) {
-                        console.error("API Error: ", err);
-                        showToast('An error occurred while submitting. Please try again.', 'error');
-                        $submitDraftBtn.disabled = false;
-                        $submitDraftBtn.innerHTML =
-                            '<i class="bi bi-send"></i> <span class="btn-text">Submit Requisition</span>';
-                    });
-            }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="document-wrapper">
+                                    <header class="header">
+                                        <div class="company-info">
+                                            <h1>APCO Building Solutions Pvt Ltd</h1>
+                                            <p>#234, Narayan Nagar, 1st stage, Doddakallasandra, Kanakapura road, Bangalore - 560062.</p>
+                                            <p>Email: Sales@apcobuildingsolutions.com</p>
+                                        </div>
+                                        <div class="document-title">
+                                            <h2>Purchase Requisition</h2>
+                                            <div style="font-size: 14pt; font-weight: bold; color: #444;">${this.escapeHtml(this.prNumber)}</div>
+                                        </div>
+                                    </header>
+                                    
+                                    <div class="meta-grid">
+                                        <div class="meta-item"><strong>Date:</strong> ${this.formatDate(this.rec.PR_Date)}</div>
+                                        <div class="meta-item"><strong>Status:</strong> ${this.escapeHtml(this.rec.Status)}</div>
+                                        <div class="meta-item"><strong>Requested By:</strong> ${this.escapeHtml(this.getDisplayName(this.rec.Requested_By_Email || this.rec.Added_User))}</div>
+                                        <div class="meta-item"><strong>Department:</strong> ${this.escapeHtml(this.getDisplayName(this.rec.Department))}</div>
+                                        <div class="meta-item"><strong>Unit / Location:</strong> ${this.escapeHtml(this.getDisplayName(this.rec.Unit))}</div>
+                                        <div class="meta-item"><strong>Required By:</strong> ${this.formatDate(this.rec.Due_Date)}</div>
+                                    </div>
+                                    
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th width="5%" class="text-center">#</th>
+                                                <th width="45%">Item Description</th>
+                                                <th width="12%" class="text-center">${isApprovedSet ? 'App. Qty' : 'Qty'}</th>
+                                                ${isApprovedSet ? '<th width="12%" class="text-center">Ord. Qty</th><th width="12%" class="text-center">Rec. Qty</th>' : ''}
+                                                <th width="14%" class="text-center">Due Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>${itemRows}</tbody>
+                                    </table>
+                                    
+                                    ${this.rec.description ? `
+                                    <div class="desc-box">
+                                        <h4>Description & Purpose</h4>
+                                        <div>${this.escapeHtml(this.rec.description)}</div>
+                                    </div>` : ''}
+                                    
+                                    <div class="signature-section">
+                                        <div class="signature-box">Requester Signature</div>
+                                        <div class="signature-box">Approver Signature</div>
+                                    </div>
+                                </div>
+                            </body>
+                            </html>
+                        `;
 
-            // ─── Action Modal (same as before) ────────────────────────────
-
-            const $actionModal = document.getElementById('actionModal');
-            const $modalTitle = document.getElementById('modalTitle');
-            const $actionComment = document.getElementById('actionComment');
-            const $confirmActionBtn = document.getElementById('confirmActionBtn');
-            const $confirmActionText = document.getElementById('confirmActionText');
-            const $cancelActionBtn = document.getElementById('cancelActionBtn');
-            const $closeModalBtn = document.getElementById('closeModalBtn');
-            const $approvalItemsWrapper = document.getElementById('approvalItemsWrapper');
-            const $approvalItemsList = document.getElementById('approvalItemsList');
-
-            let pendingAction = { recordId: null, status: '', movedTo: '', requestedItemsData: [] };
-
-            function openActionModal(title, status, movedTo, btnBgClass, btnHoverClass) {
-                $modalTitle.textContent = title;
-                $actionComment.value = '';
-                pendingAction.status = status;
-                pendingAction.movedTo = movedTo;
-                pendingAction.recordId = currentRecordId;
-                pendingAction.requestedItemsData = requestedItems;
-
-                $confirmActionBtn.disabled = false;
-                $confirmActionBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                $confirmActionText.textContent = title.split(' ')[0];
-                $confirmActionBtn.className =
-                    'px-4 py-2 rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer shadow-sm flex items-center gap-1.5 ' +
-                    btnBgClass + ' ' + btnHoverClass;
-
-                if (status === 'Approved' && pendingAction.requestedItemsData.length > 0) {
-                    $approvalItemsWrapper.classList.remove('hidden');
-                    let listHtml = '';
-                    pendingAction.requestedItemsData.forEach(function (item, index) {
-                        const rawItem = item.Item;
-                        const itemName = (rawItem && typeof rawItem === 'object') ? (rawItem.display_value ||
-                            rawItem.item_name || '-') : ('Item #' + rawItem);
-                        const reqQty = item.Quantity || 0;
-
-                        listHtml +=
-                            '<div class="approve-item-row p-3 border-b border-gray-100 last:border-0" data-index="' +
-                            index + '">' +
-                            '<div class="flex items-center justify-between">' +
-                            '<div class="flex-1 min-w-0 pr-4">' +
-                            '<div class="text-[13px] font-medium text-gray-900 truncate mb-0.5">' + esc(
-                                itemName) + '</div>' +
-                            '<div class="text-[11px] text-gray-500">Requested Qty: <span class="font-semibold">' +
-                            esc(reqQty) + '</span></div>' +
-                            '</div>' +
-                            '<div class="w-24 shrink-0 relative">' +
-                            '<label class="absolute -top-1 left-2 bg-white px-1 text-[9px] font-semibold text-gray-400 uppercase">Qty</label>' +
-                            '<input type="number" class="approve-qty-input w-full border border-gray-300 rounded-md py-1.5 px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1B5CA8]/20 focus:border-[#1B5CA8] transition-all shadow-sm" ' +
-                            'value="' + esc(reqQty) + '" max="' + esc(reqQty) + '" min="0">' +
-                            '</div>' +
-                            '</div>' +
-                            '<div class="qty-warning hidden mt-1.5 text-[11px] text-orange-400 font-medium text-right flex justify-end items-center gap-1">' +
-                            '<i class="bi bi-exclamation-triangle"></i> Exceeding requested qty (' + esc(reqQty) +
-                            ')' +
-                            '</div>' +
-                            '</div>';
-                    });
-                    $approvalItemsList.innerHTML = listHtml;
-
-                    // Bind warnings
-                    const inputs = $approvalItemsList.querySelectorAll('.approve-qty-input');
-                    inputs.forEach(function (input) {
-                        input.addEventListener('input', function () {
-                            const val = parseInt(this.value, 10) || 0;
-                            const max = parseInt(this.getAttribute('max'), 10) || 0;
-                            const warning = this.closest('.approve-item-row').querySelector(
-                                '.qty-warning');
-                            if (val > max) {
-                                warning.classList.remove('hidden');
-                                this.classList.add('border-red-400', 'focus:border-red-500',
-                                    'focus:ring-red-500/20');
-                                this.classList.remove('border-gray-300', 'focus:border-[#1B5CA8]',
-                                    'focus:ring-[#1B5CA8]/20');
-                            } else {
-                                warning.classList.add('hidden');
-                                this.classList.remove('border-red-400', 'focus:border-red-500',
-                                    'focus:ring-red-500/20');
-                                this.classList.add('border-gray-300', 'focus:border-[#1B5CA8]',
-                                    'focus:ring-[#1B5CA8]/20');
-                            }
-                            $confirmActionBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                        });
-                    });
-                } else {
-                    $approvalItemsWrapper.classList.add('hidden');
-                    $approvalItemsList.innerHTML = '';
+                        const iframe = document.createElement('iframe');
+                        iframe.style.position = 'fixed';
+                        iframe.style.right = '0'; iframe.style.bottom = '0'; iframe.style.width = '0'; iframe.style.height = '0'; iframe.style.border = '0';
+                        document.body.appendChild(iframe);
+                        const frameDoc = iframe.contentWindow.document;
+                        frameDoc.open(); frameDoc.write(printHTML); frameDoc.close();
+                        setTimeout(() => {
+                            iframe.contentWindow.focus();
+                            iframe.contentWindow.print();
+                            setTimeout(() => document.body.removeChild(iframe), 2000);
+                            this.isGeneratingPDF = false;
+                        }, 500);
+                    } catch (err) {
+                        console.error('PDF generation failed:', err);
+                        this.showToast('Failed to generate PDF.', 'error');
+                        this.isGeneratingPDF = false;
+                    }
                 }
-
-                $actionModal.classList.remove('hidden');
-            }
-
-            function closeActionModal() {
-                $actionModal.classList.add('hidden');
-            }
-
-            if ($cancelActionBtn)
-                $cancelActionBtn.onclick = closeActionModal;
-            if ($closeModalBtn)
-                $closeModalBtn.onclick = closeActionModal;
-            if ($confirmActionBtn) {
-                $confirmActionBtn.onclick = function () {
-                    const commentVal = $actionComment.value.trim();
-                    $confirmActionBtn.disabled = true;
-                    $confirmActionBtn.innerHTML = '<div class="btn-spinner mr-1"></div> Submitting...';
-
-                    if (pendingAction.status === 'Approved') {
-                        const finalApprovedItems = [];
-                        const itemRows = document.querySelectorAll('.approve-item-row');
-                        let isPartiallyApproved = false;
-
-                        itemRows.forEach(function (row) {
-                            const index = row.getAttribute('data-index');
-                            const originalItem = pendingAction.requestedItemsData[index];
-                            const inputEl = row.querySelector('.approve-qty-input');
-                            const approvedQty = parseInt(inputEl.value, 10) || 0;
-                            const originalQty = parseInt(originalItem.Quantity, 10) || 0;
-
-                            if (approvedQty < originalQty) {
-                                isPartiallyApproved = true;
-                            }
-
-                            if (approvedQty > 0) {
-                                const rawItem = originalItem.Item;
-                                const itemId = typeof rawItem === 'object' ? rawItem.ID : rawItem;
-
-                                const payloadItem = {
-                                    "Item": itemId,
-                                    "Quantity": approvedQty
-                                };
-                                if (originalItem.Due_Date && originalItem.Due_Date.trim() !== '' && originalItem
-                                    .Due_Date !== '-') {
-                                    payloadItem["Due_Date"] = dayjs(originalItem.Due_Date).format("DD-MMM-YYYY");
-                                }
-                                if (originalItem.Comment && originalItem.Comment.trim() !== '' && originalItem
-                                    .Comment !== '-') {
-                                    payloadItem["Comment"] = originalItem.Comment;
-                                }
-                                finalApprovedItems.push(payloadItem);
-                            }
-                        });
-
-                        const itemApprovalStatus = isPartiallyApproved ? "Partially Approved" : "Approved";
-
-                        const prActionConfig = {
-                            form_name: "PR_Action",
-                            payload: {
-                                "data": {
-                                    "PR_Number": pendingAction.recordId,
-                                    "Status": "Approved",
-                                    "Moved_To": "Purchase Requisition",
-                                    "Comment": commentVal
-                                }
-                            }
-                        };
-
-                        const updatePrConfig = {
-                            report_name: "Purchase_Requisition_Report",
-                            id: pendingAction.recordId,
-                            payload: {
-                                data: {
-                                    "Status": "In Progress",
-                                    "Items": finalApprovedItems,
-                                    "Items_Approval_Status": itemApprovalStatus,
-                                }
-                            }
-                        };
-
-                        ZOHO.CREATOR.DATA.updateRecordById(updatePrConfig)
-                            .then(function (updateResponse) {
-                                if (updateResponse.code === 3000) {
-                                    return ZOHO.CREATOR.DATA.addRecords(prActionConfig);
-                                } else {
-                                    throw new Error("Failed to update approved items");
-                                }
-                            })
-                            .then(function (actionResponse) {
-                                if (actionResponse.code === 3000) {
-                                    closeActionModal();
-                                    fetchPRDetail(pendingAction.recordId);
-                                } else {
-                                    throw new Error("Failed to add PR action");
-                                }
-                            })
-                            .catch(function (err) {
-                                console.error("API Error: ", err);
-                                showToast('An error occurred while approving. Please try again.', 'error');
-                                $confirmActionBtn.disabled = false;
-                                $confirmActionText.textContent = "Approve";
-                            });
-                    } else {
-                        // Reject
-                        const rejectActionConfig = {
-                            form_name: "PR_Action",
-                            payload: {
-                                "data": {
-                                    "PR_Number": pendingAction.recordId,
-                                    "Status": pendingAction.status,
-                                    "Moved_To": pendingAction.movedTo,
-                                    "Comment": commentVal
-                                }
-                            }
-                        };
-
-                        ZOHO.CREATOR.DATA.addRecords(rejectActionConfig)
-                            .then(function (response) {
-                                if (response.code === 3000) {
-                                    closeActionModal();
-                                    fetchPRDetail(pendingAction.recordId);
-                                } else {
-                                    showToast('Failed to process rejection. Please try again.', 'error');
-                                    $confirmActionBtn.disabled = false;
-                                    $confirmActionText.textContent = "Reject";
-                                }
-                            })
-                            .catch(function (err) {
-                                console.error("API Error: ", err);
-                                showToast('An error occurred while submitting.', 'error');
-                                $confirmActionBtn.disabled = false;
-                                $confirmActionText.textContent = "Reject";
-                            });
-                    }
-                };
-            }
-            // ─── Event listeners for Edit Modal ───────────────────────────
-            $closeEditModalBtn.onclick = closeEditModal;
-            $cancelEditBtn.onclick = closeEditModal;
-            $addItemRowBtn.onclick = function () { addItemRow(null); };
-            document.getElementById('editPrForm').addEventListener('submit', submitEditPR);
-
-            // ─── Initial load ──────────────────────────────────────────────
-            function loadPrDetails() {
-                P2PWorkflowUtils.init(); // Detect env prefix (Dev__ / Prod__)
-                ZOHO.CREATOR.UTIL.getQueryParams().then(function (params) {
-                    const recordId = params && params.recordId ? params.recordId : null;
-                    if (!recordId) {
-                        $loading.classList.add('hidden');
-                        $error.classList.remove('hidden');
-                        return;
-                    }
-                    // Pre-fetch masters
-                    fetchItemMasters();
-                    fetchUnitMasters();
-                    fetchPRDetail(recordId);
-                });
-            }
-            loadPrDetails();
-
-        })();
+            }));
+        });
     </script>
-
 </body>
 
 </html>

@@ -503,9 +503,10 @@
                         this.rec = response.result[0];
                         this.items = this.rec.Items || [];
 
-                        this.actions = (this.rec.PR_Reference && this.rec.PR_Reference.PR_Actions)
-                            ? this.rec.PR_Reference.PR_Actions
-                            : [];
+                        this.actions = this.rec.Actions || [];
+                        // (this.rec.PR_Reference && this.rec.PR_Reference.PR_Actions)
+                        //     ? this.rec.PR_Reference.PR_Actions
+                        //     : [];
 
                         this.$nextTick(() => {
                             if (typeof P2PWorkflowUtils !== 'undefined') {

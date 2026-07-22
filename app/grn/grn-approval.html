@@ -887,7 +887,7 @@
 
                         // Display Metadata
                         this.meta.vendorName = data.Vendor?.Display_Name || '–';
-                        this.meta.prRefName = data.PR?.PR_Number || '–'; // based on payload snippet
+                        this.meta.prRefName = data.PR?.PRs?.[0]?.ID || '–';
                         this.meta.qcRefName = 'QC-' + (qcId || '–'); // Optional formatting
 
                         // Financials
