@@ -188,27 +188,6 @@
             color: #111827 !important;
         }
 
-        .ts-control .item {
-            background-color: #EBF3FC !important;
-            color: #1B5CA8 !important;
-            border: 1px solid #c2defc !important;
-            border-radius: 0.25rem !important;
-            padding: 0.15rem 0.5rem !important;
-            margin: 0.15rem !important;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-        }
-
-        .ts-control .item .remove {
-            margin-left: 6px;
-            color: #1B5CA8;
-            opacity: 0.7;
-            cursor: pointer;
-            border-left: 1px solid #c2defc;
-            padding-left: 4px;
-        }
-
         .grid-input {
             width: 100%;
             padding: 0.375rem 0.5rem;
@@ -450,11 +429,23 @@
             flex: 1;
             min-width: 100px;
         }
+
+        /* Layout formatting details */
+        .section-header {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #1B5CA8;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 0.3rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
     </style>
 </head>
 
 <body class="bg-gray-50 p-6 font-[Lato,sans-serif] text-[13px] text-gray-700 antialiased">
-    <div id="app" x-data="poApp()" x-init="init()" x-cloak class="max-w-6xl mx-auto">
+    <div id="app" x-data="poApp()" x-init="init()" x-cloak class="max-w-7xl mx-auto">
 
         <!-- ===== STATS BANNER ===== -->
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 mb-4">
@@ -509,8 +500,8 @@
                     <i
                         class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px] pointer-events-none"></i>
                     <input x-model="searchInput" @input="onSearchInput()"
-                        class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[200px] focus:outline-none focus:border-[#1B5CA8]"
-                        type="text" placeholder="Search by PO #, Unit…" />
+                        class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[230px] focus:outline-none focus:border-[#1B5CA8]"
+                        type="text" placeholder="Search by PO #, Unit, Vendor…" />
                 </div>
                 <button @click="openCreateModal()"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-all shadow-sm">
@@ -521,19 +512,7 @@
 
         <!-- ===== DASHBOARD TABLE ===== -->
         <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
-            <table class="w-full border-collapse" style="min-width:900px">
-                <colgroup>
-                    <col style="width:100px">
-                    <col style="width:130px">
-                    <col style="width:130px">
-                    <col style="width:130px">
-                    <col style="width:100px">
-                    <col style="width:100px">
-                    <col style="width:110px">
-                    <col style="width:110px">
-                    <col style="width:120px">
-                    <col style="width:90px">
-                </colgroup>
+            <table class="w-full border-collapse" style="min-width:1050px">
                 <thead>
                     <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
                         <template x-for="col in sortableColumns" :key="col.key">
@@ -551,7 +530,7 @@
                 </thead>
                 <tbody>
                     <tr x-show="isLoading">
-                        <td colspan="10" class="px-3 py-12 text-center">
+                        <td colspan="11" class="px-3 py-12 text-center">
                             <div class="flex flex-col items-center gap-3">
                                 <div class="po-spinner"></div>
                                 <div class="text-sm text-gray-400 font-medium">Loading POs…</div>
@@ -559,7 +538,7 @@
                         </td>
                     </tr>
                     <tr x-show="!isLoading && pagedRecords.length === 0">
-                        <td colspan="10" class="px-3 py-12 text-center">
+                        <td colspan="11" class="px-3 py-12 text-center">
                             <div class="text-gray-400"><i class="bi bi-clipboard-x text-3xl mb-2 block"></i>
                                 <div class="text-sm font-medium text-gray-500">No records found</div>
                             </div>
@@ -570,11 +549,30 @@
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap"><span
                                     class="font-semibold text-[#1B5CA8] font-mono text-[11px]"
                                     x-text="rec._poRef"></span></td>
-                            <td class="px-3 py-[9px] align-middle whitespace-nowrap"><span
-                                    class="font-semibold text-gray-700 font-mono text-[11px]"
-                                    x-text="rec._prRef"></span></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap max-w-[150px] truncate"
+                                :title="rec._prTooltip">
+                                <template x-if="rec._prArray && rec._prArray.length > 0">
+                                    <span>
+                                        <template x-for="(pr, i) in rec._prArray" :key="pr.ID || i">
+                                            <span>
+                                                <a href="javascript:void(0)"
+                                                    @click.prevent="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:PR_Detailed?recordId='+(pr.ID || pr.id),window:'same'})"
+                                                    class="text-[#1B5CA8] hover:underline font-mono text-[11px] font-semibold"
+                                                    x-text="pr.display_value || pr.PR_Number || 'PR'"></a><span
+                                                    x-show="i < rec._prArray.length - 1"
+                                                    class="text-gray-500 mr-1">,</span>
+                                            </span>
+                                        </template>
+                                    </span>
+                                </template>
+                                <template x-if="!rec._prArray || rec._prArray.length === 0">
+                                    <span class="text-gray-400 font-mono text-[11px]">–</span>
+                                </template>
+                            </td>
                             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900"
                                 x-text="rec._unitName"></td>
+                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-gray-600"
+                                x-text="rec._deptName"></td>
                             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[12px]"
                                 x-text="rec._vendorName"></td>
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[11px] text-gray-500"
@@ -627,7 +625,7 @@
         <!-- ============================================================= -->
         <div class="po-modal-overlay" x-show="showModal" x-cloak>
             <div class="po-modal-bg" @click="closeModal()"></div>
-            <div class="po-modal-box max-w-5xl" style="max-height:94vh;">
+            <div class="po-modal-box max-w-6xl" style="max-height:96vh;">
                 <div
                     class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 bg-gray-50 sticky top-0 z-20">
                     <h3 class="text-[15px] font-bold text-gray-800">Create Purchase Order</h3>
@@ -635,45 +633,17 @@
                             class="bi bi-x-lg text-lg"></i></button>
                 </div>
 
-                <div class="modal-scroll">
+                <div class="modal-scroll bg-white">
                     <form @submit.prevent="submitPO()">
 
-                        <!-- VENDOR SELECTION FIRST -->
-                        <div class="mb-4">
-                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
-                                Select Vendor <span class="text-red-500">*</span>
-                                <span class="text-gray-400 font-normal ml-1">(Unlocks searchable PR multi-select
-                                    dropdown)</span>
-                            </label>
-                            <select x-ref="vendorSelect" class="w-full text-xs"
-                                placeholder="Search and select vendor..."></select>
-                        </div>
-
-                        <!-- SEARCHABLE & MULTI-SELECTABLE PR DROPDOWN -->
-                        <div class="mb-4">
-                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">
-                                Purchase Requisitions <span class="text-red-500">*</span>
-                                <span class="text-gray-400 font-normal ml-1">(Select one or multiple PR entries to
-                                    extract item matrix lines)</span>
-                            </label>
-                            <select x-ref="prSelect" class="w-full text-xs"
-                                placeholder="Search and select PR Numbers..." multiple></select>
-                        </div>
-
-                        <!-- QUOTE COMPARISON CONDITIONAL DROPDOWN -->
-                        <div class="mb-4" x-show="availableQCs.length > 0">
-                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Quote
-                                Comparison Link</label>
-                            <select x-ref="qcSelect" class="w-full text-xs"
-                                placeholder="Select quote verification link…"></select>
-                        </div>
-
-                        <!-- DATES & ORG SETTINGS GRID -->
-                        <div class="grid grid-cols-4 gap-4 mb-4">
+                        <!-- SECTION 1: VENDOR & BASIC DETAILS -->
+                        <h4 class="section-header">Vendor & Basic Details</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
                             <div>
-                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Unit
-                                    <span class="text-red-500">*</span></label>
-                                <select x-ref="unitSelect" class="w-full text-xs" :disabled="form.prLocked"></select>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Select
+                                    Vendor <span class="text-red-500">*</span></label>
+                                <select x-ref="vendorSelect" class="w-full text-xs"
+                                    placeholder="Search and select vendor..."></select>
                             </div>
                             <div>
                                 <label
@@ -691,19 +661,49 @@
                                 <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PO
                                     Date <span class="text-red-500">*</span></label>
                                 <input type="date" x-model="form.poDate"
-                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px]" />
+                                    class="w-full py-1.5 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:border-[#1B5CA8]" />
                             </div>
                             <div>
                                 <label
                                     class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Delivery
                                     Date <span class="text-red-500">*</span></label>
                                 <input type="date" x-model="form.deliveryDate"
-                                    class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px]" />
+                                    class="w-full py-1.5 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:border-[#1B5CA8]" />
                             </div>
                         </div>
 
-                        <!-- BILLING & DELIVERY ADDRESS -->
-                        <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- SECTION 2: ORGANIZATION & REFERENCES -->
+                        <h4 class="section-header">Organization & References</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
+                            <div>
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Purchase
+                                    Requisitions <span class="text-red-500">*</span></label>
+                                <select x-ref="prSelect" class="w-full text-xs" placeholder="Select PR Numbers..."
+                                    multiple></select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Quote
+                                    Comparison Link</label>
+                                <select x-ref="qcSelect" class="w-full text-xs"
+                                    placeholder="Select quote verification link…"></select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Unit
+                                    <span class="text-red-500">*</span></label>
+                                <select x-ref="unitSelect" class="w-full text-xs" :disabled="form.prLocked"></select>
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Department</label>
+                                <select x-ref="departmentSelect" class="w-full text-xs"
+                                    :disabled="form.prLocked"></select>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 3: ADDRESSES -->
+                        <h4 class="section-header">Address Details</h4>
+                        <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div class="address-group">
                                 <span class="address-label"><i class="bi bi-building mr-1"></i> Billing Address
                                     Details</span>
@@ -725,8 +725,16 @@
 
                             <div class="address-group"
                                 :class="{ 'border-blue-200 bg-blue-50/30': form.deliveryLocked }">
-                                <span class="address-label"><i class="bi bi-geo-alt mr-1"></i> Delivery Drop
-                                    Address</span>
+                                <div class="flex justify-between mb-1 items-center">
+                                    <span class="address-label m-0"><i class="bi bi-geo-alt mr-1"></i> Delivery Drop
+                                        Address</span>
+                                    <button type="button" @click="form.deliveryLocked = !form.deliveryLocked"
+                                        :class="form.deliveryLocked ? 'text-[#1B5CA8]' : 'text-amber-600'"
+                                        class="inline-flex items-center gap-1 text-[10px] font-semibold hover:underline">
+                                        <i :class="form.deliveryLocked ? 'bi bi-pencil-square' : 'bi bi-lock-fill'"></i>
+                                        <span x-text="form.deliveryLocked ? 'Edit' : 'Lock Location'"></span>
+                                    </button>
+                                </div>
                                 <div class="grid grid-cols-2 gap-x-3 gap-y-1.5 mt-1">
                                     <div class="addr-field-wrap"><span class="addr-label-sm">Line 1</span><input
                                             class="p-1 text-xs border rounded bg-white"
@@ -752,29 +760,21 @@
                                             x-model="form.deliveryAddress.country" :disabled="form.deliveryLocked" />
                                     </div>
                                 </div>
-                                <div class="mt-2 text-right">
-                                    <button type="button" @click="form.deliveryLocked = !form.deliveryLocked"
-                                        :class="form.deliveryLocked ? 'bg-[#1B5CA8]/10 text-[#1B5CA8]' : 'bg-amber-50 text-amber-700 border border-amber-300'"
-                                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold">
-                                        <i :class="form.deliveryLocked ? 'bi bi-pencil-square' : 'bi bi-lock-fill'"></i>
-                                        <span
-                                            x-text="form.deliveryLocked ? 'Edit Drop Location' : 'Lock to Target Unit'"></span>
-                                    </button>
-                                </div>
                             </div>
                         </div>
 
-                        <!-- AGGREGATED ITEMS GRID WITH SELECTION CHECKBOXES -->
-                        <div class="mb-5 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
+                        <!-- SECTION 4: LINE ITEMS -->
+                        <h4 class="section-header">Line Items</h4>
+                        <div class="mb-6 border border-gray-200 rounded-lg overflow-hidden" style="overflow:visible;">
                             <div
                                 class="bg-gray-50 px-4 py-2.5 border-b border-gray-200 flex justify-between items-center">
-                                <span class="text-xs font-semibold text-gray-700">Aggregated Items from Line
+                                <span class="text-xs font-semibold text-gray-700">Aggregated Items from
                                     Requisitions</span>
                                 <span class="text-[10px] text-gray-400">Duplicate items from multiple PRs will be summed
                                     upon submission</span>
                             </div>
                             <div class="overflow-x-auto" style="overflow:visible;">
-                                <table class="w-full border-collapse min-w-[700px]">
+                                <table class="w-full border-collapse min-w-[750px]">
                                     <thead class="bg-white border-b border-gray-200">
                                         <tr>
                                             <th
@@ -844,72 +844,93 @@
                             </div>
                         </div>
 
-                        <!-- FINANCIAL BOTTOM WRAPPER PLACED ONE BELOW THE OTHER -->
-                        <div class="flex justify-end mb-5">
-                            <div
-                                class="w-full sm:w-[320px] bg-gray-50 p-3 rounded-lg border border-gray-200 flex flex-col gap-2.5">
+                        <!-- SECTION 5: FINANCIALS, NOTES & ATTACHMENTS -->
+                        <h4 class="section-header">Financials & Notes</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-4">
+                            <!-- Left: Notes & Conditions -->
+                            <div class="flex flex-col gap-4">
                                 <div>
-                                    <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-0.5">Sub
-                                        Total</label>
-                                    <input type="text" :value="formatINR(form.subTotal)" disabled
-                                        class="w-full py-1 px-2.5 bg-gray-100 border border-gray-200 rounded text-xs font-semibold text-gray-700 cursor-not-allowed" />
+                                    <label
+                                        class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1">Internal
+                                        Notes</label>
+                                    <textarea x-model="form.notes" rows="3"
+                                        class="w-full py-1.5 px-2.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:outline-none focus:border-[#1B5CA8]"></textarea>
                                 </div>
                                 <div>
                                     <label
-                                        class="block text-[10px] font-semibold text-gray-500 uppercase mb-0.5">Discount
-                                        Value</label>
-                                    <input type="number" step="any" min="0" x-model.number="form.discount"
-                                        @input="calcTotals()"
-                                        class="w-full py-1 px-2.5 bg-white border border-gray-200 rounded text-xs focus:outline-none focus:border-[#1B5CA8]" />
+                                        class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1">Terms
+                                        &amp; Conditions</label>
+                                    <textarea x-model="form.terms" rows="3"
+                                        class="w-full py-1.5 px-2.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:outline-none focus:border-[#1B5CA8]"></textarea>
                                 </div>
-                                <div class="pt-1.5 border-t border-gray-200">
-                                    <label class="block text-[10px] font-bold text-[#1B5CA8] uppercase mb-0.5">Total Net
-                                        Amount</label>
-                                    <input type="text" :value="formatINR(form.totalAmount)" disabled
-                                        class="w-full py-1.5 px-2.5 bg-[#EBF3FC] border border-[#1B5CA8]/30 rounded text-xs font-bold text-[#1B5CA8] cursor-not-allowed" />
+                                <div>
+                                    <label
+                                        class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1">Documentation
+                                        Attachments</label>
+                                    <input type="file" x-ref="fileInput" multiple
+                                        class="w-full text-xs text-gray-500 border border-gray-200 rounded-lg bg-gray-50 py-1.5 px-2" />
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- FOOTER CONDITIONS -->
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label
-                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1">Notes</label>
-                                <textarea x-model="form.notes" rows="2"
-                                    class="w-full py-1.5 px-2.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:outline-none"></textarea>
+                            <!-- Right: Financial Breakdown -->
+                            <div class="flex justify-end">
+                                <div
+                                    class="w-full sm:w-[360px] bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-col gap-3 h-fit">
+                                    <div class="flex justify-between items-center">
+                                        <label class="text-[11px] font-semibold text-gray-600 uppercase">Sub
+                                            Total</label>
+                                        <input type="text" :value="formatINR(form.subTotal)" disabled
+                                            class="w-[140px] py-1 px-2.5 bg-gray-100 border border-gray-200 rounded text-xs font-semibold text-gray-700 cursor-not-allowed text-right" />
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <label class="text-[11px] font-semibold text-gray-600 uppercase">Discount
+                                            Value</label>
+                                        <input type="number" step="any" min="0" x-model.number="form.discount"
+                                            @input="calcTotals()"
+                                            class="w-[140px] py-1 px-2.5 bg-white border border-gray-200 rounded text-xs focus:outline-none focus:border-[#1B5CA8] text-right" />
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <label class="text-[11px] font-semibold text-gray-600 uppercase">CGST</label>
+                                        <input type="number" step="any" min="0" x-model.number="form.cgst"
+                                            @input="calcTotals()"
+                                            class="w-[140px] py-1 px-2.5 bg-white border border-gray-200 rounded text-xs focus:outline-none focus:border-[#1B5CA8] text-right" />
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <label class="text-[11px] font-semibold text-gray-600 uppercase">SGST</label>
+                                        <input type="number" step="any" min="0" x-model.number="form.sgst"
+                                            @input="calcTotals()"
+                                            class="w-[140px] py-1 px-2.5 bg-white border border-gray-200 rounded text-xs focus:outline-none focus:border-[#1B5CA8] text-right" />
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <label class="text-[11px] font-semibold text-gray-600 uppercase">IGST</label>
+                                        <input type="number" step="any" min="0" x-model.number="form.igst"
+                                            @input="calcTotals()"
+                                            class="w-[140px] py-1 px-2.5 bg-white border border-gray-200 rounded text-xs focus:outline-none focus:border-[#1B5CA8] text-right" />
+                                    </div>
+                                    <div class="pt-3 border-t border-gray-200 flex justify-between items-center mt-1">
+                                        <label class="text-[13px] font-bold text-[#1B5CA8] uppercase">Total Net
+                                            Amount</label>
+                                        <input type="text" :value="formatINR(form.totalAmount)" disabled
+                                            class="w-[140px] py-1.5 px-2.5 bg-[#EBF3FC] border border-[#1B5CA8]/30 rounded text-sm font-bold text-[#1B5CA8] cursor-not-allowed text-right" />
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1">Terms
-                                    &amp; Conditions</label>
-                                <textarea x-model="form.terms" rows="2"
-                                    class="w-full py-1.5 px-2.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:outline-none"></textarea>
-                            </div>
-                        </div>
-
-                        <!-- ATTACHMENTS MAPPING -->
-                        <div class="mb-4">
-                            <label
-                                class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1">Documentation
-                                Attachments</label>
-                            <input type="file" x-ref="fileInput" multiple
-                                class="w-full text-xs text-gray-500 border border-gray-200 rounded-lg bg-gray-50 py-1 px-2" />
                         </div>
 
                         <!-- ACTION FOOTER BAR -->
-                        <div class="flex justify-end gap-2 border-t border-gray-100 pt-3.5">
+                        <div class="flex justify-end gap-2 border-t border-gray-200 pt-4 mt-2">
                             <button type="button" @click="closeModal()"
-                                class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50">Cancel</button>
+                                class="px-5 py-2 border border-gray-300 text-gray-600 rounded-md text-xs font-bold hover:bg-gray-50 transition-colors">Cancel</button>
                             <button type="submit" @click="submitAction = 'Draft'" :disabled="submitting"
-                                class="inline-flex items-center justify-center min-w-[100px] px-4 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-md text-xs font-semibold hover:bg-gray-50">
-                                <div x-show="submitting && submitAction === 'Draft'" class="draft-spinner mr-1.5"></div>
+                                class="inline-flex items-center justify-center min-w-[120px] px-5 py-2 bg-white border border-gray-300 text-gray-700 rounded-md text-xs font-bold hover:bg-gray-50 transition-colors">
+                                <div x-show="submitting && submitAction === 'Draft'" class="draft-spinner mr-2"></div>
                                 <span>Save as Draft</span>
                             </button>
                             <button type="submit" @click="submitAction = 'Submitted'" :disabled="submitting"
-                                class="inline-flex items-center justify-center min-w-[120px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b]">
-                                <div x-show="submitting && submitAction === 'Submitted'" class="po-spinner mr-1.5"
-                                    style="width:12px;height:12px;border-width:2px;border-top-color:white;"></div>
-                                <span>Submit for Approval</span>
+                                class="inline-flex items-center justify-center min-w-[140px] px-5 py-2 bg-[#1B5CA8] text-white rounded-md text-xs font-bold hover:bg-[#12427b] transition-colors shadow">
+                                <div x-show="submitting && submitAction === 'Submitted'" class="po-spinner mr-2"
+                                    style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
+                                <span>Submit Purchase Order</span>
                             </button>
                         </div>
                     </form>
@@ -923,16 +944,16 @@
             const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true });
 
             Alpine.data('poApp', () => ({
-                REPORT_NAME: 'Purchase_Order_Report', FORM_NAME: 'Purchase_Order', PR_REPORT_NAME: 'Purchase_Requisition_Report', QC_REPORT_NAME: 'Quote_Comparison_Report', UNIT_REPORT_NAME: 'Unit_Report', VENDOR_REPORT_NAME: 'Vendor_Report', ITEMS_REPORT_NAME: 'Items_Report',
+                REPORT_NAME: 'Purchase_Order_Report', FORM_NAME: 'Purchase_Order', PR_REPORT_NAME: 'Purchase_Requisition_Report', QC_REPORT_NAME: 'Quote_Comparison_Report', UNIT_REPORT_NAME: 'Unit_Report', DEPARTMENTS_REPORT_NAME: 'Departments_Report', VENDOR_REPORT_NAME: 'Vendor_Report', ITEMS_REPORT_NAME: 'Items_Report',
                 allRecords: [], filteredRecords: [], isLoading: true, currentFilter: 'all', currentPage: 1, perPage: 10, searchQuery: '', searchInput: '', sortColumn: 'po_date', sortDirection: 'desc',
                 stats: { all: 0, draft: 0, submitted: 0, approved: 0, rejected: 0, cancelled: 0 },
                 filterTabs: [{ key: 'all', label: 'All' }, { key: 'draft', label: 'Draft' }, { key: 'submitted', label: 'Submitted' }, { key: 'approved', label: 'Approved' }, { key: 'rejected', label: 'Rejected' }, { key: 'cancelled', label: 'Cancelled' }],
-                sortableColumns: [{ key: 'po_ref', label: 'PO #', align: 'left' }, { key: 'pr_ref', label: 'PR Refs', align: 'left' }, { key: 'unit', label: 'Unit', align: 'left' }, { key: 'vendor', label: 'Vendor', align: 'left' }, { key: 'po_date', label: 'PO Date', align: 'left' }, { key: 'delivery_date', label: 'Delivery Date', align: 'left' }, { key: 'status', label: 'Status', align: 'left' }, { key: 'items_status', label: 'Items Status', align: 'left' }, { key: 'total', label: 'Total Amount', align: 'left' }],
+                sortableColumns: [{ key: 'po_ref', label: 'PO #', align: 'left' }, { key: 'pr_ref', label: 'PR Refs', align: 'left' }, { key: 'unit', label: 'Unit', align: 'left' }, { key: 'department', label: 'Department', align: 'left' }, { key: 'vendor', label: 'Vendor', align: 'left' }, { key: 'po_date', label: 'PO Date', align: 'left' }, { key: 'delivery_date', label: 'Delivery Date', align: 'left' }, { key: 'status', label: 'Status', align: 'left' }, { key: 'items_status', label: 'Items Status', align: 'left' }, { key: 'total', label: 'Total Amount', align: 'left' }],
                 showModal: false, submitting: false, submitAction: 'Submitted', todayStr: new Date().toISOString().split('T')[0],
-                tsPr: null, tsQc: null, tsUnit: null, tsVendor: null, tsPaymentTerms: null, availableQCs: [],
+                tsPr: null, tsQc: null, tsUnit: null, tsDepartment: null, tsVendor: null, tsPaymentTerms: null, availableQCs: [],
                 form: {
-                    prIds: [], prLocked: false, unit: '', vendor: '', paymentTerms: '', poDate: '', deliveryDate: '', notes: '', terms: '', items: [],
-                    subTotal: 0, discount: 0, totalAmount: 0,
+                    prIds: [], prLocked: false, unit: '', department: '', vendor: '', paymentTerms: '', poDate: '', deliveryDate: '', notes: '', terms: '', items: [],
+                    subTotal: 0, discount: 0, cgst: 0, sgst: 0, igst: 0, totalAmount: 0,
                     billingAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' },
                     deliveryAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' },
                     deliveryLocked: true, _qcId: ''
@@ -942,10 +963,10 @@
                 get paginationInfoText() { const total = this.filteredRecords.length; if (total === 0) return 'Showing 0 records'; return `Showing ${(this.currentPage - 1) * this.perPage + 1}–${Math.min(this.currentPage * this.perPage, total)} of ${total} records`; },
                 get pageButtons() { const total = this.totalPages, cur = this.currentPage; let pages = []; for (let p = 1; p <= total; p++) { if (p <= 2 || p === total || (p >= cur - 1 && p <= cur + 1)) pages.push(p); } pages = [...new Set(pages)].sort((a, b) => a - b); const btns = []; for (let i = 0; i < pages.length; i++) { if (i > 0 && pages[i] - pages[i - 1] > 1) btns.push({ type: 'ellipsis', key: 'e' + pages[i] }); btns.push({ type: 'page', key: 'p' + pages[i], value: pages[i] }); } return btns; },
 
-                init() { P2PWorkflowUtils.init(); this.fetchRecords(); this.$watch('searchInput', Alpine.debounce(() => { this.searchQuery = this.searchInput.trim(); this.currentPage = 1; this.fetchRecords(); }, 400)); },
+                init() { P2PWorkflowUtils.init(); this.fetchRecords(); this.computeStats(); this.$watch('searchInput', Alpine.debounce(() => { this.searchQuery = this.searchInput.trim(); this.currentPage = 1; this.fetchRecords(); }, 400)); },
 
                 buildCriteria() {
-                    const parts = []; if (this.searchQuery) { const q = this.searchQuery.replace(/'/g, "\\'"); parts.push(`(PO_Ref_Number.contains("${q}") || Unit.Name.contains("${q}") || Vendor.Display_Name.contains("${q}"))`); }
+                    const parts = []; if (this.searchQuery) { const q = this.searchQuery.replace(/'/g, "\\'"); parts.push(`(PO_Ref_Number.contains("${q}") || Unit.Name.contains("${q}") || Vendor.Display_Name.contains("${q}") || Purchase_Requisitions.PR_Number.contains("${q}") )`); }
                     if (this.currentFilter !== 'all') { const statusMap = { draft: 'Status == "Draft"', submitted: 'Status == "Submitted"', approved: 'Status == "Approved"', rejected: 'Status == "Rejected"', cancelled: 'Status == "Cancelled"' }; if (statusMap[this.currentFilter]) parts.push(statusMap[this.currentFilter]); }
                     return parts.join(' && ');
                 },
@@ -956,14 +977,17 @@
                             const config = { report_name: this.REPORT_NAME, max_records: 200, field_config: 'all' }; if (crit) config.criteria = crit; if (cursor) config.record_cursor = cursor;
                             const res = await ZOHO.CREATOR.DATA.getRecords(config); if (res.code === 3000 && res.data) { acc = acc.concat(res.data); cursor = res.data.length >= 200 ? res.record_cursor : null; } else { cursor = null; }
                         } while (cursor);
-                        this.allRecords = acc.map(r => this.decorateRecord(r)); this.applySortAndRender(); this.computeStats();
+                        this.allRecords = acc.map(r => this.decorateRecord(r)); this.applySortAndRender();
                     } catch (e) { this.allRecords = []; this.filteredRecords = []; } finally { this.isLoading = false; }
                 },
                 decorateRecord(rec) {
                     rec._poRef = rec.PO_Ref_Number || rec.PO_Number || '–';
                     const prs = Array.isArray(rec.Purchase_Requisitions) ? rec.Purchase_Requisitions : (rec.Purchase_Requisition ? [rec.Purchase_Requisition] : []);
-                    rec._prRef = prs.map(pr => pr.display_value || pr.PR_Number || '–').join(', ') || '–';
-                    rec._unitName = rec.Unit?.Name || rec['Unit.Name'] || rec.Unit || '–'; rec._vendorName = rec.Vendor?.Display_Name || rec.Vendor?.Name || rec.Vendor || '–';
+                    rec._prArray = prs;
+                    rec._prTooltip = prs.map(pr => pr.display_value || pr.PR_Number || '–').join(', ') || '–';
+                    rec._unitName = rec.Unit?.Name || rec['Unit.Name'] || rec.Unit || '–';
+                    rec._deptName = rec.Department?.Name || rec['Department.Name'] || rec.Department?.zc_display_value || '–';
+                    rec._vendorName = rec.Vendor?.Display_Name || rec.Vendor?.Name || rec.Vendor || '–';
                     rec._poDateFormatted = this.formatDate(rec.PO_Date); rec._deliveryDateFormatted = this.formatDate(rec.delivery_date);
                     rec._statusLabel = rec.Status || 'Draft'; rec._statusClass = this.getStatusClass(rec._statusLabel);
                     rec._itemsStatus = rec.Items_Status || '–'; rec._totalFormatted = this.formatINR(rec.Total_Amount);
@@ -980,7 +1004,8 @@
                 },
                 getSortValue(rec, col) {
                     switch (col) {
-                        case 'po_ref': return (rec.PO_Ref_Number || '').toLowerCase(); case 'pr_ref': return rec._prRef || '';
+                        case 'po_ref': return (rec.PO_Ref_Number || '').toLowerCase(); case 'pr_ref': return rec._prTooltip || '';
+                        case 'unit': return rec._unitName.toLowerCase(); case 'department': return rec._deptName.toLowerCase();
                         case 'po_date': return rec.PO_Date ? dayjs(rec.PO_Date).valueOf() : 0; case 'total': return parseFloat(rec.Total_Amount) || 0;
                         default: return '';
                     }
@@ -1003,13 +1028,13 @@
 
                 openCreateModal() {
                     this.resetForm(); this.showModal = true; this.submitting = false;
-                    this.$nextTick(() => { this.initVendorSelect(); this.initPrSelect(); this.initQcSelect(); this.initUnitSelect(); this.initPaymentTermsSelect(); });
+                    this.$nextTick(() => { this.initVendorSelect(); this.initPrSelect(); this.initQcSelect(); this.initUnitSelect(); this.initDepartmentSelect(); this.initPaymentTermsSelect(); });
                 },
                 closeModal() {
                     this.showModal = false;
                     if (this.tsPr) this.tsPr.destroy(); if (this.tsQc) this.tsQc.destroy();
-                    if (this.tsUnit) this.tsUnit.destroy(); if (this.tsVendor) this.tsVendor.destroy();
-                    if (this.tsPaymentTerms) this.tsPaymentTerms.destroy();
+                    if (this.tsUnit) this.tsUnit.destroy(); if (this.tsDepartment) this.tsDepartment.destroy();
+                    if (this.tsVendor) this.tsVendor.destroy(); if (this.tsPaymentTerms) this.tsPaymentTerms.destroy();
                 },
 
                 initVendorSelect() {
@@ -1049,6 +1074,13 @@
                     });
                     ZOHO.CREATOR.DATA.getRecords({ report_name: this.UNIT_REPORT_NAME, max_records: 200 }).then(res => { if (res.code === 3000 && res.data) this.tsUnit.addOption(res.data); });
                 },
+                initDepartmentSelect() {
+                    this.tsDepartment = new TomSelect(this.$refs.departmentSelect, {
+                        valueField: 'ID', labelField: 'Name', searchField: 'Name', maxItems: 1,
+                        onChange: (val) => { this.form.department = val; }
+                    });
+                    ZOHO.CREATOR.DATA.getRecords({ report_name: this.DEPARTMENTS_REPORT_NAME, max_records: 200 }).then(res => { if (res.code === 3000 && res.data) this.tsDepartment.addOption(res.data); });
+                },
                 initPaymentTermsSelect() {
                     this.tsPaymentTerms = new TomSelect(this.$refs.paymentTermsSelect, { valueField: 'value', labelField: 'label', maxItems: 1, onChange: (val) => { this.form.paymentTerms = val; } });
                 },
@@ -1060,32 +1092,33 @@
 
                     for (const prId of newPrIds) {
                         try {
-                            // Implemented fix: Using custom API as instructed.
                             const prRes = await ZOHO.CREATOR.DATA.invokeCustomApi({
                                 api_name: P2PWorkflowUtils.API.FETCH_PR_DETAILS,
                                 http_method: 'GET', query_params: 'recId=' + prId
                             });
                             if (prRes && prRes.result && prRes.result.length > 0) {
                                 const pr = prRes.result[0];
-                                if (this.form.items.length === 0 && pr.Unit?.ID) {
-                                    this.form.unit = pr.Unit.ID; if (this.tsUnit) this.tsUnit.setValue(pr.Unit.ID, true);
+                                if (this.form.items.length === 0) {
+                                    if (pr.Unit?.ID) {
+                                        this.form.unit = pr.Unit.ID; if (this.tsUnit) this.tsUnit.setValue(pr.Unit.ID, true);
+                                    }
+                                    if (pr.Department?.ID || pr.Department?.id) {
+                                        let dId = pr.Department.ID || pr.Department.id;
+                                        this.form.department = dId; if (this.tsDepartment) this.tsDepartment.setValue(dId, true);
+                                    }
                                     if (pr.Due_Date) this.form.deliveryDate = dayjs(pr.Due_Date).format('YYYY-MM-DD');
                                 }
 
-                                // Fetch from Items to access Ordered_Quantity, fallback to Requested_Items
                                 const requisitionItemsList = (pr.Items && pr.Items.length > 0) ? pr.Items : (pr.Requested_Items || []);
-
                                 for (let idx = 0; idx < requisitionItemsList.length; idx++) {
                                     const ri = requisitionItemsList[idx];
                                     const itemId = ri.Item?.ID || ri.Item?.id || ri.Item || '';
                                     const rate = itemId ? await this.getItemUnitPrice(itemId) : 0;
 
-                                    // Prepopulate with Remaining Quantity (Quantity - Ordered_Quantity)
                                     const totalQty = parseFloat(ri.Quantity) || 0;
                                     const orderedQty = parseFloat(ri.Ordered_Quantity) || 0;
                                     const remainingQty = Math.max(0, totalQty - orderedQty);
 
-                                    // Skip items if already completely fulfilled
                                     if (remainingQty <= 0) continue;
 
                                     this.form.items.push({
@@ -1143,7 +1176,7 @@
                 },
 
                 resetForm() {
-                    this.form = { prIds: [], prLocked: false, unit: '', vendor: '', paymentTerms: '', poDate: this.todayStr, deliveryDate: '', notes: '', terms: '', items: [], subTotal: 0, discount: 0, totalAmount: 0, billingAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' }, deliveryAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' }, deliveryLocked: true, _qcId: '' };
+                    this.form = { prIds: [], prLocked: false, unit: '', department: '', vendor: '', paymentTerms: '', poDate: this.todayStr, deliveryDate: '', notes: '', terms: '', items: [], subTotal: 0, discount: 0, cgst: 0, sgst: 0, igst: 0, totalAmount: 0, billingAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' }, deliveryAddress: { line1: '', line2: '', city: '', state: '', postal: '', country: '' }, deliveryLocked: true, _qcId: '' };
                     this.availableQCs = [];
                 },
                 calcTotals() {
@@ -1157,7 +1190,11 @@
                         }
                     });
                     this.form.subTotal = subTotal;
-                    this.form.totalAmount = Math.max(0, subTotal - (parseFloat(this.form.discount) || 0));
+                    let discount = parseFloat(this.form.discount) || 0;
+                    let cgst = parseFloat(this.form.cgst) || 0;
+                    let sgst = parseFloat(this.form.sgst) || 0;
+                    let igst = parseFloat(this.form.igst) || 0;
+                    this.form.totalAmount = Math.max(0, subTotal - discount + cgst + sgst + igst);
                 },
 
                 async submitPO() {
@@ -1166,23 +1203,14 @@
                         Toast.fire({ icon: 'error', title: 'Complete all mandatory field configurations.' }); return;
                     }
 
-                    // --- ITEM AGGREGATION LOGIC ---
                     const groupedItemsMap = {};
                     activeItems.forEach(i => {
                         const itemId = i.Item;
                         if (!groupedItemsMap[itemId]) {
-                            groupedItemsMap[itemId] = {
-                                Item: itemId,
-                                Rate: parseFloat(i.Rate) || 0,
-                                Quantity: 0,
-                                Amount: 0,
-                                Comment: ''
-                            };
+                            groupedItemsMap[itemId] = { Item: itemId, Rate: parseFloat(i.Rate) || 0, Quantity: 0, Amount: 0, Comment: '' };
                         }
-
                         groupedItemsMap[itemId].Quantity += (parseFloat(i.Quantity) || 0);
                         groupedItemsMap[itemId].Amount += (parseFloat(i.Amount) || 0);
-
                         if (i.Comment) {
                             if (groupedItemsMap[itemId].Comment && !groupedItemsMap[itemId].Comment.includes(i.Comment)) {
                                 groupedItemsMap[itemId].Comment += ' | ' + i.Comment;
@@ -1197,11 +1225,12 @@
                     try {
                         const poPayload = {
                             data: {
-                                Unit: this.form.unit, Vendor: this.form.vendor, Payment_Terms: this.form.paymentTerms,
+                                Unit: this.form.unit, Department: this.form.department, Vendor: this.form.vendor, Payment_Terms: this.form.paymentTerms,
                                 PO_Date: dayjs(this.form.poDate).format('DD-MMM-YYYY'), delivery_date: dayjs(this.form.deliveryDate).format('DD-MMM-YYYY'),
                                 Status: this.submitAction === 'Draft' ? 'Draft' : 'Submitted', Notes: this.form.notes || '', Terms_Conditions: this.form.terms || '',
-                                Sub_Total: this.form.subTotal, Discount: parseFloat(this.form.discount) || 0, Total_Amount: this.form.totalAmount,
-                                Purchase_Requisitions: this.form.prIds, Quote_Comparison: this.form._qcId || '', Items_Status: "Pending",
+                                Sub_Total: this.form.subTotal, Discount: parseFloat(this.form.discount) || 0,
+                                CGST: parseFloat(this.form.cgst) || 0, SGST: parseFloat(this.form.sgst) || 0, IGST: parseFloat(this.form.igst) || 0,
+                                Total_Amount: this.form.totalAmount, Purchase_Requisitions: this.form.prIds, Quote_Comparison: this.form._qcId || '', Items_Status: "Pending",
                                 Billing_Address: { address_line_1: this.form.billingAddress.line1, address_line_2: this.form.billingAddress.line2, district_city: this.form.billingAddress.city, state_province: this.form.billingAddress.state, postal_code: this.form.billingAddress.postal, country: this.form.billingAddress.country },
                                 Delivary_Address: { address_line_1: this.form.deliveryAddress.line1, address_line_2: this.form.deliveryAddress.line2, district_city: this.form.deliveryAddress.city, state_province: this.form.deliveryAddress.state, postal_code: this.form.deliveryAddress.postal, country: this.form.deliveryAddress.country },
                                 Items: finalGroupedItems
@@ -1211,20 +1240,14 @@
                         const res = await ZOHO.CREATOR.DATA.addRecords({ form_name: this.FORM_NAME, payload: JSON.parse(JSON.stringify(poPayload)) });
                         if (res.code === 3000) {
 
-                            // =========================================================================
-                            // NEW (V2): UPDATE PR'S "ORDERED_QUANTITY" AND STATUS AFTER PO SUCCESS
-                            // =========================================================================
                             try {
                                 const prUpdates = {};
-                                // Map items back to their origin PR ID
                                 activeItems.forEach(i => {
                                     if (!prUpdates[i._prId]) prUpdates[i._prId] = [];
                                     prUpdates[i._prId].push({ itemId: i.Item, orderQty: parseFloat(i.Quantity) || 0 });
                                 });
 
-                                // Loop through unique PRs and execute updates concurrently
                                 const prUpdatePromises = Object.keys(prUpdates).map(async prId => {
-                                    // Bug fix: Utilizing custom API over native getRecordById
                                     const prRes = await ZOHO.CREATOR.DATA.invokeCustomApi({
                                         api_name: P2PWorkflowUtils.API.FETCH_PR_DETAILS,
                                         http_method: 'GET',
@@ -1238,9 +1261,7 @@
                                         let fullyOrdered = true;
                                         let anyOrdered = false;
 
-                                        // Update subform rows matching the ordered Item ID
                                         const updatedSubform = itemsSubform.map(row => {
-                                            // Extract the correct string ID for the Item lookup field
                                             const rowItemId = row.Item?.ID || row.Item?.id || row.Item;
                                             const match = prUpdates[prId].find(u => u.itemId == rowItemId);
 
@@ -1250,7 +1271,6 @@
 
                                             if (match) newOQ += match.orderQty;
 
-                                            // Determine line level status
                                             let rowStatus = row.Status || 'Pending';
                                             if (newOQ >= totalQty && totalQty > 0) {
                                                 rowStatus = 'Completely Ordered';
@@ -1261,24 +1281,14 @@
                                             if (newOQ < totalQty) fullyOrdered = false;
                                             if (newOQ > 0) anyOrdered = true;
 
-                                            // Ensure date string is compatible with creator API
                                             let dueDate = row.Due_Date || "";
                                             if (dueDate && dueDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
                                                 dueDate = dayjs(dueDate).format('DD-MMM-YYYY');
                                             }
 
-                                            // Return object mapping strictly with fields, dropping 'ID' property.
-                                            return {
-                                                Item: rowItemId,
-                                                Quantity: totalQty,
-                                                Ordered_Quantity: newOQ,
-                                                Due_Date: dueDate,
-                                                Comment: row.Comment || "",
-                                                Status: rowStatus
-                                            };
+                                            return { Item: rowItemId, Quantity: totalQty, Ordered_Quantity: newOQ, Due_Date: dueDate, Comment: row.Comment || "", Status: rowStatus };
                                         });
 
-                                        // Determine Master PR status based on Subform evaluation
                                         let prMasterStatus = prData.Status;
                                         if (fullyOrdered && itemsSubform.length > 0) {
                                             prMasterStatus = 'Completely Ordered';
@@ -1286,26 +1296,17 @@
                                             prMasterStatus = 'Partially Ordered';
                                         }
 
-                                        // Push updates back to original PR record using V2 Widget Syntax
                                         return ZOHO.CREATOR.DATA.updateRecordById({
-                                            report_name: this.PR_REPORT_NAME,
-                                            id: prId,
-                                            payload: {
-                                                data: {
-                                                    Items: updatedSubform,
-                                                    Status: prMasterStatus
-                                                }
-                                            }
+                                            report_name: this.PR_REPORT_NAME, id: prId,
+                                            payload: { data: { Items: updatedSubform, Status: prMasterStatus } }
                                         });
                                     }
                                 });
 
                                 await Promise.all(prUpdatePromises);
-
                             } catch (prErr) {
                                 console.error('Failed to sync updated quantities to Purchase Requisition:', prErr);
                             }
-                            // =========================================================================
 
                             Toast.fire({ icon: 'success', title: 'Purchase Order tracked successfully.' });
                             this.closeModal(); this.fetchRecords();

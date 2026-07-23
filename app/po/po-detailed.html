@@ -48,6 +48,15 @@
             animation: spin 0.7s linear infinite;
         }
 
+        .btn-spinner-blue {
+            border: 2px solid rgba(27, 92, 168, 0.2);
+            border-top-color: #1B5CA8;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            animation: spin 0.7s linear infinite;
+        }
+
         @keyframes spin {
             to {
                 transform: rotate(360deg);
@@ -394,7 +403,7 @@
         <!-- ─── MAIN CONTENT ─── -->
         <div x-show="!isLoading && !hasError" class="fade-in pb-4">
 
-            <!-- HEADER -->
+            <!-- HEADER & ACTIONS -->
             <div class="flex flex-col md:flex-row md:items-start justify-between mb-5 pt-2 gap-4">
                 <div>
                     <nav class="flex items-center gap-1.5 text-xs mb-2.5">
@@ -410,18 +419,20 @@
                             x-text="poRefNumber"></h1>
                         <span x-html="getStatusBadge(rec.Status)"></span>
                     </div>
-                    <div class="text-xs text-gray-500 mt-2 flex items-center gap-2">
-                        <i class="bi bi-calendar-event text-gray-400"></i> Date: <span
-                            class="font-semibold text-gray-800" x-text="formatDate(rec.PO_Date)"></span>
-                        <span class="text-gray-300">|</span>
-                        <i class="bi bi-calendar-check text-gray-400"></i> Delivery by: <span
-                            class="font-semibold text-gray-800" x-text="formatDate(rec.delivery_date)"></span>
-                    </div>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
                     <button x-show="canEdit" @click="openEditModal()"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer">
                         <i class="bi bi-pencil-square"></i> Edit PO
+                    </button>
+                    <!-- PRINT PO BUTTON -->
+                    <button @click="downloadPDF()" :disabled="isExportingPDF"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#EBF3FC] border border-[#1B5CA8]/30 text-[#1B5CA8] hover:bg-blue-100 rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer disabled:opacity-50">
+                        <template x-if="!isExportingPDF"><i class="bi bi-printer"></i></template>
+                        <template x-if="isExportingPDF">
+                            <div class="btn-spinner-blue"></div>
+                        </template>
+                        <span x-text="isExportingPDF ? 'Preparing...' : 'Print PO'"></span>
                     </button>
                 </div>
             </div>
@@ -437,250 +448,230 @@
                 </div>
             </div>
 
-            <!-- MAIN GRID -->
-            <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+            <!-- ─── STANDARD PO SECTIONS ─── -->
+            <div class="space-y-5">
 
-                <!-- LEFT COLUMN -->
-                <div class="xl:col-span-2 space-y-5">
-
-                    <!-- Details & PR References -->
-                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
-                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
-                                <div
-                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
-                                    <i class="bi bi-file-text"></i>
-                                </div>
-                                Order Details
+                <!-- SECTION 1: PO HEADER INFO & ADDRESSES -->
+                <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                    <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                        <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                            <div
+                                class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
+                                <i class="bi bi-card-heading"></i>
                             </div>
-                        </div>
-                        <div class="px-[18px] py-[15px]">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
-                                <template x-for="field in detailFields" :key="field.label">
-                                    <div
-                                        class="flex justify-between items-center py-2 text-xs border-b border-dashed border-gray-100">
-                                        <span class="text-gray-500 font-medium" x-text="field.label"></span>
-                                        <template x-if="field.isHtml"><span x-html="field.value"
-                                                class="text-right flex flex-wrap justify-end gap-1"></span></template>
-                                        <template x-if="!field.isHtml"><span
-                                                class="text-gray-900 font-semibold text-right"
-                                                x-text="field.value || '–'"></span></template>
-                                    </div>
-                                </template>
-                            </div>
-                            <template x-if="rec.Notes">
-                                <div class="mt-4 pt-3 border-t border-gray-100">
-                                    <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                                        Operational Notes</div>
-                                    <div class="text-xs text-gray-700 leading-relaxed max-w-none bg-yellow-50 p-2.5 rounded border border-yellow-100"
-                                        x-text="rec.Notes"></div>
-                                </div>
-                            </template>
+                            Purchase Order Summary
                         </div>
                     </div>
 
-                    <!-- Addresses Section -->
-                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
-                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
-                                <div
-                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-indigo-50 text-indigo-600">
-                                    <i class="bi bi-geo-alt"></i>
-                                </div>
-                                Location & Shipping Details
+                    <div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- PO Meta -->
+                        <div>
+                            <div
+                                class="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-3 border-b border-gray-100 pb-1">
+                                PO Info
                             </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100">
-                            <template x-for="addr in getAddresses()" :key="addr.title">
-                                <div class="p-4">
-                                    <div
-                                        class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
-                                        <i :class="addr.icon"></i> <span x-text="addr.title"></span>
-                                    </div>
-                                    <div class="text-[12px] text-gray-800 leading-relaxed font-medium"
-                                        x-text="addr.formatted"></div>
+                            <div class="grid gap-2.5">
+                                <div>
+                                    <div class="text-[11px] text-gray-500 font-medium">PO Number</div>
+                                    <div class="text-[13px] font-bold text-gray-900" x-text="poRefNumber"></div>
                                 </div>
-                            </template>
-                        </div>
-                    </div>
-
-                    <!-- Line Items -->
-                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                        <div
-                            class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
-                                <div
-                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
-                                    <i class="bi bi-box-seam"></i>
+                                <div>
+                                    <div class="text-[11px] text-gray-500 font-medium">PO Date</div>
+                                    <div class="text-[13px] font-semibold text-gray-800"
+                                        x-text="formatDate(rec.PO_Date)"></div>
                                 </div>
-                                Ordered Line Items
-                            </div>
-                            <div class="text-[11px] font-semibold text-gray-500">
-                                Items Status: <span
-                                    :class="{'text-emerald-600': rec.Items_Status === 'Completely Received', 'text-amber-600': rec.Items_Status === 'Partially Received'}"
-                                    x-text="rec.Items_Status || 'Pending'"></span>
-                            </div>
-                        </div>
-
-                        <div x-show="items.length === 0" class="px-[18px] py-8 text-center text-gray-400 text-xs">
-                            <i class="bi bi-inbox text-2xl mb-2 block"></i> No line items found
-                        </div>
-
-                        <div class="overflow-x-auto w-full" x-show="items.length > 0">
-                            <table class="w-full border-collapse text-xs">
-                                <thead>
-                                    <tr class="bg-gray-50 border-b border-gray-200">
-                                        <th
-                                            class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
-                                            #</th>
-                                        <th
-                                            class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
-                                            Item Description</th>
-                                        <th
-                                            class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right">
-                                            Rate / Unit</th>
-                                        <th
-                                            class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right">
-                                            Ordered Qty</th>
-                                        <th
-                                            class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right">
-                                            Rcvd Qty</th>
-                                        <th
-                                            class="px-4 py-2 text-[10px] font-bold text-[#1B5CA8] uppercase tracking-wide text-right">
-                                            Total Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template x-for="(item, i) in items" :key="i">
-                                        <tr class="border-b border-gray-50 hover:bg-gray-50/70 transition-colors">
-                                            <td class="px-4 py-3 text-gray-400 font-mono text-[11px]" x-text="i + 1">
-                                            </td>
-                                            <td class="px-4 py-3 text-gray-900 font-medium">
-                                                <span x-text="getItemName(item)"></span>
-                                                <template x-if="item.Comment">
-                                                    <div class="text-[11px] text-gray-400 font-normal mt-0.5 bg-white inline-block px-1 rounded border border-gray-100"
-                                                        x-text="item.Comment"></div>
-                                                </template>
-                                            </td>
-                                            <td class="px-4 py-3 text-gray-600 text-right tabular-nums">
-                                                <span x-text="formatINR(getRate(item), false)"></span>
-                                                <span class="text-[10px] text-gray-400 ml-0.5"
-                                                    x-text="'/ ' + getItemUnit(item)"></span>
-                                            </td>
-                                            <td class="px-4 py-3 text-gray-800 font-semibold text-right tabular-nums"
-                                                x-text="item.Quantity || 0"></td>
-                                            <td class="px-4 py-3 text-right tabular-nums">
-                                                <span
-                                                    :class="{'text-emerald-600 font-bold': item.Received_Quantity >= item.Quantity, 'text-gray-500': !item.Received_Quantity}"
-                                                    x-text="item.Received_Quantity || '0'"></span>
-                                            </td>
-                                            <td class="px-4 py-3 text-gray-900 font-bold text-right tabular-nums"
-                                                x-text="formatINR(item.Amount, false)"></td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Grand Totals footer -->
-                        <div class="bg-gray-50/80 p-4 border-t border-gray-200 flex justify-end">
-                            <div class="w-full max-w-xs space-y-2 text-xs">
-                                <div class="flex justify-between text-gray-600"><span class="font-semibold">Sub
-                                        Total</span> <span class="font-medium tabular-nums"
-                                        x-text="formatINR(rec.Sub_Total, false)"></span></div>
-                                <div class="flex justify-between text-gray-600"><span class="font-semibold">Discount
-                                        (-)</span> <span class="font-medium tabular-nums text-red-600"
-                                        x-text="formatINR(rec.Discount, false)"></span></div>
-                                <div class="flex justify-between text-gray-600"><span class="font-semibold">CGST
-                                        (+)</span> <span class="font-medium tabular-nums"
-                                        x-text="formatINR(rec.CGST, false)"></span></div>
-                                <div class="flex justify-between text-gray-600"><span class="font-semibold">SGST
-                                        (+)</span> <span class="font-medium tabular-nums"
-                                        x-text="formatINR(rec.SGST, false)"></span></div>
-                                <div class="flex justify-between text-gray-600"><span class="font-semibold">IGST
-                                        (+)</span> <span class="font-medium tabular-nums"
-                                        x-text="formatINR(rec.IGST, false)"></span></div>
-                                <div
-                                    class="flex justify-between border-t border-gray-200 pt-2 text-[15px] font-black text-[#1B5CA8]">
-                                    <span>Grand Total</span> <span class="tabular-nums"
-                                        x-text="formatINR(rec.Total_Amount, true)"></span>
+                                <div>
+                                    <div class="text-[11px] text-gray-500 font-medium">Delivery Date</div>
+                                    <div class="text-[13px] font-semibold text-[#1B5CA8]"
+                                        x-text="formatDate(rec.delivery_date)"></div>
+                                </div>
+                                <div>
+                                    <div class="text-[11px] text-gray-500 font-medium">Payment Terms</div>
+                                    <div class="text-[12px] font-semibold text-gray-800 bg-gray-100 px-2 py-0.5 rounded inline-block mt-0.5"
+                                        x-text="rec.Payment_Terms || '–'"></div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Workflow Action Buttons -->
-                    <div class="flex flex-wrap items-center gap-2.5 fade-in" x-show="showActionButtons" x-cloak>
-                        <button x-show="isDraft"
-                            @click="openActionModal('Submit Purchase Order', 'Submitted', 'bg-blue-600', 'hover:bg-blue-700')"
-                            class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-[13px] font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer shadow-sm">
-                            <i class="bi bi-send"></i> Submit PO for Approval
-                        </button>
-
-                        <button x-show="isSubmitted"
-                            @click="openActionModal('Approve Purchase Order', 'Approved', 'bg-emerald-600', 'hover:bg-emerald-700')"
-                            class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-[13px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors cursor-pointer shadow-sm">
-                            <i class="bi bi-check-circle-fill"></i> Approve Order
-                        </button>
-
-                        <button x-show="isSubmitted"
-                            @click="openActionModal('Reject Purchase Order', 'Rejected', 'bg-white text-red-600 border border-red-300', 'hover:bg-red-50')"
-                            class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-[13px] font-bold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors cursor-pointer shadow-sm">
-                            <i class="bi bi-x-circle-fill"></i> Reject
-                        </button>
-                    </div>
-
-                </div>
-
-                <!-- RIGHT COLUMN -->
-                <div class="space-y-5">
-                    <!-- Vendor Summary -->
-                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                        <div
-                            class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
-                                <div
-                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-purple-50 text-purple-600">
-                                    <i class="bi bi-building"></i>
-                                </div>
-                                Vendor Overview
+                        <!-- Vendor Details (To) -->
+                        <div>
+                            <div
+                                class="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-3 border-b border-gray-100 pb-1">
+                                To (Vendor details)
                             </div>
-                        </div>
-                        <div class="p-4">
                             <template x-if="rec.Vendor">
                                 <div>
-                                    <div class="text-[15px] font-black text-gray-800"
+                                    <div class="text-[14px] font-bold text-gray-900"
                                         x-text="rec.Vendor.Display_Name || rec.Vendor.Company_Name"></div>
-                                    <div class="text-xs text-gray-600 mt-2.5 space-y-2">
-                                        <div class="flex items-center"><i class="bi bi-envelope text-gray-400 w-5"></i>
-                                            <span x-text="rec.Vendor.email || 'N/A'"></span>
-                                        </div>
-                                        <div class="flex items-center"><i class="bi bi-telephone text-gray-400 w-5"></i>
-                                            <span x-text="rec.Vendor.mobile || 'N/A'"></span>
-                                        </div>
-                                        <div class="flex items-center"><i class="bi bi-briefcase text-gray-400 w-5"></i>
-                                            <span x-text="rec.Vendor.Business_Type || 'Vendor'"></span>
+                                    <div class="text-xs text-gray-600 mt-2 space-y-1">
+                                        <div class="flex items-start gap-1.5"><i
+                                                class="bi bi-envelope text-gray-400 mt-0.5"></i> <span
+                                                x-text="rec.Vendor.email || 'N/A'"></span></div>
+                                        <div class="flex items-start gap-1.5"><i
+                                                class="bi bi-telephone text-gray-400 mt-0.5"></i> <span
+                                                x-text="rec.Vendor.mobile || 'N/A'"></span></div>
+                                        <div class="flex items-start gap-1.5 mt-2">
+                                            <i class="bi bi-geo-alt text-gray-400 mt-0.5"></i>
+                                            <span
+                                                x-html="formatAddress(rec.Vendor.Billing_Address) || 'Address not provided'"></span>
                                         </div>
                                     </div>
-                                    <template x-if="rec.Payment_Terms">
-                                        <div class="mt-4 pt-3 border-t border-gray-100">
-                                            <span
-                                                class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1">Payment
-                                                Terms</span>
-                                            <span
-                                                class="inline-block bg-purple-50 text-purple-700 text-[11px] font-bold px-2 py-1 rounded"
-                                                x-text="rec.Payment_Terms"></span>
-                                        </div>
-                                    </template>
                                 </div>
                             </template>
                             <template x-if="!rec.Vendor">
-                                <div class="text-xs text-gray-400 italic text-center py-4">No vendor assigned</div>
+                                <div class="text-xs text-gray-400 italic">No vendor assigned</div>
                             </template>
+                        </div>
+
+                        <!-- Shipping Details (Ship To) -->
+                        <div>
+                            <div
+                                class="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-3 border-b border-gray-100 pb-1">
+                                Ship To (Delivery details)
+                            </div>
+                            <div>
+                                <div class="text-[14px] font-bold text-gray-900" x-text="getUnitName()"></div>
+                                <div class="text-xs text-gray-600 mt-2 space-y-1.5">
+                                    <div class="flex items-start gap-1.5">
+                                        <i class="bi bi-building text-gray-400 mt-0.5"></i>
+                                        <span
+                                            x-text="'Dept: ' + (rec.Department?.Name || rec.Department?.display_value || '–')"></span>
+                                    </div>
+                                    <div class="flex items-start gap-1.5 mt-2">
+                                        <i class="bi bi-truck text-gray-400 mt-0.5"></i>
+                                        <span class="leading-relaxed"
+                                            x-html="getDeliveryAddress() || 'Delivery address not provided'"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: LINE ITEMS & TOTALS -->
+                <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                    <div
+                        class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+                        <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                            <div
+                                class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-[#EBF3FC] text-[#1B5CA8]">
+                                <i class="bi bi-box-seam"></i>
+                            </div>
+                            Ordered Line Items
+                        </div>
+                        <div class="text-[11px] font-semibold text-gray-500">
+                            Items Status: <span
+                                :class="{'text-emerald-600 font-bold': rec.Items_Status === 'Completely Received', 'text-amber-600 font-bold': rec.Items_Status === 'Partially Received'}"
+                                x-text="rec.Items_Status || 'Pending'"></span>
                         </div>
                     </div>
 
-                    <!-- Terms & Conditions -->
+                    <div x-show="items.length === 0" class="px-[18px] py-8 text-center text-gray-400 text-xs">
+                        <i class="bi bi-inbox text-2xl mb-2 block"></i> No line items found
+                    </div>
+
+                    <div class="overflow-x-auto w-full" x-show="items.length > 0">
+                        <table class="w-full border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-200">
+                                    <th
+                                        class="px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left w-12">
+                                        #</th>
+                                    <th
+                                        class="px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
+                                        Item Description</th>
+                                    <th
+                                        class="px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right w-28">
+                                        Rate / Unit</th>
+                                    <th
+                                        class="px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right w-24">
+                                        Ord. Qty</th>
+                                    <th
+                                        class="px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right w-24">
+                                        Rcvd Qty</th>
+                                    <th
+                                        class="px-4 py-3 text-[10px] font-bold text-gray-900 uppercase tracking-wide text-right w-32">
+                                        Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="(item, i) in items" :key="i">
+                                    <tr class="border-b border-gray-50 hover:bg-gray-50/70 transition-colors">
+                                        <td class="px-4 py-3 text-gray-400 font-mono text-[11px]" x-text="i + 1"></td>
+                                        <td class="px-4 py-3 text-gray-900 font-medium">
+                                            <span x-text="getItemName(item)"></span>
+                                            <template x-if="item.Comment">
+                                                <div class="text-[11px] text-gray-400 font-normal mt-1 block"
+                                                    x-text="item.Comment"></div>
+                                            </template>
+                                        </td>
+                                        <td class="px-4 py-3 text-gray-600 text-right tabular-nums">
+                                            <span x-text="formatINR(getRate(item), false)"></span>
+                                            <div class="text-[10px] text-gray-400 mt-0.5"
+                                                x-text="'per ' + getItemUnit(item)"></div>
+                                        </td>
+                                        <td class="px-4 py-3 text-gray-800 font-semibold text-right tabular-nums"
+                                            x-text="item.Quantity || 0"></td>
+                                        <td class="px-4 py-3 text-right tabular-nums">
+                                            <span
+                                                :class="{'text-emerald-600 font-bold': item.Received_Quantity >= item.Quantity, 'text-gray-500': !item.Received_Quantity}"
+                                                x-text="item.Received_Quantity || '0'"></span>
+                                        </td>
+                                        <td class="px-4 py-3 text-gray-900 font-bold text-right tabular-nums"
+                                            x-text="formatINR(item.Amount, false)"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Bottom Aligned Totals -->
+                    <div class="bg-gray-50/80 p-5 flex flex-col items-end border-t border-gray-200">
+                        <div class="w-full max-w-sm space-y-2.5 text-[13px]">
+                            <div class="flex justify-between text-gray-600">
+                                <span class="font-semibold">Sub Total</span>
+                                <span class="font-medium tabular-nums text-gray-800"
+                                    x-text="formatINR(rec.Sub_Total, false)"></span>
+                            </div>
+                            <template x-if="rec.Discount > 0">
+                                <div class="flex justify-between text-gray-600">
+                                    <span class="font-semibold">Discount (-)</span>
+                                    <span class="font-medium tabular-nums text-red-600"
+                                        x-text="formatINR(rec.Discount, false)"></span>
+                                </div>
+                            </template>
+                            <template x-if="rec.CGST > 0">
+                                <div class="flex justify-between text-gray-600">
+                                    <span class="font-semibold">CGST (+)</span>
+                                    <span class="font-medium tabular-nums text-gray-800"
+                                        x-text="formatINR(rec.CGST, false)"></span>
+                                </div>
+                            </template>
+                            <template x-if="rec.SGST > 0">
+                                <div class="flex justify-between text-gray-600">
+                                    <span class="font-semibold">SGST (+)</span>
+                                    <span class="font-medium tabular-nums text-gray-800"
+                                        x-text="formatINR(rec.SGST, false)"></span>
+                                </div>
+                            </template>
+                            <template x-if="rec.IGST > 0">
+                                <div class="flex justify-between text-gray-600">
+                                    <span class="font-semibold">IGST (+)</span>
+                                    <span class="font-medium tabular-nums text-gray-800"
+                                        x-text="formatINR(rec.IGST, false)"></span>
+                                </div>
+                            </template>
+                            <div
+                                class="flex justify-between border-t border-gray-200 pt-3 mt-1 text-[16px] font-black text-[#1B5CA8]">
+                                <span>Grand Total</span>
+                                <span class="tabular-nums" x-text="formatINR(rec.Total_Amount, true)"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 3: TERMS & NOTES -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5" x-show="rec.Notes || rec.Terms_Conditions">
                     <template x-if="rec.Terms_Conditions">
                         <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                             <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
@@ -692,24 +683,47 @@
                                     Terms & Conditions
                                 </div>
                             </div>
-                            <div class="p-4 text-xs text-gray-700 leading-relaxed bg-slate-50 border-t border-slate-100"
+                            <div class="p-4 text-xs text-gray-700 leading-relaxed whitespace-pre-wrap"
                                 x-text="rec.Terms_Conditions"></div>
                         </div>
                     </template>
 
-                    <!-- Audit Trail -->
-                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                        <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
-                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
-                                <div
-                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-amber-50 text-amber-600">
-                                    <i class="bi bi-clock-history"></i>
+                    <template x-if="rec.Notes">
+                        <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                            <div class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50">
+                                <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                                    <div
+                                        class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-yellow-50 text-yellow-600">
+                                        <i class="bi bi-journal-text"></i>
+                                    </div>
+                                    Operational Notes
                                 </div>
-                                Document History
                             </div>
+                            <div class="p-4 text-xs text-gray-700 leading-relaxed bg-yellow-50/30 whitespace-pre-wrap"
+                                x-text="rec.Notes"></div>
                         </div>
-                        <div class="px-[18px] py-[15px]" id="globalAuditTrail"></div>
-                    </div>
+                    </template>
+                </div>
+
+                <!-- Workflow Action Buttons -->
+                <div class="flex flex-wrap items-center gap-2.5 fade-in" x-show="showActionButtons" x-cloak>
+                    <button x-show="isDraft"
+                        @click="openActionModal('Submit Purchase Order', 'Submitted', 'bg-blue-600', 'hover:bg-blue-700')"
+                        class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-[13px] font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer shadow-sm">
+                        <i class="bi bi-send"></i> Submit PO for Approval
+                    </button>
+
+                    <button x-show="isSubmitted"
+                        @click="openActionModal('Approve Purchase Order', 'Approved', 'bg-emerald-600', 'hover:bg-emerald-700')"
+                        class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-[13px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors cursor-pointer shadow-sm">
+                        <i class="bi bi-check-circle-fill"></i> Approve Order
+                    </button>
+
+                    <button x-show="isSubmitted"
+                        @click="openActionModal('Reject Purchase Order', 'Rejected', 'bg-white text-red-600 border border-red-300', 'hover:bg-red-50')"
+                        class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-[13px] font-bold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors cursor-pointer shadow-sm">
+                        <i class="bi bi-x-circle-fill"></i> Reject
+                    </button>
                 </div>
             </div>
         </div>
@@ -725,6 +739,7 @@
             Alpine.data('poWidget', () => ({
                 isLoading: true, hasError: false, errorMessage: '',
                 recordId: null, rec: {}, items: [], actions: [],
+                isExportingPDF: false,
 
                 showActionModal: false, modalTitle: '', modalComment: '', pendingStatus: '',
                 modalBtnClass: '', modalBtnHoverClass: '', isSubmitting: false,
@@ -740,7 +755,7 @@
                 tsInstances: { unit: null, vendor: null, items: [] },
 
                 initWidget() {
-                    P2PWorkflowUtils.init(); // Detect env prefix (Dev__ / Prod__)
+                    if (typeof P2PWorkflowUtils !== 'undefined') P2PWorkflowUtils.init();
                     ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
                         this.recordId = params?.recordId || null;
                         if (!this.recordId) {
@@ -766,7 +781,6 @@
 
                 fetchData() {
                     this.isLoading = true;
-                    console.log({ API: P2PWorkflowUtils.API })
                     ZOHO.CREATOR.DATA.invokeCustomApi({
                         api_name: typeof P2PWorkflowUtils !== 'undefined' ? P2PWorkflowUtils.API.FETCH_PO_DETAILS : "fetch_po_details",
                         http_method: "GET", content_type: "application/json", query_params: 'recId=' + this.recordId,
@@ -779,7 +793,6 @@
                         this.$nextTick(() => {
                             if (typeof P2PWorkflowUtils !== 'undefined') {
                                 P2PWorkflowUtils.renderProgress(this.actions, "Purchase Order", document.getElementById('globalProgressContainer'), document.getElementById('globalProgressFill'));
-                                P2PWorkflowUtils.renderAuditTrail(this.actions, document.getElementById('globalAuditTrail'));
                             }
                         });
                         this.isLoading = false;
@@ -796,32 +809,19 @@
                 get showActionButtons() { return this.isDraft || this.isSubmitted; },
                 get modalBtnText() { return this.modalTitle.split(' ')[0] || 'Submit'; },
 
-                get detailFields() {
-                    let unitName = '–';
-                    if (this.rec.Unit) {
-                        unitName = Array.isArray(this.rec.Unit) && this.rec.Unit.length ? (this.rec.Unit[0].display_value || this.rec.Unit[0].Name || '–') : (this.rec.Unit.Name || this.rec.Unit.display_value || '–');
-                    }
-
-                    // Dynamically map PRs list
-                    let prLinksHtml = '–';
-                    if (this.rec.PRs && this.rec.PRs.length > 0) {
-                        prLinksHtml = this.rec.PRs.map(pr => `<a href="#Page:PR_Detailed?recordId=${pr.ID}" target="_parent" class="text-[#1B5CA8] font-bold hover:underline bg-blue-50 px-2 py-0.5 rounded shadow-sm border border-blue-100">${pr.PR_Number}</a>`).join('');
-                    } else if (this.rec.Purchase_Requisitions && this.rec.Purchase_Requisitions.length > 0) {
-                        prLinksHtml = `<span class="text-gray-500 italic">Linked (${this.rec.Purchase_Requisitions.length})</span>`;
-                    }
-
-                    return [
-                        { label: 'PO Number', value: `<span class="font-bold text-gray-800">${this.poRefNumber}</span>`, isHtml: true },
-                        { label: 'Linked PRs', value: prLinksHtml, isHtml: true },
-                        { label: 'Purchasing Unit', value: unitName },
-                        { label: 'QC Reference', value: this.rec.Quote_Comparison ? `<span class="font-mono text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded">${this.rec.Quote_Comparison}</span>` : '–', isHtml: true }
-                    ];
-                },
-
                 // ─── Helpers ───
                 getItemName(itemObj) { return itemObj.Item && typeof itemObj.Item === 'object' ? (itemObj.Item.display_value || itemObj.Item.item_name || '–') : '–'; },
                 getItemUnit(itemObj) { return itemObj.Item && typeof itemObj.Item === 'object' && itemObj.Item.unit_of_measure ? itemObj.Item.unit_of_measure : 'unit'; },
                 getRate(itemObj) { return itemObj.Rate || (itemObj.Item && itemObj.Item.unit_price ? itemObj.Item.unit_price : (itemObj.Quantity ? itemObj.Amount / itemObj.Quantity : 0)); },
+                getUnitName() {
+                    if (!this.rec.Unit) return '–';
+                    return Array.isArray(this.rec.Unit) && this.rec.Unit.length ? (this.rec.Unit[0].display_value || this.rec.Unit[0].Name || '–') : (this.rec.Unit.Name || this.rec.Unit.display_value || '–');
+                },
+                getDeliveryAddress() {
+                    let delivery = this.formatAddress(this.rec.Delivary_Address);
+                    if (!delivery && this.rec.Unit?.Address) delivery = this.formatAddress(this.rec.Unit.Address);
+                    return delivery;
+                },
 
                 formatDate(dateStr) {
                     if (!dateStr) return '–';
@@ -846,22 +846,7 @@
                     if (addr.state_province) parts.push(addr.state_province);
                     if (addr.postal_Code) parts.push(addr.postal_Code);
                     if (addr.country) parts.push(addr.country);
-                    return parts.length > 0 ? parts.join(', ') : null;
-                },
-
-                getAddresses() {
-                    let addresses = [];
-                    // Vendor Billing
-                    let billing = this.formatAddress(this.rec.Vendor?.Billing_Address);
-                    if (billing) addresses.push({ title: 'Vendor Billing Address', icon: 'bi-building-check', formatted: billing });
-
-                    // Fallback delivery address logic: Prefer PO's Delivary_Address, else Unit's Address
-                    let delivery = this.formatAddress(this.rec.Delivary_Address);
-                    if (!delivery && this.rec.Unit?.Address) delivery = this.formatAddress(this.rec.Unit.Address);
-                    if (delivery) addresses.push({ title: 'Delivery Address', icon: 'bi-truck', formatted: delivery });
-
-                    if (addresses.length === 0) addresses.push({ title: 'Notice', icon: 'bi-info-circle', formatted: 'No specific address data found in record.' });
-                    return addresses;
+                    return parts.length > 0 ? parts.join('<br>') : null;
                 },
 
                 getStatusBadge(status) {
@@ -872,6 +857,194 @@
                     if (s === 'rejected') { style = "border-red-200 bg-red-50 text-red-800"; dot = "bg-red-500"; }
                     if (s === 'cancelled') { style = "border-slate-300 bg-slate-100 text-slate-700"; dot = "bg-slate-500"; }
                     return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider border ${style}"><span class="w-1.5 h-1.5 rounded-full ${dot} shrink-0"></span>${status || 'Draft'}</span>`;
+                },
+
+                escapeHtml(str) {
+                    if (!str) return '';
+                    const d = document.createElement('div');
+                    d.textContent = str;
+                    return d.innerHTML;
+                },
+
+                // ─── PDF Print Logic ───
+                downloadPDF() {
+                    if (!this.rec) return;
+                    this.isExportingPDF = true;
+                    try {
+                        let itemRows = '';
+                        this.items.forEach((item, i) => {
+                            itemRows += `
+                                <tr>
+                                    <td class="text-center">${i + 1}</td>
+                                    <td>
+                                        <strong>${this.escapeHtml(this.getItemName(item))}</strong>
+                                        ${item.Comment ? `<br><small style="color:#666;">${this.escapeHtml(item.Comment)}</small>` : ''}
+                                    </td>
+                                    <td class="text-right">${this.formatINR(this.getRate(item), false)}</td>
+                                    <td class="text-center">${item.Quantity || 0}</td>
+                                    <td class="text-right">${this.formatINR(item.Amount, false)}</td>
+                                </tr>
+                            `;
+                        });
+
+                        const vendorName = this.rec.Vendor ? (this.rec.Vendor.Display_Name || this.rec.Vendor.Company_Name || '') : '–';
+                        const vendorEmail = this.rec.Vendor?.email || '';
+                        const vendorPhone = this.rec.Vendor?.mobile || '';
+                        const vendorAddr = this.formatAddress(this.rec.Vendor?.Billing_Address) || 'Address not provided';
+                        const shippingAddr = this.getDeliveryAddress() || 'Delivery address not provided';
+
+                        // Capture the current date for the print timestamp
+                        const printedDate = dayjs().format('DD-MMM-YYYY');
+
+                        const printHTML = `
+                            <!DOCTYPE html>
+                            <html lang="en">
+                            <head>
+                                <meta charset="UTF-8">
+                                <title>${this.poRefNumber} - Purchase Order</title>
+                                <style>
+                                    :root { --primary-color: #1B5CA8; --border-color: #bdc3c7; --bg-gray: #f8f9fa; }
+                                    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; line-height: 1.5; margin: 0; padding: 20px; font-size: 11pt; }
+                                    .document-wrapper { max-width: 800px; margin: 0 auto; }
+                                    .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--primary-color); padding-bottom: 15px; margin-bottom: 25px; }
+                                    .company-info h1 { margin: 0; color: var(--primary-color); font-size: 24pt; }
+                                    .company-info p { margin: 4px 0; color: #555; }
+                                    
+                                    /* Header Right Side Updates */
+                                    .document-title { text-align: right; }
+                                    .document-title h2 { margin: 0 0 5px 0; font-size: 20pt; text-transform: uppercase; letter-spacing: 1px; color: var(--primary-color); }
+                                    .printed-date { font-size: 9pt; color: #666; margin-top: 5px; }
+                                    
+                                    .po-meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; background: var(--bg-gray); padding: 15px; border: 1px solid var(--border-color); }
+                                    .po-meta-item { font-size: 10pt; }
+                                    .po-meta-item span { display: block; color: #555; font-size: 9pt; text-transform: uppercase; margin-bottom: 3px; }
+                                    .po-meta-item strong { display: block; font-size: 11pt; color: #111; }
+                                    
+                                    .addresses { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 30px; }
+                                    .address-box { flex: 1; border: 1px solid var(--border-color); padding: 15px; }
+                                    .address-box h3 { margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; color: var(--primary-color); font-size: 12pt; text-transform: uppercase;}
+                                    
+                                    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                                    th, td { border: 1px solid var(--border-color); padding: 10px; text-align: left; }
+                                    th { background-color: var(--primary-color); color: white; font-weight: bold; font-size: 10pt; text-transform: uppercase; }
+                                    .text-right { text-align: right; }
+                                    .text-center { text-align: center; }
+                                    
+                                    .totals-container { width: 40%; float: right; margin-bottom: 30px; }
+                                    .totals-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; }
+                                    .totals-row.grand-total { font-weight: bold; font-size: 14pt; color: var(--primary-color); border-bottom: none; border-top: 2px solid var(--primary-color); padding-top: 10px; margin-top: 5px; }
+                                    .clearfix::after { content: ""; clear: both; display: table; }
+
+                                    .terms-box { border: 1px solid var(--border-color); padding: 15px; margin-bottom: 40px; page-break-inside: avoid; }
+                                    .terms-box h4 { margin-top: 0; margin-bottom: 10px; color: var(--primary-color); }
+                                    .signature-section { display: flex; justify-content: space-between; margin-top: 60px; page-break-inside: avoid; }
+                                    .signature-box { width: 35%; border-top: 1px solid #000; text-align: center; padding-top: 5px; font-weight: bold; color: #555;}
+                                    
+                                    @media print {
+                                        body { padding: 0; background: white; }
+                                        .document-wrapper { max-width: 100%; }
+                                        th { background-color: var(--primary-color) !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                                        .po-meta-grid { background-color: var(--bg-gray) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                                        @page { size: A4; margin: 1.5cm; }
+                                        tr { page-break-inside: avoid; }
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="document-wrapper">
+                                    <header class="header">
+                                        <div class="company-info">
+                                            <h1>APCO Building Solutions Pvt Ltd</h1>
+                                            <p>#234, Narayan Nagar, 1st stage, Doddakallasandra, Kanakapura road, Bangalore - 560062.</p>
+                                            <p>Email: Sales@apcobuildingsolutions.com</p>
+                                        </div>
+                                        <div class="document-title">
+                                            <h2>Purchase Order</h2>
+                                            <div style="font-size: 14pt; font-weight: bold; color: #444;">${this.escapeHtml(this.poRefNumber)}</div>
+                                            <div class="printed-date">Printed: ${printedDate}</div>
+                                        </div>
+                                    </header>
+                                    
+                                    <div class="po-meta-grid">
+                                        <div class="po-meta-item"><span>PO Date</span><strong>${this.formatDate(this.rec.PO_Date)}</strong></div>
+                                        <div class="po-meta-item"><span>Delivery Date</span><strong>${this.formatDate(this.rec.delivery_date)}</strong></div>
+                                        <div class="po-meta-item"><span>Payment Terms</span><strong>${this.escapeHtml(this.rec.Payment_Terms || 'N/A')}</strong></div>
+                                        <div class="po-meta-item"><span>Status</span><strong>${this.escapeHtml(this.rec.Status)}</strong></div>
+                                    </div>
+
+                                    <div class="addresses">
+                                        <div class="address-box">
+                                            <h3>To (Vendor)</h3>
+                                            <strong>${this.escapeHtml(vendorName)}</strong><br>
+                                            ${vendorEmail ? 'Email: ' + this.escapeHtml(vendorEmail) + '<br>' : ''}
+                                            ${vendorPhone ? 'Phone: ' + this.escapeHtml(vendorPhone) + '<br>' : ''}
+                                            <div style="margin-top: 5px;">${vendorAddr}</div>
+                                        </div>
+                                        <div class="address-box">
+                                            <h3>Ship To</h3>
+                                            <strong>${this.escapeHtml(this.getUnitName())}</strong><br>
+                                            <div style="margin-top: 5px;">${shippingAddr}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th width="5%" class="text-center">#</th>
+                                                <th width="40%">Item Description</th>
+                                                <th width="15%" class="text-right">Rate</th>
+                                                <th width="15%" class="text-center">Qty</th>
+                                                <th width="25%" class="text-right">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>${itemRows}</tbody>
+                                    </table>
+                                    
+                                    <div class="clearfix">
+                                        <div class="totals-container">
+                                            <div class="totals-row"><span>Sub Total:</span> <span>${this.formatINR(this.rec.Sub_Total, false)}</span></div>
+                                            ${this.rec.Discount > 0 ? `<div class="totals-row"><span>Discount:</span> <span style="color:red;">-${this.formatINR(this.rec.Discount, false)}</span></div>` : ''}
+                                            ${this.rec.CGST > 0 ? `<div class="totals-row"><span>CGST:</span> <span>${this.formatINR(this.rec.CGST, false)}</span></div>` : ''}
+                                            ${this.rec.SGST > 0 ? `<div class="totals-row"><span>SGST:</span> <span>${this.formatINR(this.rec.SGST, false)}</span></div>` : ''}
+                                            ${this.rec.IGST > 0 ? `<div class="totals-row"><span>IGST:</span> <span>${this.formatINR(this.rec.IGST, false)}</span></div>` : ''}
+                                            <div class="totals-row grand-total"><span>Grand Total:</span> <span>${this.formatINR(this.rec.Total_Amount, true)}</span></div>
+                                        </div>
+                                    </div>
+                                    
+                                    ${this.rec.Terms_Conditions ? `
+                                    <div class="terms-box">
+                                        <h4>Terms & Conditions</h4>
+                                        <div style="white-space: pre-wrap; font-size: 9pt;">${this.escapeHtml(this.rec.Terms_Conditions)}</div>
+                                    </div>` : ''}
+                                    
+                                    <div class="signature-section">
+                                        <div class="signature-box">Authorized Signatory</div>
+                                        <div class="signature-box">Vendor Acceptance</div>
+                                    </div>
+                                </div>
+                            </body>
+                            </html>
+                        `;
+
+                        const iframe = document.createElement('iframe');
+                        iframe.style.position = 'fixed';
+                        iframe.style.right = '0'; iframe.style.bottom = '0'; iframe.style.width = '0'; iframe.style.height = '0'; iframe.style.border = '0';
+                        document.body.appendChild(iframe);
+                        const frameDoc = iframe.contentWindow.document;
+                        frameDoc.open(); frameDoc.write(printHTML); frameDoc.close();
+                        setTimeout(() => {
+                            iframe.contentWindow.focus();
+                            const originalTitle = document.title;
+                            document.title = `${this.poRefNumber}_Purchase_Order`;
+                            iframe.contentWindow.print();
+                            setTimeout(() => document.body.removeChild(iframe), 2000);
+                            this.isExportingPDF = false;
+                        }, 500);
+                    } catch (err) {
+                        console.error('PDF generation failed:', err);
+                        Toast.fire({ icon: 'error', title: 'Failed to generate PDF.' });
+                        this.isExportingPDF = false;
+                    }
                 },
 
                 // ─── Actions Modal ───
