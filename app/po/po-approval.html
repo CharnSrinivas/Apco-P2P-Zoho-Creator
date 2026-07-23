@@ -949,7 +949,7 @@
                 stats: { all: 0, draft: 0, submitted: 0, approved: 0, rejected: 0, cancelled: 0 },
                 filterTabs: [{ key: 'all', label: 'All' }, { key: 'draft', label: 'Draft' }, { key: 'submitted', label: 'Submitted' }, { key: 'approved', label: 'Approved' }, { key: 'rejected', label: 'Rejected' }, { key: 'cancelled', label: 'Cancelled' }],
                 sortableColumns: [{ key: 'po_ref', label: 'PO #', align: 'left' }, { key: 'pr_ref', label: 'PR Refs', align: 'left' }, { key: 'unit', label: 'Unit', align: 'left' }, { key: 'department', label: 'Department', align: 'left' }, { key: 'vendor', label: 'Vendor', align: 'left' }, { key: 'po_date', label: 'PO Date', align: 'left' }, { key: 'delivery_date', label: 'Delivery Date', align: 'left' }, { key: 'status', label: 'Status', align: 'left' }, { key: 'items_status', label: 'Items Status', align: 'left' }, { key: 'total', label: 'Total Amount', align: 'left' }],
-                showModal: false, submitting: false, submitAction: 'Submitted', todayStr: new Date().toISOString().split('T')[0],
+                showModal: false, submitting: false, submitAction: 'Submitted', todayStr: new Date().toISOString().split('T')[0], pendingPrId: null,
                 tsPr: null, tsQc: null, tsUnit: null, tsDepartment: null, tsVendor: null, tsPaymentTerms: null, availableQCs: [],
                 form: {
                     prIds: [], prLocked: false, unit: '', department: '', vendor: '', paymentTerms: '', poDate: '', deliveryDate: '', notes: '', terms: '', items: [],
@@ -963,7 +963,24 @@
                 get paginationInfoText() { const total = this.filteredRecords.length; if (total === 0) return 'Showing 0 records'; return `Showing ${(this.currentPage - 1) * this.perPage + 1}–${Math.min(this.currentPage * this.perPage, total)} of ${total} records`; },
                 get pageButtons() { const total = this.totalPages, cur = this.currentPage; let pages = []; for (let p = 1; p <= total; p++) { if (p <= 2 || p === total || (p >= cur - 1 && p <= cur + 1)) pages.push(p); } pages = [...new Set(pages)].sort((a, b) => a - b); const btns = []; for (let i = 0; i < pages.length; i++) { if (i > 0 && pages[i] - pages[i - 1] > 1) btns.push({ type: 'ellipsis', key: 'e' + pages[i] }); btns.push({ type: 'page', key: 'p' + pages[i], value: pages[i] }); } return btns; },
 
-                init() { P2PWorkflowUtils.init(); this.fetchRecords(); this.computeStats(); this.$watch('searchInput', Alpine.debounce(() => { this.searchQuery = this.searchInput.trim(); this.currentPage = 1; this.fetchRecords(); }, 400)); },
+                init() {
+                    P2PWorkflowUtils.init();
+                    this.fetchRecords();
+                    this.computeStats();
+                    this.$watch('searchInput', Alpine.debounce(() => { this.searchQuery = this.searchInput.trim(); this.currentPage = 1; this.fetchRecords(); }, 400));
+
+                    // Auto-open create modal if URL has ?createPo=True&prId=<ID>
+                    ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
+                        const shouldCreate = String(params.createPo || '').toLowerCase() === 'true';
+                        const prId = params.prId || '';
+                        if (shouldCreate) {
+                            this.pendingPrId = prId || null;
+                            this.openCreateModal(prId || null);
+                        }
+                    }).catch((err) => {
+                        console.warn('getQueryParams error', err);
+                    });
+                },
 
                 buildCriteria() {
                     const parts = []; if (this.searchQuery) { const q = this.searchQuery.replace(/'/g, "\\'"); parts.push(`(PO_Ref_Number.contains("${q}") || Unit.Name.contains("${q}") || Vendor.Display_Name.contains("${q}") || Purchase_Requisitions.PR_Number.contains("${q}") )`); }
@@ -1026,9 +1043,16 @@
                 formatINR(val) { if (val == null || isNaN(val) || val === '') return '₹0.00'; return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(val); },
                 viewPO(id) { ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', url: '#Page:PO_Detailed?recordId=' + id, window: 'same' }); },
 
-                openCreateModal() {
+                openCreateModal(prId = null) {
                     this.resetForm(); this.showModal = true; this.submitting = false;
-                    this.$nextTick(() => { this.initVendorSelect(); this.initPrSelect(); this.initQcSelect(); this.initUnitSelect(); this.initDepartmentSelect(); this.initPaymentTermsSelect(); });
+                    this.$nextTick(() => {
+                        this.initVendorSelect(); this.initPrSelect(); this.initQcSelect(); this.initUnitSelect(); this.initDepartmentSelect(); this.initPaymentTermsSelect();
+
+                        if (prId) {
+                            // Defer to an async method so we can fetch the real PR label first
+                            this.autoLoadPR(prId);
+                        }
+                    });
                 },
                 closeModal() {
                     this.showModal = false;
@@ -1037,13 +1061,62 @@
                     if (this.tsVendor) this.tsVendor.destroy(); if (this.tsPaymentTerms) this.tsPaymentTerms.destroy();
                 },
 
+                // Auto-load a PR from URL params — fetches real PR label before injecting into TomSelect
+                async autoLoadPR(prId) {
+                    try {
+                        // 1. Fetch real PR details to get the actual PR_Number
+                        const prRes = await ZOHO.CREATOR.DATA.invokeCustomApi({
+                            api_name: P2PWorkflowUtils.API.FETCH_PR_DETAILS,
+                            http_method: 'GET',
+                            query_params: 'recId=' + prId
+                        });
+
+                        if (!prRes || !prRes.result || prRes.result.length === 0) {
+                            console.warn('autoLoadPR: No PR data returned for', prId);
+                            return;
+                        }
+
+                        const pr = prRes.result[0];
+                        const prNumber = pr.PR_Number || pr.Requisition_Number || ('PR-' + prId);
+
+                        // 2. Enable the PR TomSelect (normally locked until vendor is selected)
+                        if (this.tsPr) {
+                            this.tsPr.enable();
+
+                            // 3. Add option with the REAL label (not a placeholder)
+                            if (!this.tsPr.options[String(prId)]) {
+                                this.tsPr.addOption({ ID: String(prId), PR_Number: prNumber });
+                                this.tsPr.refreshOptions(false);
+                            }
+
+                            // 4. Set value silently (true = silent, no onChange), then manually sync
+                            this.tsPr.setValue(prId, true);
+                        }
+
+                        // 5. Directly set form.prIds and call syncAggregatedPRItems
+                        // This is reliable regardless of TomSelect state
+                        this.form.prIds = [prId];
+                        await this.syncAggregatedPRItems([prId]);
+                        await this.loadQCsForPRs([prId]);
+
+                    } catch (err) {
+                        console.error('autoLoadPR failed:', err);
+                    }
+                },
+
                 initVendorSelect() {
                     this.tsVendor = new TomSelect(this.$refs.vendorSelect, {
                         valueField: 'ID', labelField: 'Display_Name', searchField: ['Display_Name', 'Company_Name'], maxItems: 1,
                         onChange: (val) => {
                             this.form.vendor = val;
                             if (val) {
-                                this.fetchVendorAddress(val); this.tsPr.enable(); this.tsPr.clear(true); this.form.items = [];
+                                this.fetchVendorAddress(val);
+                                this.tsPr.enable();
+                                // If a PR was auto-loaded from URL params, preserve it — don't wipe items
+                                if (!this.pendingPrId) {
+                                    this.tsPr.clear(true);
+                                    this.form.items = [];
+                                }
                             } else {
                                 this.tsPr.clear(true); this.tsPr.disable(); this.form.items = [];
                             }
@@ -1258,9 +1331,9 @@
                                         const prData = prRes.result[0];
                                         const itemsSubform = (prData.Items && prData.Items.length > 0) ? prData.Items : (prData.Requested_Items || []);
 
-                                        let fullyOrdered = true;
-                                        let anyOrdered = false;
-
+                                        // Only update Ordered_Quantity here (PO is submitted, not yet approved).
+                                        // Status transitions (Partially Ordered / Completely Ordered) happen
+                                        // only after the PO is approved, handled in po-detailed.html.
                                         const updatedSubform = itemsSubform.map(row => {
                                             const rowItemId = row.Item?.ID || row.Item?.id || row.Item;
                                             const match = prUpdates[prId].find(u => u.itemId == rowItemId);
@@ -1271,34 +1344,19 @@
 
                                             if (match) newOQ += match.orderQty;
 
-                                            let rowStatus = row.Status || 'Pending';
-                                            if (newOQ >= totalQty && totalQty > 0) {
-                                                rowStatus = 'Completely Ordered';
-                                            } else if (newOQ > 0) {
-                                                rowStatus = 'Partially Ordered';
-                                            }
-
-                                            if (newOQ < totalQty) fullyOrdered = false;
-                                            if (newOQ > 0) anyOrdered = true;
-
                                             let dueDate = row.Due_Date || "";
                                             if (dueDate && dueDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
                                                 dueDate = dayjs(dueDate).format('DD-MMM-YYYY');
                                             }
 
-                                            return { Item: rowItemId, Quantity: totalQty, Ordered_Quantity: newOQ, Due_Date: dueDate, Comment: row.Comment || "", Status: rowStatus };
+                                            // Keep existing row Status unchanged (stays 'Pending')
+                                            return { Item: rowItemId, Quantity: totalQty, Ordered_Quantity: newOQ, Due_Date: dueDate, Comment: row.Comment || "", Status: row.Status || 'Pending' };
                                         });
 
-                                        let prMasterStatus = prData.Status;
-                                        if (fullyOrdered && itemsSubform.length > 0) {
-                                            prMasterStatus = 'Completely Ordered';
-                                        } else if (anyOrdered) {
-                                            prMasterStatus = 'Partially Ordered';
-                                        }
-
+                                        // Keep PR master Status unchanged at this stage
                                         return ZOHO.CREATOR.DATA.updateRecordById({
                                             report_name: this.PR_REPORT_NAME, id: prId,
-                                            payload: { data: { Items: updatedSubform, Status: prMasterStatus } }
+                                            payload: { data: { Items: updatedSubform } }
                                         });
                                     }
                                 });
@@ -1309,7 +1367,15 @@
                             }
 
                             Toast.fire({ icon: 'success', title: 'Purchase Order tracked successfully.' });
-                            this.closeModal(); this.fetchRecords();
+                            this.closeModal();
+
+                            if (this.pendingPrId) {
+                                // Clear URL query params so a page refresh doesn't re-open the modal
+                                this.pendingPrId = null;
+                                ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', url: '#Page:Purchase_Orders', window: 'same' });
+                            } else {
+                                this.fetchRecords();
+                            }
                         }
                     } catch (err) {
                         Toast.fire({ icon: 'error', title: 'Transaction failure.' });

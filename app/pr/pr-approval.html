@@ -639,14 +639,22 @@
 
     function normalizeStatus(rec) {
         if (!rec) return 'pending';
-        if (rec.Status && rec.Status.toLowerCase() === 'draft') return 'draft';
-        if (rec.Status && rec.Status.toLowerCase() === 'rejected') return 'rejected';
-        if (rec.Status && rec.Status.toLowerCase() === 'completed') return 'completed';
-        if (rec.Status && rec.Status.toLowerCase() === 'in progress') return 'in_progress'
+        var s = rec.Status ? rec.Status.toLowerCase() : '';
+        if (s === 'draft')                return 'draft';
+        if (s === 'submitted')            return 'submitted';
+        if (s === 'in progress')          return 'in_progress';
+        if (s === 'completely ordered')   return 'completely_ordered';
+        if (s === 'partially ordered')    return 'partially_ordered';
+        if (s === 'partially received')   return 'partially_received';
+        if (s === 'completely received')  return 'completely_received';
+        if (s === 'paid')                 return 'paid';
+        if (s === 'rejected')             return 'rejected';
+        if (s === 'cancelled')            return 'cancelled';
+        if (s === 'completed')            return 'paid'; // legacy mapping
+        // Fall back to stage-based detection
         var stage = rec.Current_Stage;
         if (!stage || stage === 'Purchase Requisition') return 'pending';
-        // Payment stage = fully Completed; intermediate stages = In Progress
-        if (stage === 'Payment') return 'completed';
+        if (stage === 'Payment') return 'paid';
         if (['Request For Quotation', 'Quote Comparison', 'Purchase Order', 'GRN', 'Bill'].includes(stage))
             return 'in_progress';
         return 'pending';
@@ -655,21 +663,35 @@
     function getStatusBadge(rec, norm) {
         const stageLabel = rec.Current_Stage || 'Purchase Requisition';
         const map = {
-            draft: { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400', label: 'Draft' },
-            pending: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500', label: stageLabel },
-            in_progress: { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500', label: stageLabel },
-            completed: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600', label: stageLabel },
-            rejected: { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600', label: 'Rejected' },
+            draft:              { border: 'border-gray-200',    bg: 'bg-gray-50',    text: 'text-gray-600',    dot: 'bg-gray-400',    label: 'Draft' },
+            submitted:          { border: 'border-amber-200',   bg: 'bg-amber-50',   text: 'text-amber-800',   dot: 'bg-amber-500',   label: 'Submitted' },
+            pending:            { border: 'border-amber-200',   bg: 'bg-amber-50',   text: 'text-amber-800',   dot: 'bg-amber-500',   label: stageLabel },
+            in_progress:        { border: 'border-blue-200',    bg: 'bg-blue-50',    text: 'text-blue-800',    dot: 'bg-blue-500',    label: 'In Progress' },
+            completely_ordered: { border: 'border-teal-200',    bg: 'bg-teal-50',    text: 'text-teal-800',    dot: 'bg-teal-600',    label: 'Completely Ordered' },
+            partially_ordered:  { border: 'border-orange-200',  bg: 'bg-orange-50',  text: 'text-orange-800',  dot: 'bg-orange-500',  label: 'Partially Ordered' },
+            partially_received: { border: 'border-violet-200',  bg: 'bg-violet-50',  text: 'text-violet-800',  dot: 'bg-violet-500',  label: 'Partially Received' },
+            completely_received:{ border: 'border-indigo-200',  bg: 'bg-indigo-50',  text: 'text-indigo-800',  dot: 'bg-indigo-600',  label: 'Completely Received' },
+            paid:               { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600', label: 'Paid' },
+            rejected:           { border: 'border-red-200',     bg: 'bg-red-50',     text: 'text-red-800',     dot: 'bg-red-600',     label: 'Rejected' },
+            cancelled:          { border: 'border-gray-300',    bg: 'bg-gray-100',   text: 'text-gray-500',    dot: 'bg-gray-400',    label: 'Cancelled' },
         };
         return map[norm] || map.pending;
     }
 
     function getStatusColors(norm) {
-        if (norm === 'draft') return { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400' };
-        if (norm === 'completed') return { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' };
-        if (norm === 'in_progress') return { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500' };
-        if (norm === 'rejected') return { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600' };
-        return { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' };
+        const colors = {
+            draft:               { border: 'border-gray-200',    bg: 'bg-gray-50',    text: 'text-gray-600',    dot: 'bg-gray-400' },
+            submitted:           { border: 'border-amber-200',   bg: 'bg-amber-50',   text: 'text-amber-800',   dot: 'bg-amber-500' },
+            in_progress:         { border: 'border-blue-200',    bg: 'bg-blue-50',    text: 'text-blue-800',    dot: 'bg-blue-500' },
+            completely_ordered:  { border: 'border-teal-200',    bg: 'bg-teal-50',    text: 'text-teal-800',    dot: 'bg-teal-600' },
+            partially_ordered:   { border: 'border-orange-200',  bg: 'bg-orange-50',  text: 'text-orange-800',  dot: 'bg-orange-500' },
+            partially_received:  { border: 'border-violet-200',  bg: 'bg-violet-50',  text: 'text-violet-800',  dot: 'bg-violet-500' },
+            completely_received: { border: 'border-indigo-200',  bg: 'bg-indigo-50',  text: 'text-indigo-800',  dot: 'bg-indigo-600' },
+            paid:                { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' },
+            rejected:            { border: 'border-red-200',     bg: 'bg-red-50',     text: 'text-red-800',     dot: 'bg-red-600' },
+            cancelled:           { border: 'border-gray-300',    bg: 'bg-gray-100',   text: 'text-gray-500',    dot: 'bg-gray-400' },
+        };
+        return colors[norm] || { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' };
     }
 
     function getItemApprovalColors(itemApproval) {

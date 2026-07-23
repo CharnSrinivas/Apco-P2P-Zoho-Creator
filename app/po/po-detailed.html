@@ -1059,12 +1059,12 @@
                 async executeAction() {
                     this.isSubmitting = true;
                     try {
+                        // 1. Update PO status
                         const updateRes = await ZOHO.CREATOR.DATA.updateRecordById({
                             report_name: "Purchase_Order_Report", id: this.recordId,
                             payload: { data: { Status: this.pendingStatus } }
                         });
                         if (updateRes.code !== 3000) throw new Error(updateRes.message || 'Failed to update PO status');
-
                         Toast.fire({ icon: this.pendingStatus === 'Rejected' ? 'warning' : 'success', title: `PO ${this.pendingStatus} successfully` });
                         this.closeActionModal();
                         this.fetchData();
