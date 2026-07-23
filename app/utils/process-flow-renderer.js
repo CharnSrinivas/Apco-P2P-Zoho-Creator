@@ -63,8 +63,7 @@ const P2PWorkflowUtils = {
 
 		this._envReady = ZOHO.CREATOR.UTIL.getInitParams()
 			.then((response) => {
-				const fragment =
-					(response && response.envUrlFragment) || "";
+				const fragment = (response && response.envUrlFragment) || "";
 				// Development environment contains "development" in the fragment
 				const isDev = fragment.toLowerCase().includes("development");
 				this._envPrefix = isDev ? "Dev__" : "Prod__";
@@ -110,7 +109,10 @@ const P2PWorkflowUtils = {
 	get API() {
 		const prefix = this._envPrefix;
 		return Object.fromEntries(
-			Object.entries(this._API_BASE_NAMES).map(([k, v]) => [k, prefix + v])
+			Object.entries(this._API_BASE_NAMES).map(([k, v]) => [
+				k,
+				prefix + v,
+			]),
 		);
 	},
 	// Helper: Map Creator Stage Strings to Step Keys
@@ -380,5 +382,25 @@ const P2PWorkflowUtils = {
 
 		html += "</div>";
 		containerEl.innerHTML = html;
+	},
+	downloadFile(filePath, reportName, recordId) {
+		if (typeof filePath === "string" && fullPath.includes("filepath=")) {
+			filePath = fullPath.split("filepath=")[1].split("&")[0];
+		}
+		ZOHO.CREATOR.UTIL.getInitParams()
+			.then((initParams) => {
+				const { scope, envUrlFragment, appLinkName } = initParams;
+				const host = window.location.hostname.replace(
+					"creatorapp",
+					"creatorapp",
+				);
+				const url =
+					`https://creatorapp.zoho.in/${scope}${envUrlFragment}/${appLinkName}` +
+					`/report/{${reportName}}/${recordId}/Attachments/download-file` +
+					`?filepath=${encodeURIComponent(filePath)}`;
+
+				window.open(url, "_blank");
+			})
+			.catch((err) => console.error("Could not get init params:", err));
 	},
 };

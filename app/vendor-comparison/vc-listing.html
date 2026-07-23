@@ -404,6 +404,8 @@
                     <col style="width:110px">
                     <col style="width:100px">
                     <col style="width:110px">
+                    <col style="width:100px">
+                    <col style="width:110px">
                     <col style="width:140px">
                     <col style="width:110px">
                     <col style="width:90px">
@@ -411,13 +413,13 @@
                 <thead>
                     <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
                         <template
-                            x-for="col in ['qc_no', 'subject', 'pr_ref', 'rfq_ref', 'date', 'status', 'final_vendor', 'total_rate']"
+                            x-for="col in ['qc_no', 'subject', 'pr_ref', 'rfq_ref', 'unit', 'department', 'date', 'status', 'final_vendor', 'total_rate']"
                             :key="col">
                             <th @click="toggleSort(col)" data-sort
                                 class="px-3 py-2 text-[11px] font-semibold text-gray-500 tracking-wide text-left whitespace-nowrap"
                                 :class="sortCol === col ? 'sort-active' : ''">
                                 <span
-                                    x-text="{qc_no: 'ID #', subject: 'Subject', pr_ref: 'PR Ref', rfq_ref: 'RFQ Ref', date: 'Created Date', status: 'Status', final_vendor: 'Final Vendor', total_rate: 'Total Rate'}[col]"></span>
+                                    x-text="{qc_no: 'ID #', subject: 'Subject', pr_ref: 'PR Ref', rfq_ref: 'RFQ Ref', unit: 'Unit', department: 'Department', date: 'Created Date', status: 'Status', final_vendor: 'Final Vendor', total_rate: 'Total Rate'}[col]"></span>
                                 <span class="sort-indicator"
                                     x-text="sortCol === col ? (sortDir === 'asc' ? '▲' : '▼') : ''"></span>
                             </th>
@@ -454,6 +456,10 @@
                                 x-text="rec.PR_Ref?.zc_display_value || rec.PR_Ref?.PR_Number || '–'"></td>
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap font-mono text-[11px] font-semibold"
                                 x-text="rec.RFQ_Ref?.zc_display_value || rec.RFQ_Ref?.RFQ_Ref_Number || '–'"></td>
+                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900"
+                                x-text="rec['Unit.Name'] || rec.Unit?.Name || rec.Unit?.zc_display_value || '–'"></td>
+                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-gray-700"
+                                x-text="(rec.Department && (rec.Department.Name || rec.Department.zc_display_value)) || '–'"></td>
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[11px] text-gray-500"
                                 x-text="formatDate(rec.Added_Time)"></td>
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap">
@@ -530,14 +536,28 @@
                         <!-- Comparison Details -->
                         <h4 class="text-xs font-bold text-[#1B5CA8] tracking-wide mb-3 border-b border-gray-100 pb-1">
                             Comparison Details</h4>
-                        <div class="grid grid-cols-3 gap-4 mb-6">
-                            <div>
+                        <div class="grid grid-cols-5 gap-4 mb-6">
+                            <div class="col-span-1">
                                 <label
                                     class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Subject
                                     <span class="text-red-500">*</span></label>
                                 <input x-model="form.Quote_Comparison_Subject" type="text" required
                                     class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm"
                                     placeholder="e.g. Bulk Material Comparison">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Unit
+                                    <span x-show="form.unitLocked"
+                                        class="ml-1 text-[10px] font-normal text-[#1B5CA8] bg-[#1B5CA8]/10 px-1.5 py-0.5 rounded-full">Auto-filled</span>
+                                </label>
+                                <select x-ref="vcUnitSelect" class="w-full text-xs"></select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Department
+                                    <span x-show="form.departmentLocked"
+                                        class="ml-1 text-[10px] font-normal text-[#1B5CA8] bg-[#1B5CA8]/10 px-1.5 py-0.5 rounded-full">Auto-filled</span>
+                                </label>
+                                <select x-ref="vcDepartmentSelect" class="w-full text-xs"></select>
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PR
@@ -766,8 +786,12 @@
             Alpine.data('vcApp', () => ({
                 REPORT_NAME: 'Quote_Comparison_Report',
                 FORM_NAME: 'Quote_Comparison',
+                UNIT_REPORT_NAME: 'Unit_Report',
+                DEPARTMENTS_REPORT_NAME: 'Departments_Report',
 
                 allRecords: [],
+                unitMasters: [],
+                departmentMasters: [],
                 isLoading: true,
                 searchQuery: '',
                 filter: 'all',
@@ -782,9 +806,15 @@
                 isSubmitting: false,
                 tsInstance: null,
                 rfqTsInstance: null,
+                unitTsInstance: null,
+                departmentTsInstance: null,
 
                 form: {
                     Quote_Comparison_Subject: '',
+                    Unit: '',
+                    unitLocked: false,
+                    Department: '',
+                    departmentLocked: false,
                     PR_Ref: '',
                     RFQ_Ref: '',
                     Finalized_Vendor: '',
@@ -798,6 +828,8 @@
                 initApp() {
                     P2PWorkflowUtils.init(); // Detect env prefix (Dev__ / Prod__)
                     this.fetchRecords();
+                    this.fetchUnitMasters();
+                    this.fetchDepartmentMasters();
                     this.$watch('searchQuery', Alpine.debounce(() => {
                         this.page = 1;
                         this.fetchRecords();
@@ -878,6 +910,22 @@
                     }
                 },
 
+                // --- DATA FETCHING: Units ---
+                async fetchUnitMasters() {
+                    try {
+                        let res = await ZOHO.CREATOR.DATA.getRecords({ report_name: this.UNIT_REPORT_NAME, max_records: 200 });
+                        if (res.code === 3000) this.unitMasters = res.data;
+                    } catch (err) { console.error('Failed to load units', err); }
+                },
+
+                // --- DATA FETCHING: Departments ---
+                async fetchDepartmentMasters() {
+                    try {
+                        let res = await ZOHO.CREATOR.DATA.getRecords({ report_name: this.DEPARTMENTS_REPORT_NAME, max_records: 200 });
+                        if (res.code === 3000) this.departmentMasters = res.data;
+                    } catch (err) { console.error('Failed to load departments', err); }
+                },
+
                 // --- UI HELPERS ---
                 setFilter(f) { this.filter = f; },
 
@@ -893,6 +941,8 @@
                         case 'subject': return (rec.Quote_Comparison_Subject || '').toString().toLowerCase();
                         case 'pr_ref': return (rec.PR_Ref?.zc_display_value || '').toLowerCase();
                         case 'rfq_ref': return (rec.RFQ_Ref?.zc_display_value || '').toLowerCase();
+                        case 'unit': return (rec['Unit.Name'] || rec.Unit?.Name || '').toLowerCase();
+                        case 'department': return ((rec.Department && (rec.Department.Name || rec.Department.zc_display_value)) || '').toLowerCase();
                         case 'date': return rec.Added_Time ? dayjs(rec.Added_Time).valueOf() : 0;
                         case 'status': return this.normalizeStatusGroup(rec);
                         case 'final_vendor': return (rec.Finalized_Vendor || '').toString().toLowerCase();
@@ -969,6 +1019,10 @@
                 openModal(rfqId = null) {
                     this.form = {
                         Quote_Comparison_Subject: '',
+                        Unit: '',
+                        unitLocked: false,
+                        Department: '',
+                        departmentLocked: false,
                         PR_Ref: '',
                         RFQ_Ref: '',
                         Finalized_Vendor: '',
@@ -981,6 +1035,8 @@
                     this.isModalOpen = true;
 
                     setTimeout(() => {
+                        this.initUnitTomSelect();
+                        this.initDepartmentTomSelect();
                         this.initPrTomSelect();
                         this.initRfqTomSelect();
 
@@ -1032,6 +1088,8 @@
 
                 closeModal() {
                     this.isModalOpen = false;
+                    if (this.unitTsInstance) { this.unitTsInstance.destroy(); this.unitTsInstance = null; }
+                    if (this.departmentTsInstance) { this.departmentTsInstance.destroy(); this.departmentTsInstance = null; }
                     if (this.tsInstance) { this.tsInstance.destroy(); this.tsInstance = null; }
                     if (this.rfqTsInstance) { this.rfqTsInstance.destroy(); this.rfqTsInstance = null; }
                     if (this.$refs.fileInput) this.$refs.fileInput.value = '';
@@ -1208,6 +1266,32 @@
                     }
                 },
 
+                // --- TOMSELECT: Unit ---
+                initUnitTomSelect() {
+                    this.unitTsInstance = new TomSelect(this.$refs.vcUnitSelect, {
+                        valueField: 'ID', labelField: 'Name', searchField: 'Name',
+                        options: this.unitMasters, maxItems: 1, placeholder: 'Select Unit...',
+                        onChange: (val) => { this.form.Unit = val; },
+                        render: {
+                            option: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`,
+                            item: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`
+                        }
+                    });
+                },
+
+                // --- TOMSELECT: Department ---
+                initDepartmentTomSelect() {
+                    this.departmentTsInstance = new TomSelect(this.$refs.vcDepartmentSelect, {
+                        valueField: 'ID', labelField: 'Name', searchField: 'Name',
+                        options: this.departmentMasters, maxItems: 1, placeholder: 'Select Department...',
+                        onChange: (val) => { this.form.Department = val; },
+                        render: {
+                            option: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`,
+                            item: (d, e) => `<div class="font-medium">${e(d.Name)}</div>`
+                        }
+                    });
+                },
+
                 // --- TOMSELECT: PR ---
                 initPrTomSelect() {
                     this.tsInstance = new TomSelect(this.$refs.prSelect, {
@@ -1359,6 +1443,50 @@
                             this.form.Finalized_Vendor = '';
                             this.form.Total_Landed_Rate = '';
 
+                            // Auto-fill Unit from RFQ
+                            const rfqUnit = rfq.Unit;
+                            const rfqUnitId = (rfqUnit && typeof rfqUnit === 'object') ? (rfqUnit.ID || rfqUnit.id || '') : '';
+                            const rfqUnitName = (rfqUnit && typeof rfqUnit === 'object') ? (rfqUnit.Name || rfqUnit.zc_display_value || '') : (rfqUnit || '');
+                            if (rfqUnitId && this.unitTsInstance) {
+                                if (!this.unitTsInstance.options[rfqUnitId]) {
+                                    this.unitTsInstance.addOption({ ID: String(rfqUnitId), Name: rfqUnitName });
+                                }
+                                this.unitTsInstance.setValue(rfqUnitId, true);
+                                this.form.Unit = rfqUnitId;
+                                this.form.unitLocked = true;
+                                this.unitTsInstance.disable();
+                            } else if (rfqUnitName && this.unitTsInstance) {
+                                const matched = this.unitMasters.find(u => (u.Name || '').toLowerCase() === rfqUnitName.toLowerCase());
+                                if (matched) {
+                                    this.unitTsInstance.setValue(matched.ID, true);
+                                    this.form.Unit = matched.ID;
+                                    this.form.unitLocked = true;
+                                    this.unitTsInstance.disable();
+                                }
+                            }
+
+                            // Auto-fill Department from RFQ
+                            const rfqDept = rfq.Department;
+                            const rfqDeptId = (rfqDept && typeof rfqDept === 'object') ? (rfqDept.ID || rfqDept.id || '') : '';
+                            const rfqDeptName = (rfqDept && typeof rfqDept === 'object') ? (rfqDept.Name || rfqDept.zc_display_value || '') : (rfqDept || '');
+                            if (rfqDeptId && this.departmentTsInstance) {
+                                if (!this.departmentTsInstance.options[rfqDeptId]) {
+                                    this.departmentTsInstance.addOption({ ID: String(rfqDeptId), Name: rfqDeptName });
+                                }
+                                this.departmentTsInstance.setValue(rfqDeptId, true);
+                                this.form.Department = rfqDeptId;
+                                this.form.departmentLocked = true;
+                                this.departmentTsInstance.disable();
+                            } else if (rfqDeptName && this.departmentTsInstance) {
+                                const matchedDept = this.departmentMasters.find(d => (d.Name || '').toLowerCase() === rfqDeptName.toLowerCase());
+                                if (matchedDept) {
+                                    this.departmentTsInstance.setValue(matchedDept.ID, true);
+                                    this.form.Department = matchedDept.ID;
+                                    this.form.departmentLocked = true;
+                                    this.departmentTsInstance.disable();
+                                }
+                            }
+
                             if (rfq.Items && rfq.Items.length > 0) {
                                 const vendorMap = {};
 
@@ -1474,6 +1602,8 @@
                         const payload = {
                             data: {
                                 Quote_Comparison_Subject: this.form.Quote_Comparison_Subject,
+                                Unit: this.form.Unit,
+                                Department: this.form.Department,
                                 PR_Ref: this.form.PR_Ref,
                                 RFQ_Ref: this.form.RFQ_Ref,
                                 Finalized_Vendor: this.form.Finalized_Vendor,

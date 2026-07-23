@@ -383,6 +383,16 @@
                     </div>
                 </div>
             </div>
+            <!-- Progress Tracker -->
+            <div class="bg-white border border-gray-200 rounded-lg p-5 mb-4">
+                <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-4">PR Process Progress
+                </div>
+                <div class="relative flex justify-between items-start" id="progressContainer">
+                    <div class="step-connector">
+                        <div class="step-connector-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
 
             <!-- PR Layout Styled Grid Details Section -->
             <div class="flex flex-col gap-y-4">
@@ -427,7 +437,7 @@
                                 <div class="mb-3">
                                     <div class="text-[11px] text-gray-500 font-medium">Requested By</div>
                                     <div class="text-[13px] font-semibold text-gray-900 truncate"
-                                        x-text="rec.Added_User || '–'"></div>
+                                        x-text="rec.Requested_By_Email ||rec.Added_User || '–'"></div>
                                 </div>
                                 <div class="mb-3">
                                     <div class="text-[11px] text-gray-500 font-medium">Department</div>
@@ -646,6 +656,15 @@
                         this.quotations = this.rec.Quotations || [];
                         this.actions = this.rec.Actions || [];
                         this.isLoading = false;
+
+                        // Render Process Flow after DOM updates
+                        this.$nextTick(() => {
+                            console.log({ rec: this.rec })
+                            if (typeof P2PWorkflowUtils !== 'undefined') {
+                                P2PWorkflowUtils.renderProgress(this.actions, this.rec.Current_Stage, document.getElementById('progressContainer'), document.getElementById('progressFill'));
+                            }
+                        });
+
                     }).catch((err) => {
                         console.error('API Error:', err);
                         this.hasError = true;

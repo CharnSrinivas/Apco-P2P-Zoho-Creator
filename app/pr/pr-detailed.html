@@ -458,15 +458,14 @@
                                 class="bi bi-file-earmark-plus"></i> Create New RFQ</button>
                         <button @click="downloadPDF()" :disabled="isGeneratingPDF"
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#EBF3FC] border border-[#1B5CA8]/30 text-[#1B5CA8] hover:bg-blue-100 rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer disabled:opacity-50">
-                            <template x-if="!isGeneratingPDF"><i class="bi bi-download"></i></template>
+                            <template x-if="!isGeneratingPDF"><i class="bi bi-printer"></i></template>
                             <template x-if="isGeneratingPDF">
                                 <div class="btn-spinner-blue" style="width:13px;height:13px;"></div>
                             </template>
-                            <span x-text="isGeneratingPDF ? 'Preparing...' : 'Download PDF'"></span>
+                            <span x-text="isGeneratingPDF ? 'Preparing...' : 'Print PR'"></span>
                         </button>
                     </div>
                 </div>
-
                 <div class="text-xs text-gray-400 mt-1">
                     <span x-text="getDisplayName(rec.Unit)"></span> · Requested <span
                         x-text="formatDate(rec.PR_Date)"></span>
@@ -939,6 +938,7 @@
 
                         if (recByIdRes?.data?.Attachments) {
                             this.rec.Attachments = recByIdRes.data.Attachments;
+                            console.log(JSON.parse(JSON.stringify(this.rec)))
                         }
 
                         this.$nextTick(() => {
@@ -1078,15 +1078,22 @@
                     if (this.toastTimer) { clearTimeout(this.toastTimer); this.toastTimer = null; }
                 },
                 downloadFile(filePath) {
-                    ZOHO.CREATOR.UTIL.getInitParams().then((response) => {
-                        const appOwner = response.scope;
-                        const appLinkName = response.appLinkName || "npk-p2p-software";
-                        const url = `https://creatorapp.zoho.in/creator/v2.1/data/${appOwner}/${appLinkName}/report/${this.PR_REPORT}/${this.recordId}/Attachments/download?filepath=${filePath}`;
-                        window.open(url);
-                    });
+                    if (typeof filePath === 'string' && fullPath.includes('filepath=')) {
+                        filePath = fullPath.split('filepath=')[1].split('&')[0];
+                    }
+                    ZOHO.CREATOR.UTIL.getInitParams().then((initParams) => {
+                        const { scope, envUrlFragment, appLinkName } = initParams;
+                        const host = window.location.hostname.replace("creatorapp", "creatorapp");
+                        const domainSuffix = host.substring(host.indexOf(".")); // e.g. ".zoho.in"
+
+                        const url = `https://creatorapp.zoho.in/${scope}${envUrlFragment}/${appLinkName}` +
+                            `/report/${this.PR_REPORT}/${this.recordId}/Attachments/download-file` +
+                            `?filepath=${encodeURIComponent(filePath)}`;
+
+                        window.open(url, "_blank");
+                    }).catch((err) => console.error("Could not get init params:", err));
                 },
 
-                // --- Action Submissions (Draft/Approve/Reject) ---
                 submitDraft() {
                     this.isSubmittingDraft = true;
                     ZOHO.CREATOR.DATA.updateRecordById({ report_name: this.PR_REPORT, id: this.recordId, payload: { data: { "Status": "Submitted" } } })
