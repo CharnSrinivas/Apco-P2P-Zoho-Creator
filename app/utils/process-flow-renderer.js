@@ -396,7 +396,7 @@ const P2PWorkflowUtils = {
 				);
 				const url =
 					`https://creatorapp.zoho.in/${scope}${envUrlFragment}/${appLinkName}` +
-					`/report/{${reportName}}/${recordId}/Attachments/download-file` +
+					`/report/${reportName}/${recordId}/Attachments/download-file` +
 					`?filepath=${encodeURIComponent(filePath)}`;
 
 				window.open(url, "_blank");
