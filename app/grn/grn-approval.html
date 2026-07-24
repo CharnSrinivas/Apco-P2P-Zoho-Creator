@@ -47,6 +47,7 @@
             position: absolute;
             inset: 0;
             background: rgba(17, 24, 39, 0.4);
+            animation: fadeIn 0.15s ease-out;
         }
 
         .grn-modal-box {
@@ -57,6 +58,29 @@
             width: 100%;
             overflow: hidden;
             box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+            animation: slideUp 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .pill-active {
@@ -204,6 +228,35 @@
         .modal-scroll::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+
+        .section-header {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #1B5CA8;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 0.3rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .address-group {
+            background: #fafbfc;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            transition: all 0.15s;
+        }
+
+        .address-group .address-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #6b7280;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
     </style>
 </head>
 
@@ -284,27 +337,30 @@
 
         <!-- Table -->
         <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
-            <table class="w-full border-collapse" style="min-width:1050px">
+            <table class="w-full border-collapse" style="min-width:1250px">
                 <colgroup>
-                    <col style="width:120px">
-                    <col style="width:120px">
+                    <col style="width:110px">
                     <col style="width:110px">
                     <col style="width:120px">
-                    <col style="width:120px">
-                    <col style="width:140px">
                     <col style="width:110px">
-                    <col style="width:90px">
+                    <col style="width:110px">
+                    <col style="width:100px">
+                    <col style="width:100px">
+                    <col style="width:110px">
+                    <col style="width:130px">
+                    <col style="width:100px">
+                    <col style="width:80px">
                 </colgroup>
                 <thead>
                     <tr class="bg-gray-50 border-b-[1.5px] border-gray-200">
                         <template
-                            x-for="col in ['grn_no', 'po_ref', 'pr_ref', 'date', 'Status', 'items_status', 'total_amount']"
+                            x-for="col in ['grn_no', 'po_ref', 'pr_ref', 'unit', 'department', 'stage', 'date', 'Status', 'items_status', 'total_amount']"
                             :key="col">
                             <th @click="toggleSort(col)" data-sort
                                 class="px-3 py-2 text-[11px] font-semibold text-gray-500 tracking-wide text-left whitespace-nowrap"
                                 :class="sortCol === col ? 'sort-active' : ''">
                                 <span
-                                    x-text="{grn_no: 'GRN #', po_ref: 'PO Ref', pr_ref: 'PR Ref', date: 'GRN Date', Status: 'Status', items_status: 'Items Status', total_amount: 'Total Amount'}[col]"></span>
+                                    x-text="{grn_no: 'GRN #', po_ref: 'PO Ref', pr_ref: 'PR Ref', unit: 'Unit', department: 'Department', stage: 'Stage', date: 'GRN Date', Status: 'Status', items_status: 'Items Status', total_amount: 'Total Amount'}[col]"></span>
                                 <span class="sort-indicator"
                                     x-text="sortCol === col ? (sortDir === 'asc' ? '▲' : '▼') : ''"></span>
                             </th>
@@ -316,7 +372,7 @@
                 </thead>
                 <tbody>
                     <tr x-show="isLoading" x-cloak>
-                        <td colspan="8" class="px-3 py-12 text-center">
+                        <td colspan="11" class="px-3 py-12 text-center">
                             <div class="flex flex-col items-center gap-3">
                                 <div class="grn-spinner"></div>
                                 <div class="text-sm text-gray-400 font-medium">Loading GRNs…</div>
@@ -324,7 +380,7 @@
                         </td>
                     </tr>
                     <tr x-show="!isLoading && paginatedRecords.length === 0" x-cloak>
-                        <td colspan="8" class="px-3 py-12 text-center">
+                        <td colspan="11" class="px-3 py-12 text-center">
                             <div class="text-gray-400"><i class="bi bi-clipboard-x text-3xl mb-2 block"></i>
                                 <div class="text-sm font-medium text-gray-500">No records found</div>
                             </div>
@@ -335,12 +391,42 @@
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap"><span
                                     class="font-semibold text-[#1B5CA8] font-mono text-[11px]"
                                     x-text="rec.GRN_Ref_Number || rec.GRN_Number || '–'"></span></td>
-                            <td class="px-3 py-[9px] align-middle whitespace-nowrap font-mono text-[11px] font-semibold"
-                                x-text="rec.PO_Reference?.zc_display_value || rec.PO_Reference?.PO_Ref_Number || '–'">
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap">
+                                <a href="javascript:void(0)"
+                                    @click.prevent="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:PO_Detailed?recordId='+(rec.PO_Reference?.ID || rec.PO_Reference?.id),window:'same'})"
+                                    class="text-[#1B5CA8] hover:underline font-mono text-[11px] font-semibold"
+                                    x-text="rec.PO_Reference?.zc_display_value || rec.PO_Reference?.PO_Ref_Number || '–'">
+                                </a>
                             </td>
-                            <td class="px-3 py-[9px] align-middle whitespace-nowrap font-mono text-[11px] font-semibold text-gray-600"
-                                x-text="rec.PR_Reference?.zc_display_value || rec.PR_Reference?.PR_Number || '–'">
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap">
+                                <template
+                                    x-if="(rec.Purchase_Requisitions || rec.PR_References) && (rec.Purchase_Requisitions || rec.PR_References).length > 0">
+                                    <span>
+                                        <template x-for="(pr, i) in (rec.Purchase_Requisitions || rec.PR_References)"
+                                            :key="pr.ID || i">
+                                            <span>
+                                                <a href="javascript:void(0)"
+                                                    @click.prevent="ZOHO.CREATOR.UTIL.navigateParentURL({action:'open',url:'#Page:PR_Detailed?recordId='+(pr.ID || pr.id),window:'same'})"
+                                                    class="text-[#1B5CA8] hover:underline font-mono text-[11px] font-semibold"
+                                                    x-text="pr.zc_display_value || pr.PR_Number || 'PR'"></a>
+                                                <span
+                                                    x-show="i < (rec.Purchase_Requisitions || rec.PR_References).length - 1"
+                                                    class="text-gray-500 mr-1">,</span>
+                                            </span>
+                                        </template>
+                                    </span>
+                                </template>
+                                <template
+                                    x-if="!(rec.Purchase_Requisitions || rec.PR_References) || (rec.Purchase_Requisitions || rec.PR_References).length === 0">
+                                    <span class="text-gray-400 font-mono text-[11px]">–</span>
+                                </template>
                             </td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap overflow-hidden text-ellipsis text-[12px] text-gray-800 font-medium"
+                                x-text="rec.Unit?.zc_display_value || rec.Unit?.Name || '–'"></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap overflow-hidden text-ellipsis text-[12px] text-gray-600"
+                                x-text="rec.Department?.zc_display_value || rec.Department?.Name || '–'"></td>
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[11px] text-gray-500"
+                                x-text="rec.Current_Stage || '–'"></td>
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[11px] text-gray-500"
                                 x-text="formatDate(rec.GRN_Date)"></td>
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap">
@@ -416,51 +502,90 @@
                 <div class="modal-scroll">
                     <form @submit.prevent="submitForm">
 
-                        <!-- References Section -->
-                        <h4 class="text-xs font-bold text-[#1B5CA8] tracking-wide mb-3 border-b border-gray-100 pb-1">
-                            Purchase Order Reference</h4>
-                        <div class="grid grid-cols-2 gap-4 mb-6">
+                        <!-- SECTION 1: References -->
+                        <h4 class="section-header">Order Reference</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
                             <div>
                                 <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PO
                                     Reference <span class="text-red-500">*</span></label>
                                 <select x-ref="poSelect" required class="w-full text-xs"
                                     placeholder="Search PO Number to Auto-Fill..."></select>
                             </div>
-                            <div class="flex gap-4">
-                                <div class="flex-1">
-                                    <label
-                                        class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">GRN
-                                        Date <span class="text-red-500">*</span></label>
-                                    <input type="date" required x-model="form.GRN_Date"
-                                        class="w-full py-1.5 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
-                                </div>
-                                <div class="flex-1">
-                                    <label
-                                        class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Delivery
-                                        Date <span class="text-red-500">*</span></label>
-                                    <input type="date" required x-model="form.Delivery_Date"
-                                        class="w-full py-1.5 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
-                                </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">PR
+                                    Reference(s)</label>
+                                <div class="w-full py-1.5 px-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] text-gray-600 font-mono overflow-hidden text-ellipsis whitespace-nowrap cursor-not-allowed"
+                                    x-text="meta.prRefName || '–'"></div>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Quote
+                                    Comparison</label>
+                                <div class="w-full py-1.5 px-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] text-gray-600 font-mono overflow-hidden text-ellipsis whitespace-nowrap cursor-not-allowed"
+                                    x-text="meta.qcRefName || '–'"></div>
                             </div>
                         </div>
 
-                        <!-- Info Overviews (Readonly Display) -->
-                        <div x-show="form.PO_Reference"
-                            class="grid grid-cols-3 gap-4 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200 text-xs">
-                            <div><span class="block font-semibold text-gray-400 mb-1">Vendor</span><span
-                                    class="font-medium text-gray-800" x-text="meta.vendorName || '–'"></span></div>
-                            <div><span class="block font-semibold text-gray-400 mb-1">PR Reference</span><span
-                                    class="font-medium text-gray-800" x-text="meta.prRefName || '–'"></span></div>
-                            <!-- <div><span class="block font-semibold text-gray-400 mb-1">QC Reference</span><span
-                                    class="font-medium text-gray-800" x-text="meta.qcRefName || '–'"></span></div> -->
+                        <!-- SECTION 2: Organization & Dates -->
+                        <h4 class="section-header">Organization & Dates</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-5 mb-6">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Unit
+                                    <span class="text-red-500">*</span></label>
+                                <select x-ref="unitSelect" required class="w-full text-xs"
+                                    placeholder="Select Unit..."></select>
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Department
+                                    <span class="text-red-500">*</span></label>
+                                <select x-ref="deptSelect" required class="w-full text-xs"
+                                    placeholder="Select Department..."></select>
+                            </div>
+                            <!-- <div>
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Current
+                                    Stage</label>
+                                <input type="text" disabled x-model="form.Current_Stage"
+                                    class="w-full py-1.5 px-3 bg-gray-100 border border-gray-200 rounded-lg text-[13px] text-gray-500 font-semibold cursor-not-allowed">
+                            </div> -->
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">GRN
+                                    Date <span class="text-red-500">*</span></label>
+                                <input type="date" required x-model="form.GRN_Date"
+                                    class="w-full py-1.5 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Delivery
+                                    Date <span class="text-red-500">*</span></label>
+                                <input type="date" required x-model="form.Delivery_Date"
+                                    class="w-full py-1.5 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
+                            </div>
                         </div>
 
-                        <!-- Items Grid -->
+                        <!-- SECTION 3: Vendor & Address Details -->
+                        <h4 class="section-header">Vendor & Address Details</h4>
+                        <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="address-group">
+                                <span class="address-label flex items-center justify-between">
+                                    <span><i class="bi bi-building mr-1"></i> Vendor & Billing Details</span>
+                                </span>
+                                <div class="font-bold text-gray-800 text-[13px] mb-1 pb-1 border-b border-gray-200"
+                                    x-text="meta.vendorName || '–'"></div>
+                                <div class="text-xs text-gray-500 leading-relaxed min-h-[50px] mt-2"
+                                    x-html="formatAddress(form.Billing_Address)"></div>
+                            </div>
+                            <div class="address-group">
+                                <span class="address-label"><i class="bi bi-geo-alt mr-1"></i> Delivery Drop
+                                    Address</span>
+                                <div class="text-xs text-gray-500 leading-relaxed min-h-[50px] mt-2"
+                                    x-html="formatAddress(form.Delivary_Address)"></div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 4: Items Grid -->
+                        <h4 class="section-header">Received Items</h4>
                         <div class="mb-6 border border-gray-200 rounded-lg overflow-hidden">
-                            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
-                                <span class="text-xs font-semibold text-gray-700 tracking-wide">Received Items <span
-                                        class="text-red-500">*</span></span>
-                            </div>
                             <div class="overflow-x-auto">
                                 <table class="w-full border-collapse">
                                     <thead class="bg-white border-b border-gray-200">
@@ -497,26 +622,23 @@
                                             <tr class="border-b border-gray-100 bg-white">
                                                 <td class="px-2 py-2">
                                                     <input disabled :value="item.ItemName" type="text"
-                                                        class="grid-input bg-gray-100 text-gray-600 font-medium cursor-not-allowed">
+                                                        class="grid-input font-medium cursor-not-allowed text-gray-800">
                                                 </td>
                                                 <td class="px-2 py-2 text-right">
                                                     <input disabled :value="formatINR(item.Rate)" type="text"
-                                                        class="grid-input text-right bg-gray-100 cursor-not-allowed">
+                                                        class="grid-input text-right cursor-not-allowed">
                                                 </td>
                                                 <td class="px-2 py-2 text-right">
                                                     <input disabled :value="item.PO_Quantity + ' ' + (item.Unit||'')"
-                                                        type="text"
-                                                        class="grid-input text-right bg-gray-100 cursor-not-allowed">
+                                                        type="text" class="grid-input text-right cursor-not-allowed">
                                                 </td>
-                                                <!-- NEW COLUMN: PENDING QTY -->
                                                 <td class="px-2 py-2 text-right">
                                                     <input disabled :value="item.Max_Allowed + ' ' + (item.Unit||'')"
                                                         type="text"
-                                                        class="grid-input text-right bg-gray-100 font-semibold cursor-not-allowed">
+                                                        class="grid-input text-right font-semibold text-[#1B5CA8] cursor-not-allowed">
                                                 </td>
                                                 <td class="px-2 py-2">
                                                     <div class="relative">
-                                                        <!-- VALIDATION: Max set to Max_Allowed (Pending Qty) -->
                                                         <input x-model.number="item.Received_Quantity"
                                                             @input="validateQuantity(idx)" type="number" min="0"
                                                             :max="item.Max_Allowed" step="any" required
@@ -534,7 +656,7 @@
                                                 </td>
                                                 <td class="px-2 py-2 text-right">
                                                     <input disabled :value="formatINR(item.Amount)" type="text"
-                                                        class="grid-input text-right font-bold bg-gray-50 cursor-not-allowed">
+                                                        class="grid-input text-right font-bold cursor-not-allowed">
                                                 </td>
                                                 <td class="px-2 py-2">
                                                     <input x-model="item.Comment" type="text" class="grid-input"
@@ -547,16 +669,16 @@
                             </div>
                         </div>
 
-                        <!-- Totals & Extra Details -->
+                        <!-- SECTION 5: Totals & Extra Details -->
+                        <h4 class="section-header">Financial Summary & Attachments</h4>
                         <div class="flex flex-wrap md:flex-nowrap gap-6 mb-4">
-
                             <!-- Left: Extra Details -->
                             <div class="w-full md:w-1/2 flex flex-col gap-4">
                                 <div>
                                     <label
                                         class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Remarks
                                         / Notes</label>
-                                    <textarea x-model="form.Remarks" rows="3"
+                                    <textarea x-model="form.Remarks" rows="4"
                                         class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] transition-all"></textarea>
                                 </div>
                                 <div>
@@ -569,36 +691,33 @@
 
                             <!-- Right: Totals Grid -->
                             <div class="w-full md:w-1/2 bg-gray-50 rounded-lg border border-gray-200 p-4">
-                                <h4
-                                    class="text-xs font-bold text-gray-600 tracking-wide mb-3 border-b border-gray-200 pb-2">
-                                    Financial Summary</h4>
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="text-xs text-gray-500 font-medium">Sub Total</span>
+                                    <span class="text-xs text-gray-500 font-medium uppercase">Sub Total</span>
                                     <span class="text-sm font-semibold text-gray-700"
                                         x-text="formatINR(form.Sub_Total)"></span>
                                 </div>
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="text-xs text-gray-500 font-medium">Discount (From PO)</span>
+                                    <span class="text-xs text-gray-500 font-medium uppercase">Discount (From PO)</span>
                                     <span class="text-sm font-medium text-red-500"
                                         x-text="'- ' + formatINR(form.Discount)"></span>
                                 </div>
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="text-xs text-gray-500 font-medium">CGST</span>
+                                    <span class="text-xs text-gray-500 font-medium uppercase">CGST</span>
                                     <span class="text-sm font-medium text-gray-600"
                                         x-text="formatINR(form.CGST)"></span>
                                 </div>
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="text-xs text-gray-500 font-medium">SGST</span>
+                                    <span class="text-xs text-gray-500 font-medium uppercase">SGST</span>
                                     <span class="text-sm font-medium text-gray-600"
                                         x-text="formatINR(form.SGST)"></span>
                                 </div>
                                 <div class="flex justify-between items-center mb-3">
-                                    <span class="text-xs text-gray-500 font-medium">IGST</span>
+                                    <span class="text-xs text-gray-500 font-medium uppercase">IGST</span>
                                     <span class="text-sm font-medium text-gray-600"
                                         x-text="formatINR(form.IGST)"></span>
                                 </div>
-                                <div class="flex justify-between items-center pt-2 border-t border-gray-200">
-                                    <span class="text-sm font-bold text-gray-800">Total Amount</span>
+                                <div class="flex justify-between items-center pt-3 border-t border-gray-200 mt-1">
+                                    <span class="text-[13px] font-bold text-[#1B5CA8] uppercase">Total Net Amount</span>
                                     <span class="text-lg font-bold text-[#1B5CA8]"
                                         x-text="formatINR(form.Total_Amount)"></span>
                                 </div>
@@ -607,11 +726,11 @@
 
                         <!-- Form Actions -->
                         <div
-                            class="flex justify-end gap-2 border-t border-gray-200 pt-4 bg-white sticky bottom-0 z-20 pb-1">
+                            class="flex justify-end gap-2 border-t border-gray-200 pt-4 bg-white sticky bottom-0 z-20 pb-1 mt-2">
                             <button type="button" @click="closeModal()"
-                                class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
+                                class="px-5 py-2 border border-gray-300 text-gray-600 rounded-md text-xs font-bold hover:bg-gray-50 transition-colors">Cancel</button>
                             <button type="button" @click="submitGrn('Submitted')" :disabled="isSubmitting"
-                                class="inline-flex items-center justify-center min-w-[90px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70">
+                                class="inline-flex items-center justify-center min-w-[140px] px-5 py-2 bg-[#1B5CA8] text-white rounded-md text-xs font-bold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70">
                                 <span x-show="!isSubmitting">Submit GRN</span>
                                 <div x-show="isSubmitting" class="grn-spinner"
                                     style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
@@ -634,8 +753,12 @@
             Alpine.data('grnApp', () => ({
                 REPORT_NAME: 'GRN_Report',
                 PO_REPORT_NAME: 'Purchase_Order_Report',
+                UNIT_REPORT_NAME: 'Unit_Report',
+                DEPARTMENTS_REPORT_NAME: 'Departments_Report',
 
                 allRecords: [],
+                unitMasters: [],
+                departmentMasters: [],
                 filter: 'all',
                 searchQuery: '',
                 isLoading: true,
@@ -647,25 +770,28 @@
 
                 isModalOpen: false,
                 isSubmitting: false,
-                tsInstances: { po: null },
+                tsInstances: { po: null, unit: null, dept: null },
 
-                // Form Model
+                // Form Model based strictly on schema constraints
                 form: {
-                    PO_Reference: '', PR_Reference: '', Quote_Comparison: '', Vendor: '',
+                    PO_Reference: '', PR_References: [], Quote_Comparison: '', Vendor: '',
+                    Unit: '', Department: '', Current_Stage: 'GRN',
                     GRN_Date: dayjs().format('YYYY-MM-DD'),
                     Delivery_Date: '',
                     Remarks: '',
                     Sub_Total: 0, Discount: 0, CGST: 0, SGST: 0, IGST: 0, Total_Amount: 0,
                     Items: [],
-                    Billing_Address: {}, Shipping_Address: {}, Delivary_Address: {}
+                    Billing_Address: {}, Delivary_Address: {}
                 },
 
-                // UI Metadata not pushed directly
+                // UI Metadata
                 meta: { vendorName: '', prRefName: '', qcRefName: '' },
 
                 initApp() {
-                    P2PWorkflowUtils.init(); // Detect env prefix (Dev__ / Prod__)
+                    P2PWorkflowUtils.init();
                     this.fetchRecords();
+                    this.fetchUnitMasters();
+                    this.fetchDepartmentMasters();
 
                     this.$watch('searchQuery', Alpine.debounce(() => {
                         this.page = 1; this.fetchRecords();
@@ -718,6 +844,14 @@
                     }
                 },
 
+                async fetchUnitMasters() {
+                    try { let res = await ZOHO.CREATOR.DATA.getRecords({ report_name: this.UNIT_REPORT_NAME, max_records: 200 }); if (res.code === 3000) this.unitMasters = res.data; } catch (e) { }
+                },
+
+                async fetchDepartmentMasters() {
+                    try { let res = await ZOHO.CREATOR.DATA.getRecords({ report_name: this.DEPARTMENTS_REPORT_NAME, max_records: 200 }); if (res.code === 3000) this.departmentMasters = res.data; } catch (e) { }
+                },
+
                 async computeStats() {
                     let q = this.searchQuery.trim().replace(/'/g, "\\'");
                     let baseCrit = q ? `(GRN_Ref_Number.contains("${q}") || PO_Reference.PO_Ref_Number.contains("${q}"))` : '';
@@ -742,7 +876,6 @@
                 },
 
                 get filteredRecords() {
-                    console.log(this.allRecords)
                     let recs = [...this.allRecords];
                     return recs.sort((a, b) => {
                         let va = this.getSortValue(a, this.sortCol);
@@ -765,7 +898,10 @@
                     switch (col) {
                         case 'grn_no': return (rec.GRN_Ref_Number || rec.GRN_Number || '').toString();
                         case 'po_ref': return (rec.PO_Reference?.zc_display_value || '').toString();
-                        case 'pr_ref': return (rec.PR_Reference?.zc_display_value || '').toString();
+                        case 'pr_ref': return (rec.Purchase_Requisitions?.map(p => p.zc_display_value).join() || rec.PR_References?.map(p => p.zc_display_value).join() || '').toString();
+                        case 'unit': return (rec.Unit?.zc_display_value || rec.Unit?.Name || '').toString();
+                        case 'department': return (rec.Department?.zc_display_value || rec.Department?.Name || '').toString();
+                        case 'stage': return (rec.Current_Stage || '').toString();
                         case 'date': return rec.GRN_Date ? dayjs(rec.GRN_Date).valueOf() : 0;
                         case 'status': return (rec.Status || '').toString();
                         case 'items_status': return (rec.Items_Status || '').toString();
@@ -784,6 +920,17 @@
                 setFilter(f) { this.filter = f; },
                 formatDate(dateStr) { return (!dateStr || dateStr === '–') ? '–' : (dayjs(dateStr).isValid() ? dayjs(dateStr).format('DD MMM YYYY') : dateStr); },
                 formatINR(val) { return isNaN(val) ? '₹ 0.00' : new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(val); },
+                formatAddress(addr) {
+                    if (!addr || Object.keys(addr).length === 0) return '<span class="italic text-gray-400">No Address Provided</span>';
+                    let parts = [];
+                    if (addr.address_line_1) parts.push(addr.address_line_1);
+                    if (addr.address_line_2) parts.push(addr.address_line_2);
+                    if (addr.district_city) parts.push(addr.district_city);
+                    if (addr.state_province) parts.push(addr.state_province);
+                    if (addr.postal_code || addr.postal_Code) parts.push(addr.postal_code || addr.postal_Code);
+                    if (addr.country) parts.push(addr.country);
+                    return parts.join(', ');
+                },
 
                 getStatusStyle(status) {
                     const st = (status || '').toLowerCase();
@@ -796,7 +943,7 @@
                     const st = (status || '').toLowerCase();
                     if (st === 'completely received') return { classes: 'border-emerald-200 bg-emerald-50 text-emerald-800' };
                     if (st === 'partially received') return { classes: 'border-blue-200 bg-blue-50 text-blue-800' };
-                    return { classes: 'border-gray-200 bg-gray-50 text-gray-600' }; // Not Received
+                    return { classes: 'border-gray-200 bg-gray-50 text-gray-600' };
                 },
                 getPagesArray() {
                     let pages = [];
@@ -815,19 +962,26 @@
                 // --- MODAL & FORM LOGIC ---
                 openModal() {
                     this.form = {
-                        PO_Reference: '', PR_Reference: '', Quote_Comparison: '', Vendor: '',
+                        PO_Reference: '', PR_References: [], Quote_Comparison: '', Vendor: '',
+                        Unit: '', Department: '', Current_Stage: 'GRN',
                         GRN_Date: dayjs().format('YYYY-MM-DD'), Delivery_Date: '', Remarks: '',
                         Sub_Total: 0, Discount: 0, CGST: 0, SGST: 0, IGST: 0, Total_Amount: 0,
-                        Items: [], Billing_Address: {}, Shipping_Address: {}, Delivary_Address: {}
+                        Items: [], Billing_Address: {}, Delivary_Address: {}
                     };
                     this.meta = { vendorName: '', prRefName: '', qcRefName: '' };
                     this.isModalOpen = true;
 
-                    this.$nextTick(() => { this.initPoSelect(); });
+                    this.$nextTick(() => {
+                        this.initPoSelect();
+                        this.initUnitSelect();
+                        this.initDepartmentSelect();
+                    });
                 },
                 closeModal() {
                     this.isModalOpen = false;
                     if (this.tsInstances.po) this.tsInstances.po.destroy();
+                    if (this.tsInstances.unit) this.tsInstances.unit.destroy();
+                    if (this.tsInstances.dept) this.tsInstances.dept.destroy();
                 },
 
                 initPoSelect() {
@@ -850,15 +1004,34 @@
                     });
                 },
 
+                initUnitSelect() {
+                    this.tsInstances.unit = new TomSelect(this.$refs.unitSelect, {
+                        valueField: 'ID', labelField: 'Name', searchField: 'Name',
+                        options: this.unitMasters, maxItems: 1, placeholder: 'Select Unit...',
+                        onChange: (val) => { this.form.Unit = val; }
+                    });
+                },
+
+                initDepartmentSelect() {
+                    this.tsInstances.dept = new TomSelect(this.$refs.deptSelect, {
+                        valueField: 'ID', labelField: 'Name', searchField: 'Name',
+                        options: this.departmentMasters, maxItems: 1, placeholder: 'Select Department...',
+                        onChange: (val) => { this.form.Department = val; }
+                    });
+                },
+
                 resetFormExceptPO() {
                     const poRef = this.form.PO_Reference;
                     this.form = {
-                        PO_Reference: poRef, PR_Reference: '', Quote_Comparison: '', Vendor: '',
+                        PO_Reference: poRef, PR_References: [], Quote_Comparison: '', Vendor: '',
+                        Unit: '', Department: '', Current_Stage: 'GRN',
                         GRN_Date: dayjs().format('YYYY-MM-DD'), Delivery_Date: '', Remarks: '',
                         Sub_Total: 0, Discount: 0, CGST: 0, SGST: 0, IGST: 0, Total_Amount: 0,
-                        Items: [], Billing_Address: {}, Shipping_Address: {}, Delivary_Address: {}
+                        Items: [], Billing_Address: {}, Delivary_Address: {}
                     };
                     this.meta = { vendorName: '', prRefName: '', qcRefName: '' };
+                    if (this.tsInstances.unit) this.tsInstances.unit.clear(true);
+                    if (this.tsInstances.dept) this.tsInstances.dept.clear(true);
                 },
 
                 async fetchPoDetails(poId) {
@@ -870,25 +1043,31 @@
                             query_params: 'recId=' + poId
                         });
 
-                        // Parse mock/API response shape matching provided snippet
                         let data = res.result && res.result.length > 0 ? res.result[0] : null;
-                        if (typeof res.response !== 'undefined') data = res.response[0] || data; // handle varied response wrapper
+                        if (typeof res.response !== 'undefined') data = res.response[0] || data;
 
                         if (!data) throw new Error("No data returned for PO");
 
-                        // Extract References
-                        const prId = (data.PR && data.PR.ID) ? data.PR.ID : (data.PR_id || '');
-                        const qcId = (data.Quote_Comparison) ? data.Quote_Comparison : '';
-
-                        this.form.PR_Reference = prId;
-                        this.form.Quote_Comparison = qcId;
+                        // Extract References & Dates
+                        this.form.PR_References = data.PRs?.map(pr => pr.ID) || [];
+                        this.form.Quote_Comparison = data.Quote_Comparison || '';
                         this.form.Vendor = data.Vendor?.ID || '';
                         this.form.Delivery_Date = data.delivery_date ? dayjs(data.delivery_date).format('YYYY-MM-DD') : '';
 
+                        // Extract Department and Unit Data specifically to auto-populate the layout inputs
+                        if (data.Unit && data.Unit.ID) {
+                            this.form.Unit = data.Unit.ID;
+                            if (this.tsInstances.unit) this.tsInstances.unit.setValue(data.Unit.ID, true);
+                        }
+                        if (data.Department && data.Department.length > 0) {
+                            this.form.Department = data.Department[0];
+                            if (this.tsInstances.dept) this.tsInstances.dept.setValue(data.Department[0], true);
+                        }
+
                         // Display Metadata
                         this.meta.vendorName = data.Vendor?.Display_Name || '–';
-                        this.meta.prRefName = data.PR?.PRs?.[0]?.ID || '–';
-                        this.meta.qcRefName = 'QC-' + (qcId || '–'); // Optional formatting
+                        this.meta.prRefName = data.PRs && data.PRs.length > 0 ? data.PRs.map(p => p.PR_Number).join(', ') : '–';
+                        this.meta.qcRefName = data.Quote_Comparison ? data.Quote_Comparison.QC_Ref_Number : '–';
 
                         // Financials
                         this.form.Discount = data.Discount || 0;
@@ -896,12 +1075,11 @@
                         this.form.SGST = data.SGST || 0;
                         this.form.IGST = data.IGST || 0;
 
-                        // Addresses (if necessary for payload mapping)
+                        // Addresses
                         this.form.Billing_Address = data.Billing_Address || {};
-                        this.form.Shipping_Address = data.Shipping_Address || {};
                         this.form.Delivary_Address = data.Delivary_Address || {};
 
-                        // Items Map: Calculate Max_Allowed (Pending Qty) dynamically based on API returned 'Received_Quantity'
+                        // Items Map: Calculate Max_Allowed
                         if (data.Items && Array.isArray(data.Items)) {
                             this.form.Items = data.Items.map(i => {
                                 const rate = parseFloat(i.Item?.unit_price) || 0;
@@ -917,7 +1095,7 @@
                                     PO_Quantity: poQty,
                                     Already_Received: alreadyReceived,
                                     Max_Allowed: maxAllowed,
-                                    Received_Quantity: 0, // Force user to fill out
+                                    Received_Quantity: 0,
                                     Amount: 0,
                                     Comment: '',
                                     qtyError: ''
@@ -999,12 +1177,14 @@
                         const payload = {
                             data: {
                                 Status: saveStatus,
+                                Current_Stage: this.form.Current_Stage || 'GRN',
                                 Items_Status: itemsStatus,
                                 delivery_date: dayjs(this.form.Delivery_Date).format('DD-MMM-YYYY'),
                                 GRN_Date: dayjs(this.form.GRN_Date).format('DD-MMM-YYYY'),
+                                Unit: this.form.Unit,
+                                Department: this.form.Department,
                                 Vendor: this.form.Vendor,
                                 Billing_Address: this.form.Billing_Address,
-                                Shipping_Address: this.form.Shipping_Address,
                                 Delivary_Address: this.form.Delivary_Address,
                                 Items: mappedItems,
                                 Sub_Total: this.form.Sub_Total,
@@ -1014,8 +1194,8 @@
                                 IGST: this.form.IGST,
                                 Total_Amount: this.form.Total_Amount,
                                 Remarks: this.form.Remarks,
-                                PR_Reference: this.form.PR_Reference,
-                                Quote_Comparison: this.form.Quote_Comparison,
+                                PR_References: this.form.PR_References,
+                                Quote_Comparison: this.form.Quote_Comparison?.ID,
                                 PO_Reference: this.form.PO_Reference
                             }
                         };
@@ -1026,7 +1206,6 @@
                             const newRecordId = res.data.ID;
                             const files = this.$refs.grnFiles ? this.$refs.grnFiles.files : [];
 
-                            // Handle file uploads natively via ZC API
                             if (files.length > 0) {
                                 const uploadPromises = Array.from(files).map(file => {
                                     return ZOHO.CREATOR.FILE.uploadFile({ report_name: this.REPORT_NAME, field_name: "Attachments", file: file, id: newRecordId });

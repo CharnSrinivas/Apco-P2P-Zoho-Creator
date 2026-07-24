@@ -384,8 +384,8 @@ const P2PWorkflowUtils = {
 		containerEl.innerHTML = html;
 	},
 	downloadFile(filePath, reportName, recordId) {
-		if (typeof filePath === "string" && fullPath.includes("filepath=")) {
-			filePath = fullPath.split("filepath=")[1].split("&")[0];
+		if (typeof filePath === "string" && filePath.includes("filepath=")) {
+			filePath = filePath.split("filepath=")[1].split("&")[0];
 		}
 		ZOHO.CREATOR.UTIL.getInitParams()
 			.then((initParams) => {
