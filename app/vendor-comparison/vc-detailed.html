@@ -382,11 +382,12 @@
 
                         <!-- Vendor Quotes -->
                         <div class="mb-6 border border-gray-200 rounded-lg overflow-hidden bg-white">
-                            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                                <span class="text-xs font-semibold text-gray-700 tracking-wide">Quotation Comparison Statement <span
-                                        class="text-red-500">*</span></span>
+                            <div
+                                class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                                <span class="text-xs font-semibold text-gray-700 tracking-wide">Quotation Comparison
+                                    Statement <span class="text-red-500">*</span></span>
                             </div>
-                            
+
                             <div class="overflow-x-auto p-0">
                                 <table class="vendor-quote-table">
                                     <thead>
@@ -406,14 +407,17 @@
                                     </thead>
                                     <tbody>
                                         <tr x-show="editForm.Quotes.length === 0">
-                                            <td colspan="11" class="text-center text-gray-400 italic py-6 text-xs bg-gray-50">
+                                            <td colspan="11"
+                                                class="text-center text-gray-400 italic py-6 text-xs bg-gray-50">
                                                 No quotes available.
                                             </td>
                                         </tr>
                                         <template x-for="(quote, qIdx) in editForm.Quotes" :key="quote.uid">
                                             <tr class="hover:bg-gray-50/50 transition-colors">
                                                 <td>
-                                                    <input x-model="quote.Vendor_Name" type="text" class="grid-input font-semibold text-gray-700 bg-transparent border-transparent" readonly />
+                                                    <input x-model="quote.Vendor_Name" type="text"
+                                                        class="grid-input font-semibold text-gray-700 bg-transparent border-transparent"
+                                                        readonly />
                                                 </td>
                                                 <td class="text-center">
                                                     <input type="checkbox" x-model="quote.Consider"
@@ -426,32 +430,31 @@
                                                         x-init="() => { const ts = initDynamicItemEdit($el, quote, 'Items_Master', 'Item_Name'); return () => ts.destroy(); }"></select>
                                                 </td>
                                                 <td><input x-model.number="quote.Basic_Rate"
-                                                        @input="syncVendorLineRatesEdit(qIdx, 'basic')"
-                                                        type="number" step="any" min="0" required
-                                                        class="grid-input" style="min-width:70px;" /></td>
+                                                        @input="syncVendorLineRatesEdit(qIdx, 'basic')" type="number"
+                                                        step="any" min="0" required class="grid-input"
+                                                        style="min-width:70px;" /></td>
                                                 <td><input x-model.number="quote.Disc"
-                                                        @input="syncVendorLineRatesEdit(qIdx, 'disc')"
-                                                        type="number" step="any" min="0" required
-                                                        class="grid-input" style="min-width:55px;" /></td>
+                                                        @input="syncVendorLineRatesEdit(qIdx, 'disc')" type="number"
+                                                        step="any" min="0" required class="grid-input"
+                                                        style="min-width:55px;" /></td>
                                                 <td><input x-model.number="quote.Negotiated_Rate"
-                                                        @input="syncVendorLineRatesEdit(qIdx, 'neg')"
-                                                        type="number" step="any" min="0" required
-                                                        class="grid-input" style="min-width:75px;" /></td>
+                                                        @input="syncVendorLineRatesEdit(qIdx, 'neg')" type="number"
+                                                        step="any" min="0" required class="grid-input"
+                                                        style="min-width:75px;" /></td>
                                                 <td><input x-model.number="quote.Freight"
-                                                        @input="syncVendorLineRatesEdit(qIdx, 'freight')"
-                                                        type="number" step="any" min="0" required
-                                                        class="grid-input" style="min-width:60px;" /></td>
+                                                        @input="syncVendorLineRatesEdit(qIdx, 'freight')" type="number"
+                                                        step="any" min="0" required class="grid-input"
+                                                        style="min-width:60px;" /></td>
                                                 <td><input x-model.number="quote.GST"
-                                                        @input="syncVendorLineRatesEdit(qIdx, 'gst')"
-                                                        type="number" step="any" min="0" required
-                                                        class="grid-input" style="min-width:50px;" /></td>
-                                                <td><input x-model.number="quote.Landed_Rate" type="number"
-                                                        disabled
+                                                        @input="syncVendorLineRatesEdit(qIdx, 'gst')" type="number"
+                                                        step="any" min="0" required class="grid-input"
+                                                        style="min-width:50px;" /></td>
+                                                <td><input x-model.number="quote.Landed_Rate" type="number" disabled
                                                         class="grid-input font-bold text-[#1B5CA8] bg-gray-100 cursor-not-allowed"
                                                         style="min-width:80px;" /></td>
                                                 <td style="min-width:90px;">
-                                                    <select x-model="quote.Payment_Terms" class="grid-input"
-                                                        required style="min-width:80px;">
+                                                    <select x-model="quote.Payment_Terms" class="grid-input" required
+                                                        style="min-width:80px;">
                                                         <option value="">Select…</option>
                                                         <option value="Advance">Advance</option>
                                                         <option value="15 Days Credit">15 Days</option>
@@ -460,8 +463,8 @@
                                                     </select>
                                                 </td>
                                                 <td style="min-width:110px;">
-                                                    <input x-model="quote.Delivery_Date" type="date"
-                                                        class="grid-input" required style="min-width:100px;" />
+                                                    <input x-model="quote.Delivery_Date" type="date" class="grid-input"
+                                                        required style="min-width:100px;" />
                                                 </td>
                                             </tr>
                                         </template>
@@ -1321,25 +1324,74 @@
                 requestReNegotiation() { this.openModal("Request Re-Negotiation", "Requested For Re Negotiation", "Quote Comparison", "bg-amber-500", "hover:bg-amber-600"); },
                 rejectVC() { this.openModal("Reject QC", "Rejected", "Quote Comparison", "bg-red-600", "hover:bg-red-700"); },
 
-                finalizeDecision() {
+                async finalizeDecision() {
+                    if (!this.decisionJustification || !this.decisionJustification.trim()) {
+                        Toast.fire({ icon: 'warning', title: 'Please enter a Justification / Remarks before finalizing.' });
+                        return;
+                    }
                     this.isFinalizingDecision = true;
-                    // Connect properly to your API flow
-                    setTimeout(() => {
+                    try {
+                        const finalVendor = this.computedFinalVendors;
+                        const totalLandedRate = this.simulationTotal;
+
+                        const payload = {
+                            data: {
+                                Status: 'Finalized',
+                                Finalized_Vendor: finalVendor,
+                                Total_Landed_Rate: totalLandedRate.toFixed(2),
+                                Justification: this.decisionJustification
+                            }
+                        };
+
+                        const res = await ZOHO.CREATOR.DATA.updateRecordById({
+                            report_name: this.QC_REPORT,
+                            id: this.recordId,
+                            payload: payload
+                        });
+
+                        if (res.code === 3000) {
+                            Toast.fire({ icon: 'success', title: 'Vendor Finalized Successfully' });
+                            this.fetchData();
+                        } else {
+                            throw new Error(res.message || 'Failed to finalize vendor.');
+                        }
+                    } catch (err) {
+                        Toast.fire({ icon: 'error', title: err.message || 'Finalization failed.' });
+                        console.error(err);
+                    } finally {
                         this.isFinalizingDecision = false;
-                        Toast.fire({ icon: 'success', title: 'Vendor Finalized Successfully' });
-                        this.fetchData();
-                    }, 1000);
+                    }
                 },
 
-                submitAction() {
+                async submitAction() {
                     this.isSubmitting = true;
-                    // Connect properly to your API flow
-                    setTimeout(() => {
+                    try {
+                        const payload = {
+                            data: {
+                                Status: this.pendingStatus,
+                                Current_Stage: this.pendingStage || this.rec.Current_Stage
+                            }
+                        };
+
+                        const res = await ZOHO.CREATOR.DATA.updateRecordById({
+                            report_name: this.QC_REPORT,
+                            id: this.recordId,
+                            payload: payload
+                        });
+
+                        if (res.code === 3000) {
+                            this.closeModal();
+                            Toast.fire({ icon: 'success', title: `Status updated to "${this.pendingStatus}"` });
+                            this.fetchData();
+                        } else {
+                            throw new Error(res.message || 'Failed to submit action.');
+                        }
+                    } catch (err) {
+                        Toast.fire({ icon: 'error', title: err.message || 'Action failed.' });
+                        console.error(err);
+                    } finally {
                         this.isSubmitting = false;
-                        this.closeModal();
-                        Toast.fire({ icon: 'success', title: 'Action Submitted' });
-                        this.fetchData();
-                    }, 1000);
+                    }
                 },
 
                 openEditModal() {
@@ -1389,29 +1441,29 @@
                     });
                     return ts;
                 },
-                
+
                 syncVendorLineRatesEdit(qIdx, field) {
                     let quote = this.editForm.Quotes[qIdx];
                     let basic = parseFloat(quote.Basic_Rate) || 0;
                     let disc = parseFloat(quote.Disc) || 0;
-                    
+
                     if (field === 'basic' || field === 'disc') {
                         quote.Negotiated_Rate = basic - (basic * (disc / 100));
                     }
-                    
+
                     let neg = parseFloat(quote.Negotiated_Rate) || 0;
                     let freight = parseFloat(quote.Freight) || 0;
                     let gst = parseFloat(quote.GST) || 0;
-                    
+
                     let amountBeforeGST = neg + freight;
                     quote.Landed_Rate = amountBeforeGST + (amountBeforeGST * (gst / 100));
-                    
+
                     this.recalculateAllTotalsEdit();
                 },
                 recalculateAllTotalsEdit() {
                     // Triggers reactive UI evaluation state updates 
                 },
-                
+
                 async submitEdit() {
                     this.isUpdatingRecord = true;
                     try {

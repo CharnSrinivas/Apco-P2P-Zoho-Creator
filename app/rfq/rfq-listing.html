@@ -496,18 +496,10 @@
           <div class="flex justify-end gap-2 border-t border-gray-100 pt-4">
             <button type="button" @click="closeModal()"
               class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
-            <button type="button" @click="saveAsDraft()" :disabled="isDrafting || isSubmitting"
-              class="inline-flex items-center justify-center gap-1.5 min-w-[110px] px-4 py-1.5 bg-gray-50 text-gray-700 border border-gray-300 rounded-md text-xs font-semibold hover:bg-gray-100 transition-colors shadow-sm disabled:opacity-70">
-              <span x-show="!isDrafting" class="inline-flex items-center gap-1.5">
-                <!-- <i class="bi bi-floppy"></i> -->
-                Save as Draft</span>
-              <div x-show="isDrafting" class="rfq-spinner" style="width:14px;height:14px;border-width:2px;"></div>
-            </button>
             <button type="submit" :disabled="isSubmitting || isDrafting"
               class="inline-flex items-center justify-center min-w-[90px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70">
-
               <span x-show="!isSubmitting">
-                <!-- <i class="bi bi-floppy"></i> -->
+                <i class="bi bi-floppy"></i>
                 Submit RFQ</span>
               <div x-show="isSubmitting" class="rfq-spinner"
                 style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
@@ -809,7 +801,8 @@
           this.isModalOpen = true;
 
           this.fetchVendorMasters();
-
+          this.fetchDepartmentMasters();
+          this.fetchUnitMasters();
           this.$nextTick(() => {
             this.initUnitSelect();
             this.initDepartmentSelect();
@@ -903,9 +896,14 @@
                 this.rfqForm.reqDate = this.todayDate;
                 this.rfqForm.dueDate = '';
                 this.rfqForm.unit = '';
+                this.rfqForm.department = '';
                 if (this.tsInstances.unit) {
                   this.tsInstances.unit.enable();
                   this.tsInstances.unit.clear(true);
+                }
+                if (this.tsInstances.department) {
+                  this.tsInstances.department.enable();
+                  this.tsInstances.department.clear(true);
                 }
               }
             },
@@ -1010,7 +1008,7 @@
 
             if (res && res.result && res.result.length > 0) {
               const pr = res.result[0];
-              const items = pr.Requested_Items || [];
+              const items = pr.Items || [];
               const PrNumber = pr.PR_Number || 'PR-' + pr.Requisition_Number || '';
               if (PrNumber && this.tsInstances.pr && this.tsInstances.pr.options[prId]) {
                 this.tsInstances.pr.updateOption(prId, {
@@ -1042,7 +1040,28 @@
                 }
               }
 
-              // ── 2. Auto-fill Dates ───────────────────────────────────────────────
+              // ── 2. Auto-fill Department ─────────────────────────────────────────
+              const dept = pr.Department;
+              const deptId = (dept && typeof dept === 'object') ? (dept.ID || dept.id || '') : '';
+              const deptName = (dept && typeof dept === 'object') ? (dept.Name || dept.zc_display_value || dept.display_value || '') : (dept || '');
+
+              if (deptId && this.tsInstances.department) {
+                if (!this.tsInstances.department.options[deptId]) {
+                  this.tsInstances.department.addOption({ ID: String(deptId), Name: deptName });
+                }
+                this.tsInstances.department.setValue(deptId, true);
+                this.rfqForm.department = deptId;
+              } else if (deptName) {
+                const matchedDept = this.departmentMasters.find(d =>
+                  (d.Name || '').toLowerCase() === deptName.toLowerCase()
+                );
+                if (matchedDept && this.tsInstances.department) {
+                  this.tsInstances.department.setValue(matchedDept.ID, true);
+                  this.rfqForm.department = matchedDept.ID;
+                }
+              }
+
+              // ── 3. Auto-fill Dates ───────────────────────────────────────────────
               // PR_Date → Request Date  |  Due_Date → Due Date
               if (pr.PR_Date) {
                 // Zoho dates arrive as "DD-MMM-YYYY" or ISO — normalise to YYYY-MM-DD for <input type=date>
@@ -1056,6 +1075,7 @@
 
               this.rfqForm.prLocked = true;
               if (this.tsInstances.unit) this.tsInstances.unit.disable();
+              if (this.tsInstances.department) this.tsInstances.department.disable();
 
               // ── 3. Auto-fill Line Items ──────────────────────────────────────────
               this.tsInstances.items.forEach(ts => ts && ts.destroy());

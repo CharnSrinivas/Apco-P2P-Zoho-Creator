@@ -1078,8 +1078,8 @@
                     if (this.toastTimer) { clearTimeout(this.toastTimer); this.toastTimer = null; }
                 },
                 downloadFile(filePath) {
-                    if (typeof filePath === 'string' && fullPath.includes('filepath=')) {
-                        filePath = fullPath.split('filepath=')[1].split('&')[0];
+                    if (typeof filePath === 'string' && filePath.includes('filepath=')) {
+                        filePath = filePath.split('filepath=')[1].split('&')[0];
                     }
                     ZOHO.CREATOR.UTIL.getInitParams().then((initParams) => {
                         const { scope, envUrlFragment, appLinkName } = initParams;
