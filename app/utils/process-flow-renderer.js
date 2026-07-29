@@ -43,8 +43,12 @@ const P2PWorkflowUtils = {
 		FETCH_LOGIN_USER: "Me",
 	},
 
-	// Internal cache for the logged-in user — populated on first call to fetchLoginUser().
+	// Level-1 cache: in-memory (cleared on page refresh).
 	_loginUser: null,
+	// Level-2 cache: localStorage key used to persist the login user across page navigations.
+	_LOGIN_USER_CACHE_KEY: "p2p_login_user_cache",
+	// How long the localStorage cache is considered fresh (default: 4 hours).
+	_LOGIN_USER_CACHE_TTL_MS: 4 * 60 * 60 * 1000,
 
 	// Resolved prefix — set by init(), defaults to "Dev__" until resolved.
 	_envPrefix: "Dev__",
@@ -62,23 +66,24 @@ const P2PWorkflowUtils = {
 	 *
 	 * @returns {Promise<string>} Resolves to the active prefix ("Dev__" | "Prod__").
 	 */
-	init: function () {
+	init: async function () {
 		if (this._envReady) return this._envReady;
 
-		this._envReady = ZOHO.CREATOR.UTIL.getInitParams()
-			.then((response) => {
+		this._envReady = (async () => {
+			try {
+				const response = await ZOHO.CREATOR.UTIL.getInitParams();
 				const fragment = (response && response.envUrlFragment) || "";
 				// Development environment contains "development" in the fragment
 				const isDev = fragment.toLowerCase().includes("development");
 				this._envPrefix = isDev ? "Dev__" : "Prod__";
 				return this._envPrefix;
-			})
-			.catch(() => {
+			} catch {
 				// Fallback: keep default "Dev__" on error to avoid
 				// accidentally calling production APIs in unknown environments.
 				this._envPrefix = "Dev__";
 				return this._envPrefix;
-			});
+			}
+		})();
 
 		return this._envReady;
 	},
@@ -314,9 +319,27 @@ const P2PWorkflowUtils = {
 	 *   console.log(user.email);       // "zohoone@apcobuildingsolutions.com"
 	 */
 	fetchLoginUser: async function () {
-		// Return cached result if already fetched
+		// ── Level 1: in-memory (same page session) ──────────────────────────────
 		if (this._loginUser) return this._loginUser;
 
+		// ── Level 2: localStorage (survives navigation, expires after TTL) ──────
+		try {
+			const raw = localStorage.getItem(this._LOGIN_USER_CACHE_KEY);
+			if (raw) {
+				const cached = JSON.parse(raw);
+				const age = Date.now() - (cached.cachedAt || 0);
+				if (age < this._LOGIN_USER_CACHE_TTL_MS && cached.user && cached.user.loginuserid) {
+					this._loginUser = cached.user; // promote to in-memory
+					return this._loginUser;
+				}
+				// Cache expired — remove stale entry
+				localStorage.removeItem(this._LOGIN_USER_CACHE_KEY);
+			}
+		} catch (_) {
+			// localStorage may be unavailable (private mode, quota, etc.) — silently continue
+		}
+
+		// ── Level 3: fetch from Zoho custom API ─────────────────────────────────
 		try {
 			const response = await ZOHO.CREATOR.DATA.invokeCustomApi({
 				api_name: this.API.FETCH_LOGIN_USER,
@@ -338,6 +361,16 @@ const P2PWorkflowUtils = {
 				throw new Error("fetchLoginUser: unexpected response shape — " + JSON.stringify(response));
 			}
 
+			// Persist to localStorage with a timestamp for TTL checks
+			try {
+				localStorage.setItem(
+					this._LOGIN_USER_CACHE_KEY,
+					JSON.stringify({ user, cachedAt: Date.now() }),
+				);
+			} catch (_) {
+				// localStorage write failed (quota exceeded, etc.) — not critical
+			}
+
 			this._loginUser = user;
 			return this._loginUser;
 		} catch (err) {
@@ -346,24 +379,21 @@ const P2PWorkflowUtils = {
 		}
 	},
 
-	downloadFile(filePath, reportName, recordId) {
+	async downloadFile(filePath, reportName, recordId) {
 		if (typeof filePath === "string" && filePath.includes("filepath=")) {
 			filePath = filePath.split("filepath=")[1].split("&")[0];
 		}
-		ZOHO.CREATOR.UTIL.getInitParams()
-			.then((initParams) => {
-				const { scope, envUrlFragment, appLinkName } = initParams;
-				const host = window.location.hostname.replace(
-					"creatorapp",
-					"creatorapp",
-				);
-				const url =
-					`https://creatorapp.zoho.in/${scope}${envUrlFragment}/${appLinkName}` +
-					`/report/${reportName}/${recordId}/Attachments/download-file` +
-					`?filepath=${encodeURIComponent(filePath)}`;
+		try {
+			const initParams = await ZOHO.CREATOR.UTIL.getInitParams();
+			const { scope, envUrlFragment, appLinkName } = initParams;
+			const url =
+				`https://creatorapp.zoho.in/${scope}${envUrlFragment}/${appLinkName}` +
+				`/report/${reportName}/${recordId}/Attachments/download-file` +
+				`?filepath=${encodeURIComponent(filePath)}`;
 
-				window.open(url, "_blank");
-			})
-			.catch((err) => console.error("Could not get init params:", err));
+			window.open(url, "_blank");
+		} catch (err) {
+			console.error("Could not get init params:", err);
+		}
 	},
 };
