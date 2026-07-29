@@ -42,7 +42,11 @@ const P2PWorkflowUtils = {
 		FETCH_GRN_DETAILS: "Fetch_GRN_Details",
 		FETCH_LOGIN_USER: "Me",
 	},
-
+	ROLES: {
+		PRODUCTION: "Production Team",
+		OPERATIONS: "Operations Team",
+		PURCHASE: "Purchase Team",
+	},
 	// Level-1 cache: in-memory (cleared on page refresh).
 	_loginUser: null,
 	// Level-2 cache: localStorage key used to persist the login user across page navigations.
@@ -328,7 +332,11 @@ const P2PWorkflowUtils = {
 			if (raw) {
 				const cached = JSON.parse(raw);
 				const age = Date.now() - (cached.cachedAt || 0);
-				if (age < this._LOGIN_USER_CACHE_TTL_MS && cached.user && cached.user.loginuserid) {
+				if (
+					age < this._LOGIN_USER_CACHE_TTL_MS &&
+					cached.user &&
+					cached.user.loginuserid
+				) {
 					this._loginUser = cached.user; // promote to in-memory
 					return this._loginUser;
 				}
@@ -354,11 +362,18 @@ const P2PWorkflowUtils = {
 
 			// If the value is still a JSON string, parse it.
 			if (typeof user === "string") {
-				try { user = JSON.parse(user); } catch (_) { /* leave as-is */ }
+				try {
+					user = JSON.parse(user);
+				} catch (_) {
+					/* leave as-is */
+				}
 			}
 
 			if (!user || typeof user !== "object" || !user.loginuserid) {
-				throw new Error("fetchLoginUser: unexpected response shape — " + JSON.stringify(response));
+				throw new Error(
+					"fetchLoginUser: unexpected response shape — " +
+						JSON.stringify(response),
+				);
 			}
 
 			// Persist to localStorage with a timestamp for TTL checks

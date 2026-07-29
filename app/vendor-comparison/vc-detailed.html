@@ -1113,7 +1113,6 @@
                                 if (statusLower === 'finalized' || statusLower === 'approved') currentStage = "Purchase Order";
 
                                 P2PWorkflowUtils.renderProgress(this.actions, currentStage, document.getElementById('globalProgressContainer'), document.getElementById('globalProgressFill'));
-                                P2PWorkflowUtils.renderAuditTrail(this.actions, document.getElementById('globalAuditTrail'));
                             }
                         });
 

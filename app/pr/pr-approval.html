@@ -242,7 +242,7 @@
                 <div class="text-[25px] font-bold leading-none text-[#1B5CA8]" x-text="stats.all">–</div>
                 <div class="text-[11px] text-gray-400 mt-1.5">All purchase requests</div>
             </div>
-            <div
+            <div x-show="userRole !== 'Operations Team'"
                 class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-amber-500">
                 <div class="text-[11px] font-medium text-gray-500  tracking-wide mb-1.5">Pending</div>
                 <div class="text-[25px] font-bold leading-none text-amber-500" x-text="stats.pending">–</div>
@@ -274,7 +274,7 @@
 
         <div class="flex items-center justify-between gap-2.5 mb-2 flex-wrap">
             <div class="flex bg-gray-100 rounded-full p-[3px] gap-[2px]">
-                <template x-for="tab in filterTabs" :key="tab.key">
+                <template x-for="tab in activeFilterTabs" :key="tab.key">
                     <button @click="setFilter(tab.key)" type="button"
                         class="px-3 py-1 text-xs font-medium rounded-full transition-all duration-150"
                         :class="currentFilter === tab.key ? 'pill-active' : 'text-gray-600 hover:bg-white hover:text-[#1B5CA8]'">
@@ -622,14 +622,13 @@
 <script>
     'use strict';
 
-    const REPORT_NAME = 'Purchase_Requisition_Report';
+    let REPORT_NAME = 'Purchase_Requisition_Report'; // Changed to dynamically modify for Production Team[cite: 1]
     const ITEMS_REPORT_NAME = 'Items_Report';
     const UNITS_REPORT_NAME = 'Unit_Report';
     const DEPARTMENTS_REPORT_NAME = 'Departments_Report';
     const PER_PAGE = 10;
     const FETCH_BATCH_SIZE = 200;
 
-    // Configured SweetAlert2 to replace the manual CSS toast notification logic
     const Toast = Swal.mixin({
         toast: true, position: 'top-end', showConfirmButton: false, timer: 3500, timerProgressBar: true,
         customClass: { popup: 'font-[Lato] text-sm' }
@@ -639,14 +638,12 @@
         Toast.fire({ icon: type, title: message });
     }
 
-    // Replaced complex Date manual logic with Day.js
     function formatDate(dateStr) {
         if (!dateStr) return '–';
         const d = dayjs(dateStr);
         return d.isValid() ? d.format('DD MMM YYYY') : dateStr;
     }
 
-    // Replaced complex Date formatting with Day.js
     function formatZohoDateSubmission(dateString) {
         if (!dateString) return "";
         const d = dayjs(dateString);
@@ -658,6 +655,7 @@
         var s = rec.Status ? rec.Status.toLowerCase() : '';
         if (s === 'draft') return 'draft';
         if (s === 'submitted') return 'submitted';
+        if (s === 'approved') return 'approved';
         if (s === 'in progress') return 'in_progress';
         if (s === 'completely ordered') return 'completely_ordered';
         if (s === 'partially ordered') return 'partially_ordered';
@@ -666,8 +664,7 @@
         if (s === 'paid') return 'paid';
         if (s === 'rejected') return 'rejected';
         if (s === 'cancelled') return 'cancelled';
-        if (s === 'completed') return 'paid'; // legacy mapping
-        // Fall back to stage-based detection
+        if (s === 'completed') return 'paid';
         var stage = rec.Current_Stage;
         if (!stage || stage === 'Purchase Requisition') return 'pending';
         if (stage === 'Payment') return 'paid';
@@ -682,6 +679,7 @@
             draft: { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400', label: 'Draft' },
             submitted: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500', label: 'Submitted' },
             pending: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500', label: stageLabel },
+            approved: { border: 'border-green-200', bg: 'bg-green-50', text: 'text-green-800', dot: 'bg-green-500', label: 'Approved' },
             in_progress: { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500', label: 'In Progress' },
             completely_ordered: { border: 'border-teal-200', bg: 'bg-teal-50', text: 'text-teal-800', dot: 'bg-teal-600', label: 'Completely Ordered' },
             partially_ordered: { border: 'border-orange-200', bg: 'bg-orange-50', text: 'text-orange-800', dot: 'bg-orange-500', label: 'Partially Ordered' },
@@ -698,6 +696,7 @@
         const colors = {
             draft: { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400' },
             submitted: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' },
+            approved: { border: 'border-green-200', bg: 'bg-green-50', text: 'text-green-800', dot: 'bg-green-500' },
             in_progress: { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500' },
             completely_ordered: { border: 'border-teal-200', bg: 'bg-teal-50', text: 'text-teal-800', dot: 'bg-teal-600' },
             partially_ordered: { border: 'border-orange-200', bg: 'bg-orange-50', text: 'text-orange-800', dot: 'bg-orange-500' },
@@ -749,13 +748,28 @@
         }
     }
 
-    function buildStatusCriteria(filter) {
-        if (!filter || filter === 'all') return '';
-        if (filter === 'pending') return '(Current_Stage == "Purchase Requisition" && Status != "Rejected" && Status != "Draft")';
-        if (filter === 'in_progress') return '((Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill") && Status != "Rejected")';
-        if (filter === 'completed') return '(Current_Stage == "Payment" && Status != "Rejected")';
-        if (filter === 'rejected') return '(Status == "Rejected")';
-        return '';
+    function buildStatusCriteria(filter, role) {
+        let crit = '';
+        if (filter === 'pending') {
+            crit = '(Current_Stage == "Purchase Requisition" && Status != "Rejected" && Status != "Draft" && Status != "Approved")';
+        } else if (filter === 'approved') {
+            crit = '(Status == "Approved" && Current_Stage == "Purchase Requisition")';
+        } else if (filter === 'in_progress') {
+            crit = '((Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill") && Status != "Rejected")';
+        } else if (filter === 'completed') {
+            crit = '(Current_Stage == "Payment" && Status != "Rejected")';
+        } else if (filter === 'rejected') {
+            crit = '(Status == "Rejected")';
+        }
+
+        if (role === 'Operations Team') {
+            const opsBase = '(Status == "Approved" || Status == "Rejected" || Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill" || Current_Stage == "Payment")';
+            if (crit) {
+                return `(${opsBase} && ${crit})`;
+            }
+            return opsBase;
+        }
+        return crit;
     }
 
     function fetchAllRecords(criteria) {
@@ -781,10 +795,11 @@
     function prApp() {
         return {
             // ── stats ──
-            stats: { all: '–', pending: '–', in_progress: '–', completed: '–', rejected: '–' },
+            stats: { all: '–', pending: '–', approved: '–', in_progress: '–', completed: '–', rejected: '–' },
             filterTabs: [
                 { key: 'all', label: 'All' },
                 { key: 'pending', label: 'Submitted' },
+                { key: 'approved', label: 'Approved' },
                 { key: 'in_progress', label: 'In Progress' },
                 { key: 'completed', label: 'Completed' },
                 { key: 'rejected', label: 'Rejected' }
@@ -802,6 +817,7 @@
             ],
 
             // ── data ──
+            userRole: '',
             allRecords: [],
             filteredRecords: [],
             itemMasters: [],
@@ -828,15 +844,36 @@
             rfqMessage: '',
             rfqChoice: 'No',
             submitting: false,
-            submitType: 'Submitted', // 'Draft' or 'Submitted'
+            submitType: 'Submitted',
             todayStr: new Date().toISOString().split('T')[0],
 
-            init() {
-                P2PWorkflowUtils.init(); // Detect env prefix (Dev__ / Prod__)
+            async init() {
+                P2PWorkflowUtils.init();
+
+                try {
+                    const res = await P2PWorkflowUtils.fetchLoginUser();
+                    this.userRole = res.role || "";
+                    
+                    if (this.userRole === "Production Team") {
+                        REPORT_NAME = "Production_Team_PRs";
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch login user role", error);
+                }
+
+                // Initializing record and master data fetching AFTER role assignment so the accurate report loads[cite: 1]
                 this.fetchRecords();
                 this.fetchItemMasters();
                 this.fetchUnitMasters();
                 this.fetchDepartmentMasters();
+            },
+
+            get activeFilterTabs() {
+                // Remove the Pending tab visually since it inherently equates to 0 for Operations Team 
+                if (this.userRole === 'Operations Team') {
+                    return this.filterTabs.filter(tab => tab.key !== 'pending');
+                }
+                return this.filterTabs;
             },
 
             get totalPages() {
@@ -871,10 +908,6 @@
                 return btns;
             },
 
-            // ════════════════════════════════════════════
-            //  RECORD DECORATION
-            // ════════════════════════════════════════════
-
             decorateRecord(rec) {
                 const norm = normalizeStatus(rec);
                 rec._prNumber = rec.PR_Number || ('PR-' + rec.Requisition_Number);
@@ -885,6 +918,7 @@
 
                 let label = 'Submitted';
                 if (norm === 'draft') label = 'Draft';
+                if (norm === 'approved') label = 'Approved';
                 if (norm === 'in_progress') label = 'In Progress';
                 if (norm === 'completed') label = 'Completed';
                 if (norm === 'rejected') label = 'Rejected';
@@ -897,10 +931,6 @@
                 rec._rfqList = parseRfqList(rec);
                 return rec;
             },
-
-            // ════════════════════════════════════════════
-            //  DATA FETCHING & SORTING
-            // ════════════════════════════════════════════
 
             fetchUnitMasters() {
                 ZOHO.CREATOR.DATA.getRecords({ report_name: UNITS_REPORT_NAME, max_records: 200 })
@@ -933,7 +963,6 @@
                     .then((response) => {
                         if (response.code === 3000 && response.data) {
                             this.itemMasters = response.data;
-                            // Update any already-rendered Tom Select dropdowns in the modal
                             Object.values(this.rowTomSelects).forEach(ts => { ts.addOption(this.itemMasters); ts.refreshOptions(false); });
                         }
                     }).catch(err => console.error('Failed to load item masters:', err));
@@ -944,7 +973,7 @@
 
                 var q = this.searchQuery.replace(/'/g, "\\'");
                 var searchCrit = this.searchQuery ? `PR_Number.startsWith("${q}") || Requisition_Number.startsWith("${q}") || Requested_By_Email.startsWith("${q}") || Added_User.startsWith("${q}")` : '';
-                var statusCrit = buildStatusCriteria(this.currentFilter);
+                var statusCrit = buildStatusCriteria(this.currentFilter, this.userRole);
                 var criteria = [searchCrit, statusCrit].filter(Boolean).join(' && ');
 
                 fetchAllRecords(criteria).then((records) => {
@@ -1002,24 +1031,29 @@
                 });
             },
 
-            // ════════════════════════════════════════════
-            //  STATS & COUNTS
-            // ════════════════════════════════════════════
-
             computeStats() {
                 var q = this.searchQuery.replace(/'/g, "\\'");
                 var searchCrit = this.searchQuery ? `( PR_Number=("${q}") || Requisition_Number=("${q}") )` : '';
+                
+                const role = this.userRole;
 
                 function combineCriteria(statusCrit) {
                     var parts = [];
                     if (searchCrit) parts.push(searchCrit);
+
+                    if (role === 'Operations Team') {
+                        const opsBase = '(Status == "Approved" || Status == "Rejected" || Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill" || Current_Stage == "Payment")';
+                        parts.push(opsBase);
+                    }
+
                     if (statusCrit) parts.push(statusCrit);
                     return parts.join(' && ');
                 }
 
                 const counts = [
                     { key: 'all', crit: combineCriteria('') },
-                    { key: 'pending', crit: combineCriteria('(Current_Stage == "Purchase Requisition" && Status != "Rejected" && Status != "Draft")') },
+                    { key: 'pending', crit: combineCriteria('(Current_Stage == "Purchase Requisition" && Status != "Rejected" && Status != "Draft" && Status != "Approved")') },
+                    { key: 'approved', crit: combineCriteria('(Status == "Approved" && Current_Stage == "Purchase Requisition")') },
                     { key: 'in_progress', crit: combineCriteria('((Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill") && Status != "Rejected")') },
                     { key: 'completed', crit: combineCriteria('(Current_Stage == "Payment" && Status != "Rejected")') },
                     { key: 'rejected', crit: combineCriteria('(Status == "Rejected")') }
@@ -1035,10 +1069,6 @@
                 });
             },
 
-            // ════════════════════════════════════════════
-            //  ACTIONS COLUMN
-            // ════════════════════════════════════════════
-
             openRfq(id) {
                 ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', url: '#Page:RFQ_Detailed?recordId=' + id, window: 'same' });
             },
@@ -1046,10 +1076,6 @@
             openPr(id) {
                 ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', url: '#Page:PR_Detailed?recordId=' + id, window: 'same' });
             },
-
-            // ════════════════════════════════════════════
-            //  PR CREATION SYSTEM & ITEMS DROPDOWN
-            // ════════════════════════════════════════════
 
             openCreateModal() {
                 this.rowTomSelects = {};
@@ -1084,12 +1110,11 @@
                         placeholder: 'Select Department...'
                     });
 
-                    this.addGridRow(); // Add first empty row by default
+                    this.addGridRow();
                 });
             },
 
             closeModal() {
-                // Destroy Tom Select instances on close to prevent memory leaks
                 Object.values(this.rowTomSelects).forEach(ts => ts.destroy());
                 this.rowTomSelects = {};
                 if (this.unitTomSelect) {
@@ -1108,7 +1133,6 @@
                     id: ++rowIdCounter,
                     unit: '',
                     quantity: '',
-                    // Pre-fill per-row due date only when the feature is enabled
                     dueDate: P2PConfig.modules.PR.enableDueDatePerLineItem ? (this.prDueDate || '') : '',
                     comment: ''
                 });
@@ -1122,7 +1146,6 @@
             },
 
             initItemSelect(selectEl, row) {
-                // Initialize Tom Select on the new row for fully-featured autocomplete
                 const ts = new TomSelect(selectEl, {
                     valueField: 'ID',
                     labelField: 'item_name',
@@ -1289,5 +1312,4 @@
         };
     }
 </script>
-
 </html>

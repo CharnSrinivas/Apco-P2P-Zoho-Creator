@@ -4,4 +4,9 @@ const P2PConfig = {
 			enableDueDatePerLineItem: true
 		},
 	},
+
+	rbac:{
+		"Production Team":{},
+		"Operations Team":{},
+	}
 };

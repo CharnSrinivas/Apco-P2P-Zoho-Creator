@@ -326,7 +326,8 @@
                                 class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Required By
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Required
+                                By
                                 <span class="text-red-500">*</span></label>
                             <input type="date" x-model="editForm.dueDate" required
                                 class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
@@ -570,11 +571,11 @@
                             <span>Approved Line Items & Delivery Status</span>
                         </div>
                         <div x-show="selectedIndices.length > 0" x-cloak class="flex gap-2 fade-in">
-                            <button @click="createPO()"
+                            <button x-show="!isPOStageOrBeyond" @click="createPO()"
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-md text-[11px] font-semibold hover:bg-emerald-700 transition-colors shadow-sm">
                                 <i class="bi bi-cart-plus"></i> Create PO
                             </button>
-                            <button @click="createRFQ()"
+                            <button x-show="!isRFQStageOrBeyond" @click="createRFQ()"
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-md text-[11px] font-semibold hover:bg-gray-50 transition-colors shadow-sm">
                                 <i class="bi bi-file-earmark-plus"></i> Create RFQ
                             </button>
@@ -601,9 +602,8 @@
                                     <th
                                         class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
                                         QC</th>
-                                    <th
-                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
-                                        Last PO</th>
+                                    <th class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left"
+                                        x-text="hasPO ? 'PO' : 'Last PO'"></th>
                                     <th
                                         class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-center">
                                         Status</th>
@@ -710,12 +710,14 @@
                                         <td
                                             class="px-4 py-3 text-center align-top sticky right-0 bg-white group-hover:bg-gray-50 border-l border-gray-100 z-10 transition-colors">
                                             <div class="flex flex-col items-center justify-center gap-2">
-                                                <button @click="createPO()" title="Create PO"
+                                                <button x-show="!isPOStageOrBeyond" @click="createPO()"
+                                                    title="Create PO"
                                                     class="h-[26px] gap-1.5 px-2 py-1 flex items-center justify-center rounded bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 transition-colors cursor-pointer shadow-sm">
                                                     Create PO
                                                     <i class="bi bi-cart-plus text-[13px]"></i>
                                                 </button>
-                                                <button @click="createRFQ()" title="Create RFQ"
+                                                <button x-show="!isRFQStageOrBeyond" @click="createRFQ()"
+                                                    title="Create RFQ"
                                                     class="h-[26px] gap-1.5 px-2 py-1 flex items-center justify-center rounded bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-[#1B5CA8] border border-gray-200 transition-colors cursor-pointer shadow-sm">
                                                     Create RFQ
                                                     <i class="bi bi-file-earmark-plus text-[13px]"></i>
@@ -973,6 +975,18 @@
                 get isInProgress() { return (this.rec.Status || '').toLowerCase() === 'in progress'; },
                 get isPRStage() { return this.rec.Current_Stage === 'Purchase Requisition' && (this.rec.Status || '').toLowerCase() === 'submitted'; },
                 get showActionButtons() { return this.isDraft || (this.isPRStage && !this.isRejected && !this.isApproved); },
+                // Stage-based visibility for RFQ/PO creation buttons
+                get isRFQStageOrBeyond() {
+                    const s = (this.rec.Current_Stage || '').toLowerCase();
+                    return s.includes('request for quotation') || s.includes('quote comparison') || s.includes('purchase order') || s.includes('grn') || s.includes('bill') || s.includes('payment');
+                },
+                get isPOStageOrBeyond() {
+                    const s = (this.rec.Current_Stage || '').toLowerCase();
+                    return s.includes('purchase order') || s.includes('grn') || s.includes('bill') || s.includes('payment');
+                },
+                get hasPO() {
+                    return (this.rec.Items || []).some(item => item.Purchase_Orders && item.Purchase_Orders.length > 0);
+                },
 
                 get selectAll() {
                     return this.rec.Items && this.rec.Items.length > 0 && this.selectedIndices.length === this.rec.Items.length;
@@ -1152,7 +1166,7 @@
                                     finalApprovedItems.push(pItem);
                                 }
                             });
-                            payloadData.Status = "In Progress";
+                            payloadData.Status = "Approved";
                             payloadData.Items = finalApprovedItems;
                             payloadData.Items_Approval_Status = isPartiallyApproved ? "Partially Approved" : "Approved";
                         }
@@ -1280,64 +1294,91 @@
                                 <meta charset="UTF-8">
                                 <title>${this.prNumber}_Details</title>
                                 <style>
-                                    :root { --primary-color: #1B5CA8; --border-color: #bdc3c7; --bg-gray: #f8f9fa; }
-                                    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; line-height: 1.5; margin: 0; padding: 20px; font-size: 11pt; }
-                                    .document-wrapper { max-width: 800px; margin: 0 auto; }
-                                    .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--primary-color); padding-bottom: 15px; margin-bottom: 30px; }
-                                    .company-info h1 { margin: 0; color: var(--primary-color); font-size: 24pt; }
-                                    .company-info p { margin: 4px 0; color: #555; }
-                                    .document-title { text-align: right; }
-                                    .document-title h2 { margin: 0 0 10px 0; font-size: 20pt; text-transform: uppercase; letter-spacing: 1px; color: var(--primary-color); }
-                                    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; background: var(--bg-gray); padding: 15px; border: 1px solid var(--border-color); }
-                                    .meta-item { font-size: 11pt; }
-                                    .meta-item strong { display: inline-block; width: 120px; color: #555; }
+                                    :root { --primary-color: #1B5CA8; --border-color: #000000; --bg-gray: #f8f9fa; }
+                                    body { font-family: 'Arial', sans-serif; color: #151616; line-height: 1.5; margin: 0; padding: 20px; font-size: 10pt; }
+                                    .document-wrapper { max-width: 800px; margin: 0 auto; min-height: 90vh; position: relative; padding-bottom: 80px; box-sizing: border-box;}
+                                    
+                                    /* Header Styles */
+                                    .header { margin-bottom: 20px; }
+                                    .header-top { display: flex; gap:1rem; align-items: center; padding-bottom: 10px; }
+                                    .header-logo { height: 45px; }
+                                    .header-title-img { height: 35px; }
+                                    .header-divider { border-bottom: 2px solid var(--border-color); margin-bottom: 25px; }
+                                    
+                                    /* Title */
+                                    .document-title { text-align: center; margin-bottom: 25px; }
+                                    .document-title h2 { margin: 0; font-size: 18pt; text-transform: uppercase; color: var(--primary-color); text-decoration: underline; }
+                                    .document-title h3 { margin: 5px 0 0 0; font-size: 14pt; color: #444; }
+                                    
+                                    /* Meta Information Grid */
+                                    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 30px; margin-bottom: 30px; }
+                                    .meta-item { font-size: 10pt; display: flex; }
+                                    .meta-item strong { width: 130px; color: #151616; flex-shrink: 0; }
+                                    .meta-item span { flex-grow: 1; border-bottom: 1px dotted #ccc; }
+                                    
+                                    /* Table Styles */
                                     table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-                                    th, td { border: 1px solid var(--border-color); padding: 10px; text-align: left; }
-                                    th { background-color: var(--primary-color); color: white; font-weight: bold; font-size: 10pt; text-transform: uppercase; }
-                                    .text-right { text-align: right; }
-                                    .text-center { text-align: center; }
-                                    .desc-box { border: 1px solid var(--border-color); padding: 15px; margin-bottom: 40px; page-break-inside: avoid; }
-                                    .desc-box h4 { margin-top: 0; margin-bottom: 10px; color: var(--primary-color); }
+                                    th, td { border: 1px solid var(--border-color); padding: 8px 10px; text-align: left; font-size: 9.5pt; }
+                                    th { background-color: var(--primary-color); color: white; font-weight: bold; text-transform: uppercase; text-align: center; border-color: var(--primary-color); }
+                                    td.text-center { text-align: center; }
+                                    
+                                    /* Description Box */
+                                    .desc-box { border: 1px solid var(--border-color); padding: 12px 15px; margin-bottom: 40px; background-color: var(--bg-gray); page-break-inside: avoid; }
+                                    .desc-box h4 { margin: 0 0 8px 0; color: var(--primary-color); font-size: 10pt; text-transform: uppercase; }
+                                    
+                                    /* Signatures */
                                     .signature-section { display: flex; justify-content: space-between; margin-top: 60px; page-break-inside: avoid; }
-                                    .signature-box { width: 35%; border-top: 1px solid #000; text-align: center; padding-top: 5px; font-weight: bold; color: #555;}
+                                    .signature-box { width: 30%; border-top: 1px solid var(--border-color); text-align: center; padding-top: 8px; font-weight: bold; color: #151616; }
+                                    
+                                    /* Footer Styles */
+                                    .footer { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; font-size: 8.5pt; padding: 15px 20px; border-top: 2px solid var(--border-color); color: #151616; page-break-inside: avoid; }
+                                    .footer p { margin: 4px 0; }
+                                    .footer a { color: #0000ff; text-decoration: underline; }
+                                    
                                     @media print {
-                                        body { padding: 0; background: white; }
-                                        .document-wrapper { max-width: 100%; }
-                                        th { background-color: var(--primary-color) !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                                        .meta-grid, .desc-box { background-color: var(--bg-gray) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                                        @page { size: A4; margin: 1.5cm; }
+                                        body { background: white; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                                        .document-wrapper { width: 100%; max-width: none; padding: 0; padding-bottom: 70px; }
+                                        th { background-color: var(--primary-color) !important; color: white !important; }
+                                        .desc-box { background-color: var(--bg-gray) !important; }
+                                        @page { size: A4; margin: 15mm; margin-bottom: 25mm; }
                                         tr { page-break-inside: avoid; }
+                                        .footer { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding-bottom: 10px; }
                                     }
                                 </style>
                             </head>
                             <body>
                                 <div class="document-wrapper">
-                                    <header class="header">
-                                        <div class="company-info">
-                                            <h1>APCO Building Solutions Pvt Ltd</h1>
-                                            <p>#234, Narayan Nagar, 1st stage, Doddakallasandra, Kanakapura road, Bangalore - 560062.</p>
-                                            <p>Email: Sales@apcobuildingsolutions.com</p>
+                                    <!-- Header -->
+                                    <div class="header">
+                                        <div class="header-top">
+                                            <img src="https://workdrive.zohoexternal.in/external/1aea9ee07ddb530e53388742ccf74df7ed19c852bae617665137c11a15eb799f/download?directDownload=true" class="header-logo" alt="Logo" />
+                                            <img src="https://workdrive.zohoexternal.in/external/47f6a40264b8b06f4b9f35fa8891106b72bf6401c94483682a510bc0afd397fc/download?directDownload=true" class="header-title-img" alt="APCO Building Solutions" />
                                         </div>
-                                        <div class="document-title">
-                                            <h2>Purchase Requisition</h2>
-                                            <div style="font-size: 14pt; font-weight: bold; color: #444;">${this.escapeHtml(this.prNumber)}</div>
-                                        </div>
-                                    </header>
-                                    
-                                    <div class="meta-grid">
-                                        <div class="meta-item"><strong>Date:</strong> ${this.formatDate(this.rec.PR_Date)}</div>
-                                        <div class="meta-item"><strong>Status:</strong> ${this.escapeHtml(this.rec.Status)}</div>
-                                        <div class="meta-item"><strong>Requested By:</strong> ${this.escapeHtml(this.getDisplayName(this.rec.Requested_By_Email || this.rec.Added_User))}</div>
-                                        <div class="meta-item"><strong>Department:</strong> ${this.escapeHtml(this.getDisplayName(this.rec.Department))}</div>
-                                        <div class="meta-item"><strong>Unit / Location:</strong> ${this.escapeHtml(this.getDisplayName(this.rec.Unit))}</div>
-                                        <div class="meta-item"><strong>Required By:</strong> ${this.formatDate(this.rec.Due_Date)}</div>
+                                        <div class="header-divider"></div>
                                     </div>
                                     
+                                    <!-- Title -->
+                                    <div class="document-title">
+                                        <h2>Purchase Requisition</h2>
+                                        <h3>${this.escapeHtml(this.prNumber)}</h3>
+                                    </div>
+                                    
+                                    <!-- Meta Info -->
+                                    <div class="meta-grid">
+                                        <div class="meta-item"><strong>Date:</strong> <span>${this.formatDate(this.rec.PR_Date)}</span></div>
+                                        <div class="meta-item"><strong>Status:</strong> <span>${this.escapeHtml(this.rec.Status)}</span></div>
+                                        <div class="meta-item"><strong>Requested By:</strong> <span>${this.escapeHtml(this.getDisplayName(this.rec.Requested_By_Email || this.rec.Added_User))}</span></div>
+                                        <div class="meta-item"><strong>Department:</strong> <span>${this.escapeHtml(this.getDisplayName(this.rec.Department))}</span></div>
+                                        <div class="meta-item"><strong>Unit / Location:</strong> <span>${this.escapeHtml(this.getDisplayName(this.rec.Unit))}</span></div>
+                                        <div class="meta-item"><strong>Required By:</strong> <span>${this.formatDate(this.rec.Due_Date)}</span></div>
+                                    </div>
+                                    
+                                    <!-- Table -->
                                     <table>
                                         <thead>
                                             <tr>
                                                 <th width="5%" class="text-center">#</th>
-                                                <th width="45%">Item Description</th>
+                                                <th width="45%" style="text-align: left;">Item Description</th>
                                                 <th width="12%" class="text-center">${isApprovedSet ? 'App. Qty' : 'Qty'}</th>
                                                 ${isApprovedSet ? '<th width="12%" class="text-center">Ord. Qty</th><th width="12%" class="text-center">Rec. Qty</th>' : ''}
                                                 <th width="14%" class="text-center">Required By</th>
@@ -1352,9 +1393,16 @@
                                         <div>${this.escapeHtml(this.rec.description)}</div>
                                     </div>` : ''}
                                     
+                                    <!-- Signatures -->
                                     <div class="signature-section">
                                         <div class="signature-box">Requester Signature</div>
                                         <div class="signature-box">Approver Signature</div>
+                                    </div>
+                                    
+                                    <!-- Footer -->
+                                    <div class="footer">
+                                        <p><strong>CORPORATE OFFICE:</strong> #234, Narayan Nagar, 1st stage, Doddakallasandra, Kanakapura Road, Bangalore - 560 062 | Tel.: 9901 37433 | 98450 65715 | CIN No: U23954KA2024PTC185349</p>
+                                        <p>E-mail: <a href="mailto:Purchase@apcobuildingsolutions.com">Purchase@apcobuildingsolutions.com</a> | <a href="https://www.apcobuildingsolutions.com" target="_blank">www.apcobuildingsolutions.com</a></p>
                                     </div>
                                 </div>
                             </body>
@@ -1372,7 +1420,7 @@
                             iframe.contentWindow.print();
                             setTimeout(() => document.body.removeChild(iframe), 2000);
                             this.isGeneratingPDF = false;
-                        }, 500);
+                        }, 1000); // Increased interval slightly to ensure remote image loads before print popup opens
                     } catch (err) {
                         console.error('PDF generation failed:', err);
                         this.showToast('Failed to generate PDF.', 'error');
