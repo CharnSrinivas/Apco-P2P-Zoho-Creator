@@ -326,7 +326,7 @@
                                 class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Due Date
+                            <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Required By
                                 <span class="text-red-500">*</span></label>
                             <input type="date" x-model="editForm.dueDate" required
                                 class="w-full py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:bg-white focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/15 transition-all shadow-sm">
@@ -360,7 +360,7 @@
                                             Qty</th>
                                         <th
                                             class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[20%]">
-                                            Due Date</th>
+                                            Required By</th>
                                         <th
                                             class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[25%]">
                                             Comment</th>
@@ -540,7 +540,7 @@
                                         x-text="formatDate(rec.PR_Date)"></div>
                                 </div>
                                 <div class="mb-3">
-                                    <div class="text-[11px] text-gray-500 font-medium">Due Date</div>
+                                    <div class="text-[11px] text-gray-500 font-medium">Required By</div>
                                     <div class="text-[13px] font-semibold text-[#1B5CA8]"
                                         x-text="formatDate(rec.Due_Date)"></div>
                                 </div>
@@ -618,7 +618,7 @@
                                         Rec. Qty</th>
                                     <th
                                         class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left min-w-[150px]">
-                                        Due Date</th>
+                                        Required By</th>
                                     <th
                                         class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-center sticky right-0 bg-gray-50 border-l border-gray-200 shadow-sm z-10">
                                         Actions</th>
@@ -770,7 +770,7 @@
                                         Qty</th>
                                     <th
                                         class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
-                                        Due Date</th>
+                                        Required By</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1159,10 +1159,7 @@
 
                         const updateRes = await ZOHO.CREATOR.DATA.updateRecordById({ report_name: this.PR_REPORT, id: this.recordId, payload: { data: payloadData } });
                         if (updateRes.code !== 3000) throw new Error("Failed to update PR record");
-
-                        // const actionRes = await ZOHO.CREATOR.DATA.addRecords({ form_name: "PR_Action", payload: { data: { "PR_Number": this.recordId, "Status": this.pendingAction.status, "Moved_To": this.pendingAction.movedTo, "Comment": this.pendingAction.comment.trim() } } });
-                        // if (actionRes.code !== 3000) throw new Error("Failed to log PR action");
-
+                        this.isSubmittingAction = false;
                         this.closeActionModal();
                         this.fetchData();
                         this.showToast('Action processed successfully');
@@ -1343,7 +1340,7 @@
                                                 <th width="45%">Item Description</th>
                                                 <th width="12%" class="text-center">${isApprovedSet ? 'App. Qty' : 'Qty'}</th>
                                                 ${isApprovedSet ? '<th width="12%" class="text-center">Ord. Qty</th><th width="12%" class="text-center">Rec. Qty</th>' : ''}
-                                                <th width="14%" class="text-center">Due Date</th>
+                                                <th width="14%" class="text-center">Required By</th>
                                             </tr>
                                         </thead>
                                         <tbody>${itemRows}</tbody>

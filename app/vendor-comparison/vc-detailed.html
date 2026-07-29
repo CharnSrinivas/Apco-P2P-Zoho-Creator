@@ -518,11 +518,11 @@
                         class="text-[#1B5CA8] hover:text-[#14457e] font-medium transition-colors no-underline cursor-pointer">Quote
                         Comparisons</button>
                     <i class="bi bi-chevron-right text-[11px] text-gray-400"></i>
-                    <span class="text-gray-500 font-medium" x-text="vcNumber"></span>
+                    <span class="text-gray-500 font-medium" x-text="qcNumber"></span>
                 </nav>
                 <div class="flex items-center justify-between gap-2.5">
                     <div class="flex items-center gap-2.5">
-                        <h1 class="text-[17px] font-bold text-gray-900 leading-none" x-text="vcNumber"></h1>
+                        <h1 class="text-[17px] font-bold text-gray-900 leading-none" x-text="qcNumber"></h1>
                         <span x-html="getStatusBadge(rec.Status)"></span>
                         <template x-if="rec.Current_Stage">
                             <span
@@ -589,7 +589,7 @@
                                 Comparison Info</div>
                             <div class="mb-3">
                                 <div class="text-[11px] text-gray-500 font-medium">QC Number</div>
-                                <div class="text-[13px] font-semibold text-gray-900" x-text="vcNumber"></div>
+                                <div class="text-[13px] font-semibold text-gray-900" x-text="qcNumber"></div>
                             </div>
                             <div class="mb-3">
                                 <div class="text-[11px] text-gray-500 font-medium">Subject</div>
@@ -1230,7 +1230,7 @@
                     return arr.length > 0 ? arr.join(', ') : 'None';
                 },
 
-                get vcNumber() { return this.rec.QC_Number ? 'QC-' + this.rec.QC_Number : '–'; },
+                get qcNumber() { return this.rec.QC_Number ? 'QC-' + this.rec.QC_Number : '–'; },
                 get canEdit() { const s = (this.rec.Status || '').toLowerCase(); return !['freezed', 'finalized'].includes(s); },
                 get isFreezed() { return (this.rec.Status || '').toLowerCase() === 'freezed'; },
                 get isQcApproved() { const s = (this.rec.Status || '').toLowerCase(); return s === 'approved' || s === 'finalized'; },
@@ -1636,7 +1636,7 @@
                         <html lang="en">
                         <head>
                             <meta charset="UTF-8">
-                            <title>QCS_${this.vcNumber}</title>
+                            <title>QCS_${this.qcNumber}</title>
                             <style>
                                 :root { --primary-color: #1B5CA8; --border-color: #111827; --bg-gray: #f3f4f6; }
                                 body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #000; line-height:1.5; margin:0; padding:15px; font-size:9.5pt; }

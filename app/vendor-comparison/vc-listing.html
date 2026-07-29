@@ -353,7 +353,7 @@
                 class="bg-white border border-gray-200 rounded-lg p-[13px] pl-[17px] relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-[1px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-red-600">
                 <div class="text-[11px] font-medium text-gray-500 tracking-wide mb-1.5">Rejected</div>
                 <div class="text-[25px] font-bold leading-none text-red-600" x-text="stats.rejected"></div>
-                <div class="text-[11px] text-gray-400 mt-1.5">Declined VC</div>
+                <div class="text-[11px] text-gray-400 mt-1.5">Declined QC</div>
             </div>
         </div>
 
@@ -459,7 +459,8 @@
                             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap font-medium text-gray-900"
                                 x-text="rec['Unit.Name'] || rec.Unit?.Name || rec.Unit?.zc_display_value || '–'"></td>
                             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-gray-700"
-                                x-text="(rec.Department && (rec.Department.Name || rec.Department.zc_display_value)) || '–'"></td>
+                                x-text="(rec.Department && (rec.Department.Name || rec.Department.zc_display_value)) || '–'">
+                            </td>
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[11px] text-gray-500"
                                 x-text="formatDate(rec.Added_Time)"></td>
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap">
@@ -553,7 +554,8 @@
                                 <select x-ref="vcUnitSelect" class="w-full text-xs"></select>
                             </div>
                             <div>
-                                <label class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Department
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-500 tracking-wide mb-1.5">Department
                                     <span x-show="form.departmentLocked"
                                         class="ml-1 text-[10px] font-normal text-[#1B5CA8] bg-[#1B5CA8]/10 px-1.5 py-0.5 rounded-full">Auto-filled</span>
                                 </label>
@@ -613,7 +615,7 @@
                                                 </td>
                                                 <td class="px-2 py-2"><input disabled x-model="item.Unit" type="text"
                                                         class="grid-input bg-gray-100 text-gray-500 cursor-not-allowed"
-                                                        placeholder="e.g. Kg, Nos" readonly></td>
+                                                        placeholder="e.g. Kg, Each" readonly></td>
                                                 <td class="px-2 py-2"><input disabled x-model.number="item.Quantity"
                                                         @input="recalculateAllTotals()" type="number" min="1" step="any"
                                                         class="grid-input cursor-not-allowed"></td>
@@ -759,7 +761,7 @@
                                 class="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
                             <button type="submit" :disabled="isSubmitting"
                                 class="inline-flex items-center justify-center min-w-[100px] px-4 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-colors shadow-sm disabled:opacity-70">
-                                <span x-show="!isSubmitting">Submit VC</span>
+                                <span x-show="!isSubmitting">Submit QC</span>
                                 <div x-show="isSubmitting" class="vc-spinner"
                                     style="width:14px;height:14px;border-width:2px;border-top-color:white;"></div>
                             </button>
@@ -1496,7 +1498,7 @@
                                             uid: Date.now() + Math.random(),
                                             Items: itemRow.Item.ID,
                                             Item_Name: itemRow.Item.display_value || itemRow.Item.item_name,
-                                            Unit: itemRow.Unit || itemRow.Item.unit_of_measure || 'Nos',
+                                            Unit: itemRow.Unit || itemRow.Item.unit_of_measure || 'Each',
                                             Quantity: itemRow.Quantity || 0,
                                             Deliver_to_Plant: ''
                                         };
@@ -1602,6 +1604,7 @@
                         const payload = {
                             data: {
                                 Quote_Comparison_Subject: this.form.Quote_Comparison_Subject,
+                                QC_Date: P2PWorkflowUtils.formatDateForZoho(new Date().toISOString().split('T')[0]),
                                 Unit: this.form.Unit,
                                 Department: this.form.Department,
                                 PR_Ref: this.form.PR_Ref,

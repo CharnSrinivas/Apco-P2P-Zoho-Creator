@@ -324,7 +324,7 @@
                 x-text="rec.Requested_By_Email || rec.Added_User || '–'"></td>
               <td
                 class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-gray-500"
-                x-text="formatDate(rec.Request_Date)"></td>
+                x-text="formatDate(rec.RFQ_Date)"></td>
               <td
                 class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-gray-500"
                 x-text="formatDate(rec.Due_Date)"></td>
@@ -441,6 +441,20 @@
               <!-- <button type="button" @click="addItemRow()"
                 class="text-[11px] font-semibold text-[#1B5CA8] bg-[#1B5CA8]/10 px-2.5 py-1 rounded-md hover:bg-[#1B5CA8]/20 transition-colors">+
                 Add Item</button> -->
+            </div>
+
+            <!-- Apply Vendors to All Rows — shown only when 2+ items exist -->
+            <div x-show="rfqForm.items.length > 1"
+              class="flex items-center justify-between gap-3 px-4 py-2.5 bg-[#EBF3FC] border-b border-[#c5d9f0]">
+              <div class="flex items-center gap-2 text-[11.5px] text-[#1B5CA8]">
+                <i class="bi bi-info-circle-fill text-[13px] shrink-0"></i>
+                <span>Select vendors for <strong>one row</strong>, then apply the same vendors to all other rows instantly.</span>
+              </div>
+              <button type="button" @click="applyVendorsToAll()"
+                class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-[11px] font-semibold hover:bg-[#12427b] active:scale-95 transition-all shadow-sm whitespace-nowrap">
+                <i class="bi bi-people-fill"></i>
+                Apply to All Rows
+              </button>
             </div>
             <div class="overflow-x-auto" style="overflow:visible;">
               <table class="w-full border-collapse min-w-[700px]">
@@ -771,7 +785,7 @@
               return numMatch ? parseInt(numMatch[1], 10) : refVal.toLowerCase();
             case 'unit': return (rec['Unit.Name'] || '').toString();
             case 'pr_ref': return (Array.isArray(rec.PR_Refs) ? rec.PR_Refs.map(pr => pr.zc_display_value || pr.PR_Number || '').join(', ') : '').toString();
-            case 'req_date': return rec.Request_Date ? dayjs(rec.Request_Date).valueOf() : 0;
+            case 'req_date': return rec.RFQ_Date ? dayjs(rec.RFQ_Date).valueOf() : 0;
             case 'due_date': return rec.Due_Date ? dayjs(rec.Due_Date).valueOf() : 0;
             case 'status': return this.normalizeStatusGroup(rec);
             default: return '';
@@ -912,7 +926,7 @@
               var q = query.replace(/'/g, "\\'");
               ZOHO.CREATOR.DATA.getRecords({
                 report_name: this.PR_REPORT_NAME,
-                criteria: `(PR_Number.startsWith("${q}") || Requisition_Number.startsWith("${q.toLowerCase().replace('pr-', '')}")) && (Status == "In Progress" && Items_Approval_Status.contains("Approved"))`
+                criteria: `(PR_Number.contains("${q}")) && (Status == "In Progress" && Items_Approval_Status.contains("Approved"))`
               }).then(res => callback(res.code === 3000 ? res.data : [])).catch(() => callback());
             },
             render: {
@@ -1140,7 +1154,7 @@
               data: {
                 Unit: this.rfqForm.unit,
                 Department: this.rfqForm.department,
-                Request_Date: dayjs(this.rfqForm.reqDate).format('DD-MMM-YYYY'),
+                RFQ_Date: dayjs(this.rfqForm.reqDate).format('DD-MMM-YYYY'),
                 Due_Date: dayjs(this.rfqForm.dueDate).format('DD-MMM-YYYY'),
                 Purpose: this.rfqForm.purpose,
                 PR_Refs: this.rfqForm.prRef ? [this.rfqForm.prRef] : [],
@@ -1179,6 +1193,40 @@
           }
         },
 
+        // ── Apply Vendors to All Rows ──────────────────────────────────────────
+        // Copies vendor selections from the first row that has vendors selected
+        // to every other row, keeping TomSelect dropdown UIs in sync.
+        applyVendorsToAll() {
+          const source = this.rfqForm.items.find(i => i.vendorIds && i.vendorIds.length > 0);
+          if (!source) {
+            Toast.fire({ icon: 'warning', title: 'Please select vendors for at least one row first.' });
+            return;
+          }
+          const sourceIds = [...source.vendorIds];
+
+          this.rfqForm.items.forEach((item, idx) => {
+            item.vendorIds = [...sourceIds];
+
+            // Re-sync the TomSelect vendor dropdown for this row
+            const ts = this.tsInstances.vendorItems[idx];
+            if (ts) {
+              ts.clear(true); // clears selected values without destroying options
+              sourceIds.forEach(vId => {
+                if (!ts.options[vId]) {
+                  const v = this.vendorMasters.find(m => m.ID === vId);
+                  ts.addOption({
+                    ID: String(vId),
+                    Display_Name: v ? (v.Display_Name || v.Company_Name || 'Vendor') : 'Vendor #' + vId
+                  });
+                }
+              });
+              ts.setValue(sourceIds, true); // silent=true avoids re-triggering onChange loop
+            }
+          });
+
+          Toast.fire({ icon: 'success', title: `Vendors applied to all ${this.rfqForm.items.length} rows` });
+        },
+
         async saveAsDraft() {
           if (this.rfqForm.items.length === 0 || this.rfqForm.items.some(i => !i.id)) {
             Toast.fire({ icon: 'error', title: 'Please add at least one item before saving as draft.' });
@@ -1191,7 +1239,7 @@
               data: {
                 Unit: this.rfqForm.unit,
                 Department: this.rfqForm.department,
-                Request_Date: this.rfqForm.reqDate ? dayjs(this.rfqForm.reqDate).format('DD-MMM-YYYY') : '',
+                RFQ_Date: this.rfqForm.reqDate ? dayjs(this.rfqForm.reqDate).format('DD-MMM-YYYY') : '',
                 Due_Date: this.rfqForm.dueDate ? dayjs(this.rfqForm.dueDate).format('DD-MMM-YYYY') : '',
                 Purpose: this.rfqForm.purpose,
                 PR_Refs: this.rfqForm.prRef ? [this.rfqForm.prRef] : [],

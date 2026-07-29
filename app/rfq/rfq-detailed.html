@@ -452,7 +452,7 @@
                                 <div class="mb-3">
                                     <div class="text-[11px] text-gray-500 font-medium">Request Date</div>
                                     <div class="text-[13px] font-semibold text-gray-900"
-                                        x-text="formatDate(rec.Request_Date)"></div>
+                                        x-text="formatDate(rec.RFQ_Date)"></div>
                                 </div>
                                 <div class="mb-3">
                                     <div class="text-[11px] text-gray-500 font-medium">Due Date</div>
@@ -675,7 +675,7 @@
                 openEditModal() {
                     this.rfqForm = {
                         unitName: this.rec.Unit?.Name || '',
-                        reqDate: this.rec.Request_Date ? dayjs(this.rec.Request_Date).format('YYYY-MM-DD') : '',
+                        reqDate: this.rec.RFQ_Date ? dayjs(this.rec.RFQ_Date).format('YYYY-MM-DD') : '',
                         dueDate: this.rec.Due_Date ? dayjs(this.rec.Due_Date).format('YYYY-MM-DD') : '',
                         prRefDisplay: this.prRefDisplay,
                         purpose: this.rec.Purpose || '',
@@ -911,7 +911,7 @@
                             <tr>
                                 <td class="text-center">${i + 1}</td>
                                 <td><strong>${this.escapeHtml(q.item_master?.item_name || '–')}</strong></td>
-                                <td class="text-center">${P2PWorkflowUtils?.formatDateForZoho ? P2PWorkflowUtils.formatDateForZoho(this.rec.Request_Date) : this.formatDate(this.rec.Request_Date)}</td>
+                                <td class="text-center">${P2PWorkflowUtils?.formatDateForZoho ? P2PWorkflowUtils.formatDateForZoho(this.rec.RFQ_Date) : this.formatDate(this.rec.RFQ_Date)}</td>
                                 <td class="text-center">${q.Quantity || 0}</td>
                                 <td class="text-center">${this.escapeHtml(q.item_master?.unit_of_measure || '–')}</td>
                                 <td class="text-right"></td>
@@ -986,7 +986,7 @@
                                         <h2>Request for Quote</h2>
                                         <div class="rfq-meta">
                                             <strong>RFQ No:</strong> <span>${this.escapeHtml(this.rfqNumber)}</span>
-                                            <strong>Date:</strong> <span>${this.formatDate(this.rec.Request_Date)}</span>
+                                            <strong>Date:</strong> <span>${this.formatDate(this.rec.RFQ_Date)}</span>
                                             <strong>Valid Until:</strong> <span>${this.formatDate(this.rec.Due_Date)}</span>
                                         </div>
                                     </div>
