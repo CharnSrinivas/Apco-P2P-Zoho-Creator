@@ -40,7 +40,11 @@ const P2PWorkflowUtils = {
 		CHECK_ITEM_IN_GRN: "Check_Vendor_Requirement_For_Item",
 		FETCH_PO_DETAILS: "Fetch_PO_Details",
 		FETCH_GRN_DETAILS: "Fetch_GRN_Details",
+		FETCH_LOGIN_USER: "Me",
 	},
+
+	// Internal cache for the logged-in user — populated on first call to fetchLoginUser().
+	_loginUser: null,
 
 	// Resolved prefix — set by init(), defaults to "Dev__" until resolved.
 	_envPrefix: "Dev__",
@@ -288,101 +292,60 @@ const P2PWorkflowUtils = {
 		fillEl.style.background = isRejected ? "#dc2626" : "#1B5CA8";
 	},
 
-	// Main Function 2: Render Audit Trail
-	renderAuditTrail: function (actions, containerEl) {
-		if (!containerEl) return;
+	/**
+	 * Fetch the currently logged-in Zoho user's details via the "Dev_Me" custom API.
+	 *
+	 * The result is cached after the first successful call so that subsequent calls
+	 * within the same widget session are instant and never hit the network again.
+	 *
+	 * @returns {Promise<{
+	 *   loginuserid: string,
+	 *   email: string,
+	 *   username: string,
+	 *   role: string,
+	 *   permission: string
+	 * }>} Resolves with the logged-in user object.
+	 *
+	 * @throws {Error} If the API call fails or returns an unexpected payload.
+	 *
+	 * @example
+	 *   const user = await P2PWorkflowUtils.fetchLoginUser();
+	 *   console.log(user.role);        // "Super Admin"
+	 *   console.log(user.email);       // "zohoone@apcobuildingsolutions.com"
+	 */
+	fetchLoginUser: async function () {
+		// Return cached result if already fetched
+		if (this._loginUser) return this._loginUser;
 
-		if (!actions || actions.length === 0) {
-			containerEl.innerHTML = `
-                <div class="text-center py-8 text-gray-400">
-                    <i class="bi bi-clock-history-off text-xl mb-1.5 block"></i>
-                    <div class="text-xs font-medium text-gray-500">No activity recorded yet</div>
-                </div>`;
-			return;
+		try {
+			const response = await ZOHO.CREATOR.DATA.invokeCustomApi({
+				api_name: this.API.FETCH_LOGIN_USER,
+				http_method: "GET",
+				content_type: "application/json",
+			});
+
+			// The SDK may wrap the payload under .result, .data, or return it directly.
+			let user = response;
+			if (response && response.result) user = response.result;
+			else if (response && response.data) user = response.data;
+
+			// If the value is still a JSON string, parse it.
+			if (typeof user === "string") {
+				try { user = JSON.parse(user); } catch (_) { /* leave as-is */ }
+			}
+
+			if (!user || typeof user !== "object" || !user.loginuserid) {
+				throw new Error("fetchLoginUser: unexpected response shape — " + JSON.stringify(response));
+			}
+
+			this._loginUser = user;
+			return this._loginUser;
+		} catch (err) {
+			console.error("P2PWorkflowUtils.fetchLoginUser error:", err);
+			throw err;
 		}
-
-		// Sort chronologically based on Zoho ID
-		const sorted = [...actions].sort(
-			(a, b) => (parseInt(a.ID) || 0) - (parseInt(b.ID) || 0),
-		);
-		let html = '<div class="space-y-0">';
-
-		sorted.forEach((action) => {
-			const status = action.Status || "–";
-			const stage = action.Moved_To || "–";
-			const comment = action.Comment || "";
-			const performer = action.Added_User || "-";
-			const addedTime = action.Added_Time
-				? this.formatDateForZoho(action.Added_Time)
-				: "–";
-
-			// Styling Rules
-			const isApproved = status.includes("Approved");
-			const isRejected = status.includes("Rejected");
-
-			const iconBg = isApproved
-				? "bg-emerald-50"
-				: isRejected
-					? "bg-red-50"
-					: "bg-blue-50";
-			const iconColor = isApproved
-				? "text-emerald-600"
-				: isRejected
-					? "text-red-600"
-					: "text-blue-600";
-			const iconName = isApproved
-				? "bi-check-lg"
-				: isRejected
-					? "bi-x-lg"
-					: "bi-arrow-right";
-			const statusText = isApproved
-				? "text-emerald-700"
-				: isRejected
-					? "text-red-700"
-					: "text-gray-700";
-
-			let stageBg = "bg-gray-100 text-gray-600 border-gray-200";
-			const stageKey = this.stageToStepKey(stage);
-			if (stageKey === "purchase_order")
-				stageBg = "bg-blue-50 text-blue-700 border-blue-200";
-			else if (stageKey === "grn")
-				stageBg = "bg-violet-50 text-violet-700 border-violet-200";
-			else if (stageKey === "bill")
-				stageBg = "bg-cyan-50 text-cyan-700 border-cyan-200";
-			else if (stageKey === "payment")
-				stageBg = "bg-emerald-50 text-emerald-700 border-emerald-200";
-
-			const initials =
-				performer !== "-" ? performer.charAt(0).toUpperCase() : "?";
-
-			html += `
-                <div class="timeline-item relative pl-10 pb-5">
-                    <div class="timeline-line"></div>
-                    <div class="absolute left-0 top-0 w-[30px] h-[30px] rounded-full ${iconBg} flex items-center justify-center border-2 border-white shadow-sm z-10">
-                        <i class="bi ${iconName} text-[13px] ${iconColor}"></i>
-                    </div>
-                    <div class="bg-gray-50 border border-gray-200 rounded-lg px-3.5 py-3">
-                        <div class="flex items-center justify-between mb-1.5 flex-wrap gap-2">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs font-semibold ${statusText}">${this.esc(status)}</span>
-                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border ${stageBg}">
-                                    <i class="bi bi-arrow-right text-[9px] mr-1 opacity-60"></i>${this.esc(stage)}
-                                </span>
-                            </div>
-                            <span class="text-[10px] text-gray-400">${this.esc(addedTime)}</span>
-                        </div>
-                        ${comment ? `<div class="text-xs text-gray-600 mt-1.5 italic">"${this.esc(comment)}"</div>` : ""}
-                        <div class="flex items-center gap-1.5 mt-2 text-[11px] text-gray-500">
-                            <div class="w-[18px] h-[18px] rounded-full bg-[#1B5CA8] text-white flex items-center justify-center text-[9px] font-bold shrink-0">${initials}</div>
-                            <span class="font-medium truncate">${this.esc(performer)}</span>
-                        </div>
-                    </div>
-                </div>`;
-		});
-
-		html += "</div>";
-		containerEl.innerHTML = html;
 	},
+
 	downloadFile(filePath, reportName, recordId) {
 		if (typeof filePath === "string" && filePath.includes("filepath=")) {
 			filePath = filePath.split("filepath=")[1].split("&")[0];
