@@ -603,6 +603,9 @@
                                     <th class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left"
                                         x-text="isPOStageOrBeyond ? 'PO' : 'Last PO'"></th>
                                     <th
+                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
+                                        GRN</th>
+                                    <th
                                         class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-center">
                                         Status</th>
                                     <th
@@ -687,6 +690,24 @@
                                                 </div>
                                             </template>
                                             <template x-if="!item.Purchase_Orders || item.Purchase_Orders.length === 0">
+                                                <span class="text-gray-300 text-[10.5px] font-medium">–</span>
+                                            </template>
+                                        </td>
+
+                                        <!-- GRN -->
+                                        <td class="px-4 py-3 text-center">
+                                            <template x-if="item.GRNs && item.GRNs.length > 0">
+                                                <div class="flex flex-col gap-1.5">
+                                                    <template x-for="grn in item.GRNs">
+                                                        <button @click="openGRN(grn.ID)"
+                                                            class="inline-flex items-center gap-1 text-[10.5px] font-mono font-medium bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200 rounded px-2 py-0.5 transition-colors cursor-pointer w-max"
+                                                            title="Open GRN">
+                                                            <span x-text="grn.GRN_Ref_Number"></span>
+                                                        </button>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                            <template x-if="!item.GRNs || item.GRNs.length === 0">
                                                 <span class="text-gray-300 text-[10.5px] font-medium">–</span>
                                             </template>
                                         </td>
@@ -863,6 +884,7 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('prWidget', () => ({
                 userRole: '',
+                userEmail: "",
                 isLoading: true,
                 hasError: false,
                 errorMessage: '',
@@ -900,7 +922,9 @@
                 PR_REPORT: 'Purchase_Requisition_Report',
 
                 async initWidget() {
-                    if (typeof P2PWorkflowUtils !== 'undefined') P2PWorkflowUtils.init();
+                    const initParams = await ZOHO.CREATOR.UTIL.getInitParams();
+                    this.userEmail = (initParams.loginUser || "").toLowerCase();
+                    if (typeof P2PWorkflowUtils !== 'undefined') await P2PWorkflowUtils.init();
 
                     // Load user role directly utilizing async/await
                     try {
@@ -928,6 +952,11 @@
                     this.hasError = false;
 
                     try {
+                        if (this.userEmail === 'demouser_2@zohocreator.com' || this.userEmail === P2PWorkflowUtils.EMAILS.RAM_KRISHAN) {
+                            this.PR_REPORT = "Factory_PRs"
+                        } else if (["demouser_3@zohocreator.com", "demouser_4@zohocreator.com", P2PWorkflowUtils.EMAILS.NIKITHA, P2PWorkflowUtils.EMAILS.SURESH_KUMAR].includes(this.userEmail)) {
+                            this.PR_REPORT = "Corporate_Office_PRs"
+                        }
                         const [apiRes, recByIdRes] = await Promise.all([
                             ZOHO.CREATOR.DATA.invokeCustomApi({
                                 api_name: typeof P2PWorkflowUtils !== 'undefined' ? P2PWorkflowUtils.API.FETCH_PR_DETAILS : "fetch_pr_details",
@@ -1022,6 +1051,7 @@
                     }
                 },
                 openPO(id) { ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', window: 'same', url: '#Page:PO_Detailed?recordId=' + id }); },
+                openGRN(id) { ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', window: 'same', url: '#Page:GRN_Detailed?recordId=' + id }); },
                 openQC(id) { ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', window: 'same', url: '#Page:Quote_Comparison_Detailed?recordId=' + id }); },
                 openRFQ(id) { ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', window: 'same', url: '#Page:RFQ_Detailed?recordId=' + id }); },
 

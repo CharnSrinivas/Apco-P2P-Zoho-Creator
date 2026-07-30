@@ -18,7 +18,6 @@
 
     <script
         src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/process-flow-renderer.js"></script>
-    <!-- <script src="https://cdn.jsdelivr.net/gh/CharnSrinivas/Apco-P2P-Zoho-Creator@main/app/utils/config.js"></script> -->
     <script src="https://static.zohocdn.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
@@ -622,13 +621,12 @@
 <script>
     'use strict';
 
-    let REPORT_NAME = 'Purchase_Requisition_Report'; // Changed to dynamically modify for Production Team[cite: 1]
+    let REPORT_NAME = 'Purchase_Requisition_Report';
     const ITEMS_REPORT_NAME = 'Items_Report';
     const UNITS_REPORT_NAME = 'Unit_Report';
     const DEPARTMENTS_REPORT_NAME = 'Departments_Report';
     const PER_PAGE = 10;
     const FETCH_BATCH_SIZE = 200;
-
     const Toast = Swal.mixin({
         toast: true, position: 'top-end', showConfirmButton: false, timer: 3500, timerProgressBar: true,
         customClass: { popup: 'font-[Lato] text-sm' }
@@ -818,6 +816,10 @@
 
             // ── data ──
             userRole: '',
+            userEmail: '',
+            defaultUnitCode: 'corporate-office',
+            isUnitLocked: false,
+            defaultDeptCode: '',
             allRecords: [],
             filteredRecords: [],
             itemMasters: [],
@@ -848,20 +850,52 @@
             todayStr: new Date().toISOString().split('T')[0],
 
             async init() {
-                P2PWorkflowUtils.init();
+                await P2PWorkflowUtils.init();
 
                 try {
+                    // Fetch Login User Params from Zoho Creator
+                    const initParams = await ZOHO.CREATOR.UTIL.getInitParams();
+                    this.userEmail = (initParams.loginUser || "").toLowerCase();
+
+                    // Determine Default Unit and Lock logic
+                    const unitMap = {
+                        'demouser_1@zohocreator.com': 'unit-1',
+                        'demouser_5@zohocreator.com': 'unit-5',
+                        'apcounit1@apcobuildingsolutions.com': 'unit-1',
+                        'apcounit2@apcobuildingsolutions.com': 'unit-2',
+                        'apcounit4@apcobuildingsolutions.com': 'unit-4',
+                        'apcounit5@apcobuildingsolutions.com': 'unit-5'
+                    };
+
+                    if (unitMap[this.userEmail]) {
+                        this.defaultUnitCode = unitMap[this.userEmail];
+                        this.isUnitLocked = true;
+                    } else {
+                        this.defaultUnitCode = 'corporate-office';
+                        this.isUnitLocked = false;
+                    }
+
                     const res = await P2PWorkflowUtils.fetchLoginUser();
                     this.userRole = res.role || "";
-                    
-                    if (this.userRole === "Production Team") {
-                        REPORT_NAME = "Production_Team_PRs";
+                    if (this.userEmail === 'demouser_2@zohocreator.com' || this.userEmail === P2PWorkflowUtils.EMAILS.RAM_KRISHNA) {
+                        REPORT_NAME = "Factory_PRs"
+                    } else if (["demouser_3@zohocreator.com", "demouser_4@zohocreator.com", P2PWorkflowUtils.EMAILS.NIKITHA, P2PWorkflowUtils.EMAILS.SURESH_KUMAR].includes(this.userEmail)) {
+                        REPORT_NAME = "Corporate_Office_PRs"
                     }
+
+                    // Fix: Set correct Department Code based on userRole match 
+                    console.log({ userRole: this.userRole, roles: P2PWorkflowUtils.ROLES })
+                    if (this.userRole === P2PWorkflowUtils.ROLES.PRODUCTION) {
+                        this.defaultDeptCode = 'production';
+                    } else if (this.userRole === P2PWorkflowUtils.ROLES.OPERATIONS) {
+                        this.defaultDeptCode = 'operations';
+                    }
+
                 } catch (error) {
                     console.error("Failed to fetch login user role", error);
                 }
 
-                // Initializing record and master data fetching AFTER role assignment so the accurate report loads[cite: 1]
+                // Initializing record and master data fetching AFTER role assignment
                 this.fetchRecords();
                 this.fetchItemMasters();
                 this.fetchUnitMasters();
@@ -869,10 +903,9 @@
             },
 
             get activeFilterTabs() {
-                // Remove the Pending tab visually since it inherently equates to 0 for Operations Team 
-                if (this.userRole === 'Operations Team') {
-                    return this.filterTabs.filter(tab => tab.key !== 'pending');
-                }
+                // if (this.userRole === P2PWorkflowUtils.ROLES.OPERATIONS) {
+                return this.filterTabs.filter(tab => tab.key !== 'pending');
+                // }
                 return this.filterTabs;
             },
 
@@ -1034,7 +1067,7 @@
             computeStats() {
                 var q = this.searchQuery.replace(/'/g, "\\'");
                 var searchCrit = this.searchQuery ? `( PR_Number=("${q}") || Requisition_Number=("${q}") )` : '';
-                
+
                 const role = this.userRole;
 
                 function combineCriteria(statusCrit) {
@@ -1100,6 +1133,18 @@
                         placeholder: 'Select Unit...'
                     });
 
+                    // Log left intentionally matching previous version
+                    console.log({ duc: this.defaultDeptCode, d: this.defaultUnitCode })
+
+                    // Set default unit and disable if locked
+                    const targetUnit = this.unitMasters.find(u => u.Code === this.defaultUnitCode);
+                    if (targetUnit) {
+                        this.unitTomSelect.setValue(targetUnit.ID, true);
+                    }
+                    if (this.isUnitLocked) {
+                        this.unitTomSelect.disable();
+                    }
+
                     const deptSelectEl = this.$refs.prDepartment;
                     this.departmentTomSelect = new TomSelect(deptSelectEl, {
                         valueField: 'ID',
@@ -1109,6 +1154,14 @@
                         maxItems: 1,
                         placeholder: 'Select Department...'
                     });
+
+                    // Set default department
+                    if (this.defaultDeptCode) {
+                        const targetDept = this.departmentMasters.find(d => d.Code === this.defaultDeptCode);
+                        if (targetDept) {
+                            this.departmentTomSelect.setValue(targetDept.ID, true);
+                        }
+                    }
 
                     this.addGridRow();
                 });
@@ -1312,4 +1365,5 @@
         };
     }
 </script>
+
 </html>
