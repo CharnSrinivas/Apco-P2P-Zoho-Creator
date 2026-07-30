@@ -267,7 +267,6 @@
                                                 :class="item.approvedQty > item.originalQty ? 'border-red-400 focus:border-red-500' : 'border-gray-300 focus:border-[#1B5CA8]'">
                                         </div>
                                     </div>
-                                    <!--? Note: Allow exceeding quantity -->
                                     <div x-show="item.approvedQty > item.originalQty"
                                         class="mt-1.5 text-[11px] text-orange-400 font-medium text-right flex justify-end items-center gap-1">
                                         <i class="bi bi-exclamation-triangle"></i> Exceeding requested qty (<span
@@ -454,7 +453,7 @@
                         <button x-show="isDraft" @click="openEditModal()"
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-md text-xs font-semibold transition-all shadow-sm cursor-pointer"><i
                                 class="bi bi-pencil-square"></i> Edit</button>
-                        <button x-show="isInProgress" @click="createRFQ()"
+                        <button x-show="isInProgress && isOperations" @click="createRFQ()"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#1B5CA8] text-white hover:bg-[#12427b] transition-colors no-underline cursor-pointer shadow-sm"><i
                                 class="bi bi-file-earmark-plus"></i> Create New RFQ</button>
                         <button @click="downloadPDF()" :disabled="isGeneratingPDF"
@@ -557,7 +556,6 @@
                         </template>
                     </div>
                 </div>
-
                 <!-- Approved Items -->
                 <div x-show="rec.Items && rec.Items.length > 0"
                     class="bg-white border border-emerald-200 rounded-lg shadow-sm flex flex-col">
@@ -571,11 +569,11 @@
                             <span>Approved Line Items & Delivery Status</span>
                         </div>
                         <div x-show="selectedIndices.length > 0" x-cloak class="flex gap-2 fade-in">
-                            <button x-show="!isPOStageOrBeyond" @click="createPO()"
+                            <button x-show="!isPOStageOrBeyond && isOperations" @click="createPO()"
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-md text-[11px] font-semibold hover:bg-emerald-700 transition-colors shadow-sm">
                                 <i class="bi bi-cart-plus"></i> Create PO
                             </button>
-                            <button x-show="!isRFQStageOrBeyond" @click="createRFQ()"
+                            <button x-show="!isRFQStageOrBeyond && isOperations" @click="createRFQ()"
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-md text-[11px] font-semibold hover:bg-gray-50 transition-colors shadow-sm">
                                 <i class="bi bi-file-earmark-plus"></i> Create RFQ
                             </button>
@@ -603,7 +601,7 @@
                                         class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
                                         QC</th>
                                     <th class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left"
-                                        x-text="hasPO ? 'PO' : 'Last PO'"></th>
+                                        x-text="isPOStageOrBeyond ? 'PO' : 'Last PO'"></th>
                                     <th
                                         class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-center">
                                         Status</th>
@@ -619,8 +617,8 @@
                                     <th
                                         class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left min-w-[150px]">
                                         Required By</th>
-                                    <th
-                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-center sticky right-0 bg-gray-50 border-l border-gray-200 shadow-sm z-10">
+                                    <th class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-center sticky right-0 bg-gray-50 border-l border-gray-200 shadow-sm z-10"
+                                        x-show="isOperations">
                                         Actions</th>
                                 </tr>
                             </thead>
@@ -707,17 +705,17 @@
                                             x-text="formatDate(item.Due_Date)"></td>
 
                                         <!-- Actions -->
-                                        <td
+                                        <td x-show="isOperations"
                                             class="px-4 py-3 text-center align-top sticky right-0 bg-white group-hover:bg-gray-50 border-l border-gray-100 z-10 transition-colors">
                                             <div class="flex flex-col items-center justify-center gap-2">
-                                                <button x-show="!isPOStageOrBeyond" @click="createPO()"
+                                                <button x-show="!isPOStageOrBeyond && isOperations" @click="createPO()"
                                                     title="Create PO"
                                                     class="h-[26px] gap-1.5 px-2 py-1 flex items-center justify-center rounded bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 transition-colors cursor-pointer shadow-sm">
                                                     Create PO
                                                     <i class="bi bi-cart-plus text-[13px]"></i>
                                                 </button>
-                                                <button x-show="!isRFQStageOrBeyond" @click="createRFQ()"
-                                                    title="Create RFQ"
+                                                <button x-show="!isRFQStageOrBeyond && isOperations"
+                                                    @click="createRFQ()" title="Create RFQ"
                                                     class="h-[26px] gap-1.5 px-2 py-1 flex items-center justify-center rounded bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-[#1B5CA8] border border-gray-200 transition-colors cursor-pointer shadow-sm">
                                                     Create RFQ
                                                     <i class="bi bi-file-earmark-plus text-[13px]"></i>
@@ -807,12 +805,13 @@
                         </template>
                         <span x-text="isSubmittingDraft ? 'Submitting...' : 'Submit Requisition'"></span>
                     </button>
-                    <button x-show="isPRStage && !isRejected && !isApproved" @click="approvePR()"
+                    <!-- Role verification on bottom buttons explicitly disables for Production role -->
+                    <button x-show="isPRStage && !isRejected && !isApproved && isOperations" @click="approvePR()"
                         class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 transition-colors no-underline cursor-pointer shadow-sm">
                         <i class="bi bi-check-lg"></i> <span
                             x-text="rec.Request_For_Quotation === 'Yes' ? 'Approve & Submit For RFQ' : 'Approve & Submit'"></span>
                     </button>
-                    <button x-show="isPRStage && !isRejected && !isApproved" @click="rejectPR()"
+                    <button x-show="isPRStage && !isRejected && !isApproved && isOperations" @click="rejectPR()"
                         class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors no-underline cursor-pointer shadow-sm">
                         <i class="bi bi-x-lg"></i> Reject
                     </button>
@@ -863,6 +862,7 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('prWidget', () => ({
+                userRole: '',
                 isLoading: true,
                 hasError: false,
                 errorMessage: '',
@@ -870,7 +870,7 @@
                 rec: {},
                 requestedItems: [],
                 actions: [],
-                selectedIndices: [], // Tracks bulk selections
+                selectedIndices: [],
 
                 // Masters
                 itemMasters: [],
@@ -899,48 +899,54 @@
                 UNIT_REPORT: 'Unit_Report',
                 PR_REPORT: 'Purchase_Requisition_Report',
 
-                initWidget() {
+                async initWidget() {
                     if (typeof P2PWorkflowUtils !== 'undefined') P2PWorkflowUtils.init();
 
-                    ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
-                        this.recordId = params?.recordId || null;
-                        if (!this.recordId) {
-                            this.hasError = true;
-                            this.isLoading = false;
-                            this.errorMessage = "No Record ID provided in URL parameters.";
-                            return;
-                        }
-                        this.fetchMasters();
-                        this.fetchData();
-                    });
+                    // Load user role directly utilizing async/await
+                    try {
+                        const res = await P2PWorkflowUtils.fetchLoginUser();
+                        this.userRole = res.role || "";
+                    } catch (error) {
+                        console.error("Failed to fetch login user role", error);
+                    }
+
+                    const params = await ZOHO.CREATOR.UTIL.getQueryParams();
+                    this.recordId = params?.recordId || null;
+                    if (!this.recordId) {
+                        this.hasError = true;
+                        this.isLoading = false;
+                        this.errorMessage = "No Record ID provided in URL parameters.";
+                        return;
+                    }
+
+                    await this.fetchMasters();
+                    await this.fetchData();
                 },
 
-                fetchData() {
+                async fetchData() {
                     this.isLoading = true;
                     this.hasError = false;
 
-                    Promise.all([
-                        ZOHO.CREATOR.DATA.invokeCustomApi({
-                            api_name: typeof P2PWorkflowUtils !== 'undefined' ? P2PWorkflowUtils.API.FETCH_PR_DETAILS : "fetch_pr_details",
-                            http_method: "GET",
-                            content_type: "application/json",
-                            query_params: 'recId=' + this.recordId,
-                        }),
-                        ZOHO.CREATOR.DATA.getRecordById({ report_name: this.PR_REPORT, id: this.recordId })
-                    ]).then(responses => {
-                        const apiRes = responses[0];
-                        const recByIdRes = responses[1];
+                    try {
+                        const [apiRes, recByIdRes] = await Promise.all([
+                            ZOHO.CREATOR.DATA.invokeCustomApi({
+                                api_name: typeof P2PWorkflowUtils !== 'undefined' ? P2PWorkflowUtils.API.FETCH_PR_DETAILS : "fetch_pr_details",
+                                http_method: "GET",
+                                content_type: "application/json",
+                                query_params: 'recId=' + this.recordId,
+                            }),
+                            ZOHO.CREATOR.DATA.getRecordById({ report_name: this.PR_REPORT, id: this.recordId })
+                        ]);
 
                         if (!apiRes || !apiRes.result || apiRes.result.length === 0) throw new Error("No PR data returned");
 
                         this.rec = apiRes.result[0];
                         this.requestedItems = this.rec.Requested_Items || [];
                         this.actions = this.rec.PR_Actions || [];
-                        this.selectedIndices = []; // Reset selections
+                        this.selectedIndices = [];
 
                         if (recByIdRes?.data?.Attachments) {
                             this.rec.Attachments = recByIdRes.data.Attachments;
-                            console.log(JSON.parse(JSON.stringify(this.rec)))
                         }
 
                         this.$nextTick(() => {
@@ -949,11 +955,11 @@
                             }
                         });
                         this.isLoading = false;
-                    }).catch(err => {
+                    } catch (err) {
                         console.error('API Error:', err);
                         this.hasError = true;
                         this.isLoading = false;
-                    });
+                    }
                 },
 
                 async fetchMasters() {
@@ -968,6 +974,7 @@
                 },
 
                 // --- Computeds ---
+                get isOperations() { return this.userRole === (typeof P2PWorkflowUtils !== 'undefined' ? P2PWorkflowUtils.ROLES.OPERATIONS : 'Operations Team'); },
                 get prNumber() { return this.rec.PR_Number || (this.rec.Requisition_Number ? 'PR-' + this.rec.Requisition_Number : '–'); },
                 get isDraft() { return (this.rec.Status || '').toLowerCase() === 'draft'; },
                 get isApproved() { return (this.rec.Status || '').toLowerCase() === 'approved'; },
@@ -975,7 +982,6 @@
                 get isInProgress() { return (this.rec.Status || '').toLowerCase() === 'in progress'; },
                 get isPRStage() { return this.rec.Current_Stage === 'Purchase Requisition' && (this.rec.Status || '').toLowerCase() === 'submitted'; },
                 get showActionButtons() { return this.isDraft || (this.isPRStage && !this.isRejected && !this.isApproved); },
-                // Stage-based visibility for RFQ/PO creation buttons
                 get isRFQStageOrBeyond() {
                     const s = (this.rec.Current_Stage || '').toLowerCase();
                     return s.includes('request for quotation') || s.includes('quote comparison') || s.includes('purchase order') || s.includes('grn') || s.includes('bill') || s.includes('payment');
@@ -1007,8 +1013,6 @@
                     });
                 },
 
-                // get isQuantityExceeded() { return this.pendingAction.status === 'Approved' && this.approvalItems.some(i => i.approvedQty > i.originalQty); },
-
                 // --- Navigation / Create Methods ---
                 toggleAll() {
                     if (this.selectAll) {
@@ -1022,7 +1026,6 @@
                 openRFQ(id) { ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', window: 'same', url: '#Page:RFQ_Detailed?recordId=' + id }); },
 
                 createPO() {
-                    // Triggers bulk or single, target page relies on prId
                     ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', window: 'same', url: '#Page:Purchase_Orders?prId=' + this.recordId + '&createPo=True' });
                 },
                 createRFQ() {
@@ -1091,40 +1094,47 @@
                     this.toast.show = false;
                     if (this.toastTimer) { clearTimeout(this.toastTimer); this.toastTimer = null; }
                 },
-                downloadFile(filePath) {
+
+                async downloadFile(filePath) {
                     if (typeof filePath === 'string' && filePath.includes('filepath=')) {
                         filePath = filePath.split('filepath=')[1].split('&')[0];
                     }
-                    ZOHO.CREATOR.UTIL.getInitParams().then((initParams) => {
+                    try {
+                        const initParams = await ZOHO.CREATOR.UTIL.getInitParams();
                         const { scope, envUrlFragment, appLinkName } = initParams;
                         const host = window.location.hostname.replace("creatorapp", "creatorapp");
-                        const domainSuffix = host.substring(host.indexOf(".")); // e.g. ".zoho.in"
 
                         const url = `https://creatorapp.zoho.in/${scope}${envUrlFragment}/${appLinkName}` +
                             `/report/${this.PR_REPORT}/${this.recordId}/Attachments/download-file` +
                             `?filepath=${encodeURIComponent(filePath)}`;
 
                         window.open(url, "_blank");
-                    }).catch((err) => console.error("Could not get init params:", err));
+                    } catch (err) {
+                        console.error("Could not get init params:", err);
+                    }
                 },
 
-                submitDraft() {
+                async submitDraft() {
                     this.isSubmittingDraft = true;
-                    ZOHO.CREATOR.DATA.updateRecordById({ report_name: this.PR_REPORT, id: this.recordId, payload: { data: { "Status": "Submitted" } } })
-                        .then(res => {
-                            if (res.code !== 3000) throw new Error("Failed to update status");
-                            return ZOHO.CREATOR.DATA.addRecords({ form_name: "PR_Action", payload: { data: { "PR_Number": this.recordId, "Status": "Submitted", "Moved_To": "Purchase Requisition", "Comment": "Submitted for approval" } } });
-                        })
-                        .then(res => {
-                            if (res.code === 3000) this.fetchData();
-                            else throw new Error("Failed to log action");
-                        })
-                        .catch(err => {
-                            console.error(err);
-                            this.showToast('Error submitting PR', 'error');
-                        })
-                        .finally(() => this.isSubmittingDraft = false);
+                    try {
+                        const res = await ZOHO.CREATOR.DATA.updateRecordById({ report_name: this.PR_REPORT, id: this.recordId, payload: { data: { "Status": "Submitted" } } });
+                        if (res.code !== 3000) throw new Error("Failed to update status");
+
+                        const logRes = await ZOHO.CREATOR.DATA.addRecords({ form_name: "PR_Action", payload: { data: { "PR_Number": this.recordId, "Status": "Submitted", "Moved_To": "Purchase Requisition", "Comment": "Submitted for approval" } } });
+
+                        if (logRes.code === 3000) {
+                            await this.fetchData();
+                        } else {
+                            throw new Error("Failed to log action");
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        this.showToast('Error submitting PR', 'error');
+                    } finally {
+                        this.isSubmittingDraft = false;
+                    }
                 },
+
                 approvePR() {
                     this.pendingAction = {
                         title: "Approve PR", status: "Approved", movedTo: "Request For Quotation",
@@ -1136,6 +1146,7 @@
                     }));
                     this.showActionModal = true;
                 },
+
                 rejectPR() {
                     this.pendingAction = {
                         title: "Reject PR", status: "Rejected", movedTo: "Request For Quotation",
@@ -1144,10 +1155,12 @@
                     this.approvalItems = [];
                     this.showActionModal = true;
                 },
+
                 closeActionModal() {
                     if (this.isSubmittingAction) return;
                     this.showActionModal = false;
                 },
+
                 async submitAction() {
                     this.isSubmittingAction = true;
                     try {
@@ -1173,9 +1186,9 @@
 
                         const updateRes = await ZOHO.CREATOR.DATA.updateRecordById({ report_name: this.PR_REPORT, id: this.recordId, payload: { data: payloadData } });
                         if (updateRes.code !== 3000) throw new Error("Failed to update PR record");
-                        this.isSubmittingAction = false;
+
                         this.closeActionModal();
-                        this.fetchData();
+                        await this.fetchData();
                         this.showToast('Action processed successfully');
                     } catch (err) {
                         console.error(err);
@@ -1209,18 +1222,22 @@
                     this.isEditModalOpen = true;
                     this.$nextTick(() => { this.initUnitSelect(); });
                 },
+
                 closeEditModal() {
                     this.isEditModalOpen = false;
                     if (this.tsInstances.unit) this.tsInstances.unit.destroy();
                     this.tsInstances.items.forEach(ts => ts && ts.destroy());
                     this.tsInstances.items = [];
                 },
+
                 addEditItemRow() { this.editForm.items.push({ uid: Date.now() + Math.random(), id: '', quantity: 1, dueDate: '', comment: '' }); },
+
                 removeEditItemRow(index) {
                     if (this.editForm.items.length === 1) return this.showToast('At least one item is required.', 'error');
                     this.editForm.items.splice(index, 1);
                     if (this.tsInstances.items[index]) { this.tsInstances.items[index].destroy(); this.tsInstances.items.splice(index, 1); }
                 },
+
                 initUnitSelect() {
                     this.tsInstances.unit = new TomSelect(document.getElementById('prUnitSelect'), {
                         valueField: 'ID', labelField: 'Name', searchField: 'Name', options: this.unitMasters, maxItems: 1, placeholder: 'Select Unit...',
@@ -1232,6 +1249,7 @@
                         this.tsInstances.unit.setValue(this.editForm.unit);
                     }
                 },
+
                 initItemSelect(el, itemRef) {
                     let ts = new TomSelect(el, {
                         valueField: 'ID', labelField: 'item_name', searchField: 'item_name', options: this.itemMasters, maxItems: 1, placeholder: 'Search item...',
@@ -1244,6 +1262,7 @@
                     }
                     this.tsInstances.items.push(ts);
                 },
+
                 async submitEditPR() {
                     if (!this.editForm.unit) return this.showToast('Please select a Unit.', 'error');
                     if (this.editForm.items.some(i => !i.id)) return this.showToast('Please select an item for every row.', 'error');
@@ -1261,9 +1280,18 @@
                             }
                         };
                         let res = await ZOHO.CREATOR.DATA.updateRecordById({ report_name: this.PR_REPORT, id: this.recordId, payload: payload });
-                        if (res.code === 3000) { this.showToast('PR updated successfully!', 'success'); this.closeEditModal(); this.fetchData(); }
+                        if (res.code === 3000) {
+                            this.showToast('PR updated successfully!', 'success');
+                            this.closeEditModal();
+                            await this.fetchData();
+                        }
                         else throw new Error(res.message || "Failed to update record.");
-                    } catch (err) { this.showToast(err.message || 'Update failed.', 'error'); console.error(err); } finally { this.isSubmittingEdit = false; }
+                    } catch (err) {
+                        this.showToast(err.message || 'Update failed.', 'error');
+                        console.error(err);
+                    } finally {
+                        this.isSubmittingEdit = false;
+                    }
                 },
 
                 // --- PDF ---
@@ -1301,8 +1329,11 @@
                                     /* Header Styles */
                                     .header { margin-bottom: 20px; }
                                     .header-top { display: flex; gap:1rem; align-items: center; padding-bottom: 10px; }
-                                    .header-logo { height: 45px; }
-                                    .header-title-img { height: 35px; }
+                                    
+                                    /* Refined APCO logo sizing */
+                                    .header-logo { height: 24px; }
+                                    .header-title-img { height: 18px; }
+                                    
                                     .header-divider { border-bottom: 2px solid var(--border-color); margin-bottom: 25px; }
                                     
                                     /* Title */
@@ -1325,10 +1356,6 @@
                                     /* Description Box */
                                     .desc-box { border: 1px solid var(--border-color); padding: 12px 15px; margin-bottom: 40px; background-color: var(--bg-gray); page-break-inside: avoid; }
                                     .desc-box h4 { margin: 0 0 8px 0; color: var(--primary-color); font-size: 10pt; text-transform: uppercase; }
-                                    
-                                    /* Signatures */
-                                    .signature-section { display: flex; justify-content: space-between; margin-top: 60px; page-break-inside: avoid; }
-                                    .signature-box { width: 30%; border-top: 1px solid var(--border-color); text-align: center; padding-top: 8px; font-weight: bold; color: #151616; }
                                     
                                     /* Footer Styles */
                                     .footer { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; font-size: 8.5pt; padding: 15px 20px; border-top: 2px solid var(--border-color); color: #151616; page-break-inside: avoid; }
@@ -1393,12 +1420,6 @@
                                         <div>${this.escapeHtml(this.rec.description)}</div>
                                     </div>` : ''}
                                     
-                                    <!-- Signatures -->
-                                    <div class="signature-section">
-                                        <div class="signature-box">Requester Signature</div>
-                                        <div class="signature-box">Approver Signature</div>
-                                    </div>
-                                    
                                     <!-- Footer -->
                                     <div class="footer">
                                         <p><strong>CORPORATE OFFICE:</strong> #234, Narayan Nagar, 1st stage, Doddakallasandra, Kanakapura Road, Bangalore - 560 062 | Tel.: 9901 37433 | 98450 65715 | CIN No: U23954KA2024PTC185349</p>
@@ -1420,7 +1441,7 @@
                             iframe.contentWindow.print();
                             setTimeout(() => document.body.removeChild(iframe), 2000);
                             this.isGeneratingPDF = false;
-                        }, 1000); // Increased interval slightly to ensure remote image loads before print popup opens
+                        }, 1000);
                     } catch (err) {
                         console.error('PDF generation failed:', err);
                         this.showToast('Failed to generate PDF.', 'error');

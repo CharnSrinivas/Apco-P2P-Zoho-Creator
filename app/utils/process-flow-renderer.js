@@ -47,6 +47,11 @@ const P2PWorkflowUtils = {
 		OPERATIONS: "Operations Team",
 		PURCHASE: "Purchase Team",
 	},
+	EMAILS: {
+		RAM_KRISHNA: "ram@apcobuildingsolutions.com",
+		NIKITHA: "nikita@apcobuildingsolutions.com",
+		SURESH_KUMAR: "suresh@apcobuildingsolutions.com",
+	},
 	// Level-1 cache: in-memory (cleared on page refresh).
 	_loginUser: null,
 	// Level-2 cache: localStorage key used to persist the login user across page navigations.
