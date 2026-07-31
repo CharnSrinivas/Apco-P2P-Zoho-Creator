@@ -610,7 +610,7 @@
                                             <tr
                                                 class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors bg-white">
                                                 <td class="px-2 py-2 grid-select relative">
-                                                    <select disabled="w-full text-xs" class="cursor-not-allowed"
+                                                    <select disabled class="cursor-not-allowed"
                                                         x-init="() => { const ts = initDynamicItem($el, item, 'Items', 'Item_Name'); return () => ts.destroy(); }"></select>
                                                 </td>
                                                 <td class="px-2 py-2"><input disabled x-model="item.Unit" type="text"
@@ -1367,7 +1367,7 @@
                             let opt = ts.options[val];
                             if (opt) {
                                 targetObj[nameKey] = opt.item_name;
-                                if (opt.unit_of_measure && targetObj.Unit !== undefined) targetObj.Unit = opt.unit_of_measure;
+                                if (opt.UOM && targetObj.Unit !== undefined) targetObj.Unit = opt.UOM?.Unit;
                             }
                             if (targetObj.Items_Master !== undefined) this.recalculateAllTotals();
                         },
@@ -1498,7 +1498,7 @@
                                             uid: Date.now() + Math.random(),
                                             Items: itemRow.Item.ID,
                                             Item_Name: itemRow.Item.display_value || itemRow.Item.item_name,
-                                            Unit: itemRow.Unit || itemRow.Item.unit_of_measure || 'Each',
+                                            Unit: itemRow.Item?.UOM?.Unit || 'Each',
                                             Quantity: itemRow.Quantity || 0,
                                             Deliver_to_Plant: ''
                                         };

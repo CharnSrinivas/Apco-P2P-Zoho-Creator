@@ -781,8 +781,11 @@
                                                 class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-center w-[6%]">
                                                 Include</th>
                                             <th
-                                                class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-left w-[32%]">
+                                                class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-left w-[28%]">
                                                 Item Details</th>
+                                            <th
+                                                class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-left w-[8%]">
+                                                UOM</th>
                                             <th
                                                 class="px-3 py-2 text-[10px] font-semibold text-gray-500 text-left w-[14%]">
                                                 Negotiated Rate</th>
@@ -818,6 +821,9 @@
                                                         x-text="item._itemName"></div>
                                                     <div class="text-[9px] text-[#1B5CA8] font-mono"
                                                         x-text="'Origin: ' + item._prNumber"></div>
+                                                </td>
+                                                <td class="px-3 py-2 align-middle">
+                                                    <span class="text-xs text-gray-600" x-text="item._uom || '—'"></span>
                                                 </td>
                                                 <td class="px-3 py-2 align-middle">
                                                     <input type="number" step="any" min="0" x-model.number="item.Rate"
@@ -1197,6 +1203,7 @@
                                     this.form.items.push({
                                         uid: Date.now() + Math.random() + idx, Selected: true, Item: itemId,
                                         _itemName: ri.Item?.item_name || ri.Item?.display_value || 'Item',
+                                        _uom: ri.Item?.UOM?.Unit || ri.Item?.unit_of_measure || '',
                                         Quantity: remainingQty, Rate: rate, Amount: rate * remainingQty,
                                         Comment: ri.Comment || '', _prId: prId, _prNumber: pr.PR_Number || ''
                                     });

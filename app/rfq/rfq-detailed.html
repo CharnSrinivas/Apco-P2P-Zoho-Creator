@@ -542,7 +542,7 @@
                                                     x-text="q.item_master?.item_name || '–'"></span>
                                             </td>
                                             <td class="px-4 py-2.5 align-top text-gray-600"
-                                                x-text="q.item_master?.unit_of_measure || '–'"></td>
+                                                x-text="q.item_master?.UOM?.Unit || '–'"></td>
                                             <td class="px-4 py-2.5 align-top text-right text-gray-700 font-medium"
                                                 x-text="q.Quantity || 0"></td>
                                             <td x-show="idx === 0" :rowspan="group.quotes.length"
@@ -688,7 +688,7 @@
                             recId: q.ID,
                             vendorName: q.Vendor?.Display_Name || 'Unknown',
                             itemName: q.item_master?.item_name || '',
-                            uom: q.item_master?.unit_of_measure || '',
+                            uom: q.item_master?.UOM?.Unit || '',
                             quantity: q.Quantity || 0
                         });
                     });
@@ -913,7 +913,7 @@
                                 <td><strong>${this.escapeHtml(q.item_master?.item_name || '–')}</strong></td>
                                 <td class="text-center">${P2PWorkflowUtils?.formatDateForZoho ? P2PWorkflowUtils.formatDateForZoho(this.rec.RFQ_Date) : this.formatDate(this.rec.RFQ_Date)}</td>
                                 <td class="text-center">${q.Quantity || 0}</td>
-                                <td class="text-center">${this.escapeHtml(q.item_master?.unit_of_measure || '–')}</td>
+                                <td class="text-center">${this.escapeHtml(q.item_master?.UOM?.Unit || '–')}</td>
                                 <td class="text-right"></td>
                             </tr>
                         `;

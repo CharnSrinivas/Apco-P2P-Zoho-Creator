@@ -581,6 +581,9 @@
                                         class="px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
                                         Item Description</th>
                                     <th
+                                        class="px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-center w-20">
+                                        UOM</th>
+                                    <th
                                         class="px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right w-28">
                                         Rate / Unit</th>
                                     <th
@@ -605,10 +608,11 @@
                                                     x-text="item.Comment"></div>
                                             </template>
                                         </td>
+                                        <td class="px-4 py-3 text-center">
+                                            <span x-text="getItemUnit(item)"></span>
+                                        </td>
                                         <td class="px-4 py-3 text-gray-600 text-right tabular-nums">
                                             <span x-text="formatINR(getRate(item), false)"></span>
-                                            <div class="text-[10px] text-gray-400 mt-0.5"
-                                                x-text="'per ' + getItemUnit(item)"></div>
                                         </td>
                                         <td class="px-4 py-3 text-gray-800 font-semibold text-right tabular-nums"
                                             x-text="item.Quantity || 0"></td>
@@ -811,7 +815,7 @@
 
                 // ─── Helpers ───
                 getItemName(itemObj) { return itemObj.Item && typeof itemObj.Item === 'object' ? (itemObj.Item.display_value || itemObj.Item.item_name || '–') : '–'; },
-                getItemUnit(itemObj) { return itemObj.Item && typeof itemObj.Item === 'object' && itemObj.Item.unit_of_measure ? itemObj.Item.unit_of_measure : 'unit'; },
+                getItemUnit(itemObj) { return itemObj.Item && typeof itemObj.Item === 'object' && itemObj.Item.UOM ? itemObj.Item.UOM?.Unit : 'unit'; },
                 getRate(itemObj) { return itemObj.Rate || (itemObj.Item && itemObj.Item.unit_price ? itemObj.Item.unit_price : (itemObj.Quantity ? itemObj.Amount / itemObj.Quantity : 0)); },
                 getUnitName() {
                     if (!this.rec.Unit) return '–';
@@ -880,6 +884,7 @@
                                         <strong>${this.escapeHtml(this.getItemName(item))}</strong>
                                         ${item.Comment ? `<br><small style="color:#666;">${this.escapeHtml(item.Comment)}</small>` : ''}
                                     </td>
+                                    <td class="text-center">${this.escapeHtml(this.getItemUnit(item))}</td>
                                     <td class="text-right">${this.formatINR(this.getRate(item), false)}</td>
                                     <td class="text-center">${item.Quantity || 0}</td>
                                     <td class="text-right">${this.formatINR(item.Amount, false)}</td>
@@ -991,9 +996,10 @@
                                         <thead>
                                             <tr>
                                                 <th width="5%" class="text-center">#</th>
-                                                <th width="40%">Item Description</th>
+                                                <th width="35%">Item Description</th>
+                                                <th width="10%" class="text-center">UOM</th>
                                                 <th width="15%" class="text-right">Rate</th>
-                                                <th width="15%" class="text-center">Qty</th>
+                                                <th width="10%" class="text-center">Qty</th>
                                                 <th width="25%" class="text-right">Amount</th>
                                             </tr>
                                         </thead>

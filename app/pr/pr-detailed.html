@@ -596,6 +596,9 @@
                                         Item Details</th>
                                     <th
                                         class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
+                                        UOM</th>
+                                    <th
+                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
                                         RFQ</th>
                                     <th
                                         class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
@@ -635,6 +638,10 @@
                                         <td class="px-4 py-3 text-gray-400 font-mono w-8" x-text="i + 1"></td>
                                         <td class="px-4 py-3 text-gray-900 font-medium whitespace-normal">
                                             <span x-text="getItemName(item.Item)"></span>
+                                        </td>
+                                        <td class="px-4 py-3 text-gray-500 whitespace-nowrap">
+                                            <span x-text="getItemUOM(item.Item)"
+                                                class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium"></span>
                                         </td>
 
                                         <!-- RFQ -->
@@ -787,6 +794,9 @@
                                         class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
                                         Item Details</th>
                                     <th
+                                        class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
+                                        UOM</th>
+                                    <th
                                         class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right">
                                         Qty</th>
                                     <th
@@ -804,6 +814,10 @@
                                                 <div class="text-[11px] text-gray-400 font-normal mt-1"
                                                     x-text="item.Comment"></div>
                                             </template>
+                                        </td>
+                                        <td class="px-4 py-3 text-gray-500">
+                                            <span x-text="getItemUOM(item.Item)"
+                                                class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium"></span>
                                         </td>
                                         <td class="px-4 py-3 text-gray-700 text-right tabular-nums w-24"
                                             x-text="item.Quantity || 0"></td>
@@ -954,7 +968,7 @@
                     try {
                         if (this.userEmail === 'demouser_2@zohocreator.com' || this.userEmail === P2PWorkflowUtils.EMAILS.RAM_KRISHAN) {
                             this.PR_REPORT = "Factory_PRs"
-                        } else if (["demouser_3@zohocreator.com", "demouser_4@zohocreator.com", P2PWorkflowUtils.EMAILS.NIKITHA, P2PWorkflowUtils.EMAILS.SURESH_KUMAR].includes(this.userEmail)) {
+                        } else if (["demouser_3@zohocreator.com", "demouser_4@zohocreator.com", P2PWorkflowUtils.EMAILS.NIKITA, P2PWorkflowUtils.EMAILS.SURESH_KUMAR].includes(this.userEmail)) {
                             this.PR_REPORT = "Corporate_Office_PRs"
                         }
                         const [apiRes, recByIdRes] = await Promise.all([
@@ -1067,6 +1081,16 @@
                     if (!itemObj) return '–';
                     if (typeof itemObj === 'object') return itemObj.display_value || itemObj.item_name || '–';
                     return `Item #${itemObj}`;
+                },
+                getItemUOM(itemObj) {
+                    if (!itemObj) return '–';
+                    if (typeof itemObj === 'object' && itemObj.UOM) {
+                        return itemObj.UOM.Unit || itemObj.UOM.display_value || itemObj.UOM || '–';
+                    }
+                    const id = typeof itemObj === 'object' ? String(itemObj.ID || itemObj.id || '') : String(itemObj);
+                    const master = this.itemMasters.find(m => String(m.ID) === id);
+                    if (master && master.UOM) return master.UOM.Unit || master.UOM.display_value || master.UOM || '–';
+                    return '–';
                 },
                 getDisplayName(field) {
                     if (!field) return '–';
@@ -1340,7 +1364,9 @@
                                         <strong>${this.escapeHtml(this.getItemName(item.Item))}</strong>
                                         ${item.Comment ? `<br><small style="color:#666;">${this.escapeHtml(item.Comment)}</small>` : ''}
                                     </td>
-                                    <td class="text-center">${item.Quantity || 0}</td>`;
+                                    <td class="text-center">${this.escapeHtml(this.getItemUOM(item.Item))}</td>
+                                    <td class="text-center">${item.Quantity || 0}</td>
+                                    `;
                             if (isApprovedSet) itemRows += `<td class="text-center">${item.Ordered_Quantity || 0}</td><td class="text-center">${item.Received_Quantity || 0}</td>`;
                             itemRows += `<td class="text-center">${this.formatDate(item.Due_Date)}</td></tr>`;
                         });
@@ -1435,9 +1461,10 @@
                                         <thead>
                                             <tr>
                                                 <th width="5%" class="text-center">#</th>
-                                                <th width="45%" style="text-align: left;">Item Description</th>
-                                                <th width="12%" class="text-center">${isApprovedSet ? 'App. Qty' : 'Qty'}</th>
-                                                ${isApprovedSet ? '<th width="12%" class="text-center">Ord. Qty</th><th width="12%" class="text-center">Rec. Qty</th>' : ''}
+                                                <th width="38%" style="text-align: left;">Item Description</th>
+                                                <th width="9%" class="text-center">UoM</th>
+                                                <th width="10%" class="text-center">${isApprovedSet ? 'App. Qty' : 'Qty'}</th>
+                                                ${isApprovedSet ? '<th width="10%" class="text-center">Ord. Qty</th><th width="10%" class="text-center">Rec. Qty</th>' : ''}
                                                 <th width="14%" class="text-center">Required By</th>
                                             </tr>
                                         </thead>

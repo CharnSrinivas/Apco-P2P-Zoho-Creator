@@ -1157,7 +1157,7 @@
                         });
 
                         return {
-                            index: index + 1, itemName: itemName || '–', description: reqItem.Item?.description || '', quantity: qty, unit: reqItem.Unit || reqItem.Item?.unit_of_measure || '–', quotes: itemQuotes,
+                            index: index + 1, itemName: itemName || '–', description: reqItem.Item?.description || '', quantity: qty, unit: reqItem.Item?.UOM?.Unit || '–', quotes: itemQuotes,
                             l1Vendor: minRate !== Infinity ? l1Vendor : '–',
                             prevVendor: reqItem.Item?.Vendor?.Legal_Name || reqItem.Item?.Vendor?.Display_Name || '–', prevPrice: reqItem.Item?.unit_price || '–'
                         };
@@ -1544,7 +1544,6 @@
                                         `<td class="text-center">-</td><td class="text-center">-</td><td class="text-center">-</td>`;
                                 }
                             });
-
                             rowHtml += `
                                 <tr>
                                     <td class="text-center">${row.index}</td>

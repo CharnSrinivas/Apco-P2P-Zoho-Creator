@@ -879,7 +879,7 @@
                     this.userRole = res.role || "";
                     if (this.userEmail === 'demouser_2@zohocreator.com' || this.userEmail === P2PWorkflowUtils.EMAILS.RAM_KRISHNA) {
                         REPORT_NAME = "Factory_PRs"
-                    } else if (["demouser_3@zohocreator.com", "demouser_4@zohocreator.com", P2PWorkflowUtils.EMAILS.NIKITHA, P2PWorkflowUtils.EMAILS.SURESH_KUMAR].includes(this.userEmail)) {
+                    } else if (["demouser_3@zohocreator.com", "demouser_4@zohocreator.com", P2PWorkflowUtils.EMAILS.NIKITA, P2PWorkflowUtils.EMAILS.SURESH_KUMAR].includes(this.userEmail)) {
                         REPORT_NAME = "Corporate_Office_PRs"
                     }
 
@@ -904,7 +904,7 @@
 
             get activeFilterTabs() {
                 // if (this.userRole === P2PWorkflowUtils.ROLES.OPERATIONS) {
-                return this.filterTabs.filter(tab => tab.key !== 'pending');
+                // return this.filterTabs.filter(tab => tab.key !== 'pending');
                 // }
                 return this.filterTabs;
             },
@@ -1074,10 +1074,10 @@
                     var parts = [];
                     if (searchCrit) parts.push(searchCrit);
 
-                    if (role === 'Operations Team') {
-                        const opsBase = '(Status == "Approved" || Status == "Rejected" || Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill" || Current_Stage == "Payment")';
-                        parts.push(opsBase);
-                    }
+                    // if (role === 'Operations Team') {
+                    //     const opsBase = '(Status == "Approved" || Status == "Rejected" || Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill" || Current_Stage == "Payment")';
+                    //     parts.push(opsBase);
+                    // }
 
                     if (statusCrit) parts.push(statusCrit);
                     return parts.join(' && ');
@@ -1213,7 +1213,7 @@
                     },
                     onChange: (value) => {
                         const selectedItem = this.itemMasters.find(i => i.ID === value);
-                        row.unit = selectedItem ? (selectedItem.unit_of_measure || '') : '';
+                        row.unit = selectedItem?.UOM ? (selectedItem.UOM.Unit || '') : '';
                         row._itemId = value;
                         row._itemName = selectedItem ? selectedItem.item_name : 'Unknown Item';
                         this.checkItemsInGRN();
@@ -1236,10 +1236,11 @@
                 const checks = itemsToCheck.map(item => {
                     return ZOHO.CREATOR.DATA.invokeCustomApi({
                         api_name: P2PWorkflowUtils.API.FETCH_RFQ_DETAILS,
-                        http_method: "POST",
-                        payload: {
-                            itemIds: item.id
-                        }
+                        http_method: "GET",
+                        // payload: {
+                        //     itemIds: item.id
+                        // }
+
                     }).then(function (response) {
                         try {
                             let resultArr = response.data || response.result || response;

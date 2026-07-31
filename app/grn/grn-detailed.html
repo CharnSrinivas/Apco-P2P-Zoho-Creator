@@ -411,6 +411,9 @@
                                         class="px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left">
                                         Item Description</th>
                                     <th
+                                        class="px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-left w-20">
+                                        UOM</th>
+                                    <th
                                         class="px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right w-24">
                                         Ord. Qty</th>
                                     <th
@@ -435,6 +438,7 @@
                                                     x-text="item.Comment"></div>
                                             </template>
                                         </td>
+                                        <td class="px-4 py-3 text-gray-500 text-left" x-text="getItemUnit(item)"></td>
                                         <td class="px-4 py-3 text-gray-600 font-medium text-right tabular-nums"
                                             x-text="item.PO_Quantity || 0"></td>
                                         <td class="px-4 py-3 text-right tabular-nums">
@@ -683,7 +687,7 @@
 
                 getItemUnit(itemObj) {
                     if (!itemObj || !itemObj.Item) return 'unit';
-                    return itemObj.Item.unit_of_measure || 'unit';
+                    return itemObj.Item.UOM?.Unit || 'unit';
                 },
 
                 formatDate(dateStr) {
@@ -759,6 +763,7 @@
                                         <strong>${this.escapeHtml(this.getItemName(item))}</strong>
                                         ${item.Comment ? `<br><small style="color:#666;">${this.escapeHtml(item.Comment)}</small>` : ''}
                                     </td>
+                                    <td class="text-center">${this.escapeHtml(this.getItemUnit(item))}</td>
                                     <td class="text-center">${item.PO_Quantity || 0}</td>
                                     <td class="text-center"><strong>${item.Received_Quantity || 0}</strong></td>
                                     <td class="text-right">${this.formatCurrency(item.Rate)}</td>
@@ -875,10 +880,11 @@
                                         <thead>
                                             <tr>
                                                 <th width="5%" class="text-center">#</th>
-                                                <th width="35%">Item Description</th>
-                                                <th width="12%" class="text-center">PO Qty</th>
-                                                <th width="12%" class="text-center">Rcvd Qty</th>
-                                                <th width="16%" class="text-right">Rate</th>
+                                                <th width="30%">Item Description</th>
+                                                <th width="8%" class="text-center">UOM</th>
+                                                <th width="10%" class="text-center">PO Qty</th>
+                                                <th width="10%" class="text-center">Rcvd Qty</th>
+                                                <th width="17%" class="text-right">Rate</th>
                                                 <th width="20%" class="text-right">Amount</th>
                                             </tr>
                                         </thead>

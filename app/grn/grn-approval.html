@@ -591,31 +591,34 @@
                                     <thead class="bg-white border-b border-gray-200">
                                         <tr>
                                             <th
-                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[25%]">
+                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[22%]">
                                                 Item Name</th>
                                             <th
-                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right w-[12%]">
+                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[8%]">
+                                                UOM</th>
+                                            <th
+                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right w-[10%]">
                                                 Rate (₹)</th>
                                             <th
-                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right w-[10%]">
+                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right w-[9%]">
                                                 PO Qty</th>
                                             <th
-                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right w-[10%]">
+                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right w-[9%]">
                                                 Pending</th>
                                             <th
-                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right w-[13%]">
+                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right w-[11%]">
                                                 Recv. Qty</th>
                                             <th
-                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right w-[12%]">
+                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right w-[11%]">
                                                 Amount (₹)</th>
                                             <th
-                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[18%]">
+                                                class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[20%]">
                                                 Comment</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr x-show="form.Items.length === 0">
-                                            <td colspan="7" class="px-3 py-6 text-center text-xs text-gray-400 italic">
+                                            <td colspan="8" class="px-3 py-6 text-center text-xs text-gray-400 italic">
                                                 Select a PO Reference to view and receive items.</td>
                                         </tr>
                                         <template x-for="(item, idx) in form.Items" :key="idx">
@@ -624,16 +627,20 @@
                                                     <input disabled :value="item.ItemName" type="text"
                                                         class="grid-input font-medium cursor-not-allowed text-gray-800">
                                                 </td>
+                                                <td class="px-2 py-2">
+                                                    <input disabled :value="item.Unit || '-'" type="text"
+                                                        class="grid-input cursor-not-allowed text-gray-600">
+                                                </td>
                                                 <td class="px-2 py-2 text-right">
                                                     <input disabled :value="formatINR(item.Rate)" type="text"
                                                         class="grid-input text-right cursor-not-allowed">
                                                 </td>
                                                 <td class="px-2 py-2 text-right">
-                                                    <input disabled :value="item.PO_Quantity + ' ' + (item.Unit||'')"
+                                                    <input disabled :value="item.PO_Quantity"
                                                         type="text" class="grid-input text-right cursor-not-allowed">
                                                 </td>
                                                 <td class="px-2 py-2 text-right">
-                                                    <input disabled :value="item.Max_Allowed + ' ' + (item.Unit||'')"
+                                                    <input disabled :value="item.Max_Allowed"
                                                         type="text"
                                                         class="grid-input text-right font-semibold text-[#1B5CA8] cursor-not-allowed">
                                                 </td>
@@ -1090,7 +1097,7 @@
                                 return {
                                     Item: i.Item?.ID || '',
                                     ItemName: i.Item?.item_name || 'Unknown Item',
-                                    Unit: i.Item?.unit_of_measure || '',
+                                    Unit: i.Item?.UOM?.Unit || '',
                                     Rate: rate,
                                     PO_Quantity: poQty,
                                     Already_Received: alreadyReceived,

@@ -448,7 +448,8 @@
               class="flex items-center justify-between gap-3 px-4 py-2.5 bg-[#EBF3FC] border-b border-[#c5d9f0]">
               <div class="flex items-center gap-2 text-[11.5px] text-[#1B5CA8]">
                 <i class="bi bi-info-circle-fill text-[13px] shrink-0"></i>
-                <span>Select vendors for <strong>one row</strong>, then apply the same vendors to all other rows instantly.</span>
+                <span>Select vendors for <strong>one row</strong>, then apply the same vendors to all other rows
+                  instantly.</span>
               </div>
               <button type="button" @click="applyVendorsToAll()"
                 class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-[11px] font-semibold hover:bg-[#12427b] active:scale-95 transition-all shadow-sm whitespace-nowrap">
@@ -944,8 +945,8 @@
               itemRef.id = val;
               if (val) {
                 let masterItem = this.itemMasters.find(m => m.ID === val);
-                if (masterItem && masterItem.unit_of_measure) {
-                  itemRef.unit = masterItem.unit_of_measure;
+                if (masterItem && masterItem.UOM && masterItem.UOM.Unit) {
+                  itemRef.unit = masterItem.UOM.Unit;
                 }
               }
             },
@@ -1117,7 +1118,7 @@
                 }
 
                 let masterItem = this.itemMasters.find(m => m.ID === (prItem.Item && prItem.Item.ID));
-                let unit = prItem.Unit || (masterItem ? masterItem.unit_of_measure : '') || '';
+                let unit = prItem.Unit || (masterItem ? masterItem.UOM?.Unit : '') || '';
 
                 this.rfqForm.items.push({
                   uid: Date.now() + Math.random(),

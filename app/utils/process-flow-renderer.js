@@ -49,7 +49,7 @@ const P2PWorkflowUtils = {
 	},
 	EMAILS: {
 		RAM_KRISHNA: "ram@apcobuildingsolutions.com",
-		NIKITHA: "nikita@apcobuildingsolutions.com",
+		NIKITA: "nikita@apcobuildingsolutions.com",
 		SURESH_KUMAR: "suresh@apcobuildingsolutions.com",
 	},
 	// Level-1 cache: in-memory (cleared on page refresh).
