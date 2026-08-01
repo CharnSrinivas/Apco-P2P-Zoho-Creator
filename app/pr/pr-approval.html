@@ -289,6 +289,23 @@
                         class="py-1.5 pl-7 pr-2.5 border border-gray-300 rounded-md text-xs text-gray-700 bg-white w-[190px] focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10"
                         type="text" placeholder="Search by PR #, title…">
                 </div>
+                <div class="relative">
+                    <i class="bi bi-funnel absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[12px] pointer-events-none"
+                        aria-hidden="true"></i>
+                    <select x-model="stageFilter" @change="currentPage = 1; fetchRecords(); computeStats();"
+                        class="py-1.5 pl-7 pr-6 border border-gray-300 rounded-md text-xs text-gray-700 bg-white appearance-none cursor-pointer focus:outline-none focus:border-[#1B5CA8] focus:ring-[3px] focus:ring-[#1B5CA8]/10">
+                        <option value="">All Stages</option>
+                        <option value="Purchase Requisition">Purchase Requisition</option>
+                        <option value="Request For Quotation">Request For Quotation</option>
+                        <option value="Quote Comparison">Quote Comparison</option>
+                        <option value="Purchase Order">Purchase Order</option>
+                        <option value="GRN">GRN</option>
+                        <option value="Bill">Bill</option>
+                        <option value="Payment">Payment</option>
+                    </select>
+                    <i
+                        class="bi bi-chevron-down absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] pointer-events-none"></i>
+                </div>
                 <button @click="openCreateModal()"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1B5CA8] text-white rounded-md text-xs font-semibold hover:bg-[#12427b] transition-all shadow-sm">
                     <i class="bi bi-plus-lg"></i> Create PR
@@ -361,12 +378,13 @@
                                 x-text="rec._requesterName"></td>
                             <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-gray-500"
                                 x-text="rec._dateFormatted"></td>
-                            <td class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap">
+                            <td class="px-3 py-[9px] align-middle whitespace-nowrap">
                                 <span
-                                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap border"
+                                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide border"
                                     :class="[rec._stageBadge.border, rec._stageBadge.bg, rec._stageBadge.text]">
                                     <span class="w-[5px] h-[5px] rounded-full shrink-0"
-                                        :class="rec._stageBadge.dot"></span><span x-text="rec._stageBadge.label"></span>
+                                        :class="rec._stageBadge.dot"></span>
+                                    <span x-text="rec.Current_Stage || 'Purchase Requisition'"></span>
                                 </span>
                             </td>
                             <td
@@ -671,40 +689,36 @@
         return 'pending';
     }
 
-    function getStatusBadge(rec, norm) {
-        const stageLabel = rec.Current_Stage || 'Purchase Requisition';
+    // Colors for Current_Stage pipeline values
+    function getStageColors(stage) {
         const map = {
-            draft: { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400', label: 'Draft' },
-            submitted: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500', label: 'Submitted' },
-            pending: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500', label: stageLabel },
-            approved: { border: 'border-green-200', bg: 'bg-green-50', text: 'text-green-800', dot: 'bg-green-500', label: 'Approved' },
-            in_progress: { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500', label: 'In Progress' },
-            completely_ordered: { border: 'border-teal-200', bg: 'bg-teal-50', text: 'text-teal-800', dot: 'bg-teal-600', label: 'Completely Ordered' },
-            partially_ordered: { border: 'border-orange-200', bg: 'bg-orange-50', text: 'text-orange-800', dot: 'bg-orange-500', label: 'Partially Ordered' },
-            partially_received: { border: 'border-violet-200', bg: 'bg-violet-50', text: 'text-violet-800', dot: 'bg-violet-500', label: 'Partially Received' },
-            completely_received: { border: 'border-indigo-200', bg: 'bg-indigo-50', text: 'text-indigo-800', dot: 'bg-indigo-600', label: 'Completely Received' },
-            paid: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600', label: 'Paid' },
-            rejected: { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600', label: 'Rejected' },
-            cancelled: { border: 'border-gray-300', bg: 'bg-gray-100', text: 'text-gray-500', dot: 'bg-gray-400', label: 'Cancelled' },
+            'Purchase Requisition': { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' },
+            'Request For Quotation': { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500' },
+            'Quote Comparison': { border: 'border-violet-200', bg: 'bg-violet-50', text: 'text-violet-800', dot: 'bg-violet-500' },
+            'Purchase Order': { border: 'border-teal-200', bg: 'bg-teal-50', text: 'text-teal-800', dot: 'bg-teal-600' },
+            'GRN': { border: 'border-indigo-200', bg: 'bg-indigo-50', text: 'text-indigo-800', dot: 'bg-indigo-600' },
+            'Bill': { border: 'border-orange-200', bg: 'bg-orange-50', text: 'text-orange-800', dot: 'bg-orange-500' },
+            'P ayment': { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' },
         };
-        return map[norm] || map.pending;
+        return map[stage] || { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gr ay-400' };
     }
 
-    function getStatusColors(norm) {
-        const colors = {
-            draft: { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400' },
-            submitted: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' },
-            approved: { border: 'border-green-200', bg: 'bg-green-50', text: 'text-green-800', dot: 'bg-green-500' },
-            in_progress: { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500' },
-            completely_ordered: { border: 'border-teal-200', bg: 'bg-teal-50', text: 'text-teal-800', dot: 'bg-teal-600' },
-            partially_ordered: { border: 'border-orange-200', bg: 'bg-orange-50', text: 'text-orange-800', dot: 'bg-orange-500' },
-            partially_received: { border: 'border-violet-200', bg: 'bg-violet-50', text: 'text-violet-800', dot: 'bg-violet-500' },
-            completely_received: { border: 'border-indigo-200', bg: 'bg-indigo-50', text: 'text-indigo-800', dot: 'bg-indigo-600' },
-            paid: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' },
-            rejected: { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600' },
-            cancelled: { border: 'border-gray-300', bg: 'bg-gray-100', text: 'text-gray-500', dot: 'bg-gray-400' },
+    // Colors for raw Status field values
+    function getStatusBadge(status) {
+        const map = {
+            'Draft': { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400' },
+            'Submitted': { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' },
+            'Approved': { border: 'border-green-200', bg: 'bg-green-50', text: 'text-green-800', dot: 'bg-green-500' },
+            'In Progress': { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500' },
+            'Completely Ordered': { border: 'border-teal-200', bg: 'bg-teal-50', text: 'text-teal-800', dot: 'bg-teal-600' },
+            'Partially Ordered': { border: 'border-orange-200', bg: 'bg-orange-50', text: 'text-orange-800', dot: 'bg-orange-500' },
+            'Partially Received': { border: 'border-violet-200', bg: 'bg-violet-50', text: 'text-violet-800', dot: 'bg-violet-500' },
+            'Completely Received': { border: 'border-indigo-200', bg: 'bg-indigo-50', text: 'text-indigo-800', dot: 'bg-indigo-600' },
+            'Paid': { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' },
+            'Rejected': { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600' },
+            'Cancelled': { border: 'border-gray-300', bg: 'bg-gray-100', text: 'text-gray-500', dot: 'bg-gray-400' },
         };
-        return colors[norm] || { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' };
+        return map[status] || { border: 'border-gray-200', bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400' };
     }
 
     function getItemApprovalColors(itemApproval) {
@@ -748,8 +762,10 @@
 
     function buildStatusCriteria(filter, role) {
         let crit = '';
-        if (filter === 'pending') {
-            crit = '(Current_Stage == "Purchase Requisition" && Status != "Rejected" && Status != "Draft" && Status != "Approved")';
+        if (filter === 'draft') {
+            crit = '(Status == "Draft")';
+        } else if (filter === 'pending') {
+            crit = '(Current_Stage == "Purchase Requisition" && Status == "Submitted")';
         } else if (filter === 'approved') {
             crit = '(Status == "Approved" && Current_Stage == "Purchase Requisition")';
         } else if (filter === 'in_progress') {
@@ -793,9 +809,10 @@
     function prApp() {
         return {
             // ── stats ──
-            stats: { all: '–', pending: '–', approved: '–', in_progress: '–', completed: '–', rejected: '–' },
+            stats: { all: '–', draft: '–', pending: '–', approved: '–', in_progress: '–', completed: '–', rejected: '–' },
             filterTabs: [
                 { key: 'all', label: 'All' },
+                { key: 'draft', label: 'Draft', productionOnly: true },
                 { key: 'pending', label: 'Submitted' },
                 { key: 'approved', label: 'Approved' },
                 { key: 'in_progress', label: 'In Progress' },
@@ -829,6 +846,7 @@
             currentPage: 1,
             searchQuery: '',
             searchInputValue: '',
+            stageFilter: '',
             searchTimer: null,
             isLoading: true,
             sortColumn: 'date',
@@ -903,10 +921,10 @@
             },
 
             get activeFilterTabs() {
-                // if (this.userRole === P2PWorkflowUtils.ROLES.OPERATIONS) {
-                // return this.filterTabs.filter(tab => tab.key !== 'pending');
-                // }
-                return this.filterTabs;
+                return this.filterTabs.filter(tab => {
+                    if (tab.productionOnly) return this.userRole === P2PWorkflowUtils.ROLES.PRODUCTION;
+                    return true;
+                });
             },
 
             get totalPages() {
@@ -942,22 +960,12 @@
             },
 
             decorateRecord(rec) {
-                const norm = normalizeStatus(rec);
                 rec._prNumber = rec.PR_Number || ('PR-' + rec.Requisition_Number);
                 rec._requesterName = rec.Requested_By_Email || rec.Added_User;
                 rec._dateFormatted = formatDate(rec.PR_Date);
-                rec._stageBadge = getStatusBadge(rec, norm);
-                rec._statusBadge = getStatusColors(norm);
-
-                let label = 'Submitted';
-                if (norm === 'draft') label = 'Draft';
-                if (norm === 'approved') label = 'Approved';
-                if (norm === 'in_progress') label = 'In Progress';
-                if (norm === 'completed') label = 'Completed';
-                if (norm === 'rejected') label = 'Rejected';
-
-                rec._statusLabel = label;
-
+                rec._stageBadge = getStageColors(rec.Current_Stage || 'Purchase Requisition');
+                rec._statusLabel = rec.Status || 'Draft';
+                rec._statusBadge = getStatusBadge(rec._statusLabel);
                 const itemApproval = rec.Items_Approval_Status || '-';
                 rec._itemApproval = itemApproval;
                 rec._itemApprovalBadge = getItemApprovalColors(itemApproval);
@@ -1007,7 +1015,8 @@
                 var q = this.searchQuery.replace(/'/g, "\\'");
                 var searchCrit = this.searchQuery ? `PR_Number.startsWith("${q}") || Requisition_Number.startsWith("${q}") || Requested_By_Email.startsWith("${q}") || Added_User.startsWith("${q}")` : '';
                 var statusCrit = buildStatusCriteria(this.currentFilter, this.userRole);
-                var criteria = [searchCrit, statusCrit].filter(Boolean).join(' && ');
+                var stageCrit = this.stageFilter ? `Current_Stage == "${this.stageFilter}"` : '';
+                var criteria = [searchCrit, statusCrit, stageCrit].filter(Boolean).join(' && ');
 
                 fetchAllRecords(criteria).then((records) => {
                     this.allRecords = records.map(r => this.decorateRecord(r));
@@ -1083,13 +1092,16 @@
                     return parts.join(' && ');
                 }
 
+                const stageCrit = this.stageFilter ? `Current_Stage == "${this.stageFilter}"` : '';
+
                 const counts = [
-                    { key: 'all', crit: combineCriteria('') },
-                    { key: 'pending', crit: combineCriteria('(Current_Stage == "Purchase Requisition" && Status != "Rejected" && Status != "Draft" && Status != "Approved")') },
-                    { key: 'approved', crit: combineCriteria('(Status == "Approved" && Current_Stage == "Purchase Requisition")') },
-                    { key: 'in_progress', crit: combineCriteria('((Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill") && Status != "Rejected")') },
-                    { key: 'completed', crit: combineCriteria('(Current_Stage == "Payment" && Status != "Rejected")') },
-                    { key: 'rejected', crit: combineCriteria('(Status == "Rejected")') }
+                    { key: 'all', crit: combineCriteria(stageCrit) },
+                    { key: 'draft', crit: combineCriteria(stageCrit ? `(Status == "Draft") && ${stageCrit}` : '(Status == "Draft")') },
+                    { key: 'pending', crit: combineCriteria(stageCrit ? `(Current_Stage == "Purchase Requisition" && Status == "Submitted") && ${stageCrit}` : '(Current_Stage == "Purchase Requisition" && Status == "Submitted")') },
+                    { key: 'approved', crit: combineCriteria(stageCrit ? `(Status == "Approved" && Current_Stage == "Purchase Requisition") && ${stageCrit}` : '(Status == "Approved" && Current_Stage == "Purchase Requisition")') },
+                    { key: 'in_progress', crit: combineCriteria(stageCrit ? `((Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill") && Status != "Rejected") && ${stageCrit}` : '((Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill") && Status != "Rejected")') },
+                    { key: 'completed', crit: combineCriteria(stageCrit ? `(Current_Stage == "Payment" && Status != "Rejected") && ${stageCrit}` : '(Current_Stage == "Payment" && Status != "Rejected")') },
+                    { key: 'rejected', crit: combineCriteria(stageCrit ? `(Status == "Rejected") && ${stageCrit}` : '(Status == "Rejected")') }
                 ];
 
                 counts.forEach((c) => {
@@ -1361,6 +1373,7 @@
                 showToast(toastMessage, 'success');
                 this.searchQuery = '';
                 this.searchInputValue = '';
+                this.stageFilter = '';
                 this.fetchRecords();
             }
         };

@@ -966,7 +966,7 @@
                     this.hasError = false;
 
                     try {
-                        if (this.userEmail === 'demouser_2@zohocreator.com' || this.userEmail === P2PWorkflowUtils.EMAILS.RAM_KRISHAN) {
+                        if (this.userEmail === 'demouser_2@zohocreator.com' || this.userEmail === P2PWorkflowUtils.EMAILS.RAM_KRISHNA) {
                             this.PR_REPORT = "Factory_PRs"
                         } else if (["demouser_3@zohocreator.com", "demouser_4@zohocreator.com", P2PWorkflowUtils.EMAILS.NIKITA, P2PWorkflowUtils.EMAILS.SURESH_KUMAR].includes(this.userEmail)) {
                             this.PR_REPORT = "Corporate_Office_PRs"
@@ -1085,12 +1085,13 @@
                 getItemUOM(itemObj) {
                     if (!itemObj) return '–';
                     if (typeof itemObj === 'object' && itemObj.UOM) {
-                        return itemObj.UOM.Unit || itemObj.UOM.display_value || itemObj.UOM || '–';
+                        return itemObj.UOM.Unit || '-'
                     }
-                    const id = typeof itemObj === 'object' ? String(itemObj.ID || itemObj.id || '') : String(itemObj);
-                    const master = this.itemMasters.find(m => String(m.ID) === id);
-                    if (master && master.UOM) return master.UOM.Unit || master.UOM.display_value || master.UOM || '–';
-                    return '–';
+                    return '-'
+                    // const id = typeof itemObj === 'object' ? String(itemObj.ID || itemObj.id || '') : String(itemObj);
+                    // const master = this.itemMasters.find(m => String(m.ID) === id);
+                    // if (master && master.UOM) return master.UOM.Unit || '–';
+                    // return '–';
                 },
                 getDisplayName(field) {
                     if (!field) return '–';
