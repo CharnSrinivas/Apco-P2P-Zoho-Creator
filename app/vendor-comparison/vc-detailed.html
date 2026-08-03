@@ -393,7 +393,6 @@
                                     <thead>
                                         <tr>
                                             <th style="min-width:140px;">Vendor</th>
-                                            <th style="min-width:60px; text-align:center;">Consider</th>
                                             <th style="min-width:140px;">Item</th>
                                             <th style="min-width:80px;">Basic Rate</th>
                                             <th style="min-width:65px;">Disc %</th>
@@ -403,6 +402,7 @@
                                             <th style="min-width:90px;">Landed Rate</th>
                                             <th style="min-width:90px;">Payment Terms</th>
                                             <th style="min-width:110px;">Delivery Date</th>
+                                            <th style="min-width:60px; text-align:center;">Consider</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -415,14 +415,9 @@
                                         <template x-for="(quote, qIdx) in editForm.Quotes" :key="quote.uid">
                                             <tr class="hover:bg-gray-50/50 transition-colors">
                                                 <td>
-                                                    <input x-model="quote.Vendor_Name" type="text"
+                                                    <input x-model="quote.Vendor_Display" type="text"
                                                         class="grid-input font-semibold text-gray-700 bg-transparent border-transparent"
                                                         readonly />
-                                                </td>
-                                                <td class="text-center">
-                                                    <input type="checkbox" x-model="quote.Consider"
-                                                        @change="recalculateAllTotalsEdit()"
-                                                        class="w-3.5 h-3.5 text-[#1B5CA8] rounded border-gray-300 focus:ring-[#1B5CA8] consider-checkbox-clean cursor-pointer" />
                                                 </td>
                                                 <td class="grid-select relative" style="min-width:140px;">
                                                     <select class="w-full text-xs" disabled
@@ -467,6 +462,11 @@
                                                 <td style="min-width:110px;">
                                                     <input x-model="quote.Delivery_Date" type="date" class="grid-input"
                                                         required style="min-width:100px;" />
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" x-model="quote.Consider"
+                                                        @change="recalculateAllTotalsEdit()"
+                                                        class="w-3.5 h-3.5 text-[#1B5CA8] rounded border-gray-300 focus:ring-[#1B5CA8] consider-checkbox-clean cursor-pointer" />
                                                 </td>
                                             </tr>
                                         </template>
@@ -679,9 +679,9 @@
                                         rowspan="2">Unit</th>
                                     <th class="px-3 py-2.5 font-bold text-center border-r border-gray-200 align-middle"
                                         rowspan="2">Qty</th>
-                                    <template x-for="vName in comparativeMatrix.vendorNames" :key="vName">
+                                    <template x-for="vId in comparativeMatrix.vendorIds" :key="vId">
                                         <th class="px-3 py-2 font-black text-center border-r border-gray-200 text-[#1B5CA8] bg-blue-50/50"
-                                            colspan="3" x-text="vName"></th>
+                                            colspan="3" x-text="comparativeMatrix.vendorMap[vId]"></th>
                                     </template>
                                     <th class="px-3 py-2 font-bold text-center border-r border-gray-200 bg-amber-50/50"
                                         colspan="2">Previous Procurement</th>
@@ -689,7 +689,7 @@
                                     </th>
                                 </tr>
                                 <tr class="bg-gray-50 border-b border-gray-200 whitespace-nowrap text-gray-600">
-                                    <template x-for="vName in comparativeMatrix.vendorNames" :key="vName + '-sub'">
+                                    <template x-for="vId in comparativeMatrix.vendorIds" :key="vId + '-sub'">
                                         <th class="p-0 border-r border-gray-200 bg-blue-50/30" colspan="3">
                                             <div class="flex h-full w-full items-center">
                                                 <div class="flex-1 px-2 py-1.5 font-semibold text-right border-r border-gray-200"
@@ -723,24 +723,24 @@
                                             x-text="row.unit"></td>
                                         <td class="px-3 py-2.5 text-center font-bold text-gray-700 border-r border-gray-100"
                                             x-text="row.quantity"></td>
-                                        <template x-for="vName in comparativeMatrix.vendorNames"
-                                            :key="vName + '-' + row.index">
-                                            <template x-if="row.quotes[vName]">
+                                        <template x-for="vId in comparativeMatrix.vendorIds"
+                                            :key="vId + '-' + row.index">
+                                            <template x-if="row.quotes[vId]">
                                                 <td class="p-0 border-r border-gray-100" colspan="3">
                                                     <div class="flex h-full w-full items-center cursor-help"
-                                                        :title="`Breakdown:\nBasic: ${row.quotes[vName].basicRate}\nDisc: ${row.quotes[vName].disc}%\nFreight: ${row.quotes[vName].freight}\nGST: ${row.quotes[vName].gst}%\nTerms: ${row.quotes[vName].terms || 'N/A'}\n\nItem Total:\n${row.quotes[vName].landedRate} x ${row.quantity} = ${row.quotes[vName].amount}`">
+                                                        :title="`Breakdown:\nBasic: ${row.quotes[vId].basicRate}\nDisc: ${row.quotes[vId].disc}%\nFreight: ${row.quotes[vId].freight}\nGST: ${row.quotes[vId].gst}%\nTerms: ${row.quotes[vId].terms || 'N/A'}\n\nItem Total:\n${row.quotes[vId].landedRate} x ${row.quantity} = ${row.quotes[vId].amount}`">
                                                         <div class="flex-1 px-2 py-2.5 text-right border-r border-gray-100 tabular-nums text-gray-700"
-                                                            x-text="formatINR(row.quotes[vName].rate, false)"></div>
+                                                            x-text="formatINR(row.quotes[vId].rate, false)"></div>
                                                         <div class="flex-1 px-2 py-2.5 text-right border-r border-gray-100 text-[#1B5CA8] font-semibold tabular-nums"
-                                                            x-text="formatINR(row.quotes[vName].landedRate, false)">
+                                                            x-text="formatINR(row.quotes[vId].landedRate, false)">
                                                         </div>
                                                         <div class="flex-1 px-2 py-2.5 text-right font-bold tabular-nums"
-                                                            :class="row.l1Vendor === vName ? 'text-emerald-700 bg-emerald-50/50' : 'text-gray-900'"
-                                                            x-text="formatINR(row.quotes[vName].amount, false)"></div>
+                                                            :class="row.l1VendorId === vId ? 'text-emerald-700 bg-emerald-50/50' : 'text-gray-900'"
+                                                            x-text="formatINR(row.quotes[vId].amount, false)"></div>
                                                     </div>
                                                 </td>
                                             </template>
-                                            <template x-if="!row.quotes[vName]">
+                                            <template x-if="!row.quotes[vId]">
                                                 <td class="p-0 border-r border-gray-100 bg-gray-50/40" colspan="3">
                                                     <div class="flex h-full w-full items-center">
                                                         <div
@@ -760,8 +760,9 @@
                                         <td class="px-3 py-2.5 text-right text-gray-600 border-r border-gray-100 tabular-nums"
                                             x-text="row.prevPrice !== '–' ? formatINR(row.prevPrice, false) : '-'"></td>
                                         <td class="px-3 py-2.5 text-center font-black"
-                                            :class="row.l1Vendor !== '–' ? 'text-emerald-600 bg-emerald-50/30' : 'text-gray-400'"
-                                            x-text="row.l1Vendor"></td>
+                                            :class="row.l1VendorId !== '–' ? 'text-emerald-600 bg-emerald-50/30' : 'text-gray-400'"
+                                            x-text="row.l1VendorId !== '–' ? comparativeMatrix.vendorMap[row.l1VendorId] : '–'">
+                                        </td>
                                     </tr>
                                 </template>
                             </tbody>
@@ -770,11 +771,11 @@
                                     <td colspan="4"
                                         class="px-3 py-3 text-right font-black text-gray-800 border-r border-gray-300 text-xs uppercase tracking-wide">
                                         Total Estimated Value</td>
-                                    <template x-for="vName in comparativeMatrix.vendorNames" :key="'total-' + vName">
+                                    <template x-for="vId in comparativeMatrix.vendorIds" :key="'total-' + vId">
                                         <td colspan="3" class="px-2 py-3 border-r border-gray-300">
                                             <div class="flex h-full w-full items-center justify-end gap-2 text-right">
                                                 <div class="font-black text-[#1B5CA8] tabular-nums text-[13px] shrink-0"
-                                                    x-text="formatINR(comparativeMatrix.vendorTotals[vName], false)">
+                                                    x-text="formatINR(comparativeMatrix.vendorTotals[vId], false)">
                                                 </div>
                                             </div>
                                         </td>
@@ -859,7 +860,7 @@
                             <template x-for="(row, idx) in evaluationRows" :key="idx">
                                 <tr class="border-b border-gray-100 hover:bg-gray-50/80 bg-white">
                                     <td class="px-4 py-2.5 font-bold text-gray-800 border-r border-gray-100 bg-gray-50/30"
-                                        x-text="row.vendor"></td>
+                                        x-text="row.vendorDisplay"></td>
                                     <td class="px-4 py-2.5 text-gray-700 border-r border-gray-100 font-medium"
                                         x-text="row.item"></td>
                                     <td class="px-4 py-2.5 text-center text-gray-700 border-r border-gray-100"
@@ -1125,22 +1126,30 @@
                 },
 
                 get comparativeMatrix() {
-                    if (!this.rec.Items) return { vendorNames: [], rows: [], vendorTotals: {}, vendorTotalFormulas: {} };
+                    if (!this.rec.Items) return { vendorIds: [], vendorMap: {}, rows: [], vendorTotals: {} };
 
-                    const vendorNames = [...new Set(this.vendors.filter(v => v.Consider !== false && v.Consider !== "false").map(v => v.Vendor_Name))].filter(Boolean);
+                    // Utilize strictly the Vendor ID and construct a mapping for safe Display Name referencing 
+                    const activeQuotes = this.vendors.filter(v => v.Consider !== false && v.Consider !== "false" && v.Vendor?.ID);
+                    const vendorIds = [...new Set(activeQuotes.map(v => v.Vendor.ID))];
+
+                    const vendorMap = {};
+                    activeQuotes.forEach(v => {
+                        vendorMap[v.Vendor.ID] = v.Vendor.Display_Name || 'Unknown Vendor';
+                    });
+
                     const vendorTotals = {};
-                    vendorNames.forEach(v => { vendorTotals[v] = 0; });
+                    vendorIds.forEach(vId => { vendorTotals[vId] = 0; });
 
                     const rows = this.rec.Items.map((reqItem, index) => {
                         const itemId = reqItem.Item?.ID;
                         const itemName = reqItem.Item?.item_name;
                         const qty = parseFloat(reqItem.Quantity) || 0;
                         const itemQuotes = {};
-                        let l1Vendor = '–';
+                        let l1VendorId = '–';
                         let minRate = Infinity;
 
-                        vendorNames.forEach(vName => {
-                            const quote = this.vendors.find(v => v.Vendor_Name === vName && v.Items && v.Items.some(i => i.ID === itemId || i.item_name === itemName));
+                        vendorIds.forEach(vId => {
+                            const quote = this.vendors.find(v => v.Vendor?.ID === vId && v.Items && v.Items.some(i => i.ID === itemId || i.item_name === itemName));
                             if (quote) {
                                 const basicRate = parseFloat(quote.Basic_Rate) || 0;
                                 const negRate = parseFloat(quote.Negotiated_Rate) || basicRate;
@@ -1151,20 +1160,20 @@
                                 const terms = quote.Payment_Terms || '';
                                 const amount = landedRate * qty;
 
-                                itemQuotes[vName] = { basicRate, rate: negRate, disc, freight, gst, landedRate, amount, terms };
-                                vendorTotals[vName] += amount;
+                                itemQuotes[vId] = { basicRate, rate: negRate, disc, freight, gst, landedRate, amount, terms };
+                                vendorTotals[vId] += amount;
 
-                                if (landedRate > 0 && landedRate < minRate) { minRate = landedRate; l1Vendor = vName; }
-                            } else { itemQuotes[vName] = null; }
+                                if (landedRate > 0 && landedRate < minRate) { minRate = landedRate; l1VendorId = vId; }
+                            } else { itemQuotes[vId] = null; }
                         });
 
                         return {
                             index: index + 1, itemName: itemName || '–', description: reqItem.Item?.description || '', quantity: qty, unit: reqItem.Item?.UOM?.Unit || '–', quotes: itemQuotes,
-                            l1Vendor: minRate !== Infinity ? l1Vendor : '–',
+                            l1VendorId: minRate !== Infinity ? l1VendorId : '–',
                             prevVendor: reqItem.Item?.Vendor?.Legal_Name || reqItem.Item?.Vendor?.Display_Name || '–', prevPrice: reqItem.Item?.unit_price || '–'
                         };
                     });
-                    return { vendorNames, rows, vendorTotals };
+                    return { vendorIds, vendorMap, rows, vendorTotals };
                 },
 
                 getStrategyTotal(strategy) { return this.getStrategyRows(strategy).reduce((sum, r) => sum + (r.amount || 0), 0); },
@@ -1173,65 +1182,65 @@
                     const rows = [];
                     const matrix = this.comparativeMatrix;
                     if (strategy === 'lowest') {
-                        const v = this.lowestBidderVendor;
-                        if (!v) return [];
+                        const vId = this.lowestBidderVendorId;
+                        if (!vId) return [];
                         matrix.rows.forEach(r => {
-                            const q = r.quotes[v];
-                            if (q) rows.push({ vendor: v, item: r.itemName, qty: r.quantity, rate: q.rate, landedRate: q.landedRate, amount: q.amount, terms: q.terms, delivery: this.getVendorDelivery(v) });
+                            const q = r.quotes[vId];
+                            if (q) rows.push({ vendorId: vId, vendorDisplay: matrix.vendorMap[vId], item: r.itemName, qty: r.quantity, rate: q.rate, landedRate: q.landedRate, amount: q.amount, terms: q.terms, delivery: this.getVendorDelivery(vId) });
                         });
                     } else if (strategy === 'item_wise') {
                         matrix.rows.forEach(r => {
-                            const v = r.l1Vendor;
-                            if (v && v !== '–') {
-                                const q = r.quotes[v];
-                                rows.push({ vendor: v, item: r.itemName, qty: r.quantity, rate: q.rate, landedRate: q.landedRate, amount: q.amount, terms: q.terms, delivery: this.getVendorDelivery(v) });
+                            const vId = r.l1VendorId;
+                            if (vId && vId !== '–') {
+                                const q = r.quotes[vId];
+                                rows.push({ vendorId: vId, vendorDisplay: matrix.vendorMap[vId], item: r.itemName, qty: r.quantity, rate: q.rate, landedRate: q.landedRate, amount: q.amount, terms: q.terms, delivery: this.getVendorDelivery(vId) });
                             }
                         });
                     } else if (strategy === 'earliest') {
-                        const v = this.earliestDeliveryVendor;
-                        if (!v) return [];
+                        const vId = this.earliestDeliveryVendorId;
+                        if (!vId) return [];
                         matrix.rows.forEach(r => {
-                            const q = r.quotes[v];
-                            if (q) rows.push({ vendor: v, item: r.itemName, qty: r.quantity, rate: q.rate, landedRate: q.landedRate, amount: q.amount, terms: q.terms, delivery: this.getVendorDelivery(v) });
+                            const q = r.quotes[vId];
+                            if (q) rows.push({ vendorId: vId, vendorDisplay: matrix.vendorMap[vId], item: r.itemName, qty: r.quantity, rate: q.rate, landedRate: q.landedRate, amount: q.amount, terms: q.terms, delivery: this.getVendorDelivery(vId) });
                         });
                     }
                     return rows;
                 },
 
-                get lowestBidderVendor() {
-                    let minTotal = Infinity, best = null;
+                get lowestBidderVendorId() {
+                    let minTotal = Infinity, bestId = null;
                     const t = this.comparativeMatrix.vendorTotals;
-                    for (let v in t) { if (t[v] > 0 && t[v] < minTotal) { minTotal = t[v]; best = v; } }
-                    return best;
+                    for (let vId in t) { if (t[vId] > 0 && t[vId] < minTotal) { minTotal = t[vId]; bestId = vId; } }
+                    return bestId;
                 },
 
-                get earliestDeliveryVendor() {
-                    let earliest = null, best = null;
+                get earliestDeliveryVendorId() {
+                    let earliest = null, bestId = null;
                     this.vendors.forEach(v => {
-                        if (v.Consider !== false && v.Consider !== "false" && v.Delivery_Date) {
+                        if (v.Consider !== false && v.Consider !== "false" && v.Delivery_Date && v.Vendor?.ID) {
                             const d = new Date(v.Delivery_Date);
-                            if (!earliest || d < earliest) { earliest = d; best = v.Vendor_Name; }
+                            if (!earliest || d < earliest) { earliest = d; bestId = v.Vendor.ID; }
                         }
                     });
-                    return best;
+                    return bestId;
                 },
 
                 get evaluationRows() { return this.getStrategyRows(this.evaluationStrategy); },
                 get simulationTotal() { return this.evaluationRows.reduce((sum, row) => sum + (row.amount || 0), 0); },
 
-                getVendorDelivery(vName) {
-                    const v = this.vendors.find(v => (v.Vendor_Display || v.Vendor_Name) === vName);
+                getVendorDelivery(vId) {
+                    const v = this.vendors.find(v => v.Vendor?.ID === vId);
                     return v ? v.Delivery_Date : '';
                 },
 
                 get computedFinalVendors() {
                     const set = new Set();
-                    this.evaluationRows.forEach(r => { if (r.vendor && r.vendor !== '–') set.add(r.vendor); });
+                    this.evaluationRows.forEach(r => { if (r.vendorDisplay && r.vendorDisplay !== '–') set.add(r.vendorDisplay); });
                     const arr = Array.from(set);
                     return arr.length > 0 ? arr.join(', ') : 'None';
                 },
 
-                get qcNumber() { return this.rec.QC_Number ? 'QC-' + this.rec.QC_Number : '–'; },
+                get qcNumber() { return this.rec.QC_Ref_Number || (this.rec.QC_Number ? 'QC-' + this.rec.QC_Number : '–'); },
                 get canEdit() { const s = (this.rec.Status || '').toLowerCase(); return !['freezed', 'finalized'].includes(s); },
                 get isFreezed() { return (this.rec.Status || '').toLowerCase() === 'freezed'; },
                 get isQcApproved() { const s = (this.rec.Status || '').toLowerCase(); return s === 'approved' || s === 'finalized'; },
@@ -1332,15 +1341,44 @@
                     }
                     this.isFinalizingDecision = true;
                     try {
-                        const finalVendor = this.computedFinalVendors;
+                        const finalVendorStr = this.computedFinalVendors;
                         const totalLandedRate = this.simulationTotal;
+
+                        // Extract winning vendor IDs from the active evaluation strategy
+                        const finalizedVendorIds = Array.from(new Set(this.evaluationRows.map(r => r.vendorId))).filter(Boolean);
+
+                        // Reconstruct array to force the `Finalized` true/false parameter for each matching item quote.
+                        const updatedQuotes = this.vendors.map(v => {
+                            const isFinalized = finalizedVendorIds.includes(v.Vendor?.ID);
+                            let linePayload = {
+                                Vendor: v.Vendor?.ID,
+                                Basic_Rate: v.Basic_Rate,
+                                Disc: v.Disc,
+                                Negotiated_Rate: v.Negotiated_Rate,
+                                GST: v.GST,
+                                Freight: v.Freight,
+                                Landed_Rate: v.Landed_Rate,
+                                Payment_Terms: v.Payment_Terms,
+                                Consider: v.Consider,
+                                Finalized: isFinalized // Toggle Finalized status directly on row level payload map 
+                            };
+                            if (v.Delivery_Date) {
+                                linePayload.Delivery_Date = dayjs(v.Delivery_Date).format('DD-MMM-YYYY');
+                            }
+                            if (v.Items && v.Items.length > 0) {
+                                linePayload.Items = v.Items.map(i => i.ID);
+                            }
+                            return linePayload;
+                        });
 
                         const payload = {
                             data: {
                                 Status: 'Finalized',
-                                Finalized_Vendor: finalVendor,
+                                Finalized_Vendor: finalVendorStr, // Visual finalization string text
+                                Vendor: finalizedVendorIds.length > 0 ? finalizedVendorIds[0] : "", // Form Lookup linking 
                                 Total_Landed_Rate: totalLandedRate.toFixed(2),
-                                Justification: this.decisionJustification
+                                Justification: this.decisionJustification,
+                                Quotation_Comparison_Statement: updatedQuotes // Sends full mapped Subform block reflecting 'Finalized' keys
                             }
                         };
 
@@ -1405,12 +1443,14 @@
                         Quotes: []
                     };
 
-                    // Populate Flat Quotes Array directly from Quotation_Comparison_Statement
+                    // Populate form using actual object IDs over deprecated string fields 
                     if (this.rec.Quotation_Comparison_Statement && Array.isArray(this.rec.Quotation_Comparison_Statement)) {
                         this.editForm.Quotes = this.rec.Quotation_Comparison_Statement.map(q => ({
                             uid: Date.now() + Math.random(),
-                            Vendor_Name: q.Vendor_Name || '',
+                            Vendor: q.Vendor?.ID || '',
+                            Vendor_Display: q.Vendor?.Display_Name || '',
                             Consider: q.Consider === true || q.Consider === "true",
+                            Finalized: q.Finalized === true || q.Finalized === "true",
                             Item: (q.Items && q.Items.length > 0) ? q.Items[0].ID : '',
                             Item_Name: (q.Items && q.Items.length > 0) ? q.Items[0].item_name : '',
                             Basic_Rate: q.Basic_Rate || 0,
@@ -1475,7 +1515,7 @@
                                 Justification: this.editForm.Justification,
                                 Quotation_Comparison_Statement: this.editForm.Quotes.map(q => {
                                     let linePayload = {
-                                        Vendor_Name: q.Vendor_Name,
+                                        Vendor: q.Vendor, // Exclusively push 'Vendor' ID key as requested instead of string name
                                         Items: [q.Item],
                                         Basic_Rate: q.Basic_Rate,
                                         Disc: q.Disc,
@@ -1484,7 +1524,8 @@
                                         Freight: q.Freight,
                                         Landed_Rate: q.Landed_Rate,
                                         Payment_Terms: q.Payment_Terms,
-                                        Consider: q.Consider
+                                        Consider: q.Consider,
+                                        Finalized: q.Finalized
                                     };
                                     if (q.Delivery_Date) {
                                         linePayload.Delivery_Date = dayjs(q.Delivery_Date).format('DD-MMM-YYYY');
@@ -1527,7 +1568,8 @@
 
                     let vHeadersHtml = '',
                         vSubHeadersHtml = '';
-                    matrix.vendorNames.forEach(vName => {
+                    matrix.vendorIds.forEach(vId => {
+                        const vName = matrix.vendorMap[vId];
                         vHeadersHtml += `<th colspan="3" class="text-center">${this.escapeHtml(vName)}</th>`;
                         vSubHeadersHtml +=
                             `<th class="text-right sub-hdr" title="Negotiated Rate">Rate</th><th class="text-right sub-hdr">Landed Rate</th><th class="text-right sub-hdr">Amount</th>`;
@@ -1537,8 +1579,8 @@
                     if (matrix.rows.length > 0) {
                         matrix.rows.forEach(row => {
                             let vCellsHtml = '';
-                            matrix.vendorNames.forEach(vName => {
-                                const q = row.quotes[vName];
+                            matrix.vendorIds.forEach(vId => {
+                                const q = row.quotes[vId];
                                 if (q) {
                                     vCellsHtml +=
                                         `<td class="text-right">${this.formatINR(q.rate, false)}</td><td class="text-right">${this.formatINR(q.landedRate, false)}</td><td class="text-right"><strong>${this.formatINR(q.amount, false)}</strong></td>`;
@@ -1547,6 +1589,8 @@
                                         `<td class="text-center">-</td><td class="text-center">-</td><td class="text-center">-</td>`;
                                 }
                             });
+
+                            let l1VendorDisplay = row.l1VendorId !== '–' ? matrix.vendorMap[row.l1VendorId] : '–';
                             rowHtml += `
                                 <tr>
                                     <td class="text-center">${row.index}</td>
@@ -1556,15 +1600,15 @@
                                     ${vCellsHtml}
                                     <td>${this.escapeHtml(row.prevVendor)}</td>
                                     <td class="text-right">${row.prevPrice !== '–' ? this.formatINR(row.prevPrice, false) : '-'}</td>
-                                    <td class="text-center" style="font-weight:bold; color:#1B5CA8;">${this.escapeHtml(row.l1Vendor)}</td>
+                                    <td class="text-center" style="font-weight:bold; color:#1B5CA8;">${this.escapeHtml(l1VendorDisplay)}</td>
                                 </tr>
                             `;
                         });
 
                         let tfootCells = '';
-                        matrix.vendorNames.forEach(vName => {
+                        matrix.vendorIds.forEach(vId => {
                             tfootCells += `<th colspan="3" class="text-right" style="font-size:11pt; color:#1B5CA8;">
-                                ${this.formatINR(matrix.vendorTotals[vName], false)}
+                                ${this.formatINR(matrix.vendorTotals[vId], false)}
                             </th>`;
                         });
 
@@ -1575,7 +1619,7 @@
                                     </tr>`;
                     } else {
                         rowHtml =
-                            `<tr><td colspan="${6 + (matrix.vendorNames.length * 3)}" class="text-center" style="font-style:italic; color:#666;">No items found.</td></tr>`;
+                            `<tr><td colspan="${6 + (matrix.vendorIds.length * 3)}" class="text-center" style="font-style:italic; color:#666;">No items found.</td></tr>`;
                     }
 
                     // ─── Build ALL THREE strategy tables ───
@@ -1592,7 +1636,7 @@
                         rows.forEach(r => {
                             sRows += `
                                 <tr>
-                                    <td><strong>${this.escapeHtml(r.vendor)}</strong></td>
+                                    <td><strong>${this.escapeHtml(r.vendorDisplay)}</strong></td>
                                     <td>${this.escapeHtml(r.item)}</td>
                                     <td class="text-center">${r.qty}</td>
                                     <td class="text-right">${this.formatINR(r.rate, false)}</td>

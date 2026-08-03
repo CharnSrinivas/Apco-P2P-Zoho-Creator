@@ -175,6 +175,49 @@
         .group-row td {
             border-top: 1px solid #f3f4f6;
         }
+
+        /* Tom Select overrides for Edit Screen dropdowns */
+        .ts-control {
+            border: 1px solid #e5e7eb !important;
+            border-radius: 0.5rem !important;
+            font-size: 0.8125rem !important;
+            padding: 0.5rem 0.75rem !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+            font-family: inherit;
+            background-color: #f9fafb !important;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .ts-control.focus {
+            border-color: #1B5CA8 !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(27, 92, 168, 0.15) !important;
+        }
+
+        .ts-dropdown {
+            border-radius: 0.5rem !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+            border: 1px solid #f3f4f6 !important;
+            padding: 0.35rem !important;
+            margin-top: 4px !important;
+            font-size: 0.8125rem !important;
+        }
+
+        .ts-dropdown .option {
+            border-radius: 0.375rem !important;
+            padding: 0.5rem 0.75rem !important;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .ts-dropdown .active {
+            background-color: #f3f4f6 !important;
+            color: #111827 !important;
+        }
+
+        .ts-dropdown .option:hover {
+            background-color: #e5e7eb !important;
+        }
     </style>
 </head>
 
@@ -287,19 +330,32 @@
                                             class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[15%]">
                                             UOM</th>
                                         <th
-                                            class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[25%]">
+                                            class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-left w-[15%]">
                                             Quantity</th>
+                                        <th
+                                            class="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-center w-[10%]">
+                                            Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <template x-for="q in rfqForm.quotations" :key="q.recId">
-                                        <tr class="border-b border-gray-100 last:border-0 bg-white">
-                                            <td class="px-3 py-2 text-gray-700 font-medium" x-text="q.vendorName"></td>
+                                    <template x-for="(q, index) in rfqForm.quotations" :key="q.recId">
+                                        <tr
+                                            class="border-b border-gray-100 last:border-0 bg-white hover:bg-gray-50/50 transition-colors">
+                                            <td class="px-3 py-2 relative">
+                                                <select x-init="initEditVendorSelect($el, q)" class="w-full text-xs"></select>
+                                            </td>
                                             <td class="px-3 py-2 text-gray-700 font-medium" x-text="q.itemName"></td>
                                             <td class="px-3 py-2 text-gray-500" x-text="q.uom"></td>
                                             <td class="px-3 py-2">
                                                 <input type="number" x-model.number="q.quantity" required min="1"
                                                     class="w-full py-1.5 px-2.5 bg-gray-50 border border-gray-200 rounded-md text-[13px] focus:bg-white focus:outline-none focus:border-[#1B5CA8]">
+                                            </td>
+                                            <td class="px-3 py-2 text-center">
+                                                <button type="button" @click="removeQuotation(index)"
+                                                    class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50"
+                                                    title="Remove Quotation">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
                                             </td>
                                         </tr>
                                     </template>
@@ -606,6 +662,9 @@
                 quotations: [],
                 actions: [],
 
+                vendorMasters: [],
+                tsInstances: { editVendors: [] },
+
                 // Edit Modal Form State
                 isEditModalOpen: false,
                 isSubmittingEdit: false,
@@ -629,16 +688,38 @@
 
                 initWidget() {
                     if (typeof P2PWorkflowUtils !== 'undefined') P2PWorkflowUtils.init();
+
+                    this.fetchVendorMasters();
+
                     ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
                         this.recordId = params?.recordId || null;
                         if (!this.recordId) {
                             this.hasError = true;
-                            this.isLoading = false;
+                            this.isLoading = true;
                             this.errorMessage = 'No Record ID provided in URL parameters.';
                             return;
                         }
                         this.fetchData();
                     });
+                },
+
+                async fetchVendorMasters() {
+                    try {
+                        let accumulated = [];
+                        let cursor = null;
+                        do {
+                            let config = { report_name: "Vendor_Report", max_records: 200 };
+                            if (cursor) config.record_cursor = cursor;
+                            let res = await ZOHO.CREATOR.DATA.getRecords(config);
+                            if (res.code === 3000 && res.data) {
+                                accumulated = accumulated.concat(res.data);
+                                cursor = res.data.length >= 200 ? res.record_cursor : null;
+                            } else {
+                                cursor = null;
+                            }
+                        } while (cursor);
+                        this.vendorMasters = accumulated;
+                    } catch (err) { console.error('Failed to load vendors', err); }
                 },
 
                 fetchData() {
@@ -659,7 +740,6 @@
 
                         // Render Process Flow after DOM updates
                         this.$nextTick(() => {
-                            console.log({ rec: this.rec })
                             if (typeof P2PWorkflowUtils !== 'undefined') {
                                 P2PWorkflowUtils.renderProgress(this.actions, this.rec.Current_Stage, document.getElementById('progressContainer'), document.getElementById('progressFill'));
                             }
@@ -686,6 +766,7 @@
                         this.rfqForm.quotations.push({
                             _original: q, // Store original full object to satisfy Zoho Subform mapping constraints
                             recId: q.ID,
+                            vendorId: q.Vendor?.ID || '',
                             vendorName: q.Vendor?.Display_Name || 'Unknown',
                             itemName: q.item_master?.item_name || '',
                             uom: q.item_master?.UOM?.Unit || '',
@@ -696,9 +777,67 @@
                     this.isEditModalOpen = true;
                 },
 
-                closeEditModal() { this.isEditModalOpen = false; },
+                initEditVendorSelect(el, qRef) {
+                    let ts = new TomSelect(el, {
+                        valueField: 'ID',
+                        labelField: 'Display_Name',
+                        searchField: ['Display_Name', 'Company_Name'],
+                        options: this.vendorMasters,
+                        maxItems: 1,
+                        placeholder: 'Select vendor...',
+                        onChange: (val) => {
+                            qRef.vendorId = val;
+                        },
+                        render: {
+                            option: (d, e) => `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>`,
+                            item: (d, e) => `<div class="font-medium">${e(d.Display_Name || d.Company_Name || 'Vendor')}</div>`
+                        },
+                        load: (query, callback) => {
+                            if (!query.length) return callback();
+                            var q = query.replace(/'/g, "\\'");
+                            ZOHO.CREATOR.DATA.getRecords({
+                                report_name: "Vendor_Report",
+                                criteria: `(Display_Name.contains("${q}") || Company_Name.contains("${q}"))`
+                            }).then(res => {
+                                const data = res.code === 3000 ? res.data : [];
+                                data.forEach(v => {
+                                    if (!this.vendorMasters.some(existing => existing.ID === v.ID)) this.vendorMasters.push(v);
+                                });
+                                callback(data);
+                            }).catch(() => callback());
+                        }
+                    });
+
+                    if (qRef.vendorId) {
+                        if (!ts.options[qRef.vendorId]) {
+                            ts.addOption({ ID: String(qRef.vendorId), Display_Name: qRef.vendorName });
+                        }
+                        ts.setValue(String(qRef.vendorId), true);
+                    }
+                    this.tsInstances.editVendors.push(ts);
+                },
+
+                removeQuotation(index) {
+                    this.rfqForm.quotations.splice(index, 1);
+                    if (this.tsInstances.editVendors[index]) {
+                        this.tsInstances.editVendors[index].destroy();
+                        this.tsInstances.editVendors.splice(index, 1);
+                    }
+                },
+
+                closeEditModal() {
+                    this.isEditModalOpen = false;
+                    this.tsInstances.editVendors.forEach(ts => ts && ts.destroy());
+                    this.tsInstances.editVendors = [];
+                    this.rfqForm.quotations = [];
+                },
 
                 async submitEditRFQ() {
+                    const missingVendor = this.rfqForm.quotations.some(q => !q.vendorId);
+                    if (missingVendor) {
+                        this.showToast('Please select a vendor for all quotations.', 'error');
+                        return;
+                    }
                     this.isSubmittingEdit = true;
                     try {
                         const payload = {
@@ -707,10 +846,10 @@
                                 Quotations: this.rfqForm.quotations.map(q => {
                                     return {
                                         ...q._original,
-                                        Vendor: q._original.Vendor.ID,
+                                        Vendor: q.vendorId, // Use the dynamically updated Vendor mapping
                                         item_master: q._original.item_master.ID,
                                         Quantity: q.quantity,
-                                        ID: undefined
+                                        ID: undefined // Allows overwrite of rows
                                     };
                                 })
                             }

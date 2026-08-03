@@ -475,7 +475,7 @@
                             <td
                                 class="px-3 py-[9px] align-middle overflow-hidden text-ellipsis whitespace-nowrap max-w-[140px]">
                                 <span class="text-[12px] font-medium text-gray-800"
-                                    x-text="rec.Finalized_Vendor || '–'"></span>
+                                    x-text="rec.Vendor?.Display_Name || '–'"></span>
                             </td>
                             <td class="px-3 py-[9px] align-middle whitespace-nowrap text-[12px] font-medium text-gray-700"
                                 x-text="formatINR(rec.Total_Landed_Rate)"></td>
@@ -822,6 +822,7 @@
                     PR_Ref: '',
                     RFQ_Ref: '',
                     Finalized_Vendor: '',
+                    Finalized_Vendor_ID: '',
                     Total_Landed_Rate: '',
                     Justification: '',
                     Items: [],
@@ -1030,6 +1031,7 @@
                         PR_Ref: '',
                         RFQ_Ref: '',
                         Finalized_Vendor: '',
+                        Finalized_Vendor_ID: '',
                         Total_Landed_Rate: '',
                         Justification: '',
                         Items: [],
@@ -1117,7 +1119,7 @@
                 addVendor() {
                     this.form.Vendors.push({
                         uid: Date.now() + Math.random(),
-                        Vendor_Name: '',
+                        Vendor_ID: '',
                         Vendor_Display: '',
                         finalized: false,
                         Consider: true,
@@ -1201,13 +1203,17 @@
                         });
                         vendor.finalized = true;
                         vendor.QuoteLines.forEach(l => l.Rank = 'Yes');
-                        this.form.Finalized_Vendor = vendor.Vendor_Display || vendor.Vendor_Name || 'Selected Vendor';
+                        this.form.Finalized_Vendor = vendor.Vendor_Display || vendor.Vendor_ID || 'Selected Vendor';
+                        this.form.Finalized_Vendor_ID = vendor.Vendor_ID || '';
                     } else {
                         const hasYes = vendor.QuoteLines.some(l => l.Rank === 'Yes');
                         if (!hasYes) {
                             vendor.finalized = false;
                             const anyVendorFinalized = this.form.Vendors.some(v => v.finalized);
-                            if (!anyVendorFinalized) this.form.Finalized_Vendor = '';
+                            if (!anyVendorFinalized) {
+                                this.form.Finalized_Vendor = '';
+                                this.form.Finalized_Vendor_ID = '';
+                            }
                         }
                     }
                     this.recalculateAllTotals();
@@ -1225,7 +1231,10 @@
                         vendor.finalized = false;
                         vendor.QuoteLines.forEach(l => l.Rank = 'No');
                         const anyFinalized = this.form.Vendors.some(v => v.finalized);
-                        if (!anyFinalized) this.form.Finalized_Vendor = '';
+                        if (!anyFinalized) {
+                            this.form.Finalized_Vendor = '';
+                            this.form.Finalized_Vendor_ID = '';
+                        }
                         this.recalculateAllTotals();
                         return;
                     }
@@ -1238,7 +1247,8 @@
                     });
                     vendor.finalized = true;
                     vendor.QuoteLines.forEach(l => l.Rank = 'Yes');
-                    this.form.Finalized_Vendor = vendor.Vendor_Display || vendor.Vendor_Name || 'Selected Vendor';
+                    this.form.Finalized_Vendor = vendor.Vendor_Display || vendor.Vendor_ID || 'Selected Vendor';
+                    this.form.Finalized_Vendor_ID = vendor.Vendor_ID || '';
                     this.recalculateAllTotals();
                     Toast.fire({ icon: 'success', title: `Vendor "${this.form.Finalized_Vendor}" finalized.` });
                 },
@@ -1262,10 +1272,12 @@
                     });
 
                     if (finalizedVendor) {
-                        this.form.Finalized_Vendor = finalizedVendor.Vendor_Display || finalizedVendor.Vendor_Name || 'Selected Vendor';
+                        this.form.Finalized_Vendor = finalizedVendor.Vendor_Display || finalizedVendor.Vendor_ID || 'Selected Vendor';
+                        this.form.Finalized_Vendor_ID = finalizedVendor.Vendor_ID || '';
                         this.form.Total_Landed_Rate = total > 0 ? parseFloat(total.toFixed(2)) : '';
                     } else {
                         this.form.Finalized_Vendor = '';
+                        this.form.Finalized_Vendor_ID = '';
                         this.form.Total_Landed_Rate = '';
                     }
                 },
@@ -1398,12 +1410,13 @@
                         valueField: 'ID', labelField: 'Display_Name', searchField: ['Display_Name'],
                         create: false, maxItems: 1, placeholder: 'Select Vendor...', loadThrottle: 350,
                         onChange: (val) => {
-                            vendorObj.Vendor_Name = val;
+                            vendorObj.Vendor_ID = val;
                             let opt = ts.options[val];
                             if (opt) {
                                 vendorObj.Vendor_Display = opt.Display_Name;
                                 if (vendorObj.finalized) {
-                                    this.form.Finalized_Vendor = vendorObj.Vendor_Display || vendorObj.Vendor_Name || 'Selected Vendor';
+                                    this.form.Finalized_Vendor = vendorObj.Vendor_Display || vendorObj.Vendor_ID || 'Selected Vendor';
+                                    this.form.Finalized_Vendor_ID = vendorObj.Vendor_ID || '';
                                 }
                             }
                             this.recalculateAllTotals();
@@ -1420,9 +1433,9 @@
                             item: (data, escape) => `<div class="text-xs">${escape(data.Display_Name)}</div>`
                         }
                     });
-                    if (vendorObj.Vendor_Name && vendorObj.Vendor_Display) {
-                        ts.addOption({ ID: vendorObj.Vendor_Name, Display_Name: vendorObj.Vendor_Display });
-                        ts.setValue(vendorObj.Vendor_Name, true);
+                    if (vendorObj.Vendor_ID && vendorObj.Vendor_Display) {
+                        ts.addOption({ ID: vendorObj.Vendor_ID, Display_Name: vendorObj.Vendor_Display });
+                        ts.setValue(vendorObj.Vendor_ID, true);
                     }
                     if (!window.vendorTsRefs) window.vendorTsRefs = {};
                     const key = 'vts_' + Date.now() + Math.random();
@@ -1445,6 +1458,7 @@
                             this.form.Items = [];
                             this.form.Vendors = [];
                             this.form.Finalized_Vendor = '';
+                            this.form.Finalized_Vendor_ID = '';
                             this.form.Total_Landed_Rate = '';
 
                             // Auto-fill Unit from RFQ
@@ -1512,8 +1526,8 @@
                                                 if (!vendorMap[vKey]) {
                                                     vendorMap[vKey] = {
                                                         uid: Date.now() + Math.random(),
-                                                        Vendor_Name: v.ID,
-                                                        Vendor_Display: v.Display_Name || v.Vendor_Name,
+                                                        Vendor_ID: v.ID,
+                                                        Vendor_Display: v.Display_Name || v.Company_Name,
                                                         finalized: false,
                                                         Consider: true,
                                                         QuoteLines: []
@@ -1569,13 +1583,13 @@
                     let incompleteVendor = null; let incompleteField = null;
                     outer: for (const v of this.form.Vendors) {
                         for (const line of v.QuoteLines) {
-                            if (line.Basic_Rate === '' || line.Basic_Rate === null || isNaN(parseFloat(line.Basic_Rate))) { incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Basic Rate'; break outer; }
-                            if (line.Disc === '' || line.Disc === null || isNaN(parseFloat(line.Disc))) { incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Disc %'; break outer; }
-                            if (line.Negotiated_Rate === '' || line.Negotiated_Rate === null || isNaN(parseFloat(line.Negotiated_Rate))) { incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Negotiated Rate'; break outer; }
-                            if (line.Freight === '' || line.Freight === null || isNaN(parseFloat(line.Freight))) { incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Freight'; break outer; }
-                            if (line.GST === '' || line.GST === null || isNaN(parseFloat(line.GST))) { incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'GST %'; break outer; }
-                            if (!line.Payment_Terms) { incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Payment Terms'; break outer; }
-                            if (!line.Delivery_Date) { incompleteVendor = v.Vendor_Display || v.Vendor_Name; incompleteField = 'Delivery Date'; break outer; }
+                            if (line.Basic_Rate === '' || line.Basic_Rate === null || isNaN(parseFloat(line.Basic_Rate))) { incompleteVendor = v.Vendor_Display || v.Vendor_ID; incompleteField = 'Basic Rate'; break outer; }
+                            if (line.Disc === '' || line.Disc === null || isNaN(parseFloat(line.Disc))) { incompleteVendor = v.Vendor_Display || v.Vendor_ID; incompleteField = 'Disc %'; break outer; }
+                            if (line.Negotiated_Rate === '' || line.Negotiated_Rate === null || isNaN(parseFloat(line.Negotiated_Rate))) { incompleteVendor = v.Vendor_Display || v.Vendor_ID; incompleteField = 'Negotiated Rate'; break outer; }
+                            if (line.Freight === '' || line.Freight === null || isNaN(parseFloat(line.Freight))) { incompleteVendor = v.Vendor_Display || v.Vendor_ID; incompleteField = 'Freight'; break outer; }
+                            if (line.GST === '' || line.GST === null || isNaN(parseFloat(line.GST))) { incompleteVendor = v.Vendor_Display || v.Vendor_ID; incompleteField = 'GST %'; break outer; }
+                            if (!line.Payment_Terms) { incompleteVendor = v.Vendor_Display || v.Vendor_ID; incompleteField = 'Payment Terms'; break outer; }
+                            if (!line.Delivery_Date) { incompleteVendor = v.Vendor_Display || v.Vendor_ID; incompleteField = 'Delivery Date'; break outer; }
                         }
                     }
                     if (incompleteVendor !== null) { Toast.fire({ icon: 'error', title: `"${incompleteField}" is required for vendor "${incompleteVendor}".` }); return; }
@@ -1587,7 +1601,7 @@
                         this.form.Vendors.forEach(v => {
                             v.QuoteLines.forEach(line => {
                                 qcsRows.push({
-                                    "Vendor_Name": v.Vendor_Display || v.Vendor_Name || '',
+                                    "Vendor": v.Vendor_ID || '',
                                     "Items": line.Items_Master ? [line.Items_Master] : [],
                                     "Basic_Rate": parseFloat(line.Basic_Rate) || 0,
                                     "Negotiated_Rate": parseFloat(line.Negotiated_Rate) || 0,
@@ -1611,6 +1625,7 @@
                                 Department: this.form.Department,
                                 PR_Ref: this.form.PR_Ref,
                                 RFQ_Ref: this.form.RFQ_Ref,
+                                Vendor: this.form.Finalized_Vendor_ID || "",
                                 Finalized_Vendor: this.form.Finalized_Vendor,
                                 Total_Landed_Rate: parseFloat(this.form.Total_Landed_Rate) || 0,
                                 Justification: this.form.Justification,
