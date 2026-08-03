@@ -192,7 +192,7 @@
                         class="px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm cursor-pointer disabled:opacity-50">Cancel</button>
                     <button @click="executeAction()" :disabled="isSubmitting"
                         :class="modalBtnClass + ' ' + modalBtnHoverClass"
-                        class="px-4 py-2 rounded-lg text-xs font-semibold text-white transition-colors shadow-sm cursor-pointer flex items-center gap-1.5 disabled:opacity-70">
+                        class="px-4 py-2 rounded-lg text-xs font-semibold transition-colors shadow-sm cursor-pointer flex items-center gap-1.5 disabled:opacity-70">
                         <template x-if="isSubmitting">
                             <div class="btn-spinner border-t-white w-3.5 h-3.5 mr-1"></div>
                         </template>
@@ -252,6 +252,8 @@
                                     <option value="15 Days Credit">15 Days Credit</option>
                                     <option value="30 Days Credit">30 Days Credit</option>
                                     <option value="45 Days Credit">45 Days Credit</option>
+                                    <option value="60 Days Credit">60 Days Credit</option>
+                                    <option value="90 Days Credit">90 Days Credit</option>
                                 </select>
                             </div>
                         </div>
@@ -548,7 +550,105 @@
                     </div>
                 </div>
 
-                <!-- SECTION 2: LINE ITEMS & TOTALS -->
+                <!-- SECTION 1b: LINKED PURCHASE REQUISITIONS -->
+                <template x-if="rec.PRs && rec.PRs.length > 0">
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                        <div
+                            class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+                            <div class="text-[12px] font-semibold text-gray-700 flex items-center gap-2">
+                                <div
+                                    class="w-6 h-6 rounded flex items-center justify-center text-[11px] bg-purple-50 text-purple-600">
+                                    <i class="bi bi-clipboard2-check"></i>
+                                </div>
+                                Purchase Requisitions
+                            </div>
+                            <span
+                                class="text-[11px] font-semibold text-purple-600 bg-purple-50 border border-purple-100 px-2 py-0.5 rounded-full"
+                                x-text="rec.PRs.length + ' PR' + (rec.PRs.length > 1 ? 's' : '')"></span>
+                        </div>
+                        <div class="divide-y divide-gray-50">
+                            <template x-for="(pr, idx) in rec.PRs" :key="pr.ID || idx">
+                                <div class="px-[18px] py-[14px] hover:bg-gray-50/60 transition-colors">
+                                    <div class="flex flex-col md:flex-row md:items-start gap-3">
+                                        <!-- PR Number & Stage -->
+                                        <div class="flex items-center gap-2.5 min-w-[140px]">
+                                            <div class="w-7 h-7 rounded-lg bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 text-[11px] font-bold shrink-0"
+                                                x-text="idx + 1"></div>
+                                            <div>
+                                                <div class="text-[13px] font-bold text-gray-900 font-mono"
+                                                    x-text="pr.PR_Number || '–'"></div>
+                                                <div class="text-[10px] text-gray-400 mt-0.5">Purchase Requisition</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Meta chips -->
+                                        <div class="flex flex-wrap items-center gap-2 flex-1">
+                                            <!-- Status -->
+                                            <span
+                                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold border"
+                                                :class="{
+                                                    'bg-emerald-50 text-emerald-700 border-emerald-200': (pr.Status||'').toLowerCase().includes('completely'),
+                                                    'bg-amber-50 text-amber-700 border-amber-200': (pr.Status||'').toLowerCase().includes('partial'),
+                                                    'bg-blue-50 text-blue-700 border-blue-200': (pr.Status||'').toLowerCase() === 'open',
+                                                    'bg-gray-50 text-gray-600 border-gray-200': !['completely','partial','open'].some(k => (pr.Status||'').toLowerCase().includes(k))
+                                                }">
+                                                <span class="w-1.5 h-1.5 rounded-full shrink-0" :class="{
+                                                        'bg-emerald-500': (pr.Status||'').toLowerCase().includes('completely'),
+                                                        'bg-amber-500': (pr.Status||'').toLowerCase().includes('partial'),
+                                                        'bg-blue-500': (pr.Status||'').toLowerCase() === 'open',
+                                                        'bg-gray-400': !['completely','partial','open'].some(k => (pr.Status||'').toLowerCase().includes(k))
+                                                    }"></span>
+                                                <span x-text="pr.Status || 'Unknown'"></span>
+                                            </span>
+
+                                            <!-- Current Stage -->
+                                            <span x-show="pr.Current_Stage"
+                                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#EBF3FC] text-[#1B5CA8] border border-[#1B5CA8]/15">
+                                                <i class="bi bi-arrow-right-circle text-[10px]"></i>
+                                                <span x-text="pr.Current_Stage"></span>
+                                            </span>
+
+                                            <!-- Items Approval Status -->
+                                            <span x-show="pr.Items_Approval_Status"
+                                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium border"
+                                                :class="{
+                                                    'bg-emerald-50 text-emerald-700 border-emerald-200': (pr.Items_Approval_Status||'').toLowerCase() === 'approved',
+                                                    'bg-amber-50 text-amber-700 border-amber-200': (pr.Items_Approval_Status||'').toLowerCase() === 'pending',
+                                                    'bg-red-50 text-red-700 border-red-200': (pr.Items_Approval_Status||'').toLowerCase() === 'rejected',
+                                                    'bg-gray-50 text-gray-600 border-gray-200': !['approved','pending','rejected'].includes((pr.Items_Approval_Status||'').toLowerCase())
+                                                }">
+                                                <i class="bi bi-patch-check text-[10px]"></i>
+                                                <span x-text="'Approval: ' + (pr.Items_Approval_Status || '–')"></span>
+                                            </span>
+
+                                            <!-- Due Date -->
+                                            <span x-show="pr.Due_Date"
+                                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-gray-50 text-gray-600 border border-gray-200">
+                                                <i class="bi bi-calendar3 text-[10px]"></i>
+                                                <span x-text="formatDate(pr.Due_Date)"></span>
+                                            </span>
+                                        </div>
+
+                                        <!-- Requested Items count -->
+                                        <div x-show="pr.Requested_Items && pr.Requested_Items.length > 0"
+                                            class="flex flex-wrap gap-1.5 md:max-w-[280px]">
+                                            <template x-for="(ri, ri_idx) in (pr.Requested_Items || [])" :key="ri_idx">
+                                                <span
+                                                    class="inline-flex items-center gap-1 bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[11px] border border-gray-200">
+                                                    <i class="bi bi-box text-[10px] text-gray-400"></i>
+                                                    <span
+                                                        x-text="(ri.Item?.item_name || ri.Item?.display_value || '–') + ' × ' + (ri.Quantity || 0)"></span>
+                                                </span>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+
                 <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                     <div
                         class="px-[18px] py-[13px] border-b border-gray-200 bg-gray-50 flex justify-between items-center">
@@ -588,7 +688,7 @@
                                         Rate / Unit</th>
                                     <th
                                         class="px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right w-24">
-                                        Ord. Qty</th>
+                                        PO. Qty</th>
                                     <th
                                         class="px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right w-24">
                                         Rcvd Qty</th>
@@ -1072,12 +1172,12 @@
                         });
                         if (updateRes.code !== 3000) throw new Error(updateRes.message || 'Failed to update PO status');
                         Toast.fire({ icon: this.pendingStatus === 'Rejected' ? 'warning' : 'success', title: `PO ${this.pendingStatus} successfully` });
-                        this.closeActionModal();
-                        this.fetchData();
                     } catch (err) {
                         Toast.fire({ icon: 'error', title: err.message || `Failed to ${this.pendingStatus.toLowerCase()} PO` });
                     } finally {
                         this.isSubmitting = false;
+                        this.closeActionModal();
+                        this.fetchData();
                     }
                 },
 

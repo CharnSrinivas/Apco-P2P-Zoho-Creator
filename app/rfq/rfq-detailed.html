@@ -851,17 +851,16 @@
                             const updateRes = await ZOHO.CREATOR.DATA.updateRecordById({
                                 report_name: "Request_For_Quotation_Report", id: this.recordId, payload: { data: { Status: this.pendingStatus } }
                             });
+                            this.isSubmitting = false;
+                            this.closeModal()
+                            this.showToast(`RFQ successfully ${this.pendingStatus.toLowerCase()}.`, 'success');
+                            this.fetchData();
                             if (updateRes.code !== 3000) throw new Error(updateRes.message || 'Failed to update RFQ status');
                         }
-
-                        let prIds = Array.isArray(this.rec.PR_Refs) ? this.rec.PR_Refs.map(pr => pr.ID) : undefined;
-                        const response = await ZOHO.CREATOR.DATA.addRecords({
-                            form_name: "PR_Action", payload: { data: { "PR_Number": prIds[0], "Request_For_Quotation": this.recordId, "Status": this.pendingStatus, "Moved_To": this.pendingStage, "Comment": this.modalComment.trim() } }
-                        });
-                        this.closeModal();
-                        if (response.code === 3000) this.fetchData();
                         else throw new Error(response.message || 'Action failed');
                     } catch (err) {
+                        this.isSubmitting = false;
+                        this.closeModal()
                         this.showToast("An error occurred while submitting.", 'error');
                     } finally {
                         this.isSubmitting = false;

@@ -775,14 +775,6 @@
         } else if (filter === 'rejected') {
             crit = '(Status == "Rejected")';
         }
-
-        if (role === 'Operations Team') {
-            const opsBase = '(Status == "Approved" || Status == "Rejected" || Current_Stage == "Request For Quotation" || Current_Stage == "Quote Comparison" || Current_Stage == "Purchase Order" || Current_Stage == "GRN" || Current_Stage == "Bill" || Current_Stage == "Payment")';
-            if (crit) {
-                return `(${opsBase} && ${crit})`;
-            }
-            return opsBase;
-        }
         return crit;
     }
 
@@ -812,7 +804,7 @@
             stats: { all: '–', draft: '–', pending: '–', approved: '–', in_progress: '–', completed: '–', rejected: '–' },
             filterTabs: [
                 { key: 'all', label: 'All' },
-                { key: 'draft', label: 'Draft', productionOnly: true },
+                { key: 'draft', label: 'Draft' },
                 { key: 'pending', label: 'Submitted' },
                 { key: 'approved', label: 'Approved' },
                 { key: 'in_progress', label: 'In Progress' },
@@ -907,6 +899,14 @@
                         this.defaultDeptCode = 'production';
                     } else if (this.userRole === P2PWorkflowUtils.ROLES.OPERATIONS) {
                         this.defaultDeptCode = 'operations';
+                    } else if (this.userRole === P2PWorkflowUtils.ROLES.PURCHASE) {
+                        this.defaultDeptCode = 'purchase';
+                    } else if (this.userRole === P2PWorkflowUtils.ROLES.SALES) {
+                        this.defaultDeptCode = 'sales';
+                    } else if (this.userRole === P2PWorkflowUtils.ROLES.HR_ADMIN) {
+                        this.defaultDeptCode = 'hradmin';
+                    } else if (this.userRole === P2PWorkflowUtils.ROLES.LOGISTICS) {
+                        this.defaultDeptCode = 'logistics';
                     }
 
                 } catch (error) {

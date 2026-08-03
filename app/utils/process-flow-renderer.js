@@ -46,6 +46,9 @@ const P2PWorkflowUtils = {
 		PRODUCTION: "Production Team",
 		OPERATIONS: "Operations Team",
 		PURCHASE: "Purchase Team",
+		SALES: "Sales",
+		HR_ADMIN: "hradmin",
+		LOGISTICS: "logistics",
 	},
 	EMAILS: {
 		RAM_KRISHNA: "ram@apcobuildingsolutions.com",

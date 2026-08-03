@@ -457,9 +457,11 @@
                                                         style="min-width:80px;">
                                                         <option value="">Select…</option>
                                                         <option value="Advance">Advance</option>
-                                                        <option value="15 Days Credit">15 Days</option>
-                                                        <option value="30 Days Credit">30 Days</option>
-                                                        <option value="45 Days Credit">45 Days</option>
+                                                        <option value="15 Days Credit">15 Days Credit</option>
+                                                        <option value="30 Days Credit">30 Days Credit</option>
+                                                        <option value="45 Days Credit">45 Days Credit</option>
+                                                        <option value="60 Days Credit">60 Days Credit</option>
+                                                        <option value="90 Days Credit">90 Days Credit</option>
                                                     </select>
                                                 </td>
                                                 <td style="min-width:110px;">
@@ -1390,6 +1392,7 @@
                         console.error(err);
                     } finally {
                         this.isSubmitting = false;
+                        this.closeModal();
                     }
                 },
 

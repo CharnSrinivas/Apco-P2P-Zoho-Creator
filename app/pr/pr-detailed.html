@@ -569,11 +569,13 @@
                             <span>Approved Line Items & Delivery Status</span>
                         </div>
                         <div x-show="selectedIndices.length > 0" x-cloak class="flex gap-2 fade-in">
-                            <button x-show="!isPOStageOrBeyond && isOperations" @click="createPO()"
+                            <button x-show="(!isPOStageOrBeyond && !isRFQStageOrBeyond) && isOperations"
+                                @click="createPO()"
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-md text-[11px] font-semibold hover:bg-emerald-700 transition-colors shadow-sm">
                                 <i class="bi bi-cart-plus"></i> Create PO
                             </button>
-                            <button x-show="!isRFQStageOrBeyond && isOperations" @click="createRFQ()"
+                            <button x-show="(!isRFQStageOrBeyond && isPOStageOrBeyond) && isOperations"
+                                @click="createRFQ()"
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-md text-[11px] font-semibold hover:bg-gray-50 transition-colors shadow-sm">
                                 <i class="bi bi-file-earmark-plus"></i> Create RFQ
                             </button>
@@ -616,7 +618,7 @@
                                         App. Qty</th>
                                     <th
                                         class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right">
-                                        Ord. Qty</th>
+                                        PO. Qty</th>
                                     <th
                                         class="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right">
                                         Rec. Qty</th>
@@ -831,7 +833,7 @@
                 </div>
 
                 <!-- Actions Buttons (Draft / Approval) -->
-                <div class="flex items-center gap-2.5" x-show="showActionButtons">
+                <div class="flex items-center gap-2.5">
                     <button x-show="isDraft" @click="submitDraft()"
                         class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#1B5CA8] text-white hover:bg-[#12427b] transition-colors no-underline cursor-pointer shadow-sm disabled:opacity-70">
                         <template x-if="!isSubmittingDraft"><i class="bi bi-send"></i></template>
@@ -850,7 +852,7 @@
                         class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors no-underline cursor-pointer shadow-sm">
                         <i class="bi bi-x-lg"></i> Reject
                     </button>
-                    <button x-show="isDraft || (isPRStage && !isRejected && !isApproved)" @click="cancelPR()"
+                    <button @click="cancelPR()"
                         class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors no-underline cursor-pointer shadow-sm">
                         <i class="bi bi-slash-circle"></i> Cancel
                     </button>
@@ -899,6 +901,7 @@
             Alpine.data('prWidget', () => ({
                 userRole: '',
                 userEmail: "",
+                userId: '',
                 isLoading: true,
                 hasError: false,
                 errorMessage: '',
@@ -940,10 +943,11 @@
                     this.userEmail = (initParams.loginUser || "").toLowerCase();
                     if (typeof P2PWorkflowUtils !== 'undefined') await P2PWorkflowUtils.init();
 
-                    // Load user role directly utilizing async/await
                     try {
                         const res = await P2PWorkflowUtils.fetchLoginUser();
                         this.userRole = res.role || "";
+                        this.userId = res.loginuserid || "";
+                        console.log("User Role:", this.userRole);
                     } catch (error) {
                         console.error("Failed to fetch login user role", error);
                     }
@@ -1017,14 +1021,23 @@
                 },
 
                 // --- Computeds ---
-                get isOperations() { return this.userRole === (typeof P2PWorkflowUtils !== 'undefined' ? P2PWorkflowUtils.ROLES.OPERATIONS : 'Operations Team'); },
+                get isOperations() {
+                    const isops = this.userRole === (typeof P2PWorkflowUtils !== 'undefined' ? P2PWorkflowUtils.ROLES.OPERATIONS : 'Operations Team');
+                    return isops;
+                },
                 get prNumber() { return this.rec.PR_Number || (this.rec.Requisition_Number ? 'PR-' + this.rec.Requisition_Number : '–'); },
-                get isDraft() { return (this.rec.Status || '').toLowerCase() === 'draft'; },
+                get isDraft() {
+                    console.log({
+                        add_user: this.rec.Added_User,
+                        userId: this.userId
+                    })
+                    return this.rec.Added_User === this.userId && (this.rec.Status || '').toLowerCase() === 'draft';
+                },
+                get isSubmitted() { return (this.rec.Status || '').toLowerCase() === 'submitted'; },
                 get isApproved() { return (this.rec.Status || '').toLowerCase() === 'approved'; },
                 get isRejected() { return (this.rec.Status || '').toLowerCase() === 'rejected'; },
                 get isInProgress() { return (this.rec.Status || '').toLowerCase() === 'in progress'; },
                 get isPRStage() { return this.rec.Current_Stage === 'Purchase Requisition' && (this.rec.Status || '').toLowerCase() === 'submitted'; },
-                get showActionButtons() { return this.isDraft || (this.isPRStage && !this.isRejected && !this.isApproved); },
                 get isRFQStageOrBeyond() {
                     const s = (this.rec.Current_Stage || '').toLowerCase();
                     return s.includes('request for quotation') || s.includes('quote comparison') || s.includes('purchase order') || s.includes('grn') || s.includes('bill') || s.includes('payment');
@@ -1173,15 +1186,8 @@
                     this.isSubmittingDraft = true;
                     try {
                         const res = await ZOHO.CREATOR.DATA.updateRecordById({ report_name: this.PR_REPORT, id: this.recordId, payload: { data: { "Status": "Submitted" } } });
+                        await this.fetchData();
                         if (res.code !== 3000) throw new Error("Failed to update status");
-
-                        const logRes = await ZOHO.CREATOR.DATA.addRecords({ form_name: "PR_Action", payload: { data: { "PR_Number": this.recordId, "Status": "Submitted", "Moved_To": "Purchase Requisition", "Comment": "Submitted for approval" } } });
-
-                        if (logRes.code === 3000) {
-                            await this.fetchData();
-                        } else {
-                            throw new Error("Failed to log action");
-                        }
                     } catch (err) {
                         console.error(err);
                         this.showToast('Error submitting PR', 'error');
@@ -1239,10 +1245,10 @@
                             payloadData.Items_Approval_Status = isPartiallyApproved ? "Partially Approved" : "Approved";
                         }
 
+                        this.showActionModal = false;
                         const updateRes = await ZOHO.CREATOR.DATA.updateRecordById({ report_name: this.PR_REPORT, id: this.recordId, payload: { data: payloadData } });
                         if (updateRes.code !== 3000) throw new Error("Failed to update PR record");
 
-                        this.closeActionModal();
                         await this.fetchData();
                         this.showToast('Action processed successfully');
                     } catch (err) {
@@ -1465,7 +1471,7 @@
                                                 <th width="38%" style="text-align: left;">Item Description</th>
                                                 <th width="9%" class="text-center">UoM</th>
                                                 <th width="10%" class="text-center">${isApprovedSet ? 'App. Qty' : 'Qty'}</th>
-                                                ${isApprovedSet ? '<th width="10%" class="text-center">Ord. Qty</th><th width="10%" class="text-center">Rec. Qty</th>' : ''}
+                                                ${isApprovedSet ? '<th width="10%" class="text-center">PO. Qty</th><th width="10%" class="text-center">Rec. Qty</th>' : ''}
                                                 <th width="14%" class="text-center">Required By</th>
                                             </tr>
                                         </thead>

@@ -655,6 +655,8 @@
                                     <option value="15 Days Credit">15 Days Credit</option>
                                     <option value="30 Days Credit">30 Days Credit</option>
                                     <option value="45 Days Credit">45 Days Credit</option>
+                                    <option value="60 Days Credit">60 Days Credit</option>
+                                    <option value="90 Days Credit">90 Days Credit</option>
                                 </select>
                             </div>
                             <div>
@@ -823,7 +825,8 @@
                                                         x-text="'Origin: ' + item._prNumber"></div>
                                                 </td>
                                                 <td class="px-3 py-2 align-middle">
-                                                    <span class="text-xs text-gray-600" x-text="item._uom || '—'"></span>
+                                                    <span class="text-xs text-gray-600"
+                                                        x-text="item._uom || '—'"></span>
                                                 </td>
                                                 <td class="px-3 py-2 align-middle">
                                                     <input type="number" step="any" min="0" x-model.number="item.Rate"

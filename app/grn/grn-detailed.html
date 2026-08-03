@@ -415,7 +415,7 @@
                                         UOM</th>
                                     <th
                                         class="px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right w-24">
-                                        Ord. Qty</th>
+                                        PO. Qty</th>
                                     <th
                                         class="px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide text-right w-24">
                                         Rcvd Qty</th>
@@ -1057,7 +1057,7 @@
                                 }
                             });
                         }
-
+                        this.isSubmitting = false;
                         this.showToast(`GRN successfully ${this.pendingStatus.toLowerCase()}.`, 'success');
                         this.closeModal();
                         setTimeout(() => { this.fetchData(); }, 1500);
