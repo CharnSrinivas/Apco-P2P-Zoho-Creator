@@ -332,25 +332,25 @@ const P2PWorkflowUtils = {
 		if (this._loginUser) return this._loginUser;
 
 		// ── Level 2: localStorage (survives navigation, expires after TTL) ──────
-		try {
-			const raw = localStorage.getItem(this._LOGIN_USER_CACHE_KEY);
-			if (raw) {
-				const cached = JSON.parse(raw);
-				const age = Date.now() - (cached.cachedAt || 0);
-				if (
-					age < this._LOGIN_USER_CACHE_TTL_MS &&
-					cached.user &&
-					cached.user.loginuserid
-				) {
-					this._loginUser = cached.user; // promote to in-memory
-					return this._loginUser;
-				}
-				// Cache expired — remove stale entry
-				localStorage.removeItem(this._LOGIN_USER_CACHE_KEY);
-			}
-		} catch (_) {
-			// localStorage may be unavailable (private mode, quota, etc.) — silently continue
-		}
+		// try {
+		// 	const raw = localStorage.getItem(this._LOGIN_USER_CACHE_KEY);
+		// 	if (raw) {
+		// 		const cached = JSON.parse(raw);
+		// 		const age = Date.now() - (cached.cachedAt || 0);
+		// 		if (
+		// 			age < this._LOGIN_USER_CACHE_TTL_MS &&
+		// 			cached.user &&
+		// 			cached.user.loginuserid
+		// 		) {
+		// 			this._loginUser = cached.user; // promote to in-memory
+		// 			return this._loginUser;
+		// 		}
+		// 		// Cache expired — remove stale entry
+		// 		localStorage.removeItem(this._LOGIN_USER_CACHE_KEY);
+		// 	}
+		// } catch (_) {
+		// 	// localStorage may be unavailable (private mode, quota, etc.) — silently continue
+		// }
 
 		// ── Level 3: fetch from Zoho custom API ─────────────────────────────────
 		try {
