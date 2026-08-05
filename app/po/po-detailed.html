@@ -1006,70 +1006,92 @@
                             <html lang="en">
                             <head>
                                 <meta charset="UTF-8">
-                                <title>${this.poRefNumber} - Purchase Order</title>
+                                <title>${this.poRefNumber}_Purchase_Order</title>
                                 <style>
-                                    :root { --primary-color: #1B5CA8; --border-color: #bdc3c7; --bg-gray: #f8f9fa; }
-                                    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; line-height: 1.5; margin: 0; padding: 20px; font-size: 11pt; }
-                                    .document-wrapper { max-width: 800px; margin: 0 auto; }
-                                    .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--primary-color); padding-bottom: 15px; margin-bottom: 25px; }
-                                    .company-info h1 { margin: 0; color: var(--primary-color); font-size: 24pt; }
-                                    .company-info p { margin: 4px 0; color: #555; }
-                                    
-                                    /* Header Right Side Updates */
-                                    .document-title { text-align: right; }
-                                    .document-title h2 { margin: 0 0 5px 0; font-size: 20pt; text-transform: uppercase; letter-spacing: 1px; color: var(--primary-color); }
-                                    .printed-date { font-size: 9pt; color: #666; margin-top: 5px; }
-                                    
-                                    .po-meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; background: var(--bg-gray); padding: 15px; border: 1px solid var(--border-color); }
+                                    :root { --primary-color: #1B5CA8; --border-color: #000000; --bg-gray: #f8f9fa; }
+                                    body { font-family: 'Arial', sans-serif; color: #151616; line-height: 1.5; margin: 0; padding: 20px; font-size: 10pt; }
+                                    .document-wrapper { max-width: 800px; margin: 0 auto; min-height: 90vh; position: relative; padding-bottom: 80px; box-sizing: border-box; }
+
+                                    /* Header Styles */
+                                    .header { margin-bottom: 20px; }
+                                    .header-top { display: flex; gap: 1rem; align-items: center; padding-bottom: 10px; }
+                                    .header-logo { height: 24px; }
+                                    .header-title-img { height: 18px; }
+                                    .header-divider { border-bottom: 2px solid var(--border-color); margin-bottom: 25px; }
+
+                                    /* Title */
+                                    .document-title { text-align: center; margin-bottom: 25px; }
+                                    .document-title h2 { margin: 0; font-size: 18pt; text-transform: uppercase; color: var(--primary-color); text-decoration: underline; }
+                                    .document-title h3 { margin: 5px 0 0 0; font-size: 14pt; color: #444; }
+                                    .printed-date { font-size: 9pt; color: #666; margin-top: 5px; text-align: center; }
+
+                                    /* Meta Grid */
+                                    .po-meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 20px; margin-bottom: 25px; background: var(--bg-gray); padding: 15px; border: 1px solid var(--border-color); }
                                     .po-meta-item { font-size: 10pt; }
                                     .po-meta-item span { display: block; color: #555; font-size: 9pt; text-transform: uppercase; margin-bottom: 3px; }
                                     .po-meta-item strong { display: block; font-size: 11pt; color: #111; }
-                                    
+
+                                    /* Address Boxes */
                                     .addresses { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 30px; }
                                     .address-box { flex: 1; border: 1px solid var(--border-color); padding: 15px; }
-                                    .address-box h3 { margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; color: var(--primary-color); font-size: 12pt; text-transform: uppercase;}
-                                    
+                                    .address-box h3 { margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; color: var(--primary-color); font-size: 11pt; text-transform: uppercase; }
+
+                                    /* Table Styles */
                                     table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                                    th, td { border: 1px solid var(--border-color); padding: 10px; text-align: left; }
-                                    th { background-color: var(--primary-color); color: white; font-weight: bold; font-size: 10pt; text-transform: uppercase; }
-                                    .text-right { text-align: right; }
-                                    .text-center { text-align: center; }
-                                    
-                                    .totals-container { width: 40%; float: right; margin-bottom: 30px; }
-                                    .totals-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; }
-                                    .totals-row.grand-total { font-weight: bold; font-size: 14pt; color: var(--primary-color); border-bottom: none; border-top: 2px solid var(--primary-color); padding-top: 10px; margin-top: 5px; }
+                                    th, td { border: 1px solid var(--border-color); padding: 8px 10px; text-align: left; font-size: 9.5pt; }
+                                    th { background-color: var(--primary-color); color: white; font-weight: bold; text-transform: uppercase; text-align: center; border-color: var(--primary-color); }
+                                    td.text-right { text-align: right; }
+                                    td.text-center { text-align: center; }
+
+                                    /* Totals */
+                                    .totals-container { width: 45%; float: right; margin-bottom: 30px; border: 1px solid var(--border-color); }
+                                    .totals-row { display: flex; justify-content: space-between; padding: 6px 12px; border-bottom: 1px solid #ddd; font-size: 10pt; }
+                                    .totals-row.grand-total { font-weight: bold; font-size: 12pt; color: var(--primary-color); border-bottom: none; border-top: 2px solid var(--border-color); padding-top: 8px; margin-top: 0; background: var(--bg-gray); }
                                     .clearfix::after { content: ""; clear: both; display: table; }
 
-                                    .terms-box { border: 1px solid var(--border-color); padding: 15px; margin-bottom: 40px; page-break-inside: avoid; }
-                                    .terms-box h4 { margin-top: 0; margin-bottom: 10px; color: var(--primary-color); }
+                                    /* Terms & Signature */
+                                    .terms-box { border: 1px solid var(--border-color); padding: 12px 15px; margin-bottom: 40px; background-color: var(--bg-gray); page-break-inside: avoid; }
+                                    .terms-box h4 { margin: 0 0 8px 0; color: var(--primary-color); font-size: 10pt; text-transform: uppercase; }
                                     .signature-section { display: flex; justify-content: space-between; margin-top: 60px; page-break-inside: avoid; }
-                                    .signature-box { width: 35%; border-top: 1px solid #000; text-align: center; padding-top: 5px; font-weight: bold; color: #555;}
-                                    
+                                    .signature-box { width: 35%; border-top: 1px solid #000; text-align: center; padding-top: 5px; font-weight: bold; color: #555; }
+
+                                    /* Footer Styles */
+                                    .footer { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; font-size: 8.5pt; padding: 15px 20px; border-top: 2px solid var(--border-color); color: #151616; page-break-inside: avoid; }
+                                    .footer p { margin: 4px 0; }
+                                    .footer a { color: #0000ff; text-decoration: underline; }
+
                                     @media print {
-                                        body { padding: 0; background: white; }
-                                        .document-wrapper { max-width: 100%; }
-                                        th { background-color: var(--primary-color) !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                                        body { background: white; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                                        .document-wrapper { width: 100%; max-width: none; padding: 0; padding-bottom: 70px; }
+                                        th { background-color: var(--primary-color) !important; color: white !important; }
                                         .po-meta-grid { background-color: var(--bg-gray) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                                        @page { size: A4; margin: 1.5cm; }
+                                        .terms-box { background-color: var(--bg-gray) !important; }
+                                        .totals-row.grand-total { background-color: var(--bg-gray) !important; }
+                                        @page { size: A4; margin: 15mm; margin-bottom: 25mm; }
                                         tr { page-break-inside: avoid; }
+                                        .footer { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding-bottom: 10px; }
                                     }
                                 </style>
                             </head>
                             <body>
                                 <div class="document-wrapper">
-                                    <header class="header">
-                                        <div class="company-info">
-                                            <h1>APCO Building Solutions Pvt Ltd</h1>
-                                            <p>#234, Narayan Nagar, 1st stage, Doddakallasandra, Kanakapura road, Bangalore - 560062.</p>
-                                            <p>Email: Sales@apcobuildingsolutions.com</p>
+                                    <!-- Header -->
+                                    <div class="header">
+                                        <div class="header-top">
+                                            <img src="https://workdrive.zohoexternal.in/external/1aea9ee07ddb530e53388742ccf74df7ed19c852bae617665137c11a15eb799f/download?directDownload=true" class="header-logo" alt="Logo" />
+                                            <img src="https://workdrive.zohoexternal.in/external/47f6a40264b8b06f4b9f35fa8891106b72bf6401c94483682a510bc0afd397fc/download?directDownload=true" class="header-title-img" alt="APCO Building Solutions" />
                                         </div>
-                                        <div class="document-title">
-                                            <h2>Purchase Order</h2>
-                                            <div style="font-size: 14pt; font-weight: bold; color: #444;">${this.escapeHtml(this.poRefNumber)}</div>
-                                            <div class="printed-date">Printed: ${printedDate}</div>
-                                        </div>
-                                    </header>
-                                    
+                                        <div class="header-divider"></div>
+                                    </div>
+
+                                    <!-- Title -->
+                                    <div class="document-title">
+                                        <h2>Purchase Order</h2>
+                                        <h3>${this.escapeHtml(this.poRefNumber)}</h3>
+                                        <div class="printed-date">Printed: ${printedDate}</div>
+                                    </div>
+
+                                    <!-- PO Meta -->
                                     <div class="po-meta-grid">
                                         <div class="po-meta-item"><span>PO Date</span><strong>${this.formatDate(this.rec.PO_Date)}</strong></div>
                                         <div class="po-meta-item"><span>Delivery Date</span><strong>${this.formatDate(this.rec.delivery_date)}</strong></div>
@@ -1077,6 +1099,7 @@
                                         <div class="po-meta-item"><span>Status</span><strong>${this.escapeHtml(this.rec.Status)}</strong></div>
                                     </div>
 
+                                    <!-- Addresses -->
                                     <div class="addresses">
                                         <div class="address-box">
                                             <h3>To (Vendor)</h3>
@@ -1091,41 +1114,55 @@
                                             <div style="margin-top: 5px;">${shippingAddr}</div>
                                         </div>
                                     </div>
-                                    
+
+                                    <!-- Line Items Table -->
                                     <table>
                                         <thead>
                                             <tr>
                                                 <th width="5%" class="text-center">#</th>
-                                                <th width="35%">Item Description</th>
+                                                <th width="35%" style="text-align: left;">Item Description</th>
                                                 <th width="10%" class="text-center">UOM</th>
-                                                <th width="15%" class="text-right">Rate</th>
+                                                <th width="15%" class="text-center">Rate (₹)</th>
                                                 <th width="10%" class="text-center">Qty</th>
-                                                <th width="25%" class="text-right">Amount</th>
+                                                <th width="25%" class="text-center">Amount (₹)</th>
                                             </tr>
                                         </thead>
                                         <tbody>${itemRows}</tbody>
                                     </table>
-                                    
+
+                                    <!-- Totals -->
                                     <div class="clearfix">
                                         <div class="totals-container">
                                             <div class="totals-row"><span>Sub Total:</span> <span>${this.formatINR(this.rec.Sub_Total, false)}</span></div>
-                                            ${this.rec.Discount > 0 ? `<div class="totals-row"><span>Discount:</span> <span style="color:red;">-${this.formatINR(this.rec.Discount, false)}</span></div>` : ''}
-                                            ${this.rec.CGST > 0 ? `<div class="totals-row"><span>CGST:</span> <span>${this.formatINR(this.rec.CGST, false)}</span></div>` : ''}
-                                            ${this.rec.SGST > 0 ? `<div class="totals-row"><span>SGST:</span> <span>${this.formatINR(this.rec.SGST, false)}</span></div>` : ''}
-                                            ${this.rec.IGST > 0 ? `<div class="totals-row"><span>IGST:</span> <span>${this.formatINR(this.rec.IGST, false)}</span></div>` : ''}
+                                            ${this.rec.Discount > 0 ? `<div class="totals-row"><span>Discount (-):</span> <span style="color:red;">-${this.formatINR(this.rec.Discount, false)}</span></div>` : ''}
+                                            ${this.rec.CGST > 0 ? `<div class="totals-row"><span>CGST (+):</span> <span>${this.formatINR(this.rec.CGST, false)}</span></div>` : ''}
+                                            ${this.rec.SGST > 0 ? `<div class="totals-row"><span>SGST (+):</span> <span>${this.formatINR(this.rec.SGST, false)}</span></div>` : ''}
+                                            ${this.rec.IGST > 0 ? `<div class="totals-row"><span>IGST (+):</span> <span>${this.formatINR(this.rec.IGST, false)}</span></div>` : ''}
                                             <div class="totals-row grand-total"><span>Grand Total:</span> <span>${this.formatINR(this.rec.Total_Amount, true)}</span></div>
                                         </div>
                                     </div>
-                                    
+
+                                    ${this.rec.Notes ? `
+                                    <div class="terms-box" style="margin-top: 10px;">
+                                        <h4>Operational Notes</h4>
+                                        <div style="white-space: pre-wrap; font-size: 9pt;">${this.escapeHtml(this.rec.Notes)}</div>
+                                    </div>` : ''}
+
                                     ${this.rec.Terms_Conditions ? `
                                     <div class="terms-box">
-                                        <h4>Terms & Conditions</h4>
+                                        <h4>Terms &amp; Conditions</h4>
                                         <div style="white-space: pre-wrap; font-size: 9pt;">${this.escapeHtml(this.rec.Terms_Conditions)}</div>
                                     </div>` : ''}
-                                    
+
                                     <div class="signature-section">
                                         <div class="signature-box">Authorized Signatory</div>
                                         <div class="signature-box">Vendor Acceptance</div>
+                                    </div>
+
+                                    <!-- Footer -->
+                                    <div class="footer">
+                                        <p><strong>CORPORATE OFFICE:</strong> #234, Narayan Nagar, 1st stage, Doddakallasandra, Kanakapura Road, Bangalore - 560 062 | Tel.: 9901 37433 | 98450 65715 | CIN No: U23954KA2024PTC185349</p>
+                                        <p>E-mail: <a href="mailto:Purchase@apcobuildingsolutions.com">Purchase@apcobuildingsolutions.com</a> | <a href="https://www.apcobuildingsolutions.com" target="_blank">www.apcobuildingsolutions.com</a></p>
                                     </div>
                                 </div>
                             </body>

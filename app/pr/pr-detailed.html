@@ -738,13 +738,14 @@
                                         <td x-show="isOperations"
                                             class="px-4 py-3 text-center align-top sticky right-0 bg-white group-hover:bg-gray-50 border-l border-gray-100 z-10 transition-colors">
                                             <div class="flex flex-col items-center justify-center gap-2">
-                                                <button x-show="!isPOStageOrBeyond && isOperations" @click="createPO()"
-                                                    title="Create PO"
+                                                <button x-show="!isPOStageOrBeyond !isRFQStageOrBeyond && isOperations"
+                                                    @click="createPO()" title="Create PO"
                                                     class="h-[26px] gap-1.5 px-2 py-1 flex items-center justify-center rounded bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 transition-colors cursor-pointer shadow-sm">
                                                     Create PO
                                                     <i class="bi bi-cart-plus text-[13px]"></i>
                                                 </button>
-                                                <button x-show="!isRFQStageOrBeyond && isOperations"
+                                                <button
+                                                    x-show="!isPOStageOrBeyond && !isRFQStageOrBeyond && isOperations"
                                                     @click="createRFQ()" title="Create RFQ"
                                                     class="h-[26px] gap-1.5 px-2 py-1 flex items-center justify-center rounded bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-[#1B5CA8] border border-gray-200 transition-colors cursor-pointer shadow-sm">
                                                     Create RFQ

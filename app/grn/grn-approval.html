@@ -1165,8 +1165,9 @@
                         // Items Map: Calculate Max_Allowed
                         if (data.Items && Array.isArray(data.Items)) {
                             this.form.Items = data.Items.map(i => {
-                                const rate = parseFloat(i.Item?.unit_price) || 0;
                                 const poQty = parseFloat(i.Quantity) || 0;
+                                const poAmount = parseFloat(i.Amount) || 0;
+                                const rate = poQty > 0 ? poAmount / poQty : 0;
                                 const alreadyReceived = parseFloat(i.Received_Quantity) || 0;
                                 const maxAllowed = Math.max(0, poQty - alreadyReceived);
 
