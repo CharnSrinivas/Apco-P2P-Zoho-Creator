@@ -1492,3 +1492,45 @@ Response Headers{"server":"ZGS","date":"Tue, 21 Jul 2026 12:47:40 GMT","content-
 [error] [2026-08-05T15:53:05.107Z] : ✖ Below file formats are not allowed in Sigma
 [info] [2026-08-05T15:53:05.108Z] :  ==> app/.DS_Store
 [info] [2026-08-05T15:53:05.108Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-08-05T15:55:11.684Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-08-05T15:55:11.692Z] :  ==> app/.DS_Store
+[info] [2026-08-05T15:55:11.692Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-08-05T15:55:11.698Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-08-05T15:55:11.699Z] :  ==> app/.DS_Store
+[info] [2026-08-05T15:55:11.699Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-08-05T16:04:04.524Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-08-05T16:04:04.534Z] :  ==> app/.DS_Store
+[info] [2026-08-05T16:04:04.534Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-08-05T16:04:04.540Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-08-05T16:04:04.540Z] :  ==> app/.DS_Store
+[info] [2026-08-05T16:04:04.541Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-08-05T16:05:07.794Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-08-05T16:05:07.796Z] :  ==> app/.DS_Store
+[info] [2026-08-05T16:05:07.797Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-08-05T16:05:07.802Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-08-05T16:05:07.803Z] :  ==> app/.DS_Store
+[info] [2026-08-05T16:05:07.803Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-08-05T16:05:23.244Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-08-05T16:05:23.246Z] :  ==> app/.DS_Store
+[info] [2026-08-05T16:05:23.246Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-08-05T16:05:23.251Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-08-05T16:05:23.252Z] :  ==> app/.DS_Store
+[info] [2026-08-05T16:05:23.252Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-08-05T16:05:52.900Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-08-05T16:05:52.902Z] :  ==> app/.DS_Store
+[info] [2026-08-05T16:05:52.903Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-08-05T16:05:52.907Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-08-05T16:05:52.908Z] :  ==> app/.DS_Store
+[info] [2026-08-05T16:05:52.908Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-08-05T16:06:01.901Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-08-05T16:06:01.903Z] :  ==> app/.DS_Store
+[info] [2026-08-05T16:06:01.903Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-08-05T16:06:01.908Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-08-05T16:06:01.908Z] :  ==> app/.DS_Store
+[info] [2026-08-05T16:06:01.909Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-08-05T16:06:39.491Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-08-05T16:06:39.493Z] :  ==> app/.DS_Store
+[info] [2026-08-05T16:06:39.493Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-08-05T16:06:39.498Z] : ✖ Below file formats are not allowed in Sigma
+[info] [2026-08-05T16:06:39.499Z] :  ==> app/.DS_Store
+[info] [2026-08-05T16:06:39.499Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2

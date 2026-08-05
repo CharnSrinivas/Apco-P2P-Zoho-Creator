@@ -665,7 +665,7 @@
                         <div class="flex items-center gap-2">
                             <input type="file" id="rfq-attachment-input" multiple class="hidden"
                                 @change="uploadRFQAttachments($event.target.files, $event.target)">
-                            <button type="button" :disabled="isUploadingAttachment"
+                            <button type="button" :disabled="isUploadingAttachment || isApproved"
                                 @click="document.getElementById('rfq-attachment-input').click()"
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-md text-[11px] font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer">
                                 <template x-if="isUploadingAttachment">
@@ -1224,7 +1224,7 @@
                                 .header { margin-bottom: 20px; }
                                 .header-top { display: flex; gap: 1rem; align-items: center; padding-bottom: 10px; }
                                 .header-logo { height: 24px; }
-                                .header-title-img { height: 18px; }
+                                .header-title-img { height: 32px; }
                                 .header-divider { border-bottom: 2px solid var(--border-color); margin-bottom: 25px; }
 
                                 /* Title */
