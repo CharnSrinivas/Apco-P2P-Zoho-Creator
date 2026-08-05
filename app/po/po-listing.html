@@ -978,13 +978,13 @@
                     this.computeStats();
                     this.$watch('searchInput', Alpine.debounce(() => { this.searchQuery = this.searchInput.trim(); this.currentPage = 1; this.fetchRecords(); }, 400));
 
-                    // Auto-open create modal if URL has ?createPo=True&prId=<ID>
                     ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
                         const shouldCreate = String(params.createPo || '').toLowerCase() === 'true';
                         const prId = params.prId || '';
-                        if (shouldCreate) {
+                        const qcId = params.qcId || '';
+                        if (shouldCreate || qcId) {
                             this.pendingPrId = prId || null;
-                            this.openCreateModal(prId || null);
+                            this.openCreateModal(prId || null, qcId || null);
                         }
                     }).catch((err) => {
                         console.warn('getQueryParams error', err);
@@ -1047,18 +1047,23 @@
                     for (const m of map) { const config = { report_name: this.REPORT_NAME }; if (m.crit) config.criteria = m.crit; try { const res = await ZOHO.CREATOR.DATA.getRecordCount(config); this.stats[m.key] = res.result ? res.result.records_count : 0; } catch (e) { this.stats[m.key] = 0; } }
                 },
 
-                async getItemUnitPrice(itemId) { try { const res = await ZOHO.CREATOR.DATA.getRecordById({ report_name: this.ITEMS_REPORT_NAME, id: itemId }); if (res.code === 3000 && res.data) return parseFloat(res.data.unit_price) || 0; } catch (e) { } return 0; },
                 formatDate(d) { if (!d) return '–'; return dayjs(d).isValid() ? dayjs(d).format('DD MMM YYYY') : d; },
                 formatINR(val) { if (val == null || isNaN(val) || val === '') return '₹0.00'; return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(val); },
                 viewPO(id) { ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', url: '#Page:PO_Detailed?recordId=' + id, window: 'same' }); },
 
-                openCreateModal(prId = null) {
+                openCreateModal(prId = null, qcId = null) {
                     this.resetForm(); this.showModal = true; this.submitting = false;
                     this.$nextTick(() => {
                         this.initVendorSelect(); this.initPrSelect(); this.initQcSelect(); this.initUnitSelect(); this.initDepartmentSelect(); this.initPaymentTermsSelect();
 
-                        if (prId) {
-                            // Defer to an async method so we can fetch the real PR label first
+                        if (qcId) {
+                            if (this.tsQc) {
+                                if (!this.tsQc.options[qcId]) {
+                                    this.tsQc.addOption({ ID: String(qcId), QC_Ref_Number: 'QC-' + qcId });
+                                }
+                                this.tsQc.setValue(qcId);
+                            }
+                        } else if (prId) {
                             this.autoLoadPR(prId);
                         }
                     });
@@ -1070,40 +1075,28 @@
                     if (this.tsVendor) this.tsVendor.destroy(); if (this.tsPaymentTerms) this.tsPaymentTerms.destroy();
                 },
 
-                // Auto-load a PR from URL params — fetches real PR label before injecting into TomSelect
                 async autoLoadPR(prId) {
                     try {
-                        // 1. Fetch real PR details to get the actual PR_Number
                         const prRes = await ZOHO.CREATOR.DATA.invokeCustomApi({
                             api_name: P2PWorkflowUtils.API.FETCH_PR_DETAILS,
                             http_method: 'GET',
                             query_params: 'recId=' + prId
                         });
 
-                        if (!prRes || !prRes.result || prRes.result.length === 0) {
-                            console.warn('autoLoadPR: No PR data returned for', prId);
-                            return;
-                        }
+                        if (!prRes || !prRes.result || prRes.result.length === 0) return;
 
                         const pr = prRes.result[0];
                         const prNumber = pr.PR_Number || pr.Requisition_Number || ('PR-' + prId);
 
-                        // 2. Enable the PR TomSelect (normally locked until vendor is selected)
                         if (this.tsPr) {
                             this.tsPr.enable();
-
-                            // 3. Add option with the REAL label (not a placeholder)
                             if (!this.tsPr.options[String(prId)]) {
                                 this.tsPr.addOption({ ID: String(prId), PR_Number: prNumber });
                                 this.tsPr.refreshOptions(false);
                             }
-
-                            // 4. Set value silently (true = silent, no onChange), then manually sync
                             this.tsPr.setValue(prId, true);
                         }
 
-                        // 5. Directly set form.prIds and call syncAggregatedPRItems
-                        // This is reliable regardless of TomSelect state
                         this.form.prIds = [prId];
                         await this.syncAggregatedPRItems([prId]);
                         await this.loadQCsForPRs([prId]);
@@ -1121,8 +1114,7 @@
                             if (val) {
                                 this.fetchVendorAddress(val);
                                 this.tsPr.enable();
-                                // If a PR was auto-loaded from URL params, preserve it — don't wipe items
-                                if (!this.pendingPrId) {
+                                if (!this.pendingPrId && !this.form._qcId) {
                                     this.tsPr.clear(true);
                                     this.form.items = [];
                                 }
@@ -1135,10 +1127,16 @@
                 },
                 initPrSelect() {
                     this.tsPr = new TomSelect(this.$refs.prSelect, {
-                        valueField: 'ID', labelField: 'PR_Number', searchField: ['PR_Number'], maxItems: null, plugins: ['remove_button'],
+                        valueField: 'ID', labelField: 'PR_Number', searchField: ['PR_Number'], maxItems: null, plugins: ['remove_button'], preload: 'focus',
                         onChange: (vals) => { this.form.prIds = vals || []; this.syncAggregatedPRItems(this.form.prIds); this.loadQCsForPRs(this.form.prIds); },
                         load: (query, callback) => {
-                            ZOHO.CREATOR.DATA.getRecords({ report_name: this.PR_REPORT_NAME, criteria: `(Status == "Partially Ordered" || Status == "In Progress" || Status == "Approved")` }).then(res => { callback((res.code === 3000 && res.data) ? res.data : []); }).catch(() => callback());
+                            let criteria = `(Status == "Partially Ordered" || Status == "In Progress" || Status == "Approved")`;
+                            if (this.form.unit) {
+                                criteria += ` && Unit == "${this.form.unit}"`;
+                            }
+                            ZOHO.CREATOR.DATA.getRecords({ report_name: this.PR_REPORT_NAME, criteria: criteria }).then(res => {
+                                callback((res.code === 3000 && res.data) ? res.data : []);
+                            }).catch(() => callback());
                         }
                     });
                     this.tsPr.disable();
@@ -1152,7 +1150,21 @@
                 initUnitSelect() {
                     this.tsUnit = new TomSelect(this.$refs.unitSelect, {
                         valueField: 'ID', labelField: 'Name', maxItems: 1,
-                        onChange: (val) => { this.form.unit = val; if (val && this.form.deliveryLocked) this.fetchUnitAddress(val); }
+                        onChange: (val) => {
+                            const oldUnit = this.form.unit;
+                            this.form.unit = val;
+                            if (val && this.form.deliveryLocked) this.fetchUnitAddress(val);
+
+                            if (oldUnit && oldUnit !== val) {
+                                if (this.tsPr) {
+                                    this.tsPr.clear(true);
+                                    this.tsPr.clearOptions();
+                                }
+                                this.form.prIds = [];
+                                this.form.items = [];
+                                this.calcTotals();
+                            }
+                        }
                     });
                     ZOHO.CREATOR.DATA.getRecords({ report_name: this.UNIT_REPORT_NAME, max_records: 200 }).then(res => { if (res.code === 3000 && res.data) this.tsUnit.addOption(res.data); });
                 },
@@ -1195,7 +1207,7 @@
                                 for (let idx = 0; idx < requisitionItemsList.length; idx++) {
                                     const ri = requisitionItemsList[idx];
                                     const itemId = ri.Item?.ID || ri.Item?.id || ri.Item || '';
-                                    const rate = itemId ? await this.getItemUnitPrice(itemId) : 0;
+                                    const rate = parseFloat(ri.Item?.unit_price) || 0;
 
                                     const totalQty = parseFloat(ri.Quantity) || 0;
                                     const orderedQty = parseFloat(ri.Ordered_Quantity) || 0;
@@ -1208,7 +1220,7 @@
                                         _itemName: ri.Item?.item_name || ri.Item?.display_value || 'Item',
                                         _uom: ri.Item?.UOM?.Unit || ri.Item?.unit_of_measure || '',
                                         Quantity: remainingQty, Rate: rate, Amount: rate * remainingQty,
-                                        Comment: ri.Comment || '', _prId: prId, _prNumber: pr.PR_Number || ''
+                                        Comment: ri.Comment || '', _prId: String(prId), _prNumber: pr.PR_Number || ''
                                     });
                                 }
                             }
@@ -1229,14 +1241,81 @@
 
                 async fetchQCDetails(qcId) {
                     try {
-                        const res = await ZOHO.CREATOR.DATA.getRecordById({ report_name: this.QC_REPORT_NAME, id: qcId });
-                        if (res.code === 3000 && res.data) {
-                            const qcLines = res.data.Quotation_Comparison_Statement || []; const rateMap = {};
-                            qcLines.forEach(l => { const id = l.Item?.ID || l.Item || ''; if (id) rateMap[id] = parseFloat(l.Negotiated_Rate) || 0; });
-                            this.form.items.forEach(item => { if (item.Item && rateMap[item.Item]) { item.Rate = rateMap[item.Item]; item.Amount = item.Rate * item.Quantity; } });
+                        // BUG FIX: Ensure we use the custom API rather than fetching a standard report array
+                        const apiName = (typeof P2PWorkflowUtils !== 'undefined' && P2PWorkflowUtils.API && P2PWorkflowUtils.API.FETCH_QC_DETAILS)
+                            ? P2PWorkflowUtils.API.FETCH_QC_DETAILS
+                            : "fetch_qc_details";
+
+                        const res = await ZOHO.CREATOR.DATA.invokeCustomApi({
+                            api_name: apiName,
+                            http_method: 'GET',
+                            query_params: 'recId=' + qcId
+                        });
+
+                        if (res && res.result && res.result.length > 0) {
+                            const qc = res.result[0];
+
+                            const qcRef = qc.QC_Ref_Number || qc.QC_Number || ('QC-' + qcId);
+                            if (this.tsQc && this.tsQc.options[qcId]) {
+                                this.tsQc.updateOption(qcId, { ID: String(qcId), QC_Ref_Number: qcRef });
+                            }
+
+                            // 1. Auto select Finalized Vendor to unlock related forms
+                            let vendorObj = qc.Vendor || qc.Finalized_Vendor;
+                            if (vendorObj && (vendorObj.ID || vendorObj.id)) {
+                                const vId = String(vendorObj.ID || vendorObj.id);
+                                if (this.tsVendor && !this.tsVendor.options[vId]) {
+                                    this.tsVendor.addOption({ ID: vId, Display_Name: vendorObj.Display_Name || vendorObj.name || 'Vendor' });
+                                }
+                                if (this.tsVendor) this.tsVendor.setValue(vId, true);
+                                this.form.vendor = vId;
+                                if (this.tsPr) this.tsPr.enable();
+                            }
+
+                            // 2. Extrapolate PR relationships and trigger standard loader chain synchronously
+                            let prRef = qc.PR_Ref || qc.Purchase_Requisition;
+                            if (Array.isArray(prRef)) prRef = prRef[0];
+
+                            if (prRef && (prRef.ID || prRef.id)) {
+                                const prId = String(prRef.ID || prRef.id);
+                                await this.autoLoadPR(prId);
+                            }
+
+                            // 3. Map negotiated properties matching specific Landed_Rate values strictly for finalized lines
+                            const qcLines = qc.Quotation_Comparison_Statement || [];
+                            const finalizedRates = {};
+
+                            qcLines.forEach(l => {
+                                if (l.Finalized === true || String(l.Finalized).toLowerCase() === "true") {
+                                    const rate = parseFloat(l.Landed_Rate) || parseFloat(l.Negotiated_Rate) || 0;
+                                    if (l.Items && Array.isArray(l.Items)) {
+                                        l.Items.forEach(it => {
+                                            const itId = it.ID || it.id || it.Item_Code;
+                                            if (itId) finalizedRates[itId] = rate;
+                                        });
+                                    }
+                                }
+                            });
+
+                            console.log({ finalizedRates, items: this.form.items })
+
+                            // Remove PR Items if they were declined/not finalized in the Quote Comparison context. Filter cleanly:
+                            this.form.items = this.form.items.filter(item => {
+                                const itemId = item.Item || item.id;
+                                if (itemId && finalizedRates[itemId] !== undefined) {
+                                    item.Rate = finalizedRates[itemId];
+                                    item.Amount = item.Rate * item.Quantity;
+                                    item.Selected = true;
+                                    return true;
+                                }
+                                return false;
+                            });
+
                             this.calcTotals();
                         }
-                    } catch (err) { }
+                    } catch (err) {
+                        console.error('fetchQCDetails error:', err);
+                    }
                 },
 
                 async fetchVendorAddress(vendorId) {
@@ -1341,9 +1420,6 @@
                                         const prData = prRes.result[0];
                                         const itemsSubform = (prData.Items && prData.Items.length > 0) ? prData.Items : (prData.Requested_Items || []);
 
-                                        // Only update Ordered_Quantity here (PO is submitted, not yet approved).
-                                        // Status transitions (Partially Ordered / Completely Ordered) happen
-                                        // only after the PO is approved, handled in po-detailed.html.
                                         const updatedSubform = itemsSubform.map(row => {
                                             const rowItemId = row.Item?.ID || row.Item?.id || row.Item;
                                             const match = prUpdates[prId].find(u => u.itemId == rowItemId);
@@ -1359,11 +1435,9 @@
                                                 dueDate = dayjs(dueDate).format('DD-MMM-YYYY');
                                             }
 
-                                            // Keep existing row Status unchanged (stays 'Pending')
                                             return { Item: rowItemId, Quantity: totalQty, Ordered_Quantity: newOQ, Due_Date: dueDate, Comment: row.Comment || "", Status: row.Status || 'Pending' };
                                         });
 
-                                        // Keep PR master Status unchanged at this stage
                                         return ZOHO.CREATOR.DATA.updateRecordById({
                                             report_name: this.PR_REPORT_NAME, id: prId,
                                             payload: { data: { Items: updatedSubform } }
@@ -1379,8 +1453,7 @@
                             Toast.fire({ icon: 'success', title: 'Purchase Order tracked successfully.' });
                             this.closeModal();
 
-                            if (this.pendingPrId) {
-                                // Clear URL query params so a page refresh doesn't re-open the modal
+                            if (this.pendingPrId || this.form._qcId) {
                                 this.pendingPrId = null;
                                 ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', url: '#Page:Purchase_Orders', window: 'same' });
                             } else {

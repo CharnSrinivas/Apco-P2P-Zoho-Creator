@@ -1142,9 +1142,9 @@
                             this.form.Unit = data.Unit.ID;
                             if (this.tsInstances.unit) this.tsInstances.unit.setValue(data.Unit.ID, true);
                         }
-                        if (data.Department && data.Department.length > 0) {
-                            this.form.Department = data.Department[0];
-                            if (this.tsInstances.dept) this.tsInstances.dept.setValue(data.Department[0], true);
+                        if (data.Department) {
+                            this.form.Department = data.Department.ID;
+                            if (this.tsInstances.dept) this.tsInstances.dept.setValue(data.Department.ID, true);
                         }
 
                         // Display Metadata

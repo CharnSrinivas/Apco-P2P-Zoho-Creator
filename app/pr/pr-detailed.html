@@ -574,7 +574,7 @@
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-md text-[11px] font-semibold hover:bg-emerald-700 transition-colors shadow-sm">
                                 <i class="bi bi-cart-plus"></i> Create PO
                             </button>
-                            <button x-show="(!isRFQStageOrBeyond && isPOStageOrBeyond) && isOperations"
+                            <button x-show="!isRFQStageOrBeyond && !isPOStageOrBeyond && isOperations"
                                 @click="createRFQ()"
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-md text-[11px] font-semibold hover:bg-gray-50 transition-colors shadow-sm">
                                 <i class="bi bi-file-earmark-plus"></i> Create RFQ
@@ -1027,10 +1027,6 @@
                 },
                 get prNumber() { return this.rec.PR_Number || (this.rec.Requisition_Number ? 'PR-' + this.rec.Requisition_Number : '–'); },
                 get isDraft() {
-                    console.log({
-                        add_user: this.rec.Added_User,
-                        userId: this.userId
-                    })
                     return this.rec.Added_User === this.userId && (this.rec.Status || '').toLowerCase() === 'draft';
                 },
                 get isSubmitted() { return (this.rec.Status || '').toLowerCase() === 'submitted'; },

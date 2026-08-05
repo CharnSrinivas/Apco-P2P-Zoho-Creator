@@ -1505,52 +1505,60 @@
                                 }
                             }
 
-                            if (rfq.Items && rfq.Items.length > 0) {
-                                const vendorMap = {};
+                            const quotations = rfq.Quotations && rfq.Quotations.length > 0 ? rfq.Quotations : [];
+                            if (quotations.length > 0) {
+                                const itemMap = {};   // itemId → reqItem (deduplicates items)
+                                const vendorMap = {}; // vendorId → vendor card
 
-                                rfq.Items.forEach(itemRow => {
-                                    if (itemRow.Item && itemRow.Item.ID) {
-                                        const reqItem = {
+                                quotations.forEach(q => {
+                                    const im = q.item_master;
+                                    const vendor = q.Vendor;
+                                    if (!im || !im.ID || !vendor || !vendor.ID) return;
+
+                                    // Build unique item entry (deduped by item_master.ID)
+                                    if (!itemMap[im.ID]) {
+                                        itemMap[im.ID] = {
                                             uid: Date.now() + Math.random(),
-                                            Items: itemRow.Item.ID,
-                                            Item_Name: itemRow.Item.display_value || itemRow.Item.item_name,
-                                            Unit: itemRow.Item?.UOM?.Unit || 'Each',
-                                            Quantity: itemRow.Quantity || 0,
+                                            Items: im.ID,
+                                            Item_Name: im.item_name || '',
+                                            Unit: im.UOM?.Unit || 'Each',     // display text (for UI)
+                                            Unit_ID: im.UOM?.ID ? String(im.UOM.ID) : '',  // lookup ID (for payload)
+                                            Quantity: q.Quantity || 0,
                                             Deliver_to_Plant: ''
                                         };
-                                        this.form.Items.push(reqItem);
-
-                                        if (itemRow.vendors && Array.isArray(itemRow.vendors)) {
-                                            itemRow.vendors.forEach(v => {
-                                                const vKey = v.ID;
-                                                if (!vendorMap[vKey]) {
-                                                    vendorMap[vKey] = {
-                                                        uid: Date.now() + Math.random(),
-                                                        Vendor_ID: v.ID,
-                                                        Vendor_Display: v.Display_Name || v.Company_Name,
-                                                        finalized: false,
-                                                        Consider: true,
-                                                        QuoteLines: []
-                                                    };
-                                                }
-                                                vendorMap[vKey].QuoteLines.push({
-                                                    uid: Date.now() + Math.random(),
-                                                    Items_Master: reqItem.Items,
-                                                    Item_Name: reqItem.Item_Name,
-                                                    Basic_Rate: '',
-                                                    Disc: '',
-                                                    Negotiated_Rate: 0,
-                                                    Freight: '',
-                                                    GST: '',
-                                                    Landed_Rate: '',
-                                                    Payment_Terms: '',
-                                                    Delivery_Date: ''
-                                                });
-                                            });
-                                        }
                                     }
+
+                                    const reqItem = itemMap[im.ID];
+
+                                    // Build vendor entry
+                                    if (!vendorMap[vendor.ID]) {
+                                        vendorMap[vendor.ID] = {
+                                            uid: Date.now() + Math.random(),
+                                            Vendor_ID: vendor.ID,
+                                            Vendor_Display: vendor.Display_Name || vendor.Company_Name || '',
+                                            finalized: false,
+                                            Consider: true,
+                                            QuoteLines: []
+                                        };
+                                    }
+
+                                    // Add a quote line for this vendor × item
+                                    vendorMap[vendor.ID].QuoteLines.push({
+                                        uid: Date.now() + Math.random(),
+                                        Items_Master: reqItem.Items,
+                                        Item_Name: reqItem.Item_Name,
+                                        Basic_Rate: '',
+                                        Disc: '',
+                                        Negotiated_Rate: 0,
+                                        Freight: '',
+                                        GST: '',
+                                        Landed_Rate: '',
+                                        Payment_Terms: '',
+                                        Delivery_Date: ''
+                                    });
                                 });
 
+                                this.form.Items = Object.values(itemMap);
                                 this.form.Vendors = Object.values(vendorMap);
 
                                 this.form.Vendors.forEach((v, vIdx) => {
@@ -1560,9 +1568,9 @@
                                 });
 
                                 this.recalculateAllTotals();
-                                Toast.fire({ icon: 'success', title: `Loaded ${this.form.Items.length} items from ${this.form.Vendors.length} vendors.` });
+                                Toast.fire({ icon: 'success', title: `Loaded ${this.form.Items.length} item(s) from ${this.form.Vendors.length} vendor(s).` });
                             } else {
-                                Toast.fire({ icon: 'warning', title: 'No items found in RFQ.' });
+                                Toast.fire({ icon: 'warning', title: 'No quotations found in RFQ.' });
                             }
                         } else {
                             Toast.fire({ icon: 'warning', title: 'No items found in RFQ.' });
@@ -1632,7 +1640,6 @@
                                 Status: "Submitted",
                                 Items: this.form.Items.map(i => ({
                                     "Item": i.Items,
-                                    "Unit": i.Unit,
                                     "Quantity": parseFloat(i.Quantity) || 0,
                                     "Deliver_to_Plant": i.Deliver_to_Plant || ""
                                 })),

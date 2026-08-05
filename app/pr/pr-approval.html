@@ -894,7 +894,6 @@
                     }
 
                     // Fix: Set correct Department Code based on userRole match 
-                    console.log({ userRole: this.userRole, roles: P2PWorkflowUtils.ROLES })
                     if (this.userRole === P2PWorkflowUtils.ROLES.PRODUCTION) {
                         this.defaultDeptCode = 'production';
                     } else if (this.userRole === P2PWorkflowUtils.ROLES.OPERATIONS) {

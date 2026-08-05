@@ -283,7 +283,7 @@
                             class="bi bi-x-lg text-lg"></i></button>
                 </div>
 
-                <form @submit.prevent="submitEditRFQ" class="p-5">
+                <form @submit.prevent="submitEditRFQ" class="p-5" novalidate>
                     <div class="grid grid-cols-2 gap-4 mb-5">
                         <div>
                             <label
@@ -342,7 +342,8 @@
                                         <tr
                                             class="border-b border-gray-100 last:border-0 bg-white hover:bg-gray-50/50 transition-colors">
                                             <td class="px-3 py-2 relative">
-                                                <select x-init="initEditVendorSelect($el, q)" class="w-full text-xs"></select>
+                                                <select x-init="initEditVendorSelect($el, q)"
+                                                    class="w-full text-xs"></select>
                                             </td>
                                             <td class="px-3 py-2 text-gray-700 font-medium" x-text="q.itemName"></td>
                                             <td class="px-3 py-2 text-gray-500" x-text="q.uom"></td>
@@ -562,19 +563,22 @@
                             <thead>
                                 <tr class="bg-gray-50 border-b border-gray-200">
                                     <th
-                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left w-[25%]">
+                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left w-[22%]">
                                         Vendor</th>
                                     <th
                                         class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left">
                                         Item Name</th>
                                     <th
-                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left w-[12%]">
+                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-left w-[10%]">
                                         UOM</th>
                                     <th
-                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right w-[10%]">
+                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right w-[8%]">
                                         Qty</th>
                                     <th
-                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right w-[18%]">
+                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-center w-[10%]">
+                                        Attach</th>
+                                    <th
+                                        class="px-4 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wide text-right w-[14%]">
                                         Actions</th>
                                 </tr>
                             </thead>
@@ -601,6 +605,30 @@
                                                 x-text="q.item_master?.UOM?.Unit || '–'"></td>
                                             <td class="px-4 py-2.5 align-top text-right text-gray-700 font-medium"
                                                 x-text="q.Quantity || 0"></td>
+
+                                            <!-- Per-Quotation File Upload Cell -->
+                                            <td class="px-4 py-2.5 align-top text-center">
+                                                <!-- Hidden file input, id keyed to quotation ID -->
+                                                <input type="file" multiple :id="'qfile-' + q.ID" class="hidden"
+                                                    @change="uploadQuotationFiles(q.ID, $event.target.files, $event.target)">
+                                                <!-- Upload trigger button -->
+                                                <button type="button" :disabled="uploadingQuotationId === q.ID"
+                                                    @click="document.getElementById('qfile-' + q.ID).click()"
+                                                    title="Attach files to this quotation"
+                                                    class="inline-flex items-center justify-center w-8 h-8 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer">
+                                                    <!-- Spinner while uploading -->
+                                                    <template x-if="uploadingQuotationId === q.ID">
+                                                        <div
+                                                            style="width:13px;height:13px;border:2px solid rgba(99,102,241,0.25);border-top-color:#6366f1;border-radius:50%;animation:spin 0.7s linear infinite;">
+                                                        </div>
+                                                    </template>
+                                                    <!-- Paperclip icon when idle -->
+                                                    <template x-if="uploadingQuotationId !== q.ID">
+                                                        <i class="bi bi-paperclip text-[13px]"></i>
+                                                    </template>
+                                                </button>
+                                            </td>
+
                                             <td x-show="idx === 0" :rowspan="group.quotes.length"
                                                 class="px-4 py-2.5 text-right align-top border-l border-gray-50">
                                                 <div class="flex items-center justify-end gap-1.5">
@@ -682,6 +710,8 @@
 
                 sendingEmailVendorId: null,
                 isExportingFull: false,
+
+                uploadingQuotationId: null,
 
                 toast: { show: false, message: '', type: 'success' },
                 toastTimer: null,
@@ -1007,6 +1037,35 @@
                     }
                 },
 
+                async uploadQuotationFiles(quotationId, files, inputEl) {
+                    if (!files || files.length === 0) return;
+                    this.uploadingQuotationId = quotationId;
+                    try {
+                        const uploadPromises = Array.from(files).map(file =>
+                            ZOHO.CREATOR.FILE.uploadFile({
+                                report_name: "Request_For_Quotation_Report",
+                                id: String(quotationId),   // Subform row ID (Zoho can resolve this)
+                                field_name: "Attachments", // Bare field name — no dot notation needed when addressing the subform row directly
+                                file: file
+                            })
+                        );
+                        await Promise.all(uploadPromises);
+                        this.showToast(
+                            files.length === 1
+                                ? '1 file attached successfully!'
+                                : `${files.length} files attached successfully!`,
+                            'success'
+                        );
+                    } catch (err) {
+                        console.error('Quotation file upload failed:', err);
+                        this.showToast('File upload failed. Please try again.', 'error');
+                    } finally {
+                        this.uploadingQuotationId = null;
+                        // Reset the input so the same file can be re-selected if needed
+                        if (inputEl) inputEl.value = '';
+                    }
+                },
+
                 async sendEmailToVendor(group) {
                     this.sendingEmailVendorId = group.vendorId;
                     try {
@@ -1156,7 +1215,7 @@
                                     <h4>Instructions to Vendor & Terms:</h4>
                                     <ul style="margin: 0; padding-left: 20px; font-size: 10pt;">
                                         <li>Please submit your quotation on or before the "Valid Until" date mentioned above.</li>
-                                        <li>Ensure all prices are exclusive of GST. Applicable taxes should be mentioned separately in the final quote.</li>
+                                        <li>Ensure all prices are exclusive of GST. Applicable taxes should be mentioned separately.</li>
                                         <li>Please indicate any lead times, shipping charges, and warranty terms associated with the items above.</li>
                                         <li>This document is a request for quote, not a purchase order or a binding contract.</li>
                                     </ul>

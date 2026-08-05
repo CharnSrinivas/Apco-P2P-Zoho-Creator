@@ -1023,10 +1023,6 @@
                     <span x-text="isFinalizingDecision ? 'Finalizing...' : 'Approve & Finalize Vendor'"></span>
                 </button>
 
-                <button x-show="isFreezed" @click="rejectVC()"
-                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white text-red-600 border border-red-300 hover:bg-red-50 transition-colors cursor-pointer shadow-sm">
-                    <i class="bi bi-x-lg"></i> Reject
-                </button>
             </div>
 
         </div>
@@ -1240,7 +1236,7 @@
                     return arr.length > 0 ? arr.join(', ') : 'None';
                 },
 
-                get qcNumber() { return this.rec.QC_Ref_Number || (this.rec.QC_Number ? 'QC-' + this.rec.QC_Number : '–'); },
+                get qcNumber() { return this.rec.QC_Ref_Number || (this.rec.QC_Number ? 'QC-' + this.rec.QC_Number : '–') },
                 get canEdit() { const s = (this.rec.Status || '').toLowerCase(); return !['freezed', 'finalized'].includes(s); },
                 get isFreezed() { return (this.rec.Status || '').toLowerCase() === 'freezed'; },
                 get isQcApproved() { const s = (this.rec.Status || '').toLowerCase(); return s === 'approved' || s === 'finalized'; },
@@ -1796,7 +1792,7 @@
                     }, 500);
                 },
                 createPO() {
-                    ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', window: 'same', url: '#Page:Purchase_Orders?qcId=' + this.recordId + '&createPo=true' });
+                    ZOHO.CREATOR.UTIL.navigateParentURL({ action: 'open', window: 'same', url: `#Page:Purchase_Orders?qcId=${this.recordId}&prId=${this.rec.PR_Ref?.ID || ''}&createPo=true` });
                 }
             }));
         });

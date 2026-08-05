@@ -583,9 +583,20 @@
                 // Toast
                 toast: { show: false, message: '', type: 'success' },
                 toastTimer: null,
+                userRole: '',
+                userId: '',
 
-                initWidget() {
-                    if (typeof P2PWorkflowUtils !== 'undefined') P2PWorkflowUtils.init();
+                async initWidget() {
+                    if (typeof P2PWorkflowUtils !== 'undefined') await P2PWorkflowUtils.init();
+
+                    try {
+                        const res = await P2PWorkflowUtils.fetchLoginUser();
+                        this.userRole = res.role || "";
+                        this.userId = res.loginuserid || "";
+                    } catch (error) {
+                        console.error("Failed to fetch login user role", error);
+                    }
+
                     ZOHO.CREATOR.UTIL.getQueryParams().then((params) => {
                         this.recordId = params?.recordId || null;
                         if (!this.recordId) {
@@ -646,9 +657,15 @@
                     });
                 },
 
+                get isOperations() {
+                    return this.userRole === (typeof P2PWorkflowUtils !== 'undefined' ? P2PWorkflowUtils.ROLES.OPERATIONS : 'Operations Team');
+                },
+                get isPurchase() {
+                    return this.userRole === (typeof P2PWorkflowUtils !== 'undefined' ? P2PWorkflowUtils.ROLES.PURCHASE : 'Purchase Team');
+                },
                 get canApprove() {
                     const status = (this.rec.Status || '').toLowerCase();
-                    return status === 'submitted';
+                    return status === 'submitted' && (this.isOperations);
                 },
 
                 get grnNumber() {
